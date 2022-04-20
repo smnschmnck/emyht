@@ -2,6 +2,7 @@ package userService
 
 import (
 	"auth/dbHelpers/postgresHelper"
+	"auth/helpers/globals"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
@@ -75,6 +76,7 @@ func makeSalt(length int) (string, error) {
 
 func AddUser(username string, firstName string, lastName string, password string) (User, error){
 	salt, err := makeSalt(16);
+	pepper := globals.Pepper
 	if err != nil {
 		return User{}, errors.New("UNEXPECTED ERROR")
 	}
@@ -93,7 +95,7 @@ func AddUser(username string, firstName string, lastName string, password string
 	var dbUserIsAdmin bool
 
 	q := "INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;"
-	rows := conn.QueryRow(q, username, firstName, lastName, hash(password + salt), salt, false)
+	rows := conn.QueryRow(q, username, firstName, lastName, hash(password + salt + pepper), salt, false)
 	err = rows.Scan(&dbUsername, &dbFirstName, &dbLastName, &dbUserPassword, &dbUserSalt, &dbUserIsAdmin)
 
 	if err != nil {
@@ -119,6 +121,7 @@ func CheckPW(username string, password string) bool{
 	if err != nil{
 		return false
 	}
-	hashedPW := hash(password + user.Salt)
+	pepper := globals.Pepper
+	hashedPW := hash(password + user.Salt + pepper)
 	return hashedPW == user.Password
 }
