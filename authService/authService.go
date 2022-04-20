@@ -5,12 +5,11 @@ import (
 	"auth/userService"
 	"crypto/rand"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber"
 	"github.com/jackc/pgx"
 )
 
@@ -21,12 +20,12 @@ type Session struct{
 	Username string `json:"username"`
 }
 
-func GetUser(w http.ResponseWriter, r*http.Request)  {
-	bearerArr := strings.Split(r.Header.Get("authorization"), "Bearer ")
+func GetUser(c *fiber.Ctx)  {
+	bearerArr := strings.Split(c.Get("authorization"), "Bearer ")
 
 	if(len(bearerArr) <= 1){
-		w.WriteHeader(401)
-		fmt.Fprintf(w, "NOT AUTHORIZED")
+		c.Status(401)
+		c.SendString("NOT AUTHORIZED")
 		return
 	}
 
@@ -35,12 +34,12 @@ func GetUser(w http.ResponseWriter, r*http.Request)  {
 	user, err := getUserBySessionID(sessionID)
 
 	if err.StatusCode >= 300 {
-		w.WriteHeader(err.StatusCode)
-		fmt.Fprint(w, err.Msg)
+		c.Status(err.StatusCode)
+		c.SendString(err.Msg)
 		return
 	}
 
-	json.NewEncoder(w).Encode(user)
+	c.JSON(user)
 }
 
 type UserRes struct{
@@ -93,11 +92,10 @@ func makeToken(length int) (string, error) {
 	return base64.StdEncoding.EncodeToString(bytes), nil
 }
 
-func startSession(w http.ResponseWriter, username string) (Session, error){
+func startSession(c *fiber.Ctx, username string) (Session, error){
 	token, err := makeToken(32);
 	if(err != nil){
-		w.WriteHeader(500);
-		fmt.Fprintf(w, "SOMETHING WENT WRONG")
+		c.Status(500).SendString("SOMETHING WENT WRONG")
 		return Session{}, err
 	}
 
@@ -120,20 +118,17 @@ func startSession(w http.ResponseWriter, username string) (Session, error){
 	return tmpSession, nil;
 }
 
-func Register(w http.ResponseWriter, r*http.Request){
+func Register(c *fiber.Ctx){
 	var reqUser userService.ReqUser
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	err := decoder.Decode(&reqUser)
+	err := c.BodyParser(&reqUser)
 	if(err != nil){
-		w.WriteHeader(400)
-		fmt.Fprintf(w, "BAD REQUEST")
+		fmt.Print(err)
+		c.Status(400).SendString("BAD REQUEST")
 		return
 	}
 	err = validate.Struct(reqUser);
 	if(err != nil){
-		w.WriteHeader(400)
-		fmt.Fprintf(w, "BAD REQUEST")
+		c.Status(400).SendString("BAD REQUEST")
 		return
 	}
 	_, err = userService.AddUser(reqUser.Username, reqUser.FirstName, reqUser.LastName, reqUser.Password)
@@ -141,45 +136,39 @@ func Register(w http.ResponseWriter, r*http.Request){
 	if(err != nil){
 		errString := err.Error()
 		if(errString == "USER EXISTS ALREADY"){
-			w.WriteHeader(409)
-			fmt.Fprint(w, errString)
+			c.Status(409).SendString(errString)
 		}else{
-			w.WriteHeader(500)
-			fmt.Fprint(w, errString)
+			c.Status(500).SendString(errString)
 		}
 		return;
 	}
 
-	session, err := startSession(w, reqUser.Username)
+	session, err := startSession(c, reqUser.Username)
 
 	if err != nil {
-		w.WriteHeader(500)
-		fmt.Fprintf(w, "Something went wrong while creating your Account")
+		c.Status(500).SendString("Something went wrong while creating your Account")
 		return
 	}
 
-	json.NewEncoder(w).Encode(session)
+	c.JSON(session)
 }
 
-func Authenticate(w http.ResponseWriter, r*http.Request){
+func Authenticate(c *fiber.Ctx){
 	var credentials Credentials
-	err := json.NewDecoder(r.Body).Decode(&credentials)
+	err := c.BodyParser(&credentials)
 	if(err != nil){
-		w.WriteHeader(500);
-		fmt.Fprintf(w, "SOMETHING WENT WRONG")
+		c.Status(500).SendString("SOMETHING WENT WRONG")
 		return
 	}
 	pwCorrect := userService.CheckPW(credentials.Username, credentials.Password)
 	if(pwCorrect){
-		session, err := startSession(w, credentials.Username)
+		session, err := startSession(c, credentials.Username)
 		if err != nil {
-			w.WriteHeader(500)
-			fmt.Fprintf(w, "Something went wrong while authenticating")
+			c.Status(500).SendString("Something went wrong while authenticating")
 			return
 		}
-		json.NewEncoder(w).Encode(session)
+		c.JSON(session)
 		return
 	}
-	w.WriteHeader(401);
-	fmt.Fprintf(w, "WRONG CREDENTIALS")
+	c.Status(401).SendString("WRONG CREDENTIALS")
 }

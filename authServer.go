@@ -2,25 +2,20 @@ package main
 
 import (
 	"auth/authService"
-	"fmt"
-	"net/http"
 	"os"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/gofiber/fiber"
 )
 
 var PORT string
 
 func handleRequest(){
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Get("/user", authService.GetUser)
-	r.Post("/users", authService.Register)
-	r.Post("/login", authService.Authenticate)
-	fmt.Println("Server Running on Port", PORT)
-	http.ListenAndServe(PORT, r)
+	app := fiber.New()
+	app.Get("/user", authService.GetUser)
+	app.Post("/users", authService.Register)
+	app.Post("/login", authService.Authenticate)
+	app.Listen(PORT)
 }
 
 func setPort(defaultPort int){
