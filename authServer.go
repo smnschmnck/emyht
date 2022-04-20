@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 )
 
 var PORT string

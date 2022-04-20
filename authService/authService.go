@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx"
 )
 
@@ -19,12 +19,11 @@ type Session struct{
 	Username string `json:"username"`
 }
 
-func GetUser(c *fiber.Ctx)  {
+func GetUser(c *fiber.Ctx) error {
 	bearerArr := strings.Split(c.Get("authorization"), "Bearer ")
 
 	if(len(bearerArr) <= 1){
-		c.Status(401).SendString("NOT AUTHORIZED")
-		return
+		return c.Status(401).SendString("NOT AUTHORIZED")
 	}
 
 	sessionID := bearerArr[1]
@@ -32,11 +31,10 @@ func GetUser(c *fiber.Ctx)  {
 	user, err := getUserBySessionID(sessionID)
 
 	if err.StatusCode >= 300 {
-		c.Status(err.StatusCode).SendString(err.Msg)
-		return
+		return c.Status(err.StatusCode).SendString(err.Msg)
 	}
 
-	c.JSON(user)
+	return c.JSON(user)
 }
 
 type UserRes struct{
@@ -115,56 +113,48 @@ func startSession(c *fiber.Ctx, username string) (Session, error){
 	return tmpSession, nil;
 }
 
-func Register(c *fiber.Ctx){
+func Register(c *fiber.Ctx) error {
 	var reqUser userService.ReqUser
 	err := c.BodyParser(&reqUser)
 	if(err != nil){
-		c.Status(400).SendString("BAD REQUEST")
-		return
+		return c.Status(400).SendString("BAD REQUEST")
 	}
 	err = validate.Struct(reqUser);
 	if(err != nil){
-		c.Status(400).SendString("BAD REQUEST")
-		return
+		return c.Status(400).SendString("BAD REQUEST")
 	}
 	_, err = userService.AddUser(reqUser.Username, reqUser.FirstName, reqUser.LastName, reqUser.Password)
 
 	if(err != nil){
 		errString := err.Error()
 		if(errString == "USER EXISTS ALREADY"){
-			c.Status(409).SendString(errString)
-		}else{
-			c.Status(500).SendString(errString)
+			return c.Status(409).SendString(errString)
 		}
-		return;
+		c.Status(500).SendString(errString)
 	}
 
 	session, err := startSession(c, reqUser.Username)
 
 	if err != nil {
-		c.Status(500).SendString("Something went wrong while creating your Account")
-		return
+		return c.Status(500).SendString("Something went wrong while creating your Account")
 	}
 
-	c.JSON(session)
+	return c.JSON(session)
 }
 
-func Authenticate(c *fiber.Ctx){
+func Authenticate(c *fiber.Ctx) error{
 	var credentials Credentials
 	err := c.BodyParser(&credentials)
 	if(err != nil){
-		c.Status(500).SendString("SOMETHING WENT WRONG")
-		return
+		return c.Status(500).SendString("SOMETHING WENT WRONG")
 	}
 	pwCorrect := userService.CheckPW(credentials.Username, credentials.Password)
 	if(pwCorrect){
 		session, err := startSession(c, credentials.Username)
 		if err != nil {
-			c.Status(500).SendString("Something went wrong while authenticating")
-			return
+			return c.Status(500).SendString("Something went wrong while authenticating")
 		}
-		c.JSON(session)
-		return
+		return c.JSON(session)
 	}
-	c.Status(401).SendString("WRONG CREDENTIALS")
+	return c.Status(401).SendString("WRONG CREDENTIALS")
 }
