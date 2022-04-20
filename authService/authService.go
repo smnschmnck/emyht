@@ -5,7 +5,6 @@ import (
 	"auth/userService"
 	"crypto/rand"
 	"encoding/base64"
-	"fmt"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
@@ -24,8 +23,7 @@ func GetUser(c *fiber.Ctx)  {
 	bearerArr := strings.Split(c.Get("authorization"), "Bearer ")
 
 	if(len(bearerArr) <= 1){
-		c.Status(401)
-		c.SendString("NOT AUTHORIZED")
+		c.Status(401).SendString("NOT AUTHORIZED")
 		return
 	}
 
@@ -34,8 +32,7 @@ func GetUser(c *fiber.Ctx)  {
 	user, err := getUserBySessionID(sessionID)
 
 	if err.StatusCode >= 300 {
-		c.Status(err.StatusCode)
-		c.SendString(err.Msg)
+		c.Status(err.StatusCode).SendString(err.Msg)
 		return
 	}
 
@@ -122,7 +119,6 @@ func Register(c *fiber.Ctx){
 	var reqUser userService.ReqUser
 	err := c.BodyParser(&reqUser)
 	if(err != nil){
-		fmt.Print(err)
 		c.Status(400).SendString("BAD REQUEST")
 		return
 	}
