@@ -34,7 +34,7 @@ func loadDotEnv(){
 	godotenv.Load()
 	err := godotenv.Load()
 	if err != nil {
-	  fmt.Print("No .env file. Using defaults")
+		fmt.Println(string("\033[31m"), "No .env file. Using default or runtime vars")
 	}
 }
 
