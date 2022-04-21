@@ -8,8 +8,8 @@ import (
 
 var PGConfig = pgx.ConnConfig{
 	Host: "localhost",
-	User: "postgres",
-	Password: "example",
+	User: "user",
+	Password: "password",
 	Database: "postgres",
 }
 

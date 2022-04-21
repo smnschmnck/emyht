@@ -2,10 +2,13 @@ package main
 
 import (
 	"auth/authService"
+	"auth/dbHelpers/postgresHelper"
+	"fmt"
 	"os"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
 )
 
 var PORT string
@@ -27,7 +30,21 @@ func setPort(defaultPort int){
 	}
 }
 
-func main() {
+func loadDotEnv(){
+	godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+	  fmt.Print("No .env file. Using defaults")
+	}
+}
+
+func initGlobals(){
+	loadDotEnv()
+	postgresHelper.LoadEnv()
 	setPort(3001)
-	handleRequest();
+}
+
+func main() {
+	initGlobals()
+	handleRequest()
 }
