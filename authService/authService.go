@@ -148,6 +148,10 @@ func Authenticate(c *fiber.Ctx) error{
 	if(err != nil){
 		return c.Status(500).SendString("SOMETHING WENT WRONG")
 	}
+	err = validate.Struct(credentials);
+	if(err != nil){
+		return c.Status(400).SendString("BAD REQUEST")
+	}
 	pwCorrect := userService.CheckPW(credentials.Username, credentials.Password)
 	if(pwCorrect){
 		session, err := startSession(c, credentials.Username)
