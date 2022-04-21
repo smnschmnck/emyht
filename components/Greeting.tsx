@@ -12,8 +12,8 @@ const Greeting: React.FC<GreetingProps> = ({
   return (
     <div>
       <h1>Hello {username}</h1>
-      <h1>First Name: {firstName}</h1>
-      <h1>Last Name: {lastName}</h1>
+      <h4>First Name: {firstName}</h4>
+      <h4>Last Name: {lastName}</h4>
     </div>
   );
 };
