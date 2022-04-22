@@ -1,8 +1,8 @@
 package main
 
 import (
-	"auth/authService"
-	"auth/dbHelpers/postgresHelper"
+	"chat/auth/authService"
+	"chat/dbHelpers/postgresHelper"
 	"fmt"
 	"os"
 	"strconv"
