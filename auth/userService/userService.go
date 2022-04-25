@@ -116,12 +116,12 @@ func AddUser(username string, firstName string, lastName string, password string
 	}, nil
 }
 
-func CheckPW(username string, password string) bool{
+func CheckPW(username string, password string) (bool, error){
 	user, err := GetUser(username);
 	if err != nil{
-		return false
+		return false, err
 	}
 	pepper := globals.Pepper
 	hashedPW := hash(password + user.Salt + pepper)
-	return hashedPW == user.Password
+	return hashedPW == user.Password, nil
 }

@@ -136,7 +136,7 @@ func Register(c *fiber.Ctx) error {
 	session, err := startSession(c, reqUser.Username)
 
 	if err != nil {
-		return c.Status(500).SendString("Something went wrong while creating your Account")
+		return c.Status(500).SendString("SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
 	}
 
 	return c.JSON(session)
@@ -152,11 +152,14 @@ func Authenticate(c *fiber.Ctx) error{
 	if(err != nil){
 		return c.Status(400).SendString("BAD REQUEST")
 	}
-	pwCorrect := userService.CheckPW(credentials.Username, credentials.Password)
+	pwCorrect, err := userService.CheckPW(credentials.Username, credentials.Password)
+	if err != nil {
+		return c.Status(500).SendString("SOMETHING WENT WRONG WHILE AUTHENTICATING")
+	}
 	if(pwCorrect){
 		session, err := startSession(c, credentials.Username)
 		if err != nil {
-			return c.Status(500).SendString("Something went wrong while authenticating")
+			return c.Status(500).SendString("SOMETHING WENT WRONG WHILE AUTHENTICATING")
 		}
 		return c.JSON(session)
 	}
