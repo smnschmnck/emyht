@@ -3,6 +3,7 @@ package main
 import (
 	"chat/auth/authService"
 	"chat/dbHelpers/postgresHelper"
+	"chat/dbHelpers/redisHelper"
 	"fmt"
 	"os"
 	"strconv"
@@ -41,6 +42,7 @@ func loadDotEnv(){
 func initGlobals(){
 	loadDotEnv()
 	postgresHelper.LoadEnv()
+	redisHelper.LoadEnv()
 	setPort(3001)
 }
 

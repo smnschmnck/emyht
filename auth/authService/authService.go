@@ -2,6 +2,7 @@ package authService
 
 import (
 	"chat/auth/userService"
+	"chat/dbHelpers/redisHelper"
 	"context"
 	"crypto/rand"
 	"encoding/base64"
@@ -16,7 +17,6 @@ import (
 
 var validate = validator.New()
 var ctx = context.Background()
-
 
 type Session struct{
 	SessionID string `json:"sessionID"`
@@ -54,11 +54,7 @@ type ResponseError struct {
 }
 
 func getUserBySessionID(sessionID string) (UserRes, ResponseError){
-	rdb := redis.NewClient(&redis.Options{
-        Addr:     "localhost:6379",
-        Password: "example",
-        DB:       0,
-    })
+	rdb := redis.NewClient(&redisHelper.RedisConfig)
 	username, err := rdb.Get(ctx, sessionID).Result()
 	rdb.Set(ctx, sessionID, username, 24*time.Hour)
 	if err != nil {
@@ -93,11 +89,7 @@ func startSession(c *fiber.Ctx, username string) (Session, error){
 		return Session{}, err
 	}
 
-    rdb := redis.NewClient(&redis.Options{
-        Addr:     "localhost:6379",
-        Password: "example",
-        DB:       0,
-    })
+    rdb := redis.NewClient(&redisHelper.RedisConfig)
 
     err = rdb.Set(ctx, token, username, 24*time.Hour).Err()
 
