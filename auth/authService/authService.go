@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"strings"
+	"time"
 
 	"github.com/go-redis/redis/v8"
 
@@ -59,6 +60,7 @@ func getUserBySessionID(sessionID string) (UserRes, ResponseError){
         DB:       0,
     })
 	username, err := rdb.Get(ctx, sessionID).Result()
+	rdb.Set(ctx, sessionID, username, 24*time.Hour)
 	if err != nil {
 		return UserRes{}, ResponseError{Msg: "USER NOT FOUND", StatusCode: 404}
 	}
@@ -97,7 +99,7 @@ func startSession(c *fiber.Ctx, username string) (Session, error){
         DB:       0,
     })
 
-    err = rdb.Set(ctx, token, username, 0).Err()
+    err = rdb.Set(ctx, token, username, 24*time.Hour).Err()
 
 	if err != nil {
 		return Session{}, err
