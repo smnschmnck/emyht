@@ -2,24 +2,27 @@ package authService
 
 import (
 	"chat/auth/userService"
-	"chat/dbHelpers/postgresHelper"
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"strings"
 
+	"github.com/go-redis/redis/v8"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	"github.com/jackc/pgx"
 )
 
 var validate = validator.New()
+var ctx = context.Background()
+
 
 type Session struct{
 	SessionID string `json:"sessionID"`
 	Username string `json:"username"`
 }
 
-func GetUser(c *fiber.Ctx) error {
+func GetUserBySession(c *fiber.Ctx) error {
 	bearerArr := strings.Split(c.Get("authorization"), "Bearer ")
 
 	if(len(bearerArr) <= 1){
@@ -50,27 +53,21 @@ type ResponseError struct {
 }
 
 func getUserBySessionID(sessionID string) (UserRes, ResponseError){
-	conn, err := pgx.Connect(postgresHelper.PGConfig)
-	if err != nil {
-		return UserRes{}, ResponseError{Msg: "INTERNAL ERROR", StatusCode: 500}
-	}
-	defer conn.Close()
-	q := `SELECT u.username, u.first_name, u.last_name, u.is_admin
-	FROM sessions
-	RIGHT JOIN users u
-	ON u.username = sessions.username
-	WHERE session_id = $1`
-	rows := conn.QueryRow(q, sessionID)
-	var dbUsername string
-	var dbFirstName string
-	var dbLastName string
-	var dbUserIsAdmin bool
-	err = rows.Scan(&dbUsername, &dbFirstName, &dbLastName, &dbUserIsAdmin)
+	rdb := redis.NewClient(&redis.Options{
+        Addr:     "localhost:6379",
+        Password: "example",
+        DB:       0,
+    })
+	username, err := rdb.Get(ctx, sessionID).Result()
 	if err != nil {
 		return UserRes{}, ResponseError{Msg: "USER NOT FOUND", StatusCode: 404}
 	}
+	user, err := userService.GetUser(username)
+	if err != nil {
+		return UserRes{}, ResponseError{Msg: "INTERNAL ERROR", StatusCode: 500}
+	}
 
-	res := &UserRes{Username: dbUsername, FirstName: dbFirstName, LastName: dbLastName, IsAdmin: dbUserIsAdmin}
+	res := &UserRes{Username: user.Username, FirstName: user.FirstName, LastName: user.LastName, IsAdmin: user.IsAdmin}
 	return *res, ResponseError{StatusCode: 200}
 }
 
@@ -94,22 +91,18 @@ func startSession(c *fiber.Ctx, username string) (Session, error){
 		return Session{}, err
 	}
 
-	conn, err := pgx.Connect(postgresHelper.PGConfig)
-	if err != nil {
-		return Session{}, err
-	}
-	defer conn.Close()
-	
-	var dbUserToken string
-	var dbUsername string
+    rdb := redis.NewClient(&redis.Options{
+        Addr:     "localhost:6379",
+        Password: "example",
+        DB:       0,
+    })
 
-	q := "INSERT INTO sessions VALUES ($1, $2) RETURNING *;"
-	rows := conn.QueryRow(q, token, username)
-	err = rows.Scan(&dbUserToken, &dbUsername)
+    err = rdb.Set(ctx, token, username, 0).Err()
+
 	if err != nil {
 		return Session{}, err
 	}
-	tmpSession := Session{dbUserToken, dbUsername}
+	tmpSession := Session{token, username}
 	return tmpSession, nil;
 }
 

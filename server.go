@@ -15,7 +15,7 @@ var PORT string
 
 func handleRequest(){
 	app := fiber.New()
-	app.Get("/user", authService.GetUser)
+	app.Get("/user", authService.GetUserBySession)
 	app.Post("/register", authService.Register)
 	app.Post("/login", authService.Authenticate)
 	app.Listen(PORT)
