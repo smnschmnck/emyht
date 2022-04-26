@@ -100,7 +100,7 @@ func AddUser(username string, firstName string, lastName string, password string
 
 	if err != nil {
 		errString := err.Error()
-		if(strings.Contains(errString, `duplicate key value violates unique constraint "users_pk"`)){
+		if(strings.Contains(errString, `duplicate key value violates unique constraint`)){
 			return User{}, errors.New("USER EXISTS ALREADY")
 		}
 		return User{}, errors.New("INTERNAL ERROR")
