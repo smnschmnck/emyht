@@ -3,6 +3,7 @@ module chat
 go 1.17
 
 require (
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/gofiber/fiber/v2 v2.32.0
 	github.com/joho/godotenv v1.4.0
 )
@@ -12,7 +13,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
 	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733 // indirect
 	github.com/lib/pq v1.10.2 // indirect
