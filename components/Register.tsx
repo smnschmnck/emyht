@@ -20,7 +20,6 @@ const Register: React.FC<RegisterProps> = (props) => {
       password: '',
     },
     onSubmit: async (values) => {
-      console.log(values);
       if (values.password !== passwordRepeat) {
         alert('Passwords do not match!');
         return;

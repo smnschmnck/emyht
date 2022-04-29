@@ -16,7 +16,6 @@ const Login: React.FC<LoginProps> = (props) => {
       password: '',
     },
     onSubmit: async (values) => {
-      console.log(values);
       const res = await fetch('/api/login', {
         method: 'post',
         body: JSON.stringify(values),
