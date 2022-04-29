@@ -1,4 +1,5 @@
-import { FormEvent, useState } from 'react';
+import { useFormik } from 'formik';
+import { useState } from 'react';
 
 interface RegisterProps {
   showLogin: boolean;
@@ -10,36 +11,32 @@ interface RegisterProps {
 }
 
 const Register: React.FC<RegisterProps> = (props) => {
-  const [username, setUsername] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastname] = useState('');
-  const [password, setPassword] = useState('');
-  const [passwordRepeat, setPasswordRepeat] = useState('');
+  const [passwordRepeat, setPasswordReapeat] = useState('');
+  const formik = useFormik({
+    initialValues: {
+      username: '',
+      firstName: '',
+      lastName: '',
+      password: '',
+    },
+    onSubmit: async (values) => {
+      console.log(values);
+      if (values.password !== passwordRepeat) {
+        alert('Passwords do not match!');
+        return;
+      }
 
-  const register = async (e: FormEvent) => {
-    e.preventDefault();
-    if (password !== passwordRepeat) {
-      alert('Passwords do not match!');
-      return;
-    }
-
-    const creds = {
-      username: username,
-      firstName: firstName,
-      lastName: lastName,
-      password: password,
-    };
-
-    const res = await fetch('/api/register', {
-      method: 'post',
-      body: JSON.stringify(creds),
-    });
-    if (!res.ok) {
-      alert(await res.text());
-      return;
-    }
-    loadUser();
-  };
+      const res = await fetch('/api/register', {
+        method: 'post',
+        body: JSON.stringify(values),
+      });
+      if (!res.ok) {
+        alert(await res.text());
+        return;
+      }
+      loadUser();
+    },
+  });
 
   const loadUser = async () => {
     const res = await fetch('/api/user');
@@ -54,40 +51,45 @@ const Register: React.FC<RegisterProps> = (props) => {
   return (
     <div>
       <h1>Register</h1>
-      <form onSubmit={(e) => register(e)}>
+      <form onSubmit={formik.handleSubmit}>
         <input
           type='text'
           placeholder='Username'
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          name='username'
+          value={formik.values.username}
+          onChange={formik.handleChange}
           required
         />
         <input
           type='text'
-          placeholder='Firstname'
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
+          placeholder='First Name'
+          name='firstName'
+          value={formik.values.firstName}
+          onChange={formik.handleChange}
           required
         />
         <input
           type='text'
-          placeholder='Lastname'
-          value={lastName}
-          onChange={(e) => setLastname(e.target.value)}
+          placeholder='Last Name'
+          name='lastName'
+          value={formik.values.lastName}
+          onChange={formik.handleChange}
           required
         />
         <input
           type='password'
           placeholder='Password'
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          name='password'
+          value={formik.values.password}
+          onChange={formik.handleChange}
           required
         />
         <input
           type='password'
           placeholder='Repeat Password'
+          name='passwordRepeat'
           value={passwordRepeat}
-          onChange={(e) => setPasswordRepeat(e.target.value)}
+          onChange={(e) => setPasswordReapeat(e.target.value)}
           required
         />
         <button type='submit'>Register</button>
