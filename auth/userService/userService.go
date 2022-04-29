@@ -119,7 +119,7 @@ func AddUser(username string, firstName string, lastName string, password string
 func CheckPW(username string, password string) (bool, error){
 	user, err := GetUser(username);
 	if err != nil{
-		return false, err
+		return false, errors.New("USER NOT FOUND")
 	}
 	pepper := globals.Pepper
 	hashedPW := hash(password + user.Salt + pepper)

@@ -141,7 +141,7 @@ func Authenticate(c *fiber.Ctx) error{
 	}
 	pwCorrect, err := userService.CheckPW(credentials.Username, credentials.Password)
 	if err != nil {
-		return c.Status(500).SendString("SOMETHING WENT WRONG WHILE AUTHENTICATING")
+		return c.Status(500).SendString(err.Error())
 	}
 	if(pwCorrect){
 		session, err := startSession(c, credentials.Username)
