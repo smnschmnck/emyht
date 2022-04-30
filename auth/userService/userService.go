@@ -31,7 +31,7 @@ type User struct {
 func GetUser(username string) (User, error){
 	conn, err := pgx.Connect(postgresHelper.PGConfig)
 	if err != nil {
-		return User{}, err
+		return User{}, errors.New("INTERNAL ERROR")
 	}
 	defer conn.Close()
 
@@ -46,7 +46,7 @@ func GetUser(username string) (User, error){
 	rows := conn.QueryRow(q, username)
 	err = rows.Scan(&dbUsername, &dbFirstName, &dbLastName, &dbUserPassword, &dbUserSalt, &dbUserIsAdmin)
 	if err != nil {
-		return User{}, errors.New("INTERNAL ERROR")
+		return User{}, errors.New("USER NOT FOUND")
 	}
 
 	return User{
@@ -119,7 +119,7 @@ func AddUser(username string, firstName string, lastName string, password string
 func CheckPW(username string, password string) (bool, error){
 	user, err := GetUser(username);
 	if err != nil{
-		return false, errors.New("USER NOT FOUND")
+		return false, err
 	}
 	pepper := globals.Pepper
 	hashedPW := hash(password + user.Salt + pepper)
