@@ -5,17 +5,46 @@ import (
 	"chat/dbHelpers/postgresHelper"
 	"chat/dbHelpers/redisHelper"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/websocket/v2"
 	"github.com/joho/godotenv"
 )
 
 var PORT string
 
+func wsHandler(c *websocket.Conn) {
+	for {
+		mt, msg, err := c.ReadMessage()
+		if err != nil {
+			log.Println("read:", err)
+			break
+		}
+
+		msgString := string(msg)
+		echoMsg := []byte("Echo: " + msgString)
+		err = c.WriteMessage(mt, echoMsg)
+		if err != nil {
+			log.Println("write:", err)
+			break
+		}
+	}
+}
+
 func handleRequest(){
 	app := fiber.New()
+
+	app.Use("/ws", func(c *fiber.Ctx) error {
+		if websocket.IsWebSocketUpgrade(c) {
+			c.Locals("allowed", true)
+			return c.Next()
+		}
+		return fiber.ErrUpgradeRequired
+	})
+	app.Get("/ws", websocket.New(wsHandler))
 	app.Get("/user", authService.GetUserBySession)
 	app.Post("/register", authService.Register)
 	app.Post("/login", authService.Authenticate)
