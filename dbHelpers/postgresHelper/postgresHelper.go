@@ -7,31 +7,31 @@ import (
 )
 
 var PGConfig = pgx.ConnConfig{
-	Host: "localhost",
-	User: "user",
+	Host:     "localhost",
+	User:     "user",
 	Password: "password",
 	Database: "postgres",
 }
 
-func LoadEnv(){
+func LoadEnv() {
 	envHost := os.Getenv("PG_HOST")
 	envUser := os.Getenv("PG_USER")
 	envPassword := os.Getenv("PG_PASSWORD")
 	envDb := os.Getenv("PG_DATABASE")
 
-	if envHost != ""{
+	if envHost != "" {
 		PGConfig.Host = envHost
 	}
 
-	if envUser != ""{
+	if envUser != "" {
 		PGConfig.User = envUser
 	}
 
-	if envPassword != ""{
+	if envPassword != "" {
 		PGConfig.Password = envPassword
 	}
 
-	if envDb != ""{
+	if envDb != "" {
 		PGConfig.Database = envDb
 	}
 }

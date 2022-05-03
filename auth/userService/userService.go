@@ -13,22 +13,22 @@ import (
 )
 
 type ReqUser struct {
-	Username string `json:"username" validate:"required"`
+	Username  string `json:"username" validate:"required"`
 	FirstName string `json:"firstName" validate:"required"`
-	LastName string `json:"lastName" validate:"required"`
-	Password string `json:"password" validate:"required"`
+	LastName  string `json:"lastName" validate:"required"`
+	Password  string `json:"password" validate:"required"`
 }
 
 type User struct {
-	Username string `json:"username"`
+	Username  string `json:"username"`
 	FirstName string `json:"firstName"`
-	LastName string `json:"lastName"`
-	Password string `json:"password"`
-	Salt string `json:"salt"`
-	IsAdmin bool `json:"isAdmin"`
+	LastName  string `json:"lastName"`
+	Password  string `json:"password"`
+	Salt      string `json:"salt"`
+	IsAdmin   bool   `json:"isAdmin"`
 }
 
-func GetUser(username string) (User, error){
+func GetUser(username string) (User, error) {
 	conn, err := pgx.Connect(postgresHelper.PGConfig)
 	if err != nil {
 		return User{}, errors.New("INTERNAL ERROR")
@@ -50,18 +50,18 @@ func GetUser(username string) (User, error){
 	}
 
 	return User{
-		Username: dbUsername,
+		Username:  dbUsername,
 		FirstName: dbFirstName,
-		LastName: dbLastName,
-		Password: dbUserPassword,
-		Salt: dbUserSalt,
-		IsAdmin: dbUserIsAdmin,
+		LastName:  dbLastName,
+		Password:  dbUserPassword,
+		Salt:      dbUserSalt,
+		IsAdmin:   dbUserIsAdmin,
 	}, nil
 }
 
-func hash(s string) string{
-	h := sha256.New();
-	h.Write([]byte(s));
+func hash(s string) string {
+	h := sha256.New()
+	h.Write([]byte(s))
 	sum := h.Sum(nil)
 	return hex.EncodeToString(sum)
 }
@@ -74,8 +74,8 @@ func makeSalt(length int) (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
-func AddUser(username string, firstName string, lastName string, password string) (User, error){
-	salt, err := makeSalt(16);
+func AddUser(username string, firstName string, lastName string, password string) (User, error) {
+	salt, err := makeSalt(16)
 	pepper := globals.Pepper
 	if err != nil {
 		return User{}, errors.New("UNEXPECTED ERROR")
@@ -95,30 +95,30 @@ func AddUser(username string, firstName string, lastName string, password string
 	var dbUserIsAdmin bool
 
 	q := "INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;"
-	rows := conn.QueryRow(q, username, firstName, lastName, hash(password + salt + pepper), salt, false)
+	rows := conn.QueryRow(q, username, firstName, lastName, hash(password+salt+pepper), salt, false)
 	err = rows.Scan(&dbUsername, &dbFirstName, &dbLastName, &dbUserPassword, &dbUserSalt, &dbUserIsAdmin)
 
 	if err != nil {
 		errString := err.Error()
-		if(strings.Contains(errString, `duplicate key value violates unique constraint`)){
+		if strings.Contains(errString, `duplicate key value violates unique constraint`) {
 			return User{}, errors.New("USER EXISTS ALREADY")
 		}
 		return User{}, errors.New("INTERNAL ERROR")
 	}
 
 	return User{
-		Username: dbUsername,
+		Username:  dbUsername,
 		FirstName: dbFirstName,
-		LastName: dbLastName,
-		Password: dbUserPassword,
-		Salt: dbUserSalt,
-		IsAdmin: dbUserIsAdmin,
+		LastName:  dbLastName,
+		Password:  dbUserPassword,
+		Salt:      dbUserSalt,
+		IsAdmin:   dbUserIsAdmin,
 	}, nil
 }
 
-func CheckPW(username string, password string) (bool, error){
-	user, err := GetUser(username);
-	if err != nil{
+func CheckPW(username string, password string) (bool, error) {
+	user, err := GetUser(username)
+	if err != nil {
 		return false, err
 	}
 	pepper := globals.Pepper

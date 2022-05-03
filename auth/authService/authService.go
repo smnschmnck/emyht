@@ -18,15 +18,15 @@ import (
 var validate = validator.New()
 var ctx = context.Background()
 
-type Session struct{
+type Session struct {
 	SessionID string `json:"sessionID"`
-	Username string `json:"username"`
+	Username  string `json:"username"`
 }
 
 func GetUserBySession(c *fiber.Ctx) error {
 	bearerArr := strings.Split(c.Get("authorization"), "Bearer ")
 
-	if(len(bearerArr) <= 1){
+	if len(bearerArr) <= 1 {
 		return c.Status(401).SendString("NOT AUTHORIZED")
 	}
 
@@ -41,19 +41,19 @@ func GetUserBySession(c *fiber.Ctx) error {
 	return c.JSON(user)
 }
 
-type UserRes struct{
-	Username string `json:"username"`
+type UserRes struct {
+	Username  string `json:"username"`
 	FirstName string `json:"firstName"`
-	LastName string `json:"lastName"`
-	IsAdmin bool `json:"isAdmin"`
+	LastName  string `json:"lastName"`
+	IsAdmin   bool   `json:"isAdmin"`
 }
 
 type ResponseError struct {
-    Msg    string
-    StatusCode int
+	Msg        string
+	StatusCode int
 }
 
-func getUserBySessionID(sessionID string) (UserRes, ResponseError){
+func getUserBySessionID(sessionID string) (UserRes, ResponseError) {
 	rdb := redis.NewClient(&redisHelper.RedisConfig)
 	username, err := rdb.Get(ctx, sessionID).Result()
 	rdb.Set(ctx, sessionID, username, 24*time.Hour)
@@ -69,7 +69,7 @@ func getUserBySessionID(sessionID string) (UserRes, ResponseError){
 	return res, ResponseError{StatusCode: 200}
 }
 
-type Credentials struct{
+type Credentials struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
@@ -82,39 +82,39 @@ func makeToken(length int) (string, error) {
 	return base64.StdEncoding.EncodeToString(bytes), nil
 }
 
-func startSession(c *fiber.Ctx, username string) (Session, error){
-	token, err := makeToken(32);
-	if(err != nil){
+func startSession(c *fiber.Ctx, username string) (Session, error) {
+	token, err := makeToken(32)
+	if err != nil {
 		c.Status(500).SendString("SOMETHING WENT WRONG")
 		return Session{}, err
 	}
 
-    rdb := redis.NewClient(&redisHelper.RedisConfig)
+	rdb := redis.NewClient(&redisHelper.RedisConfig)
 
-    err = rdb.Set(ctx, token, username, 24*time.Hour).Err()
+	err = rdb.Set(ctx, token, username, 24*time.Hour).Err()
 
 	if err != nil {
 		return Session{}, err
 	}
 	tmpSession := Session{token, username}
-	return tmpSession, nil;
+	return tmpSession, nil
 }
 
 func Register(c *fiber.Ctx) error {
 	var reqUser userService.ReqUser
 	err := c.BodyParser(&reqUser)
-	if(err != nil){
+	if err != nil {
 		return c.Status(400).SendString("BAD REQUEST")
 	}
-	err = validate.Struct(reqUser);
-	if(err != nil){
+	err = validate.Struct(reqUser)
+	if err != nil {
 		return c.Status(400).SendString("BAD REQUEST")
 	}
 	_, err = userService.AddUser(reqUser.Username, reqUser.FirstName, reqUser.LastName, reqUser.Password)
 
-	if(err != nil){
+	if err != nil {
 		errString := err.Error()
-		if(errString == "USER EXISTS ALREADY"){
+		if errString == "USER EXISTS ALREADY" {
 			return c.Status(409).SendString(errString)
 		}
 		c.Status(500).SendString(errString)
@@ -129,21 +129,21 @@ func Register(c *fiber.Ctx) error {
 	return c.JSON(session)
 }
 
-func Authenticate(c *fiber.Ctx) error{
+func Authenticate(c *fiber.Ctx) error {
 	var credentials Credentials
 	err := c.BodyParser(&credentials)
-	if(err != nil){
+	if err != nil {
 		return c.Status(500).SendString("SOMETHING WENT WRONG")
 	}
-	err = validate.Struct(credentials);
-	if(err != nil){
+	err = validate.Struct(credentials)
+	if err != nil {
 		return c.Status(400).SendString("BAD REQUEST")
 	}
 	pwCorrect, err := userService.CheckPW(credentials.Username, credentials.Password)
 	if err != nil {
 		return c.Status(500).SendString(err.Error())
 	}
-	if(pwCorrect){
+	if pwCorrect {
 		session, err := startSession(c, credentials.Username)
 		if err != nil {
 			return c.Status(500).SendString("SOMETHING WENT WRONG WHILE AUTHENTICATING")

@@ -34,7 +34,7 @@ func wsHandler(c *websocket.Conn) {
 	}
 }
 
-func handleRequest(){
+func handleRequest() {
 	app := fiber.New()
 
 	app.Use("/ws", func(c *fiber.Ctx) error {
@@ -51,16 +51,16 @@ func handleRequest(){
 	app.Listen(PORT)
 }
 
-func setPort(defaultPort int){
+func setPort(defaultPort int) {
 	envPort := os.Getenv("PORT")
-	if envPort != ""{
+	if envPort != "" {
 		PORT = ":" + envPort
-	}else{
+	} else {
 		PORT = ":" + strconv.Itoa(defaultPort)
 	}
 }
 
-func loadDotEnv(){
+func loadDotEnv() {
 	godotenv.Load()
 	err := godotenv.Load()
 	if err != nil {
@@ -68,7 +68,7 @@ func loadDotEnv(){
 	}
 }
 
-func initGlobals(){
+func initGlobals() {
 	loadDotEnv()
 	postgresHelper.LoadEnv()
 	redisHelper.LoadEnv()
