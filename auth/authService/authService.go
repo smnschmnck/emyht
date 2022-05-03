@@ -65,8 +65,8 @@ func getUserBySessionID(sessionID string) (UserRes, ResponseError){
 		return UserRes{}, ResponseError{Msg: "INTERNAL ERROR", StatusCode: 500}
 	}
 
-	res := &UserRes{Username: user.Username, FirstName: user.FirstName, LastName: user.LastName, IsAdmin: user.IsAdmin}
-	return *res, ResponseError{StatusCode: 200}
+	res := UserRes{Username: user.Username, FirstName: user.FirstName, LastName: user.LastName, IsAdmin: user.IsAdmin}
+	return res, ResponseError{StatusCode: 200}
 }
 
 type Credentials struct{
