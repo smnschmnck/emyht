@@ -3,130 +3,52 @@ import type {
   GetServerSidePropsContext,
   NextPage,
 } from 'next';
-import Head from 'next/head';
-import { useState } from 'react';
 import Greeting from '../components/Greeting';
-import Login from '../components/Login';
-import Register from '../components/Register';
-import { BACKEND_HOST } from '../helpers/globals';
+import { getLoginData } from '../helpers/loginHelpers';
 
-interface HomeProps {
-  loggedIn: boolean;
+interface LoginProps {
   username: string;
   firstName: string;
   lastName: string;
   isAdmin: boolean;
 }
 
-interface GetUserResponse {
-  sessionID: string;
-  username: string;
-  firstName: string;
-  lastName: string;
-  isAdmin: boolean;
-}
-
-export const getServerSideProps: GetServerSideProps<HomeProps> = async (
+export const getServerSideProps: GetServerSideProps<LoginProps | {}> = async (
   context: GetServerSidePropsContext
 ) => {
-  const noLogin: HomeProps = {
-    loggedIn: false,
-    username: '',
-    firstName: '',
-    lastName: '',
-    isAdmin: false,
-  };
-
-  const sessionID = context.req.cookies.SESSIONID;
-
-  if (!sessionID) {
+  const cookies = context.req.cookies;
+  try {
+    const getUserResponse = await getLoginData(cookies);
     return {
-      props: noLogin,
+      props: {
+        username: getUserResponse.username,
+        firstName: getUserResponse.firstName,
+        lastName: getUserResponse.lastName,
+        isAdmin: getUserResponse.isAdmin,
+      },
+    };
+  } catch {
+    //Not logged in
+    const res = context.res;
+    res.writeHead(302, { Location: '/login' });
+    res.end();
+    return {
+      props: {},
     };
   }
-
-  const resp = await fetch(`${BACKEND_HOST}/user`, {
-    headers: { authorization: `Bearer ${sessionID}` },
-  });
-
-  if (!resp.ok) {
-    return {
-      props: noLogin,
-    };
-  }
-
-  const json: GetUserResponse = await resp.json();
-
-  return {
-    props: {
-      loggedIn: true,
-      username: json.username,
-      firstName: json.firstName,
-      lastName: json.lastName,
-      isAdmin: json.isAdmin,
-    },
-  };
 };
 
-const Home: NextPage<HomeProps> = (props) => {
-  const [showLogin, setShowLogin] = useState(!props.loggedIn);
-  const [showRegister, setShowRegister] = useState(false);
-  const [isLoggedin, setIsLoggedIn] = useState(props.loggedIn);
-  const [username, setUsername] = useState(props.username);
-  const [firstName, setFirstname] = useState(props.firstName);
-  const [lastName, setLastname] = useState(props.lastName);
-
-  const toggleLoginRegister = () => {
-    setShowLogin(!showLogin);
-    setShowRegister(!showRegister);
-  };
-
-  const newLogin = (username: string, firstName: string, lastName: string) => {
-    setUsername(username);
-    setFirstname(firstName);
-    setLastname(lastName);
-    setIsLoggedIn(true);
-    setShowLogin(false);
-    setShowRegister(false);
-  };
-
+const HomePage: NextPage<LoginProps> = (props) => {
   return (
     <>
-      <Head>
-        <title>Hello</title>
-      </Head>
-      <div>
-        {!isLoggedin && <h1>You are not logged in</h1>}
-        {isLoggedin && (
-          <Greeting
-            username={username}
-            firstName={firstName}
-            lastName={lastName}
-          />
-        )}
-        {showLogin && (
-          <Login
-            showLogin={showLogin}
-            setShowLogin={setShowLogin}
-            showRegister={showRegister}
-            setShowRegister={setShowRegister}
-            toggleLoginRegister={toggleLoginRegister}
-            newLogin={newLogin}
-          />
-        )}
-        {showRegister && (
-          <Register
-            showLogin={showLogin}
-            setShowLogin={setShowLogin}
-            showRegister={showRegister}
-            setShowRegister={setShowRegister}
-            toggleLoginRegister={toggleLoginRegister}
-            newLogin={newLogin}
-          />
-        )}
-      </div>
+      <h1>Home</h1>
+      <Greeting
+        username={props.username}
+        firstName={props.firstName}
+        lastName={props.lastName}
+      />
     </>
   );
 };
 
-export default Home;
+export default HomePage;
