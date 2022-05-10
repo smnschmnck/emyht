@@ -6,6 +6,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"strings"
 	"time"
 
@@ -23,19 +24,27 @@ type Session struct {
 	Username  string `json:"username"`
 }
 
-func GetUserBySession(c *fiber.Ctx) error {
+func getBearer(c *fiber.Ctx) (string, error) {
 	bearerArr := strings.Split(c.Get("authorization"), "Bearer ")
 
 	if len(bearerArr) <= 1 {
-		return c.Status(401).SendString("NOT AUTHORIZED")
+		return "", errors.New("NOT AUTHORIZED")
 	}
 
 	sessionID := bearerArr[1]
+	return sessionID, nil
+}
 
-	user, err := getUserBySessionID(sessionID)
+func GetUserBySession(c *fiber.Ctx) error {
+	sessionID, responseErr := getBearer(c)
+	if responseErr != nil {
+		return c.Status(401).SendString("NOT AUTHORIZED")
+	}
 
-	if err.StatusCode >= 300 {
-		return c.Status(err.StatusCode).SendString(err.Msg)
+	user, respErr := getUserBySessionID(sessionID)
+
+	if respErr.StatusCode >= 300 {
+		return c.Status(respErr.StatusCode).SendString(respErr.Msg)
 	}
 
 	return c.JSON(user)
@@ -151,4 +160,17 @@ func Authenticate(c *fiber.Ctx) error {
 		return c.JSON(session)
 	}
 	return c.Status(401).SendString("WRONG CREDENTIALS")
+}
+
+func Logout(c *fiber.Ctx) error {
+	sessionID, err := getBearer(c)
+	if err != nil {
+		return c.Status(500).SendString("SOMETHING WENT WRONG")
+	}
+	rdb := redis.NewClient(&redisHelper.RedisConfig)
+	_, err = rdb.Del(ctx, sessionID).Result()
+	if err != nil {
+		return c.Status(500).SendString("SOMETHING WENT WRONG")
+	}
+	return c.SendString("SUCCESSFULLY LOGGED OUT")
 }

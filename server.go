@@ -48,6 +48,7 @@ func handleRequest() {
 	app.Get("/user", authService.GetUserBySession)
 	app.Post("/register", authService.Register)
 	app.Post("/login", authService.Authenticate)
+	app.Get("/logout", authService.Logout)
 	app.Listen(PORT)
 }
 
