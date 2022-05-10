@@ -4,6 +4,7 @@ import type {
   NextPage,
 } from 'next';
 import Greeting from '../components/Greeting';
+import Logout from '../components/Logout';
 import { getLoginData } from '../helpers/loginHelpers';
 
 interface LoginProps {
@@ -47,6 +48,7 @@ const HomePage: NextPage<LoginProps> = (props) => {
         firstName={props.firstName}
         lastName={props.lastName}
       />
+      <Logout></Logout>
     </>
   );
 };
