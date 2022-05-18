@@ -1,0 +1,73 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  min-width: 270px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 90%;
+  margin: 0;
+}
+
+.inputField {
+  margin: 0;
+  transform: translateZ(0);
+  border-radius: 10px;
+  border: none;
+  border: 1px solid rgb(225, 225, 225);
+  outline: none;
+  background-color: rgb(250, 250, 250);
+  color: black;
+  padding-left: 10px;
+  padding-right: 10px;
+  height: 50px;
+  font-weight: bold;
+}
+
+.inputField:focus {
+  border: 1px solid #06f;
+}
+
+.inputField::placeholder {
+  color: rgb(100, 100, 100);
+}
+
+.submitButton {
+  margin: 0;
+  border-radius: 10px;
+  background-color: #06f;
+  height: 50px;
+  color: white;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.submitButton:hover {
+  background-color: rgb(41, 126, 255);
+}
+
+.switchButtonContainer {
+  text-align: center;
+  width: 100%;
+}
+
+.switchButton {
+  margin-top: 10px;
+  width: 50%;
+  height: 50px;
+  border: none;
+  background-color: transparent;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.switchButton:hover {
+  text-decoration: underline;
+}

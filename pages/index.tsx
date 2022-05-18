@@ -3,6 +3,7 @@ import type {
   GetServerSidePropsContext,
   NextPage,
 } from 'next';
+import Head from 'next/head';
 import Greeting from '../components/Greeting';
 import Logout from '../components/Logout';
 import { getLoginData } from '../helpers/loginHelpers';
@@ -42,13 +43,18 @@ export const getServerSideProps: GetServerSideProps<LoginProps | {}> = async (
 const HomePage: NextPage<LoginProps> = (props) => {
   return (
     <>
-      <h1>Home</h1>
-      <Greeting
-        username={props.username}
-        firstName={props.firstName}
-        lastName={props.lastName}
-      />
-      <Logout></Logout>
+      <Head>
+        <title>Home</title>
+      </Head>
+      <div>
+        <h1>Home</h1>
+        <Greeting
+          username={props.username}
+          firstName={props.firstName}
+          lastName={props.lastName}
+        />
+        <Logout></Logout>
+      </div>
     </>
   );
 };

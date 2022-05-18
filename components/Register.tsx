@@ -1,5 +1,6 @@
 import { useFormik } from 'formik';
 import { useState } from 'react';
+import styles from '../styles/LoginRegisterComponent.module.css';
 
 interface RegisterProps {
   showLogin: boolean;
@@ -48,10 +49,14 @@ const Register: React.FC<RegisterProps> = (props) => {
   };
 
   return (
-    <div>
+    <div className={styles.content}>
       <h1>Register</h1>
-      <form onSubmit={formik.handleSubmit}>
+      <form
+        onSubmit={formik.handleSubmit}
+        className={styles.form}
+        autoComplete='off'>
         <input
+          className={styles.inputField}
           type='text'
           placeholder='Username'
           name='username'
@@ -60,6 +65,7 @@ const Register: React.FC<RegisterProps> = (props) => {
           required
         />
         <input
+          className={styles.inputField}
           type='text'
           placeholder='First Name'
           name='firstName'
@@ -68,6 +74,7 @@ const Register: React.FC<RegisterProps> = (props) => {
           required
         />
         <input
+          className={styles.inputField}
           type='text'
           placeholder='Last Name'
           name='lastName'
@@ -76,6 +83,7 @@ const Register: React.FC<RegisterProps> = (props) => {
           required
         />
         <input
+          className={styles.inputField}
           type='password'
           placeholder='Password'
           name='password'
@@ -84,6 +92,7 @@ const Register: React.FC<RegisterProps> = (props) => {
           required
         />
         <input
+          className={styles.inputField}
           type='password'
           placeholder='Repeat Password'
           name='passwordRepeat'
@@ -91,9 +100,17 @@ const Register: React.FC<RegisterProps> = (props) => {
           onChange={(e) => setPasswordReapeat(e.target.value)}
           required
         />
-        <button type='submit'>Register</button>
+        <button type='submit' className={styles.submitButton}>
+          Register
+        </button>
       </form>
-      <button onClick={props.toggleLoginRegister}>Login</button>
+      <div className={styles.switchButtonContainer}>
+        <button
+          onClick={props.toggleLoginRegister}
+          className={styles.switchButton}>
+          Log In
+        </button>
+      </div>
     </div>
   );
 };

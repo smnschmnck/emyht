@@ -1,4 +1,5 @@
 import { useFormik } from 'formik';
+import styles from '../styles/LoginRegisterComponent.module.css';
 
 interface LoginProps {
   showLogin: boolean;
@@ -39,10 +40,14 @@ const Login: React.FC<LoginProps> = (props) => {
   };
 
   return (
-    <div>
+    <div className={styles.content}>
       <h1>Login</h1>
-      <form onSubmit={formik.handleSubmit}>
+      <form
+        onSubmit={formik.handleSubmit}
+        autoComplete='off'
+        className={styles.form}>
         <input
+          className={styles.inputField}
           type='text'
           placeholder='Username'
           name='username'
@@ -51,6 +56,7 @@ const Login: React.FC<LoginProps> = (props) => {
           required
         />
         <input
+          className={styles.inputField}
           type='password'
           placeholder='Password'
           name='password'
@@ -58,9 +64,17 @@ const Login: React.FC<LoginProps> = (props) => {
           onChange={formik.handleChange}
           required
         />
-        <button type='submit'>Log In</button>
+        <button type='submit' className={styles.submitButton}>
+          Log In
+        </button>
       </form>
-      <button onClick={props.toggleLoginRegister}>Sign Up</button>
+      <div className={styles.switchButtonContainer}>
+        <button
+          onClick={props.toggleLoginRegister}
+          className={styles.switchButton}>
+          Sign Up
+        </button>
+      </div>
     </div>
   );
 };
