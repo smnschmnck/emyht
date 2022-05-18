@@ -4,7 +4,7 @@ import (
 	"chat/auth/authHelpers/globals"
 	"chat/dbHelpers/postgresHelper"
 	"crypto/rand"
-	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/hex"
 	"errors"
 	"strings"
@@ -60,7 +60,7 @@ func GetUser(username string) (User, error) {
 }
 
 func hash(s string) string {
-	h := sha256.New()
+	h := sha512.New()
 	h.Write([]byte(s))
 	sum := h.Sum(nil)
 	return hex.EncodeToString(sum)
