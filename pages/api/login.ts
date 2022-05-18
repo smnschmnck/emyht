@@ -16,19 +16,18 @@ const authProxy = async (
   if (!response.ok) {
     const status = response.status;
     const msg = await response.text();
-    res.status(status).send(msg);
-    return;
+    return res.status(status).send(msg);
   }
 
   const json: { username: string; sessionID: string } = await response.json();
   const sessionID = json.sessionID;
-  res
+  return res
     .setHeader('set-cookie', `SESSIONID=${sessionID}; path=/; httponly`)
     .json({ username: json.username });
 };
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  authProxy('/login', req, res);
+  return authProxy('/login', req, res);
 };
 
 export default handler;

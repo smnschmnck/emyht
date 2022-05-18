@@ -17,7 +17,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   res.writeHead(200, {
     'Set-Cookie': `SESSIONID=; HttpOnly; path=/; max-age=0`,
   });
-  res.end();
+  return res.end();
 };
 
 export default handler;
