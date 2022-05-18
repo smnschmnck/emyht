@@ -18,7 +18,7 @@
 .inputField {
   margin: 0;
   transform: translateZ(0);
-  border-radius: 10px;
+  border-radius: 0;
   border: none;
   border: 1px solid rgb(225, 225, 225);
   outline: none;
@@ -40,13 +40,14 @@
 
 .submitButton {
   margin: 0;
-  border-radius: 10px;
+  border-radius: 0;
   background-color: #06f;
   height: 50px;
   color: white;
   border: none;
   font-weight: bold;
   cursor: pointer;
+  transition: 0.2s;
 }
 
 .submitButton:hover {
