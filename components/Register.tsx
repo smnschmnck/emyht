@@ -12,6 +12,7 @@ interface RegisterProps {
 }
 
 const Register: React.FC<RegisterProps> = (props) => {
+  const [loginError, setLoginError] = useState('');
   const [passwordRepeat, setPasswordReapeat] = useState('');
   const formik = useFormik({
     initialValues: {
@@ -21,7 +22,7 @@ const Register: React.FC<RegisterProps> = (props) => {
     },
     onSubmit: async (values) => {
       if (values.password !== passwordRepeat) {
-        alert('Passwords do not match!');
+        setLoginError('Passwords do not match');
         return;
       }
       const res = await fetch('/api/register', {
@@ -29,7 +30,7 @@ const Register: React.FC<RegisterProps> = (props) => {
         body: JSON.stringify(values),
       });
       if (!res.ok) {
-        alert(await res.text());
+        setLoginError(await res.text());
         return;
       }
       loadUser();
@@ -39,7 +40,7 @@ const Register: React.FC<RegisterProps> = (props) => {
   const loadUser = async () => {
     const res = await fetch('/api/user');
     if (!res.ok) {
-      alert(await res.text());
+      setLoginError(await res.text());
       return;
     }
     const json = await res.json();
@@ -50,6 +51,7 @@ const Register: React.FC<RegisterProps> = (props) => {
     <div className={styles.content}>
       <h1>Register</h1>
       <form
+        onChange={() => setLoginError('')}
         onSubmit={formik.handleSubmit}
         className={styles.form}
         autoComplete='off'>
@@ -94,6 +96,7 @@ const Register: React.FC<RegisterProps> = (props) => {
           Register
         </button>
       </form>
+      {loginError && <p className={styles.errorP}>{loginError}</p>}
       <div className={styles.switchButtonContainer}>
         <button
           onClick={props.toggleLoginRegister}

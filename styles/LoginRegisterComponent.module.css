@@ -31,6 +31,7 @@
 }
 
 .inputField:focus {
+  background-color: white;
   border: 1px solid #06f;
 }
 
@@ -50,23 +51,29 @@
   transition: 0.2s;
 }
 
+.errorP {
+  font-weight: bold;
+  color: red;
+}
+
 .submitButton:hover {
   background-color: rgb(41, 126, 255);
 }
 
 .switchButtonContainer {
+  margin-top: 10px;
   text-align: center;
-  width: 100%;
+  width: 90%;
 }
 
 .switchButton {
-  margin-top: 10px;
   width: 50%;
   height: 50px;
   border: none;
   background-color: transparent;
   font-weight: bold;
   cursor: pointer;
+  color: #06f;
 }
 
 .switchButton:hover {

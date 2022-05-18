@@ -1,4 +1,5 @@
 import { useFormik } from 'formik';
+import { useState } from 'react';
 import styles from '../styles/LoginRegisterComponent.module.css';
 
 interface LoginProps {
@@ -11,6 +12,7 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = (props) => {
+  const [loginError, setLoginError] = useState('');
   const formik = useFormik({
     initialValues: {
       username: '',
@@ -22,7 +24,7 @@ const Login: React.FC<LoginProps> = (props) => {
         body: JSON.stringify(values),
       });
       if (!res.ok) {
-        alert(await res.text());
+        setLoginError(await res.text());
         return;
       }
       loadUser();
@@ -32,7 +34,7 @@ const Login: React.FC<LoginProps> = (props) => {
   const loadUser = async () => {
     const res = await fetch('/api/user');
     if (!res.ok) {
-      alert(await res.text());
+      setLoginError(await res.text());
       return;
     }
     const json = await res.json();
@@ -43,6 +45,7 @@ const Login: React.FC<LoginProps> = (props) => {
     <div className={styles.content}>
       <h1>Login</h1>
       <form
+        onChange={() => setLoginError('')}
         onSubmit={formik.handleSubmit}
         autoComplete='off'
         className={styles.form}>
@@ -69,6 +72,7 @@ const Login: React.FC<LoginProps> = (props) => {
           Log In
         </button>
       </form>
+      {loginError && <p className={styles.errorP}>{loginError}</p>}
       <div className={styles.switchButtonContainer}>
         <button
           onClick={props.toggleLoginRegister}
