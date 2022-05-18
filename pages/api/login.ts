@@ -22,7 +22,10 @@ const authProxy = async (
   const json: { username: string; sessionID: string } = await response.json();
   const sessionID = json.sessionID;
   return res
-    .setHeader('set-cookie', `SESSIONID=${sessionID}; path=/; httponly`)
+    .setHeader(
+      'set-cookie',
+      `SESSIONID=${sessionID}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/; httponly`
+    )
     .json({ username: json.username });
 };
 
