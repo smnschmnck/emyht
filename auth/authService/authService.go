@@ -64,10 +64,10 @@ type ResponseError struct {
 func getUserBySessionID(sessionID string) (UserRes, ResponseError) {
 	rdb := redis.NewClient(&redisHelper.RedisConfig)
 	username, err := rdb.Get(ctx, sessionID).Result()
-	rdb.Set(ctx, sessionID, username, 24*time.Hour)
 	if err != nil {
 		return UserRes{}, ResponseError{Msg: "USER NOT FOUND", StatusCode: 404}
 	}
+	rdb.Set(ctx, sessionID, username, 24*time.Hour)
 	user, err := userService.GetUser(username)
 	if err != nil {
 		return UserRes{}, ResponseError{Msg: "INTERNAL ERROR", StatusCode: 500}
