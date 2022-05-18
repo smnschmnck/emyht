@@ -118,7 +118,7 @@ func Register(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(400).SendString("BAD REQUEST")
 	}
-	if len(reqUser.Password) <= 8 {
+	if len(reqUser.Password) < 8 {
 		return c.Status(403).SendString("PASSWORD TOO SHORT")
 	}
 
