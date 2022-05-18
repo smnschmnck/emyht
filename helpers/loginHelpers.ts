@@ -4,8 +4,7 @@ import { NextApiRequestCookies } from 'next/dist/server/api-utils';
 interface GetUserResponse {
   sessionID: string;
   username: string;
-  firstName: string;
-  lastName: string;
+  email: string;
   isAdmin: boolean;
 }
 

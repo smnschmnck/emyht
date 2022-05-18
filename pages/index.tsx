@@ -10,8 +10,7 @@ import { getLoginData } from '../helpers/loginHelpers';
 
 interface LoginProps {
   username: string;
-  firstName: string;
-  lastName: string;
+  email: string;
   isAdmin: boolean;
 }
 
@@ -24,8 +23,7 @@ export const getServerSideProps: GetServerSideProps<LoginProps | {}> = async (
     return {
       props: {
         username: getUserResponse.username,
-        firstName: getUserResponse.firstName,
-        lastName: getUserResponse.lastName,
+        email: getUserResponse.email,
         isAdmin: getUserResponse.isAdmin,
       },
     };
@@ -48,11 +46,7 @@ const HomePage: NextPage<LoginProps> = (props) => {
       </Head>
       <div>
         <h1>Home</h1>
-        <Greeting
-          username={props.username}
-          firstName={props.firstName}
-          lastName={props.lastName}
-        />
+        <Greeting username={props.username} email={props.email} />
         <Logout></Logout>
       </div>
     </>

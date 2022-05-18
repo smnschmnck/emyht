@@ -7,7 +7,7 @@ interface LoginProps {
   showRegister: boolean;
   setShowRegister: (showRegister: boolean) => void;
   toggleLoginRegister: () => void;
-  newLogin: (username: string, firstName: string, lastName: string) => void;
+  newLogin: (username: string, email: string) => void;
 }
 
 const Login: React.FC<LoginProps> = (props) => {
@@ -36,7 +36,7 @@ const Login: React.FC<LoginProps> = (props) => {
       return;
     }
     const json = await res.json();
-    props.newLogin(json.username, json.firstName, json.lastName);
+    props.newLogin(json.username, json.email);
   };
 
   return (
