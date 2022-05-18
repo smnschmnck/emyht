@@ -47,6 +47,8 @@ const LoginPage: NextPage = () => {
     <>
       <Head>
         <title>Login</title>
+        {showRegister && <title>Register</title>}
+        {showLogin && <title>Login</title>}
       </Head>
       <div className={styles.main}>
         <div className={styles.content}>
