@@ -51,10 +51,9 @@ func GetUserBySession(c *fiber.Ctx) error {
 }
 
 type UserRes struct {
-	Username  string `json:"username"`
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	IsAdmin   bool   `json:"isAdmin"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	IsAdmin  bool   `json:"isAdmin"`
 }
 
 type ResponseError struct {
@@ -74,7 +73,7 @@ func getUserBySessionID(sessionID string) (UserRes, ResponseError) {
 		return UserRes{}, ResponseError{Msg: "INTERNAL ERROR", StatusCode: 500}
 	}
 
-	res := UserRes{Username: user.Username, FirstName: user.FirstName, LastName: user.LastName, IsAdmin: user.IsAdmin}
+	res := UserRes{Username: user.Username, Email: user.Email, IsAdmin: user.IsAdmin}
 	return res, ResponseError{StatusCode: 200}
 }
 
@@ -123,16 +122,15 @@ func Register(c *fiber.Ctx) error {
 		return c.Status(403).SendString("PASSWORD TOO SHORT")
 	}
 
-	_, err = userService.AddUser(reqUser.Username, reqUser.FirstName, reqUser.LastName, reqUser.Password)
+	_, err = userService.AddUser(reqUser.Username, reqUser.Email, reqUser.Password)
 
 	if err != nil {
 		errString := err.Error()
 		if errString == "USER EXISTS ALREADY" {
 			return c.Status(409).SendString(errString)
 		}
-		c.Status(500).SendString(errString)
+		return c.Status(500).SendString(errString)
 	}
-
 	session, err := startSession(c, reqUser.Username)
 
 	if err != nil {

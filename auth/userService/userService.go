@@ -7,25 +7,24 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/jackc/pgx"
 )
 
 type ReqUser struct {
-	Username  string `json:"username" validate:"required"`
-	FirstName string `json:"firstName" validate:"required"`
-	LastName  string `json:"lastName" validate:"required"`
-	Password  string `json:"password" validate:"required"`
+	Username string `json:"username" validate:"required"`
+	Email    string `json:"email" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 
 type User struct {
-	Username  string `json:"username"`
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Password  string `json:"password"`
-	Salt      string `json:"salt"`
-	IsAdmin   bool   `json:"isAdmin"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Salt     string `json:"salt"`
+	IsAdmin  bool   `json:"isAdmin"`
 }
 
 func GetUser(username string) (User, error) {
@@ -36,26 +35,24 @@ func GetUser(username string) (User, error) {
 	defer conn.Close()
 
 	var dbUsername string
-	var dbFirstName string
-	var dbLastName string
+	var dbEmail string
 	var dbUserPassword string
 	var dbUserSalt string
 	var dbUserIsAdmin bool
 
-	q := "select username, first_name, last_name, password, salt, is_admin from users where username=$1"
+	q := "select username, email, password, salt, is_admin from users where username=$1"
 	rows := conn.QueryRow(q, username)
-	err = rows.Scan(&dbUsername, &dbFirstName, &dbLastName, &dbUserPassword, &dbUserSalt, &dbUserIsAdmin)
+	err = rows.Scan(&dbUsername, &dbEmail, &dbUserPassword, &dbUserSalt, &dbUserIsAdmin)
 	if err != nil {
 		return User{}, errors.New("USER NOT FOUND")
 	}
 
 	return User{
-		Username:  dbUsername,
-		FirstName: dbFirstName,
-		LastName:  dbLastName,
-		Password:  dbUserPassword,
-		Salt:      dbUserSalt,
-		IsAdmin:   dbUserIsAdmin,
+		Username: dbUsername,
+		Email:    dbEmail,
+		Password: dbUserPassword,
+		Salt:     dbUserSalt,
+		IsAdmin:  dbUserIsAdmin,
 	}, nil
 }
 
@@ -74,7 +71,7 @@ func makeSalt(length int) (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
-func AddUser(username string, firstName string, lastName string, password string) (User, error) {
+func AddUser(username string, email string, password string) (User, error) {
 	salt, err := makeSalt(16)
 	pepper := globals.Pepper
 	if err != nil {
@@ -88,31 +85,30 @@ func AddUser(username string, firstName string, lastName string, password string
 	defer conn.Close()
 
 	var dbUsername string
-	var dbFirstName string
-	var dbLastName string
+	var dbEmail string
 	var dbUserPassword string
 	var dbUserSalt string
 	var dbUserIsAdmin bool
 
-	q := "INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;"
-	rows := conn.QueryRow(q, username, firstName, lastName, hash(password+salt+pepper), salt, false)
-	err = rows.Scan(&dbUsername, &dbFirstName, &dbLastName, &dbUserPassword, &dbUserSalt, &dbUserIsAdmin)
+	q := "INSERT INTO users VALUES ($1, $2, $3, $4, $5) RETURNING *;"
+	rows := conn.QueryRow(q, username, email, hash(password+salt+pepper), salt, false)
+	err = rows.Scan(&dbUsername, &dbEmail, &dbUserPassword, &dbUserSalt, &dbUserIsAdmin)
 
 	if err != nil {
 		errString := err.Error()
 		if strings.Contains(errString, `duplicate key value violates unique constraint`) {
 			return User{}, errors.New("USER EXISTS ALREADY")
 		}
+		fmt.Println(errString)
 		return User{}, errors.New("INTERNAL ERROR")
 	}
 
 	return User{
-		Username:  dbUsername,
-		FirstName: dbFirstName,
-		LastName:  dbLastName,
-		Password:  dbUserPassword,
-		Salt:      dbUserSalt,
-		IsAdmin:   dbUserIsAdmin,
+		Username: dbUsername,
+		Email:    dbEmail,
+		Password: dbUserPassword,
+		Salt:     dbUserSalt,
+		IsAdmin:  dbUserIsAdmin,
 	}, nil
 }
 
