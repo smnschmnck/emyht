@@ -53,6 +53,7 @@ const Login: React.FC<LoginProps> = (props) => {
           name='username'
           value={formik.values.username}
           onChange={formik.handleChange}
+          autoFocus
           required
         />
         <input

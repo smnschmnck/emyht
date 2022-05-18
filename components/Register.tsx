@@ -63,6 +63,7 @@ const Register: React.FC<RegisterProps> = (props) => {
           value={formik.values.username}
           onChange={formik.handleChange}
           required
+          autoFocus
         />
         <input
           className={styles.inputField}
