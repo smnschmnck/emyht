@@ -13,6 +13,7 @@ interface RegisterProps {
 
 const Register: React.FC<RegisterProps> = (props) => {
   const [loginError, setLoginError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [passwordRepeat, setPasswordReapeat] = useState('');
   const formik = useFormik({
     initialValues: {
@@ -23,6 +24,10 @@ const Register: React.FC<RegisterProps> = (props) => {
     onSubmit: async (values) => {
       if (values.password !== passwordRepeat) {
         setLoginError('Passwords do not match');
+        return;
+      }
+      if (values.password.length < 8) {
+        setLoginError('Password must be longer than 8 characters');
         return;
       }
       const res = await fetch('/api/register', {
@@ -74,24 +79,44 @@ const Register: React.FC<RegisterProps> = (props) => {
           onChange={formik.handleChange}
           required
         />
-        <input
-          className={styles.inputField}
-          type='password'
-          placeholder='Password'
-          name='password'
-          value={formik.values.password}
-          onChange={formik.handleChange}
-          required
-        />
-        <input
-          className={styles.inputField}
-          type='password'
-          placeholder='Repeat Password'
-          name='passwordRepeat'
-          value={passwordRepeat}
-          onChange={(e) => setPasswordReapeat(e.target.value)}
-          required
-        />
+        <div className={styles.inputWrapper}>
+          <input
+            className={styles.innerInput}
+            type={showPassword ? 'text' : 'password'}
+            placeholder='Password'
+            name='password'
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            required
+          />
+          <button
+            className={
+              showPassword
+                ? styles.hidePasswordButton
+                : styles.showPasswordButton
+            }
+            type='button'
+            onClick={() => setShowPassword(!showPassword)}></button>
+        </div>
+        <div className={styles.inputWrapper}>
+          <input
+            className={styles.innerInput}
+            type={showPassword ? 'text' : 'password'}
+            placeholder='Repeat Password'
+            name='passwordRepeat'
+            value={passwordRepeat}
+            onChange={(e) => setPasswordReapeat(e.target.value)}
+            required
+          />
+          <button
+            className={
+              showPassword
+                ? styles.hidePasswordButton
+                : styles.showPasswordButton
+            }
+            type='button'
+            onClick={() => setShowPassword(!showPassword)}></button>
+        </div>
         <button type='submit' className={styles.submitButton}>
           Register
         </button>

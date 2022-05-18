@@ -13,6 +13,7 @@ interface LoginProps {
 
 const Login: React.FC<LoginProps> = (props) => {
   const [loginError, setLoginError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const formik = useFormik({
     initialValues: {
       username: '',
@@ -59,15 +60,25 @@ const Login: React.FC<LoginProps> = (props) => {
           autoFocus
           required
         />
-        <input
-          className={styles.inputField}
-          type='password'
-          placeholder='Password'
-          name='password'
-          value={formik.values.password}
-          onChange={formik.handleChange}
-          required
-        />
+        <div className={styles.inputWrapper}>
+          <input
+            className={styles.innerInput}
+            type={showPassword ? 'text' : 'password'}
+            placeholder='Password'
+            name='password'
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            required
+          />
+          <button
+            className={
+              showPassword
+                ? styles.hidePasswordButton
+                : styles.showPasswordButton
+            }
+            type='button'
+            onClick={() => setShowPassword(!showPassword)}></button>
+        </div>
         <button type='submit' className={styles.submitButton}>
           Log In
         </button>
