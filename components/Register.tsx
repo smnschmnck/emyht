@@ -8,7 +8,7 @@ interface RegisterProps {
   showRegister: boolean;
   setShowRegister: (showRegister: boolean) => void;
   toggleLoginRegister: () => void;
-  newLogin: (username: string, email: string) => void;
+  newLogin: (email: string, username: string) => void;
 }
 
 const Register: React.FC<RegisterProps> = (props) => {
@@ -17,8 +17,8 @@ const Register: React.FC<RegisterProps> = (props) => {
   const [passwordRepeat, setPasswordReapeat] = useState('');
   const formik = useFormik({
     initialValues: {
-      username: '',
       email: '',
+      username: '',
       password: '',
     },
     onSubmit: async (values) => {
@@ -63,9 +63,9 @@ const Register: React.FC<RegisterProps> = (props) => {
         <input
           className={styles.inputField}
           type='text'
-          placeholder='Username'
-          name='username'
-          value={formik.values.username}
+          placeholder='E-Mail'
+          name='email'
+          value={formik.values.email}
           onChange={formik.handleChange}
           required
           autoFocus
@@ -73,9 +73,9 @@ const Register: React.FC<RegisterProps> = (props) => {
         <input
           className={styles.inputField}
           type='text'
-          placeholder='E-Mail'
-          name='email'
-          value={formik.values.email}
+          placeholder='Username'
+          name='username'
+          value={formik.values.username}
           onChange={formik.handleChange}
           required
         />

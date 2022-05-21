@@ -9,8 +9,8 @@ import Logout from '../components/Logout';
 import { getLoginData } from '../helpers/loginHelpers';
 
 interface LoginProps {
-  username: string;
   email: string;
+  username: string;
   isAdmin: boolean;
 }
 
@@ -22,8 +22,8 @@ export const getServerSideProps: GetServerSideProps<LoginProps | {}> = async (
     const getUserResponse = await getLoginData(cookies);
     return {
       props: {
-        username: getUserResponse.username,
         email: getUserResponse.email,
+        username: getUserResponse.username,
         isAdmin: getUserResponse.isAdmin,
       },
     };
@@ -46,7 +46,7 @@ const HomePage: NextPage<LoginProps> = (props) => {
       </Head>
       <div>
         <h1>Home</h1>
-        <Greeting username={props.username} email={props.email} />
+        <Greeting email={props.email} username={props.username} />
         <Logout></Logout>
       </div>
     </>

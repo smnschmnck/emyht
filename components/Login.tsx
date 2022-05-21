@@ -8,7 +8,7 @@ interface LoginProps {
   showRegister: boolean;
   setShowRegister: (showRegister: boolean) => void;
   toggleLoginRegister: () => void;
-  newLogin: (username: string, email: string) => void;
+  newLogin: (email: string, username: string) => void;
 }
 
 const Login: React.FC<LoginProps> = (props) => {
@@ -16,7 +16,7 @@ const Login: React.FC<LoginProps> = (props) => {
   const [showPassword, setShowPassword] = useState(false);
   const formik = useFormik({
     initialValues: {
-      username: '',
+      email: '',
       password: '',
     },
     onSubmit: async (values) => {
@@ -39,7 +39,7 @@ const Login: React.FC<LoginProps> = (props) => {
       return;
     }
     const json = await res.json();
-    props.newLogin(json.username, json.email);
+    props.newLogin(json.email, json.username);
   };
 
   return (
@@ -53,12 +53,12 @@ const Login: React.FC<LoginProps> = (props) => {
         <input
           className={styles.inputField}
           type='text'
-          placeholder='Username'
-          name='username'
-          value={formik.values.username}
+          placeholder='E-Mail'
+          name='email'
+          value={formik.values.email}
           onChange={formik.handleChange}
-          autoFocus
           required
+          autoFocus
         />
         <div className={styles.inputWrapper}>
           <input

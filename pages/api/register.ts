@@ -20,14 +20,15 @@ const authProxy = async (
       return res.status(status).send(msg);
     }
 
-    const json: { username: string; sessionID: string } = await response.json();
+    const json: { sessionID: string; email: string } = await response.json();
+    console.log(json);
     const sessionID = json.sessionID;
     return res
       .setHeader(
         'set-cookie',
         `SESSIONID=${sessionID}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/; httponly`
       )
-      .json({ username: json.username });
+      .json({ email: json.email });
   } catch {
     return res.status(500).send('Something went wrong');
   }
