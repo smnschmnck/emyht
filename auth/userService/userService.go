@@ -14,42 +14,42 @@ import (
 )
 
 type ReqUser struct {
-	Username string `json:"username" validate:"required"`
 	Email    string `json:"email" validate:"required"`
+	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
 }
 
 type User struct {
-	Username string `json:"username"`
 	Email    string `json:"email"`
+	Username string `json:"username"`
 	Password string `json:"password"`
 	Salt     string `json:"salt"`
 	IsAdmin  bool   `json:"isAdmin"`
 }
 
-func GetUser(username string) (User, error) {
+func GetUser(email string) (User, error) {
 	conn, err := pgx.Connect(postgresHelper.PGConfig)
 	if err != nil {
 		return User{}, errors.New("INTERNAL ERROR")
 	}
 	defer conn.Close()
 
-	var dbUsername string
 	var dbEmail string
+	var dbUsername string
 	var dbUserPassword string
 	var dbUserSalt string
 	var dbUserIsAdmin bool
 
-	q := "select username, email, password, salt, is_admin from users where username=$1"
-	rows := conn.QueryRow(q, username)
-	err = rows.Scan(&dbUsername, &dbEmail, &dbUserPassword, &dbUserSalt, &dbUserIsAdmin)
+	q := "select email, username, password, salt, is_admin from users where email=$1"
+	rows := conn.QueryRow(q, email)
+	err = rows.Scan(&dbEmail, &dbUsername, &dbUserPassword, &dbUserSalt, &dbUserIsAdmin)
 	if err != nil {
 		return User{}, errors.New("USER NOT FOUND")
 	}
 
 	return User{
-		Username: dbUsername,
 		Email:    dbEmail,
+		Username: dbUsername,
 		Password: dbUserPassword,
 		Salt:     dbUserSalt,
 		IsAdmin:  dbUserIsAdmin,
@@ -71,7 +71,7 @@ func makeSalt(length int) (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
-func AddUser(username string, email string, password string) (User, error) {
+func AddUser(email string, username string, password string) (User, error) {
 	salt, err := makeSalt(16)
 	pepper := globals.Pepper
 	if err != nil {
@@ -84,15 +84,15 @@ func AddUser(username string, email string, password string) (User, error) {
 	}
 	defer conn.Close()
 
-	var dbUsername string
 	var dbEmail string
+	var dbUsername string
 	var dbUserPassword string
 	var dbUserSalt string
 	var dbUserIsAdmin bool
 
 	q := "INSERT INTO users VALUES ($1, $2, $3, $4, $5) RETURNING *;"
-	rows := conn.QueryRow(q, username, email, hash(password+salt+pepper), salt, false)
-	err = rows.Scan(&dbUsername, &dbEmail, &dbUserPassword, &dbUserSalt, &dbUserIsAdmin)
+	rows := conn.QueryRow(q, email, username, hash(password+salt+pepper), salt, false)
+	err = rows.Scan(&dbEmail, &dbUsername, &dbUserPassword, &dbUserSalt, &dbUserIsAdmin)
 
 	if err != nil {
 		errString := err.Error()
@@ -104,16 +104,16 @@ func AddUser(username string, email string, password string) (User, error) {
 	}
 
 	return User{
-		Username: dbUsername,
 		Email:    dbEmail,
+		Username: dbUsername,
 		Password: dbUserPassword,
 		Salt:     dbUserSalt,
 		IsAdmin:  dbUserIsAdmin,
 	}, nil
 }
 
-func CheckPW(username string, password string) (bool, error) {
-	user, err := GetUser(username)
+func CheckPW(email string, password string) (bool, error) {
+	user, err := GetUser(email)
 	if err != nil {
 		return false, err
 	}

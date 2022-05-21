@@ -21,7 +21,7 @@ var ctx = context.Background()
 
 type Session struct {
 	SessionID string `json:"sessionID"`
-	Username  string `json:"username"`
+	Email     string `json:"email"`
 }
 
 func getBearer(c *fiber.Ctx) (string, error) {
@@ -51,8 +51,8 @@ func GetUserBySession(c *fiber.Ctx) error {
 }
 
 type UserRes struct {
-	Username string `json:"username"`
 	Email    string `json:"email"`
+	Username string `json:"username"`
 	IsAdmin  bool   `json:"isAdmin"`
 }
 
@@ -63,22 +63,22 @@ type ResponseError struct {
 
 func getUserBySessionID(sessionID string) (UserRes, ResponseError) {
 	rdb := redis.NewClient(&redisHelper.RedisConfig)
-	username, err := rdb.Get(ctx, sessionID).Result()
+	email, err := rdb.Get(ctx, sessionID).Result()
 	if err != nil {
 		return UserRes{}, ResponseError{Msg: "USER NOT FOUND", StatusCode: 404}
 	}
-	rdb.Set(ctx, sessionID, username, 24*time.Hour)
-	user, err := userService.GetUser(username)
+	rdb.Set(ctx, sessionID, email, 24*time.Hour)
+	user, err := userService.GetUser(email)
 	if err != nil {
 		return UserRes{}, ResponseError{Msg: "INTERNAL ERROR", StatusCode: 500}
 	}
 
-	res := UserRes{Username: user.Username, Email: user.Email, IsAdmin: user.IsAdmin}
+	res := UserRes{Email: user.Email, Username: user.Username, IsAdmin: user.IsAdmin}
 	return res, ResponseError{StatusCode: 200}
 }
 
 type Credentials struct {
-	Username string `json:"username"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
@@ -90,7 +90,7 @@ func makeToken(length int) (string, error) {
 	return base64.StdEncoding.EncodeToString(bytes), nil
 }
 
-func startSession(c *fiber.Ctx, username string) (Session, error) {
+func startSession(c *fiber.Ctx, email string) (Session, error) {
 	token, err := makeToken(32)
 	if err != nil {
 		c.Status(500).SendString("SOMETHING WENT WRONG")
@@ -99,12 +99,12 @@ func startSession(c *fiber.Ctx, username string) (Session, error) {
 
 	rdb := redis.NewClient(&redisHelper.RedisConfig)
 
-	err = rdb.Set(ctx, token, username, 24*time.Hour).Err()
+	err = rdb.Set(ctx, token, email, 24*time.Hour).Err()
 
 	if err != nil {
 		return Session{}, err
 	}
-	tmpSession := Session{token, username}
+	tmpSession := Session{token, email}
 	return tmpSession, nil
 }
 
@@ -122,7 +122,7 @@ func Register(c *fiber.Ctx) error {
 		return c.Status(403).SendString("PASSWORD TOO SHORT")
 	}
 
-	_, err = userService.AddUser(reqUser.Username, reqUser.Email, reqUser.Password)
+	_, err = userService.AddUser(reqUser.Email, reqUser.Username, reqUser.Password)
 
 	if err != nil {
 		errString := err.Error()
@@ -131,7 +131,7 @@ func Register(c *fiber.Ctx) error {
 		}
 		return c.Status(500).SendString(errString)
 	}
-	session, err := startSession(c, reqUser.Username)
+	session, err := startSession(c, reqUser.Email)
 
 	if err != nil {
 		return c.Status(500).SendString("SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
@@ -150,12 +150,12 @@ func Authenticate(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(400).SendString("BAD REQUEST")
 	}
-	pwCorrect, err := userService.CheckPW(credentials.Username, credentials.Password)
+	pwCorrect, err := userService.CheckPW(credentials.Email, credentials.Password)
 	if err != nil {
 		return c.Status(500).SendString(err.Error())
 	}
 	if pwCorrect {
-		session, err := startSession(c, credentials.Username)
+		session, err := startSession(c, credentials.Email)
 		if err != nil {
 			return c.Status(500).SendString("SOMETHING WENT WRONG WHILE AUTHENTICATING")
 		}
