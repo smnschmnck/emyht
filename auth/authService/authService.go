@@ -122,7 +122,8 @@ func Register(c *fiber.Ctx) error {
 		return c.Status(403).SendString("PASSWORD TOO SHORT")
 	}
 
-	_, err = userService.AddUser(reqUser.Email, reqUser.Username, reqUser.Password)
+	lowerCaseEmail := strings.ToLower(reqUser.Email)
+	_, err = userService.AddUser(lowerCaseEmail, reqUser.Username, reqUser.Password)
 
 	if err != nil {
 		errString := err.Error()
@@ -131,7 +132,7 @@ func Register(c *fiber.Ctx) error {
 		}
 		return c.Status(500).SendString(errString)
 	}
-	session, err := startSession(c, reqUser.Email)
+	session, err := startSession(c, lowerCaseEmail)
 
 	if err != nil {
 		return c.Status(500).SendString("SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
@@ -150,12 +151,13 @@ func Authenticate(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(400).SendString("BAD REQUEST")
 	}
-	pwCorrect, err := userService.CheckPW(credentials.Email, credentials.Password)
+	lowerCaseEmail := strings.ToLower(credentials.Email)
+	pwCorrect, err := userService.CheckPW(lowerCaseEmail, credentials.Password)
 	if err != nil {
 		return c.Status(500).SendString(err.Error())
 	}
 	if pwCorrect {
-		session, err := startSession(c, credentials.Email)
+		session, err := startSession(c, lowerCaseEmail)
 		if err != nil {
 			return c.Status(500).SendString("SOMETHING WENT WRONG WHILE AUTHENTICATING")
 		}
