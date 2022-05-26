@@ -3,6 +3,7 @@ package authService
 import (
 	"chat/auth/userService"
 	"chat/dbHelpers/redisHelper"
+	"chat/emailService"
 	"context"
 	"crypto/rand"
 	"encoding/base64"
@@ -133,6 +134,12 @@ func Register(c *fiber.Ctx) error {
 		return c.Status(500).SendString(errString)
 	}
 	session, err := startSession(c, lowerCaseEmail)
+
+	if err != nil {
+		return c.Status(500).SendString("SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
+	}
+
+	err = emailService.SendVerificationEmail(reqUser.Username, reqUser.Email)
 
 	if err != nil {
 		return c.Status(500).SendString("SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
