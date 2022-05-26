@@ -1,3 +1,8 @@
+:root {
+  --accent: #05f;
+  --accent-lighter: #07f;
+}
+
 html,
 body {
   height: 100%;

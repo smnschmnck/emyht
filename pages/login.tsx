@@ -3,6 +3,8 @@ import type {
   GetServerSidePropsContext,
   NextPage,
 } from 'next';
+import logo from '../assets/images/logo-small.webp';
+import Image from 'next/image';
 import Router from 'next/router';
 import Head from 'next/head';
 import { useState } from 'react';
@@ -50,6 +52,11 @@ const LoginPage: NextPage = () => {
         {showRegister && <title>Register</title>}
         {showLogin && <title>Login</title>}
       </Head>
+      <header className={styles.mainHeader}>
+        <div className={styles.logoContainer}>
+          <Image src={logo} alt='emyht-logo'></Image>
+        </div>
+      </header>
       <div className={styles.main}>
         <div className={styles.content}>
           {showLogin && (

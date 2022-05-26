@@ -49,7 +49,7 @@
 
 .inputWrapper:focus-within {
   background-color: white;
-  border: 1px solid #06f;
+  border: 1px solid var(--accent);
 }
 
 .showPasswordButton {
@@ -98,7 +98,7 @@
 
 .inputField:focus {
   background-color: white;
-  border: 1px solid #06f;
+  border: 1px solid var(--accent);
 }
 
 .inputField::placeholder {
@@ -109,7 +109,7 @@
 .submitButton {
   margin: 0;
   border-radius: 0;
-  background-color: #06f;
+  background-color: var(--accent);
   height: 50px;
   color: white;
   border: none;
@@ -125,7 +125,7 @@
 }
 
 .submitButton:hover {
-  background-color: rgb(41, 126, 255);
+  background-color: var(--accent-lighter);
 }
 
 .switchButtonContainer {
@@ -141,7 +141,7 @@
   background-color: transparent;
   font-weight: bold;
   cursor: pointer;
-  color: #06f;
+  color: var(--accent);
 }
 
 .switchButton:hover {
