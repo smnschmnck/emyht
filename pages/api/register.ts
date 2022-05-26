@@ -21,7 +21,6 @@ const authProxy = async (
     }
 
     const json: { sessionID: string; email: string } = await response.json();
-    console.log(json);
     const sessionID = json.sessionID;
     return res
       .setHeader(
