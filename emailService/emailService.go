@@ -9,11 +9,14 @@ import (
 	"github.com/aws/aws-sdk-go/service/ses"
 )
 
-func populateHtmlTemplate(data any, templatePath string) string {
+func populateHtmlTemplate(data any, templatePath string) (string, error) {
 	tmpl := template.Must(template.ParseFiles(templatePath))
 	var tpl bytes.Buffer
-	tmpl.Execute(&tpl, data)
-	return tpl.String()
+	err := tmpl.Execute(&tpl, data)
+	if err != nil {
+		return "", err
+	}
+	return tpl.String(), nil
 }
 
 func sendEmail(subject string, recipientMail string, htmlBody string, textBody string) error {
@@ -75,13 +78,22 @@ func SendVerificationEmail(username string, recipientMail string) error {
 		VerifyLink string
 	}
 
-	subject := "Verify your E-Mail"
-	//TODO Add verify Link
-	templateData := VerifyPageData{Username: username, VerifyLink: "https://www.google.com"}
-	templatePath := "./emailService/htmlTemplates/mailVerifyLayout.html"
-	htmlBody := populateHtmlTemplate(templateData, templatePath)
+	const (
+		templatePath = "./emailService/htmlTemplates/mailVerifyLayout.html"
+		subject      = "Verify your E-Mail"
+	)
+
+	//TODO Add real verify Link
+	templateData := VerifyPageData{Username: username, VerifyLink: "https://example.com"}
+	htmlBody, err := populateHtmlTemplate(templateData, templatePath)
+	if err != nil {
+		return err
+	}
 
 	sendEmail(subject, recipientMail, htmlBody, textBody)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
