@@ -50,20 +50,22 @@ func GetUser(email string) (User, error) {
 	var dbUserPassword string
 	var dbUserSalt string
 	var dbUserIsAdmin bool
+	var dbUserEmailActive bool
 
-	q := "select email, username, password, salt, is_admin from users where email=$1"
+	q := "select email, username, password, salt, is_admin, email_active from users where email=$1"
 	rows := conn.QueryRow(q, email)
-	err = rows.Scan(&dbEmail, &dbUsername, &dbUserPassword, &dbUserSalt, &dbUserIsAdmin)
+	err = rows.Scan(&dbEmail, &dbUsername, &dbUserPassword, &dbUserSalt, &dbUserIsAdmin, &dbUserEmailActive)
 	if err != nil {
 		return User{}, errors.New("USER NOT FOUND")
 	}
 
 	return User{
-		Email:    dbEmail,
-		Username: dbUsername,
-		Password: dbUserPassword,
-		Salt:     dbUserSalt,
-		IsAdmin:  dbUserIsAdmin,
+		Email:       dbEmail,
+		Username:    dbUsername,
+		Password:    dbUserPassword,
+		Salt:        dbUserSalt,
+		IsAdmin:     dbUserIsAdmin,
+		EmailActive: dbUserEmailActive,
 	}, nil
 }
 

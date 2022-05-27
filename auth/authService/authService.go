@@ -52,9 +52,10 @@ func GetUserBySession(c *fiber.Ctx) error {
 }
 
 type UserRes struct {
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	IsAdmin  bool   `json:"isAdmin"`
+	Email       string `json:"email"`
+	Username    string `json:"username"`
+	IsAdmin     bool   `json:"isAdmin"`
+	EmailActive bool   `json:"emailActive"`
 }
 
 type ResponseError struct {
@@ -74,7 +75,7 @@ func getUserBySessionID(sessionID string) (UserRes, ResponseError) {
 		return UserRes{}, ResponseError{Msg: "INTERNAL ERROR", StatusCode: 500}
 	}
 
-	res := UserRes{Email: user.Email, Username: user.Username, IsAdmin: user.IsAdmin}
+	res := UserRes{Email: user.Email, Username: user.Username, IsAdmin: user.IsAdmin, EmailActive: user.EmailActive}
 	return res, ResponseError{StatusCode: 200}
 }
 
