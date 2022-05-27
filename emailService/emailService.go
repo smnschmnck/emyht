@@ -88,7 +88,6 @@ func SendVerificationEmail(username string, recipientMail string, token string) 
 	if frontendHost == "" {
 		panic("NO FRONTEND HOST IN .ENV!")
 	}
-	//TODO Add real verify Link
 	url := frontendHost + "/verifyEmail/" + token
 	templateData := VerifyPageData{Username: username, VerifyLink: url}
 	htmlBody, err := populateHtmlTemplate(templateData, templatePath)

@@ -2,6 +2,7 @@ package authService
 
 import (
 	"chat/auth/userService"
+	"chat/dbHelpers/postgresHelper"
 	"chat/dbHelpers/redisHelper"
 	"chat/emailService"
 	"context"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/jackc/pgx"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -147,6 +149,44 @@ func Register(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(session)
+}
+
+func VerifyEmail(c *fiber.Ctx) error {
+	type EmailToken struct {
+		Token string `json:"emailToken"`
+	}
+	var emailToken EmailToken
+	err := c.BodyParser(&emailToken)
+	if err != nil {
+		c.Status(400).SendString("BAD REQUEST")
+	}
+
+	conn, err := pgx.Connect(postgresHelper.PGConfig)
+	if err != nil {
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+	defer conn.Close()
+
+	selectQuery := "SELECT email_active FROM users WHERE email_token=$1"
+	rows := conn.QueryRow(selectQuery, emailToken.Token)
+	var dbUserEmailActive bool
+	err = rows.Scan(&dbUserEmailActive)
+	if err != nil {
+		return c.Status(404).SendString("COULD NOT FIND E-MAIL ADDRESS MATHCHING THE SUPPLIED LINK")
+	}
+	if dbUserEmailActive {
+		return c.Status(409).SendString("EMAIL ALREADY VERIFIED")
+	}
+
+	insertQuery := "UPDATE users SET email_active=true WHERE email_token=$1 RETURNING email_active"
+	insertedRows := conn.QueryRow(insertQuery, emailToken.Token)
+	var active bool
+	err = insertedRows.Scan(&active)
+	if err != nil || !active {
+		return c.Status(500).SendString("SOMETHING WENT WRONG WHILE VERIYFING YOUR E-MAIL")
+	}
+
+	return c.SendString("EMAIL VERIFIED SUCCESSFULLY")
 }
 
 func Authenticate(c *fiber.Ctx) error {

@@ -47,6 +47,7 @@ func handleRequest() {
 	app.Get("/ws", websocket.New(wsHandler))
 	app.Get("/user", authService.GetUserBySession)
 	app.Post("/register", authService.Register)
+	app.Post("/verifyEmail", authService.VerifyEmail)
 	app.Post("/login", authService.Authenticate)
 	app.Get("/logout", authService.Logout)
 	app.Listen(PORT)
