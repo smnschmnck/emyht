@@ -8,7 +8,10 @@ require (
 	github.com/joho/godotenv v1.4.0
 )
 
-require github.com/jmespath/go-jmespath v0.4.0 // indirect
+require (
+	github.com/google/uuid v1.3.0 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
+)
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect

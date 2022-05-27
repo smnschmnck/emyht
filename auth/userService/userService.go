@@ -1,15 +1,16 @@
 package userService
 
 import (
-	"chat/auth/authHelpers/globals"
 	"chat/dbHelpers/postgresHelper"
 	"crypto/rand"
 	"crypto/sha512"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx"
 )
 
@@ -20,11 +21,21 @@ type ReqUser struct {
 }
 
 type User struct {
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Salt     string `json:"salt"`
-	IsAdmin  bool   `json:"isAdmin"`
+	Email       string `json:"email"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	Salt        string `json:"salt"`
+	IsAdmin     bool   `json:"isAdmin"`
+	EmailActive bool   `json:"emailActive"`
+	EmailToken  string `json:"emailToken"`
+}
+
+func getPepper() string {
+	pepper := os.Getenv("PEPPER")
+	if pepper == "" {
+		panic("NO PEPPER")
+	}
+	return pepper
 }
 
 func GetUser(email string) (User, error) {
@@ -56,15 +67,15 @@ func GetUser(email string) (User, error) {
 	}, nil
 }
 
-func hash(s string) string {
+func hashPW(password string, salt string, pepper string) string {
 	h := sha512.New()
-	h.Write([]byte(s))
+	h.Write([]byte(password + salt + pepper))
 	sum := h.Sum(nil)
 	return hex.EncodeToString(sum)
 }
 
-func makeSalt(length int) (string, error) {
-	bytes := make([]byte, length)
+func makeSalt() (string, error) {
+	bytes := make([]byte, 16)
 	if _, err := rand.Read(bytes); err != nil {
 		return "", err
 	}
@@ -72,8 +83,7 @@ func makeSalt(length int) (string, error) {
 }
 
 func AddUser(email string, username string, password string) (User, error) {
-	salt, err := makeSalt(16)
-	pepper := globals.Pepper
+	salt, err := makeSalt()
 	if err != nil {
 		return User{}, errors.New("UNEXPECTED ERROR")
 	}
@@ -89,10 +99,15 @@ func AddUser(email string, username string, password string) (User, error) {
 	var dbUserPassword string
 	var dbUserSalt string
 	var dbUserIsAdmin bool
+	var dbUserEmailActive bool
+	var dbUserEmailToken string
 
-	q := "INSERT INTO users VALUES ($1, $2, $3, $4, $5) RETURNING *;"
-	rows := conn.QueryRow(q, email, username, hash(password+salt+pepper), salt, false)
-	err = rows.Scan(&dbEmail, &dbUsername, &dbUserPassword, &dbUserSalt, &dbUserIsAdmin)
+	pepper := getPepper()
+	emailToken := uuid.New().String()
+	hashedPW := hashPW(password, salt, pepper)
+	q := "INSERT INTO users(email, username, password, salt, is_admin, email_active, email_token) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;"
+	rows := conn.QueryRow(q, email, username, hashedPW, salt, false, false, emailToken)
+	err = rows.Scan(&dbEmail, &dbUsername, &dbUserPassword, &dbUserSalt, &dbUserIsAdmin, &dbUserEmailActive, &dbUserEmailToken)
 
 	if err != nil {
 		errString := err.Error()
@@ -104,11 +119,13 @@ func AddUser(email string, username string, password string) (User, error) {
 	}
 
 	return User{
-		Email:    dbEmail,
-		Username: dbUsername,
-		Password: dbUserPassword,
-		Salt:     dbUserSalt,
-		IsAdmin:  dbUserIsAdmin,
+		Email:       dbEmail,
+		Username:    dbUsername,
+		Password:    dbUserPassword,
+		Salt:        dbUserSalt,
+		IsAdmin:     dbUserIsAdmin,
+		EmailActive: dbUserEmailActive,
+		EmailToken:  dbUserEmailToken,
 	}, nil
 }
 
@@ -117,7 +134,7 @@ func CheckPW(email string, password string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	pepper := globals.Pepper
-	hashedPW := hash(password + user.Salt + pepper)
+	pepper := getPepper()
+	hashedPW := hashPW(password, user.Salt, pepper)
 	return hashedPW == user.Password, nil
 }

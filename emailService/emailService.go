@@ -3,6 +3,7 @@ package emailService
 import (
 	"bytes"
 	"html/template"
+	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -70,7 +71,7 @@ func sendEmail(subject string, recipientMail string, htmlBody string, textBody s
 	return nil
 }
 
-func SendVerificationEmail(username string, recipientMail string) error {
+func SendVerificationEmail(username string, recipientMail string, token string) error {
 	textBody := "Hey" + username + "! Use the following link to verify your E-Mail address and start using emyht: "
 
 	type VerifyPageData struct {
@@ -83,8 +84,13 @@ func SendVerificationEmail(username string, recipientMail string) error {
 		subject      = "Verify your E-Mail"
 	)
 
+	frontendHost := os.Getenv("FRONTEND_HOST")
+	if frontendHost == "" {
+		panic("NO FRONTEND HOST IN .ENV!")
+	}
 	//TODO Add real verify Link
-	templateData := VerifyPageData{Username: username, VerifyLink: "https://example.com"}
+	url := frontendHost + "/verifyEmail/" + token
+	templateData := VerifyPageData{Username: username, VerifyLink: url}
 	htmlBody, err := populateHtmlTemplate(templateData, templatePath)
 	if err != nil {
 		return err

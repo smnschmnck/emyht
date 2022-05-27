@@ -83,8 +83,8 @@ type Credentials struct {
 	Password string `json:"password"`
 }
 
-func makeToken(length int) (string, error) {
-	bytes := make([]byte, length)
+func makeToken() (string, error) {
+	bytes := make([]byte, 32)
 	if _, err := rand.Read(bytes); err != nil {
 		return "", err
 	}
@@ -92,7 +92,7 @@ func makeToken(length int) (string, error) {
 }
 
 func startSession(c *fiber.Ctx, email string) (Session, error) {
-	token, err := makeToken(32)
+	token, err := makeToken()
 	if err != nil {
 		c.Status(500).SendString("SOMETHING WENT WRONG")
 		return Session{}, err
@@ -124,7 +124,7 @@ func Register(c *fiber.Ctx) error {
 	}
 
 	lowerCaseEmail := strings.ToLower(reqUser.Email)
-	_, err = userService.AddUser(lowerCaseEmail, reqUser.Username, reqUser.Password)
+	user, err := userService.AddUser(lowerCaseEmail, reqUser.Username, reqUser.Password)
 
 	if err != nil {
 		errString := err.Error()
@@ -139,7 +139,7 @@ func Register(c *fiber.Ctx) error {
 		return c.Status(500).SendString("SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
 	}
 
-	err = emailService.SendVerificationEmail(reqUser.Username, reqUser.Email)
+	err = emailService.SendVerificationEmail(reqUser.Username, reqUser.Email, user.EmailToken)
 
 	if err != nil {
 		return c.Status(500).SendString("SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
