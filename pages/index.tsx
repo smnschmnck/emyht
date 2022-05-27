@@ -42,7 +42,7 @@ const HomePage: NextPage<LoginProps> = (props) => {
   return (
     <>
       <Head>
-        <title>Home</title>
+        <title>emyht</title>
       </Head>
       <div>
         <h1>Home</h1>
