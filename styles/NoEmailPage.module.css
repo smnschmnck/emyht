@@ -1,0 +1,38 @@
+.content {
+  padding: 50px;
+  width: 100%;
+  height: min-content;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  min-width: 250px;
+}
+
+.info {
+  color: gray;
+  max-width: 50ch;
+}
+
+.emailEmphasis {
+  color: #55b0ff;
+}
+
+.button {
+  color: var(--accent);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.button:hover {
+  text-decoration: underline;
+}
