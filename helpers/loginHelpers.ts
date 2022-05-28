@@ -26,6 +26,5 @@ export const getLoginData = async (cookies: NextApiRequestCookies) => {
 
   const json: GetUserResponse = await resp.json();
 
-  console.log(json);
   return json;
 };
