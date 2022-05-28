@@ -2,7 +2,7 @@ import { NextPage } from 'next';
 import Head from 'next/head';
 import DefaultLayout from '../components/DefaultLayout';
 
-const NoEmailPage: NextPage = ({}) => {
+const NoEmailPage: NextPage = () => {
   return (
     <>
       <Head>
