@@ -4,14 +4,14 @@
   height: min-content;
   display: flex;
   justify-content: center;
-  align-content: center;
+  align-items: center;
+  height: 80%;
 }
 
 .main {
   display: flex;
   flex-direction: column;
   text-align: center;
-  justify-content: center;
   align-items: center;
   width: 50%;
   min-width: 250px;
@@ -19,7 +19,6 @@
 
 .info {
   color: gray;
-  max-width: 50ch;
 }
 
 .emailEmphasis {

@@ -1,0 +1,22 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-width: 250px;
+  min-height: min-content;
+}
+
+.emailEmphasis {
+  color: #55b0ff;
+}
+
+.heading {
+  margin: 0;
+}
+
+.info {
+  max-width: 35ch;
+  color: gray;
+}
