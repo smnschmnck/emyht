@@ -67,25 +67,6 @@ const Login: React.FC<LoginProps> = (props) => {
           required={true}
           autoFocus={false}
         />
-        {/* <div className={styles.inputWrapper}>
-          <input
-            className={styles.innerInput}
-            type={showPassword ? 'text' : 'password'}
-            placeholder='Password'
-            name='password'
-            value={formik.values.password}
-            onChange={formik.handleChange}
-            required
-          />
-          <button
-            className={
-              showPassword
-                ? styles.hidePasswordButton
-                : styles.showPasswordButton
-            }
-            type='button'
-            onClick={() => setShowPassword(!showPassword)}></button>
-        </div>*/}
         <button type='submit' className={styles.submitButton}>
           Log In
         </button>
