@@ -39,6 +39,7 @@ input {
 }
 
 a {
+  font-size: 12px;
   -webkit-tap-highlight-color: transparent;
   font-family: 'Space Grotesk', sans-serif;
 }

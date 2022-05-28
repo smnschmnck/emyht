@@ -31,16 +31,15 @@
   transition: 0.2s;
 }
 
+.submitButton:hover {
+  background-color: var(--accent-lighter);
+}
+
 .errorP {
   font-weight: bold;
   text-align: center;
   color: red;
 }
-
-.submitButton:hover {
-  background-color: var(--accent-lighter);
-}
-
 .switchButtonContainer {
   margin-top: 10px;
   text-align: center;

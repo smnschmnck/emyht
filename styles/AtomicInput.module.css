@@ -10,6 +10,7 @@
   padding-right: 10px;
   height: 50px;
   font-weight: bold;
+  width: 100%;
 }
 
 .inputField:focus {
@@ -36,6 +37,7 @@
   padding-left: 10px;
   padding-right: 10px;
   height: 50px;
+  width: 100%;
 }
 
 .innerInput {
