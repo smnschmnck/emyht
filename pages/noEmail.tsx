@@ -1,5 +1,6 @@
 import { NextPage } from 'next';
 import Head from 'next/head';
+import DefaultLayout from '../components/DefaultLayout';
 
 const NoEmailPage: NextPage = ({}) => {
   return (
@@ -7,9 +8,11 @@ const NoEmailPage: NextPage = ({}) => {
       <Head>
         <title>Verify your E-Mail</title>
       </Head>
-      <div>
-        <h1>Verify your E-Mail</h1>
-      </div>
+      <DefaultLayout>
+        <div>
+          <h1>Verify your E-Mail</h1>
+        </div>
+      </DefaultLayout>
     </>
   );
 };

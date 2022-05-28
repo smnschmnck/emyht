@@ -15,6 +15,10 @@
   margin: 0;
 }
 
+.heading {
+  color: black;
+}
+
 .inputWrapper {
   display: flex;
   justify-content: space-between;

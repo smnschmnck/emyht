@@ -4,17 +4,18 @@ import type {
   NextPage,
 } from 'next';
 import Head from 'next/head';
+import DefaultLayout from '../components/DefaultLayout';
 import Greeting from '../components/Greeting';
 import Logout from '../components/Logout';
 import { getLoginData } from '../helpers/loginHelpers';
 
-interface LoginProps {
+interface UserProps {
   email: string;
   username: string;
   isAdmin: boolean;
 }
 
-export const getServerSideProps: GetServerSideProps<LoginProps | {}> = async (
+export const getServerSideProps: GetServerSideProps<UserProps | {}> = async (
   context: GetServerSidePropsContext
 ) => {
   const cookies = context.req.cookies;
@@ -46,17 +47,19 @@ export const getServerSideProps: GetServerSideProps<LoginProps | {}> = async (
   }
 };
 
-const HomePage: NextPage<LoginProps> = (props) => {
+const HomePage: NextPage<UserProps> = (props) => {
   return (
     <>
       <Head>
         <title>emyht</title>
       </Head>
-      <div>
-        <h1>Home</h1>
-        <Greeting email={props.email} username={props.username} />
-        <Logout></Logout>
-      </div>
+      <DefaultLayout>
+        <div>
+          <h1>Home</h1>
+          <Greeting email={props.email} username={props.username} />
+          <Logout></Logout>
+        </div>
+      </DefaultLayout>
     </>
   );
 };

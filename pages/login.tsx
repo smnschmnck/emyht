@@ -3,8 +3,6 @@ import type {
   GetServerSidePropsContext,
   NextPage,
 } from 'next';
-import logo from '../assets/images/logo-small.webp';
-import Image from 'next/image';
 import Router from 'next/router';
 import Head from 'next/head';
 import { useState } from 'react';
@@ -12,6 +10,7 @@ import Login from '../components/Login';
 import Register from '../components/Register';
 import { getLoginData } from '../helpers/loginHelpers';
 import styles from '../styles/LoginPage.module.css';
+import DefaultLayout from '../components/DefaultLayout';
 
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
@@ -52,35 +51,32 @@ const LoginPage: NextPage = () => {
         {showRegister && <title>Register</title>}
         {showLogin && <title>Login</title>}
       </Head>
-      <header className={styles.mainHeader}>
-        <div className={styles.logoContainer}>
-          <Image src={logo} alt='emyht-logo'></Image>
+      <DefaultLayout>
+        <div className={styles.main}>
+          <div className={styles.content}>
+            {showLogin && (
+              <Login
+                showLogin={showLogin}
+                setShowLogin={setShowLogin}
+                showRegister={showRegister}
+                setShowRegister={setShowRegister}
+                toggleLoginRegister={toggleLoginRegister}
+                newLogin={newLogin}
+              />
+            )}
+            {showRegister && (
+              <Register
+                showLogin={showLogin}
+                setShowLogin={setShowLogin}
+                showRegister={showRegister}
+                setShowRegister={setShowRegister}
+                toggleLoginRegister={toggleLoginRegister}
+                newLogin={newLogin}
+              />
+            )}
+          </div>
         </div>
-      </header>
-      <div className={styles.main}>
-        <div className={styles.content}>
-          {showLogin && (
-            <Login
-              showLogin={showLogin}
-              setShowLogin={setShowLogin}
-              showRegister={showRegister}
-              setShowRegister={setShowRegister}
-              toggleLoginRegister={toggleLoginRegister}
-              newLogin={newLogin}
-            />
-          )}
-          {showRegister && (
-            <Register
-              showLogin={showLogin}
-              setShowLogin={setShowLogin}
-              showRegister={showRegister}
-              setShowRegister={setShowRegister}
-              toggleLoginRegister={toggleLoginRegister}
-              newLogin={newLogin}
-            />
-          )}
-        </div>
-      </div>
+      </DefaultLayout>
     </>
   );
 };

@@ -1,6 +1,7 @@
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
+import DefaultLayout from '../../components/DefaultLayout';
 import { BACKEND_HOST } from '../../helpers/globals';
 
 interface EmailVerificationPageProps {
@@ -36,20 +37,13 @@ const EmailVerificationPage: NextPage<EmailVerificationPageProps> = ({
       <Head>
         <title>E-Mail Verification</title>
       </Head>
-      <div>
-        {verificationSuccess && (
-          <div>
-            <h1>E-Mail succesfully verified</h1>
-            <Link href={'/'}>Home</Link>
-          </div>
-        )}
-        {!verificationSuccess && (
-          <div>
-            <h1>{resText}</h1>
-            <Link href={'/'}>Home</Link>
-          </div>
-        )}
-      </div>
+      <DefaultLayout>
+        <div>
+          {verificationSuccess && <h1>E-Mail succesfully verified</h1>}
+          {!verificationSuccess && <h1>{resText}</h1>}
+          <Link href={'/'}>Home</Link>
+        </div>
+      </DefaultLayout>
     </>
   );
 };
