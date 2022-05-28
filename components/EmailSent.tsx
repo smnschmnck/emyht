@@ -1,5 +1,5 @@
-import { emit } from 'process';
 import styles from '../styles/EmailSentComponent.module.css';
+import Link from 'next/link';
 
 const EmailSent: React.FC<{ email: string }> = ({ email }) => {
   return (
@@ -11,6 +11,9 @@ const EmailSent: React.FC<{ email: string }> = ({ email }) => {
         <br />
         Please open the E-Mail and click on the link.
       </p>
+      <Link href={'/'}>
+        <a className={styles.homeButton}>Go back to Home</a>
+      </Link>
     </div>
   );
 };
