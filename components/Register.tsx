@@ -1,6 +1,7 @@
 import { useFormik } from 'formik';
 import { useState } from 'react';
 import styles from '../styles/LoginRegisterComponent.module.css';
+import { Input, PasswordInput } from './atomic/Input';
 
 interface RegisterProps {
   showLogin: boolean;
@@ -13,7 +14,6 @@ interface RegisterProps {
 
 const Register: React.FC<RegisterProps> = (props) => {
   const [loginError, setLoginError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [passwordRepeat, setPasswordReapeat] = useState('');
   const formik = useFormik({
     initialValues: {
@@ -60,63 +60,36 @@ const Register: React.FC<RegisterProps> = (props) => {
         onSubmit={formik.handleSubmit}
         className={styles.form}
         autoComplete='off'>
-        <input
-          className={styles.inputField}
-          type='text'
-          placeholder='E-Mail'
-          name='email'
+        <Input
+          type={'text'}
+          placeholder={'E-Mail'}
+          name={'email'}
           value={formik.values.email}
           onChange={formik.handleChange}
-          required
-          autoFocus
+          required={false}
+          autoFocus={false}
         />
-        <input
-          className={styles.inputField}
-          type='text'
-          placeholder='Username'
-          name='username'
+        <Input
+          type={'text'}
+          placeholder={'Username'}
+          name={'username'}
           value={formik.values.username}
           onChange={formik.handleChange}
-          required
+          required={false}
         />
-        <div className={styles.inputWrapper}>
-          <input
-            className={styles.innerInput}
-            type={showPassword ? 'text' : 'password'}
-            placeholder='Password'
-            name='password'
-            value={formik.values.password}
-            onChange={formik.handleChange}
-            required
-          />
-          <button
-            className={
-              showPassword
-                ? styles.hidePasswordButton
-                : styles.showPasswordButton
-            }
-            type='button'
-            onClick={() => setShowPassword(!showPassword)}></button>
-        </div>
-        <div className={styles.inputWrapper}>
-          <input
-            className={styles.innerInput}
-            type={showPassword ? 'text' : 'password'}
-            placeholder='Repeat Password'
-            name='passwordRepeat'
-            value={passwordRepeat}
-            onChange={(e) => setPasswordReapeat(e.target.value)}
-            required
-          />
-          <button
-            className={
-              showPassword
-                ? styles.hidePasswordButton
-                : styles.showPasswordButton
-            }
-            type='button'
-            onClick={() => setShowPassword(!showPassword)}></button>
-        </div>
+        <PasswordInput
+          placeholder={'Password'}
+          name={'password'}
+          value={formik.values.password}
+          onChange={formik.handleChange}
+          required={true}
+        />
+        <PasswordInput
+          placeholder={'Repeat Password'}
+          value={passwordRepeat}
+          onChange={(e) => setPasswordReapeat(e.target.value)}
+          required={true}
+        />
         <button type='submit' className={styles.submitButton}>
           Register
         </button>

@@ -1,5 +1,6 @@
 import { useFormik } from 'formik';
 import { useState } from 'react';
+import { Input, PasswordInput } from './atomic/Input';
 import styles from '../styles/LoginRegisterComponent.module.css';
 
 interface LoginProps {
@@ -13,7 +14,6 @@ interface LoginProps {
 
 const Login: React.FC<LoginProps> = (props) => {
   const [loginError, setLoginError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -50,17 +50,24 @@ const Login: React.FC<LoginProps> = (props) => {
         onSubmit={formik.handleSubmit}
         autoComplete='off'
         className={styles.form}>
-        <input
-          className={styles.inputField}
-          type='text'
-          placeholder='E-Mail'
-          name='email'
+        <Input
+          type={'text'}
+          placeholder={'E-Mail'}
+          name={'email'}
           value={formik.values.email}
           onChange={formik.handleChange}
-          required
-          autoFocus
+          required={false}
+          autoFocus={false}
         />
-        <div className={styles.inputWrapper}>
+        <PasswordInput
+          placeholder={'Password'}
+          name={'password'}
+          value={formik.values.password}
+          onChange={formik.handleChange}
+          required={true}
+          autoFocus={false}
+        />
+        {/* <div className={styles.inputWrapper}>
           <input
             className={styles.innerInput}
             type={showPassword ? 'text' : 'password'}
@@ -78,7 +85,7 @@ const Login: React.FC<LoginProps> = (props) => {
             }
             type='button'
             onClick={() => setShowPassword(!showPassword)}></button>
-        </div>
+        </div>*/}
         <button type='submit' className={styles.submitButton}>
           Log In
         </button>
