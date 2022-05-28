@@ -44,7 +44,7 @@ const Login: React.FC<LoginProps> = (props) => {
 
   return (
     <div className={styles.content}>
-      <h1>Login</h1>
+      <h1 className={styles.heading}>Login</h1>
       <form
         onChange={() => setLoginError('')}
         onSubmit={formik.handleSubmit}

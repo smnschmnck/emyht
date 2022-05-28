@@ -54,7 +54,7 @@ const Register: React.FC<RegisterProps> = (props) => {
 
   return (
     <div className={styles.content}>
-      <h1>Register</h1>
+      <h1 className={styles.heading}>Register</h1>
       <form
         onChange={() => setLoginError('')}
         onSubmit={formik.handleSubmit}
