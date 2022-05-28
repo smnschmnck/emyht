@@ -20,6 +20,14 @@ export const getServerSideProps: GetServerSideProps<LoginProps | {}> = async (
   const cookies = context.req.cookies;
   try {
     const getUserResponse = await getLoginData(cookies);
+    if (!getUserResponse.emailActive) {
+      const res = context.res;
+      res.writeHead(302, { Location: '/noEmail' });
+      res.end();
+      return {
+        props: {},
+      };
+    }
     return {
       props: {
         email: getUserResponse.email,

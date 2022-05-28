@@ -6,6 +6,7 @@ interface GetUserResponse {
   username: string;
   email: string;
   isAdmin: boolean;
+  emailActive: boolean;
 }
 
 export const getLoginData = async (cookies: NextApiRequestCookies) => {
@@ -25,5 +26,6 @@ export const getLoginData = async (cookies: NextApiRequestCookies) => {
 
   const json: GetUserResponse = await resp.json();
 
+  console.log(json);
   return json;
 };
