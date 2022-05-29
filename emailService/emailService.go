@@ -2,6 +2,7 @@ package emailService
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 	"os"
 
@@ -95,8 +96,9 @@ func SendVerificationEmail(username string, recipientMail string, token string) 
 		return err
 	}
 
-	sendEmail(subject, recipientMail, htmlBody, textBody)
+	err = sendEmail(subject, recipientMail, htmlBody, textBody)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
