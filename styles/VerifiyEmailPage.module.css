@@ -1,0 +1,39 @@
+.content {
+  padding: 50px;
+  width: 100%;
+  height: min-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80%;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  width: 50%;
+  min-width: 250px;
+}
+
+.startLink {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  min-width: 250px;
+  margin: 0;
+  border-radius: 0;
+  background-color: var(--accent);
+  height: 50px;
+  color: white;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.startLink:hover {
+  background-color: var(--accent-lighter);
+}
