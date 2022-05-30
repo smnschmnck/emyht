@@ -9,6 +9,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -149,6 +150,29 @@ func Register(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(session)
+}
+
+func ResendVerificationEmail(c *fiber.Ctx) error {
+	sessionID, responseErr := getBearer(c)
+	if responseErr != nil {
+		return c.Status(401).SendString("NOT AUTHORIZED")
+	}
+
+	user, respErr := getUserBySessionID(sessionID)
+
+	if respErr.StatusCode >= 300 {
+		return c.Status(respErr.StatusCode).SendString(respErr.Msg)
+	}
+	emailToken, err := userService.RenewEmailToken(user.Email)
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(500).SendString("ERROR WHILE SENDING EMAIL")
+	}
+	err = emailService.SendVerificationEmail(user.Username, user.Email, emailToken)
+	if err != nil {
+		return c.Status(500).SendString("ERROR WHILE SENDING EMAIL")
+	}
+	return c.SendString("SUCCESS")
 }
 
 func VerifyEmail(c *fiber.Ctx) error {

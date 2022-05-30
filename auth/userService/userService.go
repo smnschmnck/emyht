@@ -131,6 +131,24 @@ func AddUser(email string, username string, password string) (User, error) {
 	}, nil
 }
 
+func RenewEmailToken(email string) (string, error) {
+	conn, err := pgx.Connect(postgresHelper.PGConfig)
+	if err != nil {
+		return "", err
+	}
+	defer conn.Close()
+
+	emailToken := uuid.New().String()
+	var dbEmailToken string
+	q := "UPDATE users SET email_token=$1 WHERE email=$2 RETURNING email_token"
+	rows := conn.QueryRow(q, emailToken, email)
+	err = rows.Scan(&dbEmailToken)
+	if err != nil {
+		return "", err
+	}
+	return dbEmailToken, nil
+}
+
 func CheckPW(email string, password string) (bool, error) {
 	user, err := GetUser(email)
 	if err != nil {
