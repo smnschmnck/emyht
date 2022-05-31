@@ -66,8 +66,8 @@ const Register: React.FC<RegisterProps> = (props) => {
           name={'email'}
           value={formik.values.email}
           onChange={formik.handleChange}
-          required={false}
-          autoFocus={false}
+          required={true}
+          autoFocus={true}
         />
         <Input
           type={'text'}
@@ -75,7 +75,7 @@ const Register: React.FC<RegisterProps> = (props) => {
           name={'username'}
           value={formik.values.username}
           onChange={formik.handleChange}
-          required={false}
+          required={true}
         />
         <PasswordInput
           placeholder={'Password'}

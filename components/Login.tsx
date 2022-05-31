@@ -56,8 +56,8 @@ const Login: React.FC<LoginProps> = (props) => {
           name={'email'}
           value={formik.values.email}
           onChange={formik.handleChange}
-          required={false}
-          autoFocus={false}
+          required={true}
+          autoFocus={true}
         />
         <PasswordInput
           placeholder={'Password'}
