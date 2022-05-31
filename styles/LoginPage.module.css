@@ -1,11 +1,11 @@
 .main {
   height: 70%;
   display: flex;
-  justify-content: flex-start;
-  background: url(../assets/images/login-bg.webp);
+  justify-content: flex-end;
+  background: url(../assets/images/login-bg.svg);
   background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
+  background-size: 30%;
+  background-position: 15%;
 }
 
 .content {
