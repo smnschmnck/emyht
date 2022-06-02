@@ -7,10 +7,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(401).send('NOT AUTHORIZED');
   }
 
-  const resp = await fetch(BACKEND_HOST + '/logout', {
-    headers: { authorization: `Bearer ${sessionID}` },
-  });
-  if (!resp.ok) {
+  try {
+    const resp = await fetch(BACKEND_HOST + '/logout', {
+      headers: { authorization: `Bearer ${sessionID}` },
+    });
+    if (!resp.ok) {
+      return res.status(500).send('SOMETHING WENT WRONG');
+    }
+  } catch {
     return res.status(500).send('SOMETHING WENT WRONG');
   }
 
