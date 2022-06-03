@@ -198,12 +198,9 @@ func VerifyEmail(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(404).SendString("COULD NOT FIND E-MAIL ADDRESS MATHCHING THE SUPPLIED LINK")
 	}
-	if dbUserEmailActive {
-		return c.Status(409).SendString("EMAIL ALREADY VERIFIED")
-	}
 
-	insertQuery := "UPDATE users SET email_active=true WHERE email_token=$1 RETURNING email_active"
-	insertedRows := conn.QueryRow(insertQuery, emailToken.Token)
+	insertQuery := "UPDATE users SET email_active=true, email_token=$1 WHERE email_token=$2 RETURNING email_active"
+	insertedRows := conn.QueryRow(insertQuery, nil, emailToken.Token)
 	var active bool
 	err = insertedRows.Scan(&active)
 	if err != nil || !active {
