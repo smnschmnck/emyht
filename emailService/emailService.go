@@ -73,7 +73,9 @@ func sendEmail(subject string, recipientMail string, htmlBody string, textBody s
 }
 
 func SendVerificationEmail(username string, recipientMail string, token string) error {
-	textBody := "Hey" + username + "! Use the following link to verify your E-Mail address and start using emyht: "
+	textBody := "Hey" +
+		username +
+		"! Use the following link to verify your E-Mail address and start using emyht: "
 
 	type VerifyPageData struct {
 		Username   string
@@ -106,7 +108,9 @@ func SendVerificationEmail(username string, recipientMail string, token string) 
 }
 
 func SendVerifyEmailChangeEmail(username string, recipientMail string, token string) error {
-	textBody := "Hey" + username + "! Use the following link to confirm your new E-Mail address and start using emyht: "
+	textBody := "Hey" +
+		username +
+		"! Use the following link to confirm your new E-Mail address and start using emyht: "
 
 	type VerifyPageData struct {
 		Username   string

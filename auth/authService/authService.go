@@ -50,7 +50,11 @@ func GetUserBySession(c *fiber.Ctx) error {
 	if respErr.StatusCode >= 300 {
 		return c.Status(respErr.StatusCode).SendString(respErr.Msg)
 	}
-	res := UserRes{Email: user.Email, Username: user.Username, IsAdmin: user.IsAdmin, EmailActive: user.EmailActive}
+	res := UserRes{
+		Email:       user.Email,
+		Username:    user.Username,
+		IsAdmin:     user.IsAdmin,
+		EmailActive: user.EmailActive}
 	return c.JSON(res)
 }
 
@@ -263,7 +267,10 @@ func ChangeEmail(c *fiber.Ctx) error {
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 	defer conn.Close()
-	insertQuery := "INSERT INTO change_email(uuid, new_email, confirmation_token) VALUES ($1, $2, $3) ON CONFLICT(uuid) DO UPDATE SET new_email=$2, confirmation_token=$3 RETURNING confirmation_token, new_email"
+	insertQuery := "INSERT INTO change_email(uuid, new_email, confirmation_token) " +
+		"VALUES ($1, $2, $3) " +
+		"ON CONFLICT(uuid) DO UPDATE SET new_email=$2, confirmation_token=$3 " +
+		"RETURNING confirmation_token, new_email"
 	confirmationToken := uuid.New().String()
 	insertedRows := conn.QueryRow(insertQuery, user.Uuid, changeReq.NewEmail, confirmationToken)
 	var dbConfirmationToken string

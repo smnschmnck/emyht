@@ -56,7 +56,14 @@ func GetUser(email string) (User, error) {
 
 	q := "select uuid, email, username, password, salt, is_admin, email_active from users where email=$1"
 	rows := conn.QueryRow(q, email)
-	err = rows.Scan(&dbUUID, &dbEmail, &dbUsername, &dbUserPassword, &dbUserSalt, &dbUserIsAdmin, &dbUserEmailActive)
+	err = rows.Scan(
+		&dbUUID,
+		&dbEmail,
+		&dbUsername,
+		&dbUserPassword,
+		&dbUserSalt,
+		&dbUserIsAdmin,
+		&dbUserEmailActive)
 	if err != nil {
 		return User{}, errors.New("USER NOT FOUND")
 	}
@@ -112,9 +119,19 @@ func AddUser(email string, username string, password string) (User, error) {
 	emailToken := uuid.New().String()
 	hashedPW := hashPW(password, salt, pepper)
 	userID := uuid.New().String()
-	q := "INSERT INTO users(uuid, email, username, password, salt, is_admin, email_active, email_token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING uuid, email, username, password, salt, is_admin, email_active, email_token;"
+	q := "INSERT INTO users(uuid, email, username, password, salt, is_admin, email_active, email_token) " +
+		"VALUES ($1, $2, $3, $4, $5, $6, $7, $8) " +
+		"RETURNING uuid, email, username, password, salt, is_admin, email_active, email_token;"
 	rows := conn.QueryRow(q, userID, email, username, hashedPW, salt, false, false, emailToken)
-	err = rows.Scan(&dbUUID, &dbEmail, &dbUsername, &dbUserPassword, &dbUserSalt, &dbUserIsAdmin, &dbUserEmailActive, &dbUserEmailToken)
+	err = rows.Scan(
+		&dbUUID,
+		&dbEmail,
+		&dbUsername,
+		&dbUserPassword,
+		&dbUserSalt,
+		&dbUserIsAdmin,
+		&dbUserEmailActive,
+		&dbUserEmailToken)
 
 	if err != nil {
 		errString := err.Error()
