@@ -180,12 +180,16 @@ func ResendVerificationEmail(c *fiber.Ctx) error {
 
 func VerifyEmail(c *fiber.Ctx) error {
 	type EmailToken struct {
-		Token string `json:"emailToken"`
+		Token string `json:"emailToken" validate:"required"`
 	}
 	var emailToken EmailToken
 	err := c.BodyParser(&emailToken)
 	if err != nil {
 		c.Status(400).SendString("BAD REQUEST")
+	}
+	err = validate.Struct(emailToken)
+	if err != nil {
+		return c.Status(400).SendString("BAD REQUEST")
 	}
 
 	conn, err := pgx.Connect(postgresHelper.PGConfig)
@@ -287,6 +291,47 @@ func ChangeEmail(c *fiber.Ctx) error {
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 
+	return c.SendString("SUCCESS")
+}
+
+func ConfirmChangedEmail(c *fiber.Ctx) error {
+	type ConfirmToken struct {
+		Token string `json:"confirmToken" validate:"required"`
+	}
+	var confirmToken ConfirmToken
+	err := c.BodyParser(&confirmToken)
+	if err != nil {
+		c.Status(400).SendString("BAD REQUEST")
+	}
+	err = validate.Struct(confirmToken)
+	if err != nil {
+		return c.Status(400).SendString("BAD REQUEST")
+	}
+
+	conn, err := pgx.Connect(postgresHelper.PGConfig)
+	if err != nil {
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+	defer conn.Close()
+	updateQuery := "UPDATE users u " +
+		"SET email=( " +
+		"SELECT c.new_email " +
+		"FROM change_email c " +
+		"WHERE c.confirmation_token=$1 " +
+		") " +
+		"WHERE u.uuid=( " +
+		"SELECT c.uuid " +
+		"FROM change_email c " +
+		"WHERE c.confirmation_token=$1 " +
+		") " +
+		"RETURNING u.email"
+	updatedRows := conn.QueryRow(updateQuery, confirmToken.Token)
+	var dbNewEmail string
+	err = updatedRows.Scan(&dbNewEmail)
+	if err != nil || dbNewEmail == "" {
+		fmt.Print(err)
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
 	return c.SendString("SUCCESS")
 }
 
