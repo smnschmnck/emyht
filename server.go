@@ -49,6 +49,7 @@ func handleRequest() {
 	app.Post("/register", authService.Register)
 	app.Post("/verifyEmail", authService.VerifyEmail)
 	app.Get("/resendVerificationEmail", authService.ResendVerificationEmail)
+	app.Post("/changeEmail", authService.ChangeEmail)
 	app.Post("/login", authService.Authenticate)
 	app.Get("/logout", authService.Logout)
 	app.Listen(PORT)
