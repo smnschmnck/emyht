@@ -52,12 +52,15 @@ const NoEmailPage: NextPage<UserProps> = ({ email }) => {
   const sendEmail = async () => {
     const res = await fetch('/api/resendVerificationEmail');
     if (res.ok) {
-      setShowMainInfo(false);
-      setShowChangeEmail(false);
-      setShowEmailSent(true);
+      showEmailSentScreen();
     } else {
       alert(await res.text());
     }
+  };
+  const showEmailSentScreen = () => {
+    setShowMainInfo(false);
+    setShowChangeEmail(false);
+    setShowEmailSent(true);
   };
   const toggleShowChangeEmail = () => {
     setShowMainInfo(!showMainInfo);
@@ -98,7 +101,7 @@ const NoEmailPage: NextPage<UserProps> = ({ email }) => {
           {showChangeEmail && (
             <ChangeEmail
               toggleShowChangeEmail={toggleShowChangeEmail}
-              sendEmail={sendEmail}
+              showEmailSentScreen={showEmailSentScreen}
             />
           )}
         </div>

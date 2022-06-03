@@ -36,6 +36,12 @@
   background-color: var(--accent-lighter);
 }
 
+.errorP {
+  font-weight: bold;
+  text-align: center;
+  color: red;
+}
+
 .cancelButton {
   background-color: transparent;
   border: none;
