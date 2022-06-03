@@ -63,15 +63,10 @@ const EmailVerificationPage: NextPage<EmailVerificationPageProps> = ({
                 {status === 404 && (
                   <>
                     <h1>Could not Verify E-Mail 😟</h1>
-                    <h2>Seems like the supplied link does not work</h2>
-                  </>
-                )}
-                {status === 409 && (
-                  <>
-                    <h1>E-Mail was already verified ✅</h1>
-                    <Link href={'/'}>
-                      <a className={styles.startLink}>Start using emyht</a>
-                    </Link>
+                    <h2>
+                      Either the supplied link does not work or the E-Mail was
+                      verified already
+                    </h2>
                   </>
                 )}
                 {status === 503 && (
