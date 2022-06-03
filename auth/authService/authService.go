@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx"
 
 	"github.com/go-playground/validator/v10"
@@ -46,12 +47,11 @@ func GetUserBySession(c *fiber.Ctx) error {
 	}
 
 	user, respErr := getUserBySessionID(sessionID)
-
 	if respErr.StatusCode >= 300 {
 		return c.Status(respErr.StatusCode).SendString(respErr.Msg)
 	}
-
-	return c.JSON(user)
+	res := UserRes{Email: user.Email, Username: user.Username, IsAdmin: user.IsAdmin, EmailActive: user.EmailActive}
+	return c.JSON(res)
 }
 
 type UserRes struct {
@@ -66,25 +66,24 @@ type ResponseError struct {
 	StatusCode int
 }
 
-func getUserBySessionID(sessionID string) (UserRes, ResponseError) {
+func getUserBySessionID(sessionID string) (userService.User, ResponseError) {
 	rdb := redis.NewClient(&redisHelper.RedisConfig)
 	email, err := rdb.Get(ctx, sessionID).Result()
 	if err != nil {
-		return UserRes{}, ResponseError{Msg: "USER NOT FOUND", StatusCode: 404}
+		return userService.User{}, ResponseError{Msg: "USER NOT FOUND", StatusCode: 404}
 	}
 	rdb.Set(ctx, sessionID, email, 24*time.Hour)
 	user, err := userService.GetUser(email)
 	if err != nil {
-		return UserRes{}, ResponseError{Msg: "INTERNAL ERROR", StatusCode: 500}
+		return userService.User{}, ResponseError{Msg: "INTERNAL ERROR", StatusCode: 500}
 	}
 
-	res := UserRes{Email: user.Email, Username: user.Username, IsAdmin: user.IsAdmin, EmailActive: user.EmailActive}
-	return res, ResponseError{StatusCode: 200}
+	return user, ResponseError{StatusCode: 200}
 }
 
 type Credentials struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 
 func makeToken() (string, error) {
@@ -233,6 +232,47 @@ func Authenticate(c *fiber.Ctx) error {
 		return c.JSON(session)
 	}
 	return c.Status(401).SendString("WRONG CREDENTIALS")
+}
+
+func ChangeEmail(c *fiber.Ctx) error {
+	type ChangeReq struct {
+		NewEmail string `json:"newEmail" validate:"required"`
+	}
+	var changeReq ChangeReq
+	err := c.BodyParser(&changeReq)
+	if err != nil {
+		return c.Status(400).SendString("BAD REQUEST")
+	}
+	err = validate.Struct(changeReq)
+	if err != nil {
+		return c.Status(400).SendString("BAD REQUEST")
+	}
+
+	sessionID, responseErr := getBearer(c)
+	if responseErr != nil {
+		return c.Status(401).SendString("NOT AUTHORIZED")
+	}
+
+	user, respErr := getUserBySessionID(sessionID)
+	if respErr.StatusCode >= 300 {
+		return c.Status(respErr.StatusCode).SendString(respErr.Msg)
+	}
+
+	conn, err := pgx.Connect(postgresHelper.PGConfig)
+	if err != nil {
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+	defer conn.Close()
+	insertQuery := "INSERT INTO change_email(uuid, new_email, confirmation_token) VALUES ($1, $2, $3) ON CONFLICT(uuid) DO UPDATE SET new_email=$2, confirmation_token=$3 RETURNING confirmation_token"
+	confirmationToken := uuid.New().String()
+	insertedRows := conn.QueryRow(insertQuery, user.Uuid, changeReq.NewEmail, confirmationToken)
+	var dbConfirmationToken string
+	err = insertedRows.Scan(&dbConfirmationToken)
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+	return c.SendString("SUCCESS! TODO: SEND EMAIL")
 }
 
 func Logout(c *fiber.Ctx) error {
