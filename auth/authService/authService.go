@@ -314,18 +314,18 @@ func ConfirmChangedEmail(c *fiber.Ctx) error {
 	}
 	defer conn.Close()
 	updateQuery := "UPDATE users u " +
-		"SET email=( " +
+		"SET email_active=true, email_token=$1, email=( " +
 		"SELECT c.new_email " +
 		"FROM change_email c " +
-		"WHERE c.confirmation_token=$1 " +
+		"WHERE c.confirmation_token=$2 " +
 		") " +
 		"WHERE u.uuid=( " +
 		"SELECT c.uuid " +
 		"FROM change_email c " +
-		"WHERE c.confirmation_token=$1 " +
+		"WHERE c.confirmation_token=$2 " +
 		") " +
 		"RETURNING u.email"
-	updatedRows := conn.QueryRow(updateQuery, confirmToken.Token)
+	updatedRows := conn.QueryRow(updateQuery, nil, confirmToken.Token)
 	var dbNewEmail string
 	err = updatedRows.Scan(&dbNewEmail)
 	if err != nil || dbNewEmail == "" {
