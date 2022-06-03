@@ -1,0 +1,71 @@
+<body>
+  <div
+    style="
+      width: 50%;
+      min-width: 270px;
+      max-width: 500px;
+      font-family: BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu,
+        Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+      padding: 2%;
+    "
+  >
+    <img
+      src="https://raw.githubusercontent.com/smnschmnck/img/main/emyht1.png"
+      alt="emyht-logo"
+      style="width: 100px; margin-bottom: 25px"
+    />
+    <h1 style="font-weight: 900; font-size: 32px">
+      Confirm your new E-Mail Address
+    </h1>
+    <p
+      style="font-weight: 400; color: gray; line-height: 25px; font-size: 16px"
+    >
+      Hey {{.Username}}! Use the link below to confirm your new E-Mail adddress
+    </p>
+    <a
+      class="verify-link"
+      href="{{.VerifyLink}}"
+      style="
+        display: block;
+        margin-top: 40px;
+        line-height: 50px;
+        text-align: center;
+        font-family: BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu,
+          Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+        font-weight: 600;
+        font-size: 16px;
+        color: white;
+        background-color: #05f;
+        width: 100%;
+        text-decoration: none;
+        height: 50px;
+      "
+      >Confirm</a
+    >
+    <p
+      style="font-weight: 400; color: gray; line-height: 20px; font-size: 14px"
+    >
+      Questions? Email us at
+      <a
+        class="email-link"
+        style="text-decoration: none; color: #05f"
+        href="mailto:feedback@emyht.com"
+        >feedback@emyht.com</a
+      >
+    </p>
+  </div>
+</body>
+
+<style>
+  .verify-link {
+    transition: 0.2s;
+  }
+
+  .verify-link:hover {
+    background-color: #07f !important;
+  }
+
+  .email-link:hover {
+    text-decoration: underline !important;
+  }
+</style>

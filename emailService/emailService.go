@@ -104,3 +104,36 @@ func SendVerificationEmail(username string, recipientMail string, token string) 
 
 	return nil
 }
+
+func SendVerifyEmailChangeEmail(username string, recipientMail string, token string) error {
+	textBody := "Hey" + username + "! Use the following link to confirm your new E-Mail address and start using emyht: "
+
+	type VerifyPageData struct {
+		Username   string
+		VerifyLink string
+	}
+
+	const (
+		templatePath = "./emailService/htmlTemplates/confirmEmailChangeLayout.html"
+		subject      = "Confirm your new E-Mail Adress"
+	)
+
+	frontendHost := os.Getenv("FRONTEND_HOST")
+	if frontendHost == "" {
+		panic("NO FRONTEND HOST IN .ENV!")
+	}
+	url := frontendHost + "/confirmNewEmail/" + token
+	templateData := VerifyPageData{Username: username, VerifyLink: url}
+	htmlBody, err := populateHtmlTemplate(templateData, templatePath)
+	if err != nil {
+		return err
+	}
+
+	err = sendEmail(subject, recipientMail, htmlBody, textBody)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}

@@ -263,16 +263,24 @@ func ChangeEmail(c *fiber.Ctx) error {
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 	defer conn.Close()
-	insertQuery := "INSERT INTO change_email(uuid, new_email, confirmation_token) VALUES ($1, $2, $3) ON CONFLICT(uuid) DO UPDATE SET new_email=$2, confirmation_token=$3 RETURNING confirmation_token"
+	insertQuery := "INSERT INTO change_email(uuid, new_email, confirmation_token) VALUES ($1, $2, $3) ON CONFLICT(uuid) DO UPDATE SET new_email=$2, confirmation_token=$3 RETURNING confirmation_token, new_email"
 	confirmationToken := uuid.New().String()
 	insertedRows := conn.QueryRow(insertQuery, user.Uuid, changeReq.NewEmail, confirmationToken)
 	var dbConfirmationToken string
-	err = insertedRows.Scan(&dbConfirmationToken)
+	var dbNewEmail string
+	err = insertedRows.Scan(&dbConfirmationToken, &dbNewEmail)
 	if err != nil {
 		fmt.Println(err)
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
-	return c.SendString("SUCCESS! TODO: SEND EMAIL")
+
+	err = emailService.SendVerifyEmailChangeEmail(user.Username, dbNewEmail, dbConfirmationToken)
+
+	if err != nil {
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+
+	return c.SendString("SUCCESS")
 }
 
 func Logout(c *fiber.Ctx) error {
