@@ -62,8 +62,10 @@
 }
 
 .showPasswordButton {
-  height: 20px;
-  width: 20px;
+  all: unset;
+  -webkit-tap-highlight-color: transparent;
+  height: 50%;
+  aspect-ratio: 1/1;
   margin-right: 5px;
   background: url(../assets/images/eye-open.svg);
   background-size: cover;
@@ -77,8 +79,10 @@
 }
 
 .hidePasswordButton {
-  height: 20px;
-  width: 20px;
+  all: unset;
+  -webkit-tap-highlight-color: transparent;
+  height: 50%;
+  aspect-ratio: 1/1;
   margin-right: 5px;
   background: url(../assets/images/eye-close.svg);
   background-size: cover;
