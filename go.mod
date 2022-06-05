@@ -5,13 +5,11 @@ go 1.18
 require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/gofiber/fiber/v2 v2.32.0
+	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.4.0
 )
 
-require (
-	github.com/google/uuid v1.3.0 // indirect
-	github.com/jmespath/go-jmespath v0.4.0 // indirect
-)
+require github.com/jmespath/go-jmespath v0.4.0 // indirect
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
@@ -35,7 +33,6 @@ require (
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.10.1
-	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/klauspost/compress v1.15.2 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
