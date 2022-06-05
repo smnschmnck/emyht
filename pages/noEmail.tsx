@@ -46,6 +46,7 @@ export const getServerSideProps: GetServerSideProps<UserProps | {}> = async (
 };
 
 const NoEmailPage: NextPage<UserProps> = ({ email }) => {
+  const [curEmail, setCurEmail] = useState(email);
   const [showMainInfo, setShowMainInfo] = useState(true);
   const [showEmailSent, setShowEmailSent] = useState(false);
   const [showChangeEmail, setShowChangeEmail] = useState(false);
@@ -97,9 +98,10 @@ const NoEmailPage: NextPage<UserProps> = ({ email }) => {
               </button>
             </div>
           )}
-          {showEmailSent && <EmailSent email={email} />}
+          {showEmailSent && <EmailSent email={curEmail} />}
           {showChangeEmail && (
             <ChangeEmail
+              setCurEmail={setCurEmail}
               toggleShowChangeEmail={toggleShowChangeEmail}
               showEmailSentScreen={showEmailSentScreen}
             />

@@ -3,11 +3,13 @@ import styles from '../styles/ChangeEmailComponent.module.css';
 import { FormEvent, useState } from 'react';
 
 interface ChangeEmailProps {
+  setCurEmail: (email: string) => void;
   toggleShowChangeEmail: () => void;
   showEmailSentScreen: () => void;
 }
 
 const ChangeEmail: React.FC<ChangeEmailProps> = ({
+  setCurEmail,
   toggleShowChangeEmail,
   showEmailSentScreen,
 }) => {
@@ -32,6 +34,7 @@ const ChangeEmail: React.FC<ChangeEmailProps> = ({
       setError(await res.text());
       return;
     }
+    setCurEmail(newEmail);
     showEmailSentScreen();
   };
 
