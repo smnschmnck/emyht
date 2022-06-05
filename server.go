@@ -44,7 +44,6 @@ func handleRequest() {
 		}
 		return fiber.ErrUpgradeRequired
 	})
-	//TODO change primary id from email to uuid
 	app.Get("/ws", websocket.New(wsHandler))
 	app.Get("/user", authService.GetUserBySession)
 	app.Post("/register", authService.Register)
