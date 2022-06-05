@@ -10,6 +10,7 @@ import styles from '../styles/IndexPage.module.css';
 import fakeChats from '../dev/dummyData/fakeChats.json';
 import Image from 'next/image';
 import logo from '../assets/images/logo-small.webp';
+import more from '../assets/images/more.svg';
 
 interface UserProps {
   email: string;
@@ -56,10 +57,21 @@ const HomePage: NextPage<UserProps> = (props) => {
         <title>emyht</title>
       </Head>
       <div className={styles.sidebar}>
-        <div className={styles.logoContainer}>
-          <Image src={logo} alt="emyht-logo" />
+        <div className={styles.innerSidebar}>
+          <div className={styles.logoContainer}>
+            <Image src={logo} alt="emyht-logo" />
+          </div>
+          <Chats chats={fakeChats} />
         </div>
-        <Chats chats={fakeChats} />
+        <div className={styles.settingsContainer}>
+          <div className={styles.infoContainer}>
+            <h3 className={styles.usernameH3}>{props.username}</h3>
+            <p className={styles.emailP}>{props.email}</p>
+          </div>
+          <button className={styles.settingsButton}>
+            <Image src={more} alt="settings" />
+          </button>
+        </div>
       </div>
     </>
   );
