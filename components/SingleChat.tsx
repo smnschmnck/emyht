@@ -1,19 +1,9 @@
 import Image from 'next/image';
 import styles from '../styles/SingleChatComponent.module.css';
 import fallbackProfilePicure from '../assets/images/fallback-pp.webp';
+import ISingleChat from '../interfaces/ISingleChat';
 
-interface SingleChatProps {
-  name: string;
-  time: string;
-  message: string;
-  read: boolean;
-  unreadMessagesCount?: number;
-  ownMessage: boolean;
-  deliveryStatus?: 'sent' | 'recieved' | 'read';
-  profilePictureUrl?: string;
-}
-
-const SingleChat: React.FC<SingleChatProps> = ({
+const SingleChat: React.FC<ISingleChat> = ({
   name,
   time,
   message,
@@ -48,7 +38,7 @@ const SingleChat: React.FC<SingleChatProps> = ({
               <h3 className={styles.name}>{name}</h3>
               <h3
                 className={styles.time}
-                id={read || !ownMessage ? styles.readTime : ''}
+                id={read || ownMessage ? styles.readTime : ''}
               >
                 {time}
               </h3>

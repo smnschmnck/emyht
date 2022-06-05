@@ -7,6 +7,7 @@ import Head from 'next/head';
 import Chats from '../components/Chats';
 import { getLoginData } from '../helpers/loginHelpers';
 import styles from '../styles/IndexPage.module.css';
+import fakeChats from '../dev/dummyData/fakeChats.json';
 
 interface UserProps {
   email: string;
@@ -52,7 +53,7 @@ const HomePage: NextPage<UserProps> = (props) => {
       <Head>
         <title>emyht</title>
       </Head>
-      <Chats></Chats>
+      <Chats chats={fakeChats}></Chats>
     </>
   );
 };
