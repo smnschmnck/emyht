@@ -1,0 +1,30 @@
+.todo {
+  margin: 20px;
+  width: 250px;
+}
+
+.controls {
+  margin-bottom: 15px;
+}
+
+.chatsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.addChatButton {
+  all: unset;
+  display: flex;
+  height: 35px;
+  width: 35px;
+  border-radius: 50%;
+  justify-content: center;
+  align-items: center;
+  transition: 0.2s;
+  cursor: pointer;
+}
+
+.addChatButton:hover {
+  background-color: var(--accentHover);
+}

@@ -3,6 +3,9 @@
 :root {
   --accent: #05f;
   --accent-lighter: #07f;
+  --accentHover: #e7eeff;
+  --grey: #9f9f9f;
+  --lightGrey: #e2e2e2;
 }
 
 html,
@@ -16,37 +19,44 @@ body {
 }
 
 h1 {
-  font-size: 46px;
+  font-size: 56px;
   font-family: 'Space Grotesk', sans-serif;
 }
 
 h2 {
-  font-size: 23px;
+  font-size: 28px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: bold;
+}
+
+h3 {
+  font-size: 14px;
   font-family: 'Space Grotesk', sans-serif;
   font-weight: bold;
 }
 
 button {
-  font-size: 12px;
+  font-size: 14px;
   -webkit-tap-highlight-color: transparent;
   font-family: 'Space Grotesk', sans-serif;
   font-weight: bold;
 }
 
 input {
+  font-size: 14px;
   -webkit-tap-highlight-color: transparent;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
 
 a {
-  font-size: 12px;
+  font-size: 14px;
   -webkit-tap-highlight-color: transparent;
   font-family: 'Space Grotesk', sans-serif;
 }
 
 p {
-  font-size: 12px;
+  font-size: 14px;
   max-width: 50ch;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
