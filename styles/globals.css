@@ -19,44 +19,44 @@ body {
 }
 
 h1 {
-  font-size: 56px;
+  font-size: 52px;
   font-family: 'Space Grotesk', sans-serif;
 }
 
 h2 {
-  font-size: 28px;
+  font-size: 26px;
   font-family: 'Space Grotesk', sans-serif;
   font-weight: bold;
 }
 
 h3 {
-  font-size: 14px;
+  font-size: 13px;
   font-family: 'Space Grotesk', sans-serif;
   font-weight: bold;
 }
 
 button {
-  font-size: 14px;
+  font-size: 13px;
   -webkit-tap-highlight-color: transparent;
   font-family: 'Space Grotesk', sans-serif;
   font-weight: bold;
 }
 
 input {
-  font-size: 14px;
+  font-size: 13px;
   -webkit-tap-highlight-color: transparent;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
 
 a {
-  font-size: 14px;
+  font-size: 13px;
   -webkit-tap-highlight-color: transparent;
   font-family: 'Space Grotesk', sans-serif;
 }
 
 p {
-  font-size: 14px;
+  font-size: 13px;
   max-width: 50ch;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;

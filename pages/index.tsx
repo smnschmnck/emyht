@@ -8,6 +8,8 @@ import Chats from '../components/Chats';
 import { getLoginData } from '../helpers/loginHelpers';
 import styles from '../styles/IndexPage.module.css';
 import fakeChats from '../dev/dummyData/fakeChats.json';
+import Image from 'next/image';
+import logo from '../assets/images/logo-small.webp';
 
 interface UserProps {
   email: string;
@@ -53,7 +55,12 @@ const HomePage: NextPage<UserProps> = (props) => {
       <Head>
         <title>emyht</title>
       </Head>
-      <Chats chats={fakeChats}></Chats>
+      <div className={styles.sidebar}>
+        <div className={styles.logoContainer}>
+          <Image src={logo} alt="emyht-logo" />
+        </div>
+        <Chats chats={fakeChats} />
+      </div>
     </>
   );
 };

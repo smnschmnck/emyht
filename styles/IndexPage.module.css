@@ -1,0 +1,22 @@
+.sidebar {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+  padding: 0 30px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.logoContainer {
+  width: 100px;
+  margin: 30px 0;
+}
+
+@media only screen and (min-width: 600px) {
+  .sidebar {
+    max-width: 350px;
+    min-width: 250px;
+  }
+}

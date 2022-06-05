@@ -15,11 +15,11 @@ interface ChatsProps {
 
 const Chats: React.FC<ChatsProps> = ({ chats }) => {
   return (
-    <>
+    <div className={styles.chatWrapper}>
       <div className={styles.controls}>
         <div className={styles.chatContainer}>
           <div className={styles.chatsHeader}>
-            <h2>Chats</h2>
+            <h2 className={styles.chatsHeading}>Chats</h2>
             <button className={styles.addChatButton}>
               <Image src={plus} alt="Add Chat" />
             </button>
@@ -42,7 +42,7 @@ const Chats: React.FC<ChatsProps> = ({ chats }) => {
           />
         ))}
       </div>
-    </>
+    </div>
   );
 };
 
