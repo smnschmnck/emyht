@@ -4,10 +4,9 @@ import type {
   NextPage,
 } from 'next';
 import Head from 'next/head';
-import DefaultLayout from '../components/DefaultLayout';
-import Greeting from '../components/Greeting';
-import Logout from '../components/Logout';
+import Chats from '../components/Chats';
 import { getLoginData } from '../helpers/loginHelpers';
+import styles from '../styles/IndexPage.module.css';
 
 interface UserProps {
   email: string;
@@ -53,13 +52,7 @@ const HomePage: NextPage<UserProps> = (props) => {
       <Head>
         <title>emyht</title>
       </Head>
-      <DefaultLayout>
-        <div>
-          <h1>Home</h1>
-          <Greeting email={props.email} username={props.username} />
-          <Logout></Logout>
-        </div>
-      </DefaultLayout>
+      <Chats></Chats>
     </>
   );
 };
