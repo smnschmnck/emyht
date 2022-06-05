@@ -32,6 +32,25 @@
   aspect-ratio: 1/1;
 }
 
+.unreadMessagesNum {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  transform: translateY(-3px);
+  width: 15px;
+  height: 15px;
+  font-size: 8px;
+  position: absolute;
+  background-color: var(--accent);
+  color: white;
+  z-index: 1;
+  font-weight: bold;
+}
+
 .chatContent {
   display: flex;
   flex-direction: column;

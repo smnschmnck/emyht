@@ -26,12 +26,15 @@ const Chats: React.FC = () => {
           message={"Yeah I've been thinking the same"}
           read={false}
           profilePictureUrl={dummy.src}
+          ownMessage={false}
+          unreadMessagesCount={66}
         />
         <SingleChat
           name={'Sarah Parker'}
           time={'17:12'}
           message={'Thanks!'}
           read={true}
+          ownMessage={true}
         />
       </div>
     </div>
