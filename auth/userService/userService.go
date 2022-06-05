@@ -43,7 +43,7 @@ func getPepper() string {
 	return pepper
 }
 
-func GetUser(uuid string) (User, error) {
+func GetUserByUUID(uuid string) (User, error) {
 	conn, err := pgx.Connect(postgresHelper.PGConfig)
 	if err != nil {
 		return User{}, errors.New("INTERNAL ERROR")
@@ -83,6 +83,46 @@ func GetUser(uuid string) (User, error) {
 	}, nil
 }
 
+func GetUserByEmail(email string) (User, error) {
+	conn, err := pgx.Connect(postgresHelper.PGConfig)
+	if err != nil {
+		return User{}, errors.New("INTERNAL ERROR")
+	}
+	defer conn.Close()
+
+	var dbUUID string
+	var dbEmail string
+	var dbUsername string
+	var dbUserPassword string
+	var dbUserSalt string
+	var dbUserIsAdmin bool
+	var dbUserEmailActive bool
+
+	q := "select uuid, email, username, password, salt, is_admin, email_active from users where email=$1"
+	rows := conn.QueryRow(q, email)
+	err = rows.Scan(
+		&dbUUID,
+		&dbEmail,
+		&dbUsername,
+		&dbUserPassword,
+		&dbUserSalt,
+		&dbUserIsAdmin,
+		&dbUserEmailActive)
+	if err != nil {
+		return User{}, errors.New("USER NOT FOUND")
+	}
+
+	return User{
+		Uuid:        dbUUID,
+		Email:       dbEmail,
+		Username:    dbUsername,
+		Password:    dbUserPassword,
+		Salt:        dbUserSalt,
+		IsAdmin:     dbUserIsAdmin,
+		EmailActive: dbUserEmailActive,
+	}, nil
+}
+
 type ResponseError struct {
 	Msg        string
 	StatusCode int
@@ -96,7 +136,7 @@ func GetUserBySessionID(sessionID string) (User, ResponseError) {
 		return User{}, ResponseError{Msg: "USER NOT FOUND", StatusCode: 404}
 	}
 	rdb.Set(ctx, sessionID, uuid, 24*time.Hour)
-	user, err := GetUser(uuid)
+	user, err := GetUserByUUID(uuid)
 	if err != nil {
 		return User{}, ResponseError{Msg: "INTERNAL ERROR", StatusCode: 500}
 	}
@@ -197,11 +237,7 @@ func RenewEmailToken(email string) (string, error) {
 	return dbEmailToken, nil
 }
 
-func CheckPW(email string, password string) (bool, error) {
-	user, err := GetUser(email)
-	if err != nil {
-		return false, err
-	}
+func CheckPW(user User, email string, password string) (bool, error) {
 	pepper := getPepper()
 	hashedPW := hashPW(password, user.Salt, pepper)
 	return hashedPW == user.Password, nil

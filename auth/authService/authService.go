@@ -207,25 +207,28 @@ func Authenticate(c *fiber.Ctx) error {
 		return c.Status(400).SendString("BAD REQUEST")
 	}
 	lowerCaseEmail := strings.ToLower(credentials.Email)
-	pwCorrect, err := userService.CheckPW(lowerCaseEmail, credentials.Password)
+	user, err := userService.GetUserByEmail(lowerCaseEmail)
+	if err != nil {
+		c.Status(500).SendString("SOMETHING WENT WRONG")
+	}
+	pwCorrect, err := userService.CheckPW(user, lowerCaseEmail, credentials.Password)
 	if err != nil {
 		return c.Status(500).SendString(err.Error())
 	}
-	if pwCorrect {
-		user, err := userService.GetUser(lowerCaseEmail)
-		if err != nil {
-			c.Status(500).SendString("SOMETHING WENT WRONG")
-		}
-		session, err := startSession(user.Uuid)
-		if err != nil {
-			c.Status(500).SendString("SOMETHING WENT WRONG")
-		}
-		if err != nil {
-			return c.Status(500).SendString("SOMETHING WENT WRONG WHILE AUTHENTICATING")
-		}
-		return c.JSON(session)
+	if !pwCorrect {
+		return c.Status(401).SendString("WRONG CREDENTIALS")
 	}
-	return c.Status(401).SendString("WRONG CREDENTIALS")
+	if err != nil {
+		c.Status(500).SendString("SOMETHING WENT WRONG")
+	}
+	session, err := startSession(user.Uuid)
+	if err != nil {
+		c.Status(500).SendString("SOMETHING WENT WRONG")
+	}
+	if err != nil {
+		return c.Status(500).SendString("SOMETHING WENT WRONG WHILE AUTHENTICATING")
+	}
+	return c.JSON(session)
 }
 
 func ChangeEmail(c *fiber.Ctx) error {
