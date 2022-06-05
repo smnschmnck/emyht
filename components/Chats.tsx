@@ -3,9 +3,17 @@ import plus from '../assets/images/plus.svg';
 import { Input } from './atomic/Input';
 import Image from 'next/image';
 import SingleChat from './SingleChat';
-import dummy from '../assets/images/dummypp.jpeg';
+import ISingleChat from '../interfaces/ISingleChat';
 
-const Chats: React.FC = () => {
+interface ISingleChatWithMessageID extends ISingleChat {
+  messageID: string;
+}
+
+interface ChatsProps {
+  chats: ISingleChatWithMessageID[];
+}
+
+const Chats: React.FC<ChatsProps> = ({ chats }) => {
   return (
     <>
       <div className={styles.controls}>
@@ -20,86 +28,19 @@ const Chats: React.FC = () => {
         </div>
       </div>
       <div className={styles.chats}>
-        <SingleChat
-          name={'Maximilian Berger'}
-          time={'17:32'}
-          message={"Yeah I've been thinking the same"}
-          read={false}
-          profilePictureUrl={dummy.src}
-          ownMessage={false}
-          unreadMessagesCount={66}
-        />
-        <SingleChat
-          name={'Sarah Parker'}
-          time={'17:12'}
-          message={'Thanks!'}
-          read={true}
-          ownMessage={true}
-        />
-        <SingleChat
-          name={'Maximilian Berger'}
-          time={'17:32'}
-          message={"Yeah I've been thinking the same"}
-          read={false}
-          profilePictureUrl={dummy.src}
-          ownMessage={false}
-          unreadMessagesCount={66}
-        />
-        <SingleChat
-          name={'Sarah Parker'}
-          time={'17:12'}
-          message={'Thanks!'}
-          read={true}
-          ownMessage={true}
-        />
-        <SingleChat
-          name={'Maximilian Berger'}
-          time={'17:32'}
-          message={"Yeah I've been thinking the same"}
-          read={false}
-          profilePictureUrl={dummy.src}
-          ownMessage={false}
-          unreadMessagesCount={66}
-        />
-        <SingleChat
-          name={'Sarah Parker'}
-          time={'17:12'}
-          message={'Thanks!'}
-          read={true}
-          ownMessage={true}
-        />
-        <SingleChat
-          name={'Maximilian Berger'}
-          time={'17:32'}
-          message={"Yeah I've been thinking the same"}
-          read={false}
-          profilePictureUrl={dummy.src}
-          ownMessage={false}
-          unreadMessagesCount={66}
-        />
-        <SingleChat
-          name={'Sarah Parker'}
-          time={'17:12'}
-          message={'Thanks!'}
-          read={true}
-          ownMessage={true}
-        />
-        <SingleChat
-          name={'Maximilian Berger'}
-          time={'17:32'}
-          message={"Yeah I've been thinking the same"}
-          read={false}
-          profilePictureUrl={dummy.src}
-          ownMessage={false}
-          unreadMessagesCount={66}
-        />
-        <SingleChat
-          name={'Sarah Parker'}
-          time={'17:12'}
-          message={'Thanks!'}
-          read={true}
-          ownMessage={true}
-        />
+        {chats.map((chat) => (
+          <SingleChat
+            key={chat.messageID}
+            name={chat.name}
+            time={chat.time}
+            message={chat.message}
+            unreadMessagesCount={chat.unreadMessagesCount}
+            deliveryStatus={chat.deliveryStatus}
+            read={chat.read}
+            ownMessage={chat.ownMessage}
+            profilePictureUrl={chat.profilePictureUrl}
+          />
+        ))}
       </div>
     </>
   );
