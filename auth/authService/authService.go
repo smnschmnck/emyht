@@ -46,7 +46,7 @@ func GetUserBySession(c *fiber.Ctx) error {
 		return c.Status(401).SendString("NOT AUTHORIZED")
 	}
 
-	user, respErr := getUserBySessionID(sessionID)
+	user, respErr := userService.GetUserBySessionID(sessionID)
 	if respErr.StatusCode >= 300 {
 		return c.Status(respErr.StatusCode).SendString(respErr.Msg)
 	}
@@ -65,26 +65,6 @@ type UserRes struct {
 	EmailActive bool   `json:"emailActive"`
 }
 
-type ResponseError struct {
-	Msg        string
-	StatusCode int
-}
-
-func getUserBySessionID(sessionID string) (userService.User, ResponseError) {
-	rdb := redis.NewClient(&redisHelper.RedisConfig)
-	email, err := rdb.Get(ctx, sessionID).Result()
-	if err != nil {
-		return userService.User{}, ResponseError{Msg: "USER NOT FOUND", StatusCode: 404}
-	}
-	rdb.Set(ctx, sessionID, email, 24*time.Hour)
-	user, err := userService.GetUser(email)
-	if err != nil {
-		return userService.User{}, ResponseError{Msg: "INTERNAL ERROR", StatusCode: 500}
-	}
-
-	return user, ResponseError{StatusCode: 200}
-}
-
 type Credentials struct {
 	Email    string `json:"email" validate:"required"`
 	Password string `json:"password" validate:"required"`
@@ -98,21 +78,20 @@ func makeToken() (string, error) {
 	return base64.StdEncoding.EncodeToString(bytes), nil
 }
 
-func startSession(c *fiber.Ctx, email string) (Session, error) {
+func startSession(uuid string) (Session, error) {
 	token, err := makeToken()
 	if err != nil {
-		c.Status(500).SendString("SOMETHING WENT WRONG")
 		return Session{}, err
 	}
 
 	rdb := redis.NewClient(&redisHelper.RedisConfig)
 
-	err = rdb.Set(ctx, token, email, 24*time.Hour).Err()
+	err = rdb.Set(ctx, token, uuid, 24*time.Hour).Err()
 
 	if err != nil {
 		return Session{}, err
 	}
-	tmpSession := Session{token, email}
+	tmpSession := Session{token, uuid}
 	return tmpSession, nil
 }
 
@@ -140,7 +119,7 @@ func Register(c *fiber.Ctx) error {
 		}
 		return c.Status(500).SendString(errString)
 	}
-	session, err := startSession(c, lowerCaseEmail)
+	session, err := startSession(user.Uuid)
 
 	if err != nil {
 		return c.Status(500).SendString("SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
@@ -161,7 +140,7 @@ func ResendVerificationEmail(c *fiber.Ctx) error {
 		return c.Status(401).SendString("NOT AUTHORIZED")
 	}
 
-	user, respErr := getUserBySessionID(sessionID)
+	user, respErr := userService.GetUserBySessionID(sessionID)
 
 	if respErr.StatusCode >= 300 {
 		return c.Status(respErr.StatusCode).SendString(respErr.Msg)
@@ -233,7 +212,14 @@ func Authenticate(c *fiber.Ctx) error {
 		return c.Status(500).SendString(err.Error())
 	}
 	if pwCorrect {
-		session, err := startSession(c, lowerCaseEmail)
+		user, err := userService.GetUser(lowerCaseEmail)
+		if err != nil {
+			c.Status(500).SendString("SOMETHING WENT WRONG")
+		}
+		session, err := startSession(user.Uuid)
+		if err != nil {
+			c.Status(500).SendString("SOMETHING WENT WRONG")
+		}
 		if err != nil {
 			return c.Status(500).SendString("SOMETHING WENT WRONG WHILE AUTHENTICATING")
 		}
@@ -261,7 +247,7 @@ func ChangeEmail(c *fiber.Ctx) error {
 		return c.Status(401).SendString("NOT AUTHORIZED")
 	}
 
-	user, respErr := getUserBySessionID(sessionID)
+	user, respErr := userService.GetUserBySessionID(sessionID)
 	if respErr.StatusCode >= 300 {
 		return c.Status(respErr.StatusCode).SendString(respErr.Msg)
 	}

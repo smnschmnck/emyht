@@ -2,6 +2,8 @@ package userService
 
 import (
 	"chat/dbHelpers/postgresHelper"
+	"chat/dbHelpers/redisHelper"
+	"context"
 	"crypto/rand"
 	"crypto/sha512"
 	"encoding/hex"
@@ -9,7 +11,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx"
 )
@@ -39,7 +43,7 @@ func getPepper() string {
 	return pepper
 }
 
-func GetUser(email string) (User, error) {
+func GetUser(uuid string) (User, error) {
 	conn, err := pgx.Connect(postgresHelper.PGConfig)
 	if err != nil {
 		return User{}, errors.New("INTERNAL ERROR")
@@ -54,8 +58,8 @@ func GetUser(email string) (User, error) {
 	var dbUserIsAdmin bool
 	var dbUserEmailActive bool
 
-	q := "select uuid, email, username, password, salt, is_admin, email_active from users where email=$1"
-	rows := conn.QueryRow(q, email)
+	q := "select uuid, email, username, password, salt, is_admin, email_active from users where uuid=$1"
+	rows := conn.QueryRow(q, uuid)
 	err = rows.Scan(
 		&dbUUID,
 		&dbEmail,
@@ -77,6 +81,27 @@ func GetUser(email string) (User, error) {
 		IsAdmin:     dbUserIsAdmin,
 		EmailActive: dbUserEmailActive,
 	}, nil
+}
+
+type ResponseError struct {
+	Msg        string
+	StatusCode int
+}
+
+func GetUserBySessionID(sessionID string) (User, ResponseError) {
+	ctx := context.Background()
+	rdb := redis.NewClient(&redisHelper.RedisConfig)
+	uuid, err := rdb.Get(ctx, sessionID).Result()
+	if err != nil {
+		return User{}, ResponseError{Msg: "USER NOT FOUND", StatusCode: 404}
+	}
+	rdb.Set(ctx, sessionID, uuid, 24*time.Hour)
+	user, err := GetUser(uuid)
+	if err != nil {
+		return User{}, ResponseError{Msg: "INTERNAL ERROR", StatusCode: 500}
+	}
+
+	return user, ResponseError{StatusCode: 200}
 }
 
 func hashPW(password string, salt string, pepper string) string {
