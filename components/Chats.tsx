@@ -7,7 +7,7 @@ import dummy from '../assets/images/dummypp.jpeg';
 
 const Chats: React.FC = () => {
   return (
-    <div className={styles.todo}>
+    <>
       <div className={styles.controls}>
         <div className={styles.chatContainer}>
           <div className={styles.chatsHeader}>
@@ -36,8 +36,72 @@ const Chats: React.FC = () => {
           read={true}
           ownMessage={true}
         />
+        <SingleChat
+          name={'Maximilian Berger'}
+          time={'17:32'}
+          message={"Yeah I've been thinking the same"}
+          read={false}
+          profilePictureUrl={dummy.src}
+          ownMessage={false}
+          unreadMessagesCount={66}
+        />
+        <SingleChat
+          name={'Sarah Parker'}
+          time={'17:12'}
+          message={'Thanks!'}
+          read={true}
+          ownMessage={true}
+        />
+        <SingleChat
+          name={'Maximilian Berger'}
+          time={'17:32'}
+          message={"Yeah I've been thinking the same"}
+          read={false}
+          profilePictureUrl={dummy.src}
+          ownMessage={false}
+          unreadMessagesCount={66}
+        />
+        <SingleChat
+          name={'Sarah Parker'}
+          time={'17:12'}
+          message={'Thanks!'}
+          read={true}
+          ownMessage={true}
+        />
+        <SingleChat
+          name={'Maximilian Berger'}
+          time={'17:32'}
+          message={"Yeah I've been thinking the same"}
+          read={false}
+          profilePictureUrl={dummy.src}
+          ownMessage={false}
+          unreadMessagesCount={66}
+        />
+        <SingleChat
+          name={'Sarah Parker'}
+          time={'17:12'}
+          message={'Thanks!'}
+          read={true}
+          ownMessage={true}
+        />
+        <SingleChat
+          name={'Maximilian Berger'}
+          time={'17:32'}
+          message={"Yeah I've been thinking the same"}
+          read={false}
+          profilePictureUrl={dummy.src}
+          ownMessage={false}
+          unreadMessagesCount={66}
+        />
+        <SingleChat
+          name={'Sarah Parker'}
+          time={'17:12'}
+          message={'Thanks!'}
+          read={true}
+          ownMessage={true}
+        />
       </div>
-    </div>
+    </>
   );
 };
 

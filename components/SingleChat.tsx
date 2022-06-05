@@ -27,7 +27,7 @@ const SingleChat: React.FC<SingleChatProps> = ({
     <div className={styles.wrapper}>
       <div className={styles.singleChatContainer}>
         <div className={styles.singleChat}>
-          <div>
+          <div className={styles.profilePictureWrapper}>
             {!ownMessage && !read && unreadMessagesCount && (
               <span className={styles.unreadMessagesNum}>
                 {unreadMessagesCount < 9 ? unreadMessagesCount : '9+'}

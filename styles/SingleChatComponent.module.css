@@ -24,6 +24,10 @@
   height: 40px;
 }
 
+.profilePictureWrapper {
+  position: relative;
+}
+
 .profilePicture {
   display: inline-block;
   position: relative;

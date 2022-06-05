@@ -1,6 +1,8 @@
 .todo {
-  margin: 20px;
+  display: flex;
+  flex-direction: column;
   width: 250px;
+  height: 100%;
 }
 
 .controls {
@@ -27,4 +29,11 @@
 
 .addChatButton:hover {
   background-color: var(--accentHover);
+}
+
+.chats {
+  height: 50%;
+  flex-grow: 1;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
