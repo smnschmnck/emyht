@@ -310,11 +310,17 @@ func ConfirmChangedEmail(c *fiber.Ctx) error {
 		"FROM change_email c " +
 		"WHERE c.confirmation_token=$2 " +
 		") " +
-		"RETURNING u.email"
+		"RETURNING u.email;"
 	updatedRows := conn.QueryRow(updateQuery, nil, confirmToken.Token)
 	var dbNewEmail string
 	err = updatedRows.Scan(&dbNewEmail)
 	if err != nil || dbNewEmail == "" {
+		fmt.Print(err)
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+	deleteQuery := "DELETE FROM change_email WHERE confirmation_token=$1"
+	_, err = conn.Query(deleteQuery, confirmToken.Token)
+	if err != nil {
 		fmt.Print(err)
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
