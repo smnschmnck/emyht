@@ -4,6 +4,7 @@ import { Input } from './atomic/Input';
 import Image from 'next/image';
 import SingleChat from './SingleChat';
 import ISingleChat from '../interfaces/ISingleChat';
+import { useState } from 'react';
 
 interface ISingleChatWithChatID extends ISingleChat {
   chatID: string;
@@ -14,6 +15,16 @@ interface ChatsProps {
 }
 
 const Chats: React.FC<ChatsProps> = ({ chats }) => {
+  const [filteredChats, setFilteredChats] = useState(chats);
+  const filterChats = (query: string) => {
+    const lowerCaseQuery = query.toLowerCase();
+    setFilteredChats(
+      chats.filter((c) => {
+        const lowerCaseChat = c.name.toLowerCase();
+        return lowerCaseChat.includes(lowerCaseQuery);
+      })
+    );
+  };
   return (
     <div className={styles.chatWrapper}>
       <div className={styles.controls}>
@@ -24,11 +35,14 @@ const Chats: React.FC<ChatsProps> = ({ chats }) => {
               <Image src={plus} alt="Add Chat" />
             </button>
           </div>
-          <Input placeholder="Search Chats"></Input>
+          <Input
+            placeholder="Search Chats"
+            onChange={(e) => filterChats(e.target.value)}
+          ></Input>
         </div>
       </div>
       <div className={styles.chats}>
-        {chats.map((chat) => (
+        {filteredChats.map((chat) => (
           <SingleChat
             key={chat.chatID}
             name={chat.name}
