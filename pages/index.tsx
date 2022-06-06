@@ -51,8 +51,8 @@ export const getServerSideProps: GetServerSideProps<UserProps | {}> = async (
   }
 };
 
-//dummy
-const pbUrl =
+//TODO fetch real profile pic
+const dummyPbUrl =
   'https://loremflickr.com/cache/resized/65535_52052815502_26e487ffd0_z_640_480_nofilter.jpg';
 
 const HomePage: NextPage<UserProps> = (props) => {
@@ -74,7 +74,7 @@ const HomePage: NextPage<UserProps> = (props) => {
         <MainChat
           chatName={'Shari Waelchi'}
           lastOnline={'13:21'}
-          profilePictureUrl={pbUrl}
+          profilePictureUrl={dummyPbUrl}
         />
       </div>
     </>
