@@ -1,0 +1,45 @@
+.settingsContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  width: 100%;
+  height: 70px;
+  background-color: var(--accent);
+}
+
+.infoContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  width: 100%;
+}
+
+.usernameH3 {
+  margin: 0;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+.emailP {
+  margin: 0;
+  color: white;
+}
+
+.settingsButton {
+  all: unset;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  height: 100%;
+  border-radius: 50%;
+  aspect-ratio: 1/1;
+  transition: 0.2s;
+}
+
+.settingsButton:hover {
+  background-color: var(--accent-lighter);
+}
