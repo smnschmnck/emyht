@@ -2,6 +2,7 @@ import styles from '../styles/UserInfoAndSettingsComponent.module.css';
 import more from '../assets/images/more.svg';
 import logout from '../assets/images/logout.svg';
 import Image from 'next/image';
+import Logout from './Logout';
 
 interface UserInfoAndSettingsProps {
   username: string;
@@ -21,9 +22,9 @@ const UserInfoAndSettings: React.FC<UserInfoAndSettingsProps> = ({
       <button className={styles.settingsButton} title="Settings">
         <Image src={more} alt="settings" />
       </button>
-      <button className={styles.settingsButton} title="Log Out">
-        <Image src={logout} alt="settings" />
-      </button>
+      <Logout className={styles.settingsButton}>
+        <Image src={logout} alt="logout" />
+      </Logout>
     </div>
   );
 };

@@ -1,6 +1,12 @@
 import Router from 'next/router';
 
-const Logout: React.FC = () => {
+interface LogoutProps {
+  type?: 'button' | 'submit';
+  children: React.ReactNode;
+  className: string;
+}
+
+const Logout: React.FC<LogoutProps> = ({ children, className, type }) => {
   const handleLogout = async () => {
     const res = await fetch('/api/logout');
     if (res.ok) {
@@ -11,7 +17,14 @@ const Logout: React.FC = () => {
   };
   return (
     <>
-      <button onClick={handleLogout}>Logout</button>
+      <button
+        onClick={handleLogout}
+        className={className}
+        title="Log Out"
+        type={type}
+      >
+        {children}
+      </button>
     </>
   );
 };
