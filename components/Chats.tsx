@@ -42,6 +42,13 @@ const Chats: React.FC<ChatsProps> = ({ chats }) => {
         </div>
       </div>
       <div className={styles.chats}>
+        {chats.length <= 0 && (
+          //TODO make message more beautiful
+          <div>
+            <h2>Looks empty in here</h2>
+            <p>Start a new chat</p>
+          </div>
+        )}
         {filteredChats.map((chat) => (
           <SingleChat
             key={chat.chatID}
