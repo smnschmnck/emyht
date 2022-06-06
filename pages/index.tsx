@@ -11,6 +11,7 @@ import fakeChats from '../dev/dummyData/fakeChats.json';
 import Image from 'next/image';
 import logo from '../assets/images/logo-small.webp';
 import UserInfoAndSettings from '../components/UserInfoAndSettings';
+import MainChat from '../components/MainChat';
 
 interface UserProps {
   email: string;
@@ -50,20 +51,31 @@ export const getServerSideProps: GetServerSideProps<UserProps | {}> = async (
   }
 };
 
+//dummy
+const pbUrl =
+  'https://loremflickr.com/cache/resized/65535_52052815502_26e487ffd0_z_640_480_nofilter.jpg';
+
 const HomePage: NextPage<UserProps> = (props) => {
   return (
     <>
       <Head>
         <title>emyht</title>
       </Head>
-      <div className={styles.sidebar}>
-        <div className={styles.innerSidebar}>
-          <div className={styles.logoContainer}>
-            <Image src={logo} alt="emyht-logo" />
+      <div className={styles.main}>
+        <div className={styles.sidebar}>
+          <div className={styles.innerSidebar}>
+            <div className={styles.logoContainer}>
+              <Image src={logo} alt="emyht-logo" />
+            </div>
+            <Chats chats={fakeChats} />
           </div>
-          <Chats chats={fakeChats} />
+          <UserInfoAndSettings username={props.username} email={props.email} />
         </div>
-        <UserInfoAndSettings username={props.username} email={props.email} />
+        <MainChat
+          chatName={'Shari Waelchi'}
+          lastOnline={'13:21'}
+          profilePictureUrl={pbUrl}
+        />
       </div>
     </>
   );

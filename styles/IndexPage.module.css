@@ -1,3 +1,9 @@
+.main {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
 .sidebar {
   display: flex;
   flex-direction: column;
