@@ -24,13 +24,14 @@ const SingleChat: React.FC<ISingleChat> = ({
               </span>
             )}
             <div className={styles.profilePicture}>
-              <Image
-                className={styles.profilePicture}
-                src={profilePictureUrl ?? fallbackProfilePicure}
-                objectFit="cover"
-                alt="pp"
-                layout="fill"
-              />
+              <div className={styles.image}>
+                <Image
+                  src={profilePictureUrl ?? fallbackProfilePicure}
+                  objectFit="cover"
+                  alt="pp"
+                  layout="fill"
+                />
+              </div>
             </div>
           </div>
           <div className={styles.chatContent}>
