@@ -68,7 +68,7 @@ const HomePage: NextPage<UserProps> = (props) => {
             <h3 className={styles.usernameH3}>{props.username}</h3>
             <p className={styles.emailP}>{props.email}</p>
           </div>
-          <button className={styles.settingsButton}>
+          <button className={styles.settingsButton} title="Settings">
             <Image src={more} alt="settings" />
           </button>
         </div>
