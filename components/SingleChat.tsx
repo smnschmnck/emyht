@@ -6,7 +6,7 @@ import ISingleChat from '../interfaces/ISingleChat';
 const SingleChat: React.FC<ISingleChat> = ({
   name,
   time,
-  message,
+  lastMessage: message,
   read,
   unreadMessagesCount,
   ownMessage,

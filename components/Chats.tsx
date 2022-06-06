@@ -5,12 +5,12 @@ import Image from 'next/image';
 import SingleChat from './SingleChat';
 import ISingleChat from '../interfaces/ISingleChat';
 
-interface ISingleChatWithMessageID extends ISingleChat {
-  messageID: string;
+interface ISingleChatWithChatID extends ISingleChat {
+  chatID: string;
 }
 
 interface ChatsProps {
-  chats: ISingleChatWithMessageID[];
+  chats: ISingleChatWithChatID[];
 }
 
 const Chats: React.FC<ChatsProps> = ({ chats }) => {
@@ -30,10 +30,10 @@ const Chats: React.FC<ChatsProps> = ({ chats }) => {
       <div className={styles.chats}>
         {chats.map((chat) => (
           <SingleChat
-            key={chat.messageID}
+            key={chat.chatID}
             name={chat.name}
             time={chat.time}
-            message={chat.message}
+            lastMessage={chat.lastMessage}
             unreadMessagesCount={chat.unreadMessagesCount}
             deliveryStatus={chat.deliveryStatus}
             read={chat.read}

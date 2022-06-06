@@ -1,7 +1,7 @@
 interface ISingleChat {
   name: string;
   time: string;
-  message: string;
+  lastMessage: string;
   read: boolean;
   unreadMessagesCount?: number;
   ownMessage: boolean;
