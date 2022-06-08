@@ -19,23 +19,6 @@
   gap: 20px;
 }
 
-.submitButton {
-  width: 100%;
-  margin: 0;
-  border-radius: 0;
-  background-color: var(--accent);
-  height: 50px;
-  color: white;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.submitButton:hover {
-  background-color: var(--accent-lighter);
-}
-
 .errorP {
   font-weight: bold;
   text-align: center;

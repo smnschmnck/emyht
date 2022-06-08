@@ -24,14 +24,3 @@
 .emailEmphasis {
   color: #55b0ff;
 }
-
-.button {
-  color: var(--accent);
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-.button:hover {
-  text-decoration: underline;
-}

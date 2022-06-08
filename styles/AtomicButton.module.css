@@ -1,0 +1,35 @@
+.submitButton {
+  margin: 0;
+  border-radius: 0;
+  background-color: var(--accent);
+  height: 45px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+  border-radius: 5px;
+  width: 100%;
+}
+
+.submitButton:hover {
+  background-color: var(--accent-lighter);
+}
+
+.smallButtonContainer {
+  margin-top: 10px;
+  text-align: center;
+  width: 90%;
+}
+
+.smallButton {
+  width: 50%;
+  height: 100%;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  color: var(--accent);
+}
+
+.smallButton:hover {
+  text-decoration: underline;
+}

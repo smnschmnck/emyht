@@ -19,43 +19,8 @@
   color: black;
 }
 
-.submitButton {
-  margin: 0;
-  border-radius: 0;
-  background-color: var(--accent);
-  height: 50px;
-  color: white;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.submitButton:hover {
-  background-color: var(--accent-lighter);
-}
-
 .errorP {
   font-weight: bold;
   text-align: center;
   color: red;
-}
-.switchButtonContainer {
-  margin-top: 10px;
-  text-align: center;
-  width: 90%;
-}
-
-.switchButton {
-  width: 50%;
-  height: 50px;
-  border: none;
-  background-color: transparent;
-  font-weight: bold;
-  cursor: pointer;
-  color: var(--accent);
-}
-
-.switchButton:hover {
-  text-decoration: underline;
 }
