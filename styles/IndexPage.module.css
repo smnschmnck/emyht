@@ -8,7 +8,8 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-width: 100%;
+  max-width: 350px;
+  min-width: 250px;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
   -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
   -moz-box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
@@ -28,9 +29,20 @@
   margin: 30px 0;
 }
 
-@media only screen and (min-width: 600px) {
+.chatContainer {
+  width: 100%;
+}
+
+@media only screen and (max-width: 600px) {
   .sidebar {
-    max-width: 350px;
-    min-width: 250px;
+    min-width: 100%;
+  }
+
+  div#closed.sidebar {
+    display: none;
+  }
+
+  div#closed.chatContainer {
+    display: none;
   }
 }

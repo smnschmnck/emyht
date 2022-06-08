@@ -8,10 +8,10 @@ import { useState } from 'react';
 
 interface ChatsProps {
   chats: ISingleChat[];
-  setCurChatID: (curChatID: string) => void;
+  openChat: (curChatID: string) => void;
 }
 
-const Chats: React.FC<ChatsProps> = ({ chats, setCurChatID }) => {
+const Chats: React.FC<ChatsProps> = ({ chats, openChat }) => {
   const [filteredChats, setFilteredChats] = useState(chats);
   const filterChats = (query: string) => {
     const lowerCaseQuery = query.toLowerCase();
@@ -58,7 +58,7 @@ const Chats: React.FC<ChatsProps> = ({ chats, setCurChatID }) => {
             read={chat.read}
             ownMessage={chat.ownMessage}
             profilePictureUrl={chat.profilePictureUrl}
-            setCurChatID={setCurChatID}
+            openChat={openChat}
           />
         ))}
       </div>

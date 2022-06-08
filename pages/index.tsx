@@ -57,23 +57,36 @@ const dummyPbUrl =
   'https://loremflickr.com/cache/resized/65535_52052815502_26e487ffd0_z_640_480_nofilter.jpg';
 
 const HomePage: NextPage<UserProps> = (props) => {
-  const [curChatID, setCurChatID] = useState('qwqew');
+  const [curChatID, setCurChatID] = useState('');
+  const [chatOpened, setChatOpened] = useState(false);
+  const openChat = (chatID: string) => {
+    setCurChatID(chatID);
+    setChatOpened(true);
+  };
   return (
     <>
       <Head>
         <title>emyht</title>
       </Head>
       <div className={styles.main}>
-        <div className={styles.sidebar}>
+        <div
+          className={styles.sidebar}
+          id={chatOpened ? styles.closed : undefined}
+        >
           <div className={styles.innerSidebar}>
             <div className={styles.logoContainer}>
               <Image src={logo} alt="emyht-logo" />
             </div>
-            <Chats chats={fakeChats} setCurChatID={setCurChatID} />
+            <Chats chats={fakeChats} openChat={openChat} />
           </div>
           <UserInfoAndSettings username={props.username} email={props.email} />
         </div>
-        <MainChat chatID={curChatID} profilePictureUrl={dummyPbUrl} />
+        <div
+          className={styles.chatContainer}
+          id={chatOpened ? undefined : styles.closed}
+        >
+          <MainChat chatID={curChatID} profilePictureUrl={dummyPbUrl} />
+        </div>
       </div>
     </>
   );
