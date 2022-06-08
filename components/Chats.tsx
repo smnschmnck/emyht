@@ -6,15 +6,12 @@ import SingleChat from './SingleChat';
 import ISingleChat from '../interfaces/ISingleChat';
 import { useState } from 'react';
 
-interface ISingleChatWithChatID extends ISingleChat {
-  chatID: string;
-}
-
 interface ChatsProps {
-  chats: ISingleChatWithChatID[];
+  chats: ISingleChat[];
+  setCurChatID: (curChatID: string) => void;
 }
 
-const Chats: React.FC<ChatsProps> = ({ chats }) => {
+const Chats: React.FC<ChatsProps> = ({ chats, setCurChatID }) => {
   const [filteredChats, setFilteredChats] = useState(chats);
   const filterChats = (query: string) => {
     const lowerCaseQuery = query.toLowerCase();
@@ -52,6 +49,7 @@ const Chats: React.FC<ChatsProps> = ({ chats }) => {
         {filteredChats.map((chat) => (
           <SingleChat
             key={chat.chatID}
+            chatID={chat.chatID}
             name={chat.name}
             time={chat.time}
             lastMessage={chat.lastMessage}
@@ -60,6 +58,7 @@ const Chats: React.FC<ChatsProps> = ({ chats }) => {
             read={chat.read}
             ownMessage={chat.ownMessage}
             profilePictureUrl={chat.profilePictureUrl}
+            setCurChatID={setCurChatID}
           />
         ))}
       </div>

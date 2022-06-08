@@ -1,17 +1,42 @@
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import styles from '../styles/MainChatComponent.module.css';
 
 interface MainChatProps {
-  chatName: string;
-  lastOnline: string;
+  chatID: string;
   profilePictureUrl: string;
 }
 
-const MainChat: React.FC<MainChatProps> = ({
-  chatName,
-  lastOnline,
-  profilePictureUrl,
-}) => {
+interface SingleMessageProps {
+  messageID: string;
+  timeStamp: string;
+}
+
+const MainChat: React.FC<MainChatProps> = ({ chatID, profilePictureUrl }) => {
+  const [chatName, setChatName] = useState('');
+  const [lastOnline, setLastOnline] = useState('');
+  const [messages, setMessages] = useState<SingleMessageProps[]>([]);
+
+  const fetchChatInfo = async () => {
+    //TODO: fetch with chatid
+    //eg. fetch("/api/chatInfo/chatID")
+    const json = {
+      name: 'Shari Waelchi',
+      lastOnline: '11:21',
+    };
+    setChatName(json.name);
+    setLastOnline(json.lastOnline);
+  };
+
+  const fetchMessages = async () => {
+    //TODO: fetch with chatid
+    //eg. fetch("/api/chatMessages/chatID")
+  };
+
+  useEffect(() => {
+    fetchChatInfo();
+  }, []);
+
   return (
     <div className={styles.mainChat}>
       <div className={styles.chatHeader}>
@@ -32,7 +57,9 @@ const MainChat: React.FC<MainChatProps> = ({
           </div>
         </div>
       </div>
-      <div className={styles.messageContainer}></div>
+      <div className={styles.messageContainer}>
+        <p>{chatID}</p>
+      </div>
     </div>
   );
 };

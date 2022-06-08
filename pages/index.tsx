@@ -12,6 +12,7 @@ import Image from 'next/image';
 import logo from '../assets/images/logo-small.webp';
 import UserInfoAndSettings from '../components/UserInfoAndSettings';
 import MainChat from '../components/MainChat';
+import { useState } from 'react';
 
 interface UserProps {
   email: string;
@@ -56,6 +57,7 @@ const dummyPbUrl =
   'https://loremflickr.com/cache/resized/65535_52052815502_26e487ffd0_z_640_480_nofilter.jpg';
 
 const HomePage: NextPage<UserProps> = (props) => {
+  const [curChatID, setCurChatID] = useState('qwqew');
   return (
     <>
       <Head>
@@ -67,15 +69,11 @@ const HomePage: NextPage<UserProps> = (props) => {
             <div className={styles.logoContainer}>
               <Image src={logo} alt="emyht-logo" />
             </div>
-            <Chats chats={fakeChats} />
+            <Chats chats={fakeChats} setCurChatID={setCurChatID} />
           </div>
           <UserInfoAndSettings username={props.username} email={props.email} />
         </div>
-        <MainChat
-          chatName={'Shari Waelchi'}
-          lastOnline={'13:21'}
-          profilePictureUrl={dummyPbUrl}
-        />
+        <MainChat chatID={curChatID} profilePictureUrl={dummyPbUrl} />
       </div>
     </>
   );

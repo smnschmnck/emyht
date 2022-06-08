@@ -3,7 +3,11 @@ import styles from '../styles/SingleChatComponent.module.css';
 import fallbackProfilePicure from '../assets/images/fallback-pp.webp';
 import ISingleChat from '../interfaces/ISingleChat';
 
-const SingleChat: React.FC<ISingleChat> = ({
+interface SingleChatProps extends ISingleChat {
+  setCurChatID: (curChatID: string) => void;
+}
+
+const SingleChat: React.FC<SingleChatProps> = ({
   name,
   time,
   lastMessage: message,
@@ -12,10 +16,15 @@ const SingleChat: React.FC<ISingleChat> = ({
   ownMessage,
   deliveryStatus,
   profilePictureUrl,
+  setCurChatID,
+  chatID,
 }) => {
   return (
     <div className={styles.wrapper}>
-      <div className={styles.singleChatContainer}>
+      <button
+        className={styles.singleChatContainer}
+        onClick={() => setCurChatID(chatID)}
+      >
         <div className={styles.singleChat}>
           <div className={styles.profilePictureWrapper}>
             {!ownMessage && !read && unreadMessagesCount && (
@@ -47,7 +56,7 @@ const SingleChat: React.FC<ISingleChat> = ({
             <p className={styles.chatText}>{message}</p>
           </div>
         </div>
-      </div>
+      </button>
     </div>
   );
 };
