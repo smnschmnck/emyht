@@ -260,6 +260,20 @@ func ChangeEmail(c *fiber.Ctx) error {
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 	defer conn.Close()
+
+	var emailExists bool
+	checkQuery := "SELECT count(1) > 0 " +
+		"FROM users " +
+		"WHERE email=$1"
+	rows := conn.QueryRow(checkQuery, changeReq.NewEmail)
+	err = rows.Scan(&emailExists)
+	if err != nil {
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+	if emailExists {
+		return c.Status(409).SendString("EMAIL EXISTS ALREADY")
+	}
+
 	insertQuery := "INSERT INTO change_email(uuid, new_email, confirmation_token) " +
 		"VALUES ($1, $2, $3) " +
 		"ON CONFLICT(uuid) DO UPDATE SET new_email=$2, confirmation_token=$3 " +
