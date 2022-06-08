@@ -1,5 +1,6 @@
 import styles from '../styles/EmailSentComponent.module.css';
 import Link from 'next/link';
+import { SmallLink } from './atomic/Link';
 
 const EmailSent: React.FC<{ email: string }> = ({ email }) => {
   return (
@@ -11,9 +12,7 @@ const EmailSent: React.FC<{ email: string }> = ({ email }) => {
         <br />
         Please open the E-Mail and click on the link.
       </p>
-      <Link href={'/'}>
-        <a className={styles.homeButton}>Go back to Home</a>
-      </Link>
+      <SmallLink href="/">Go back to Home</SmallLink>
     </div>
   );
 };

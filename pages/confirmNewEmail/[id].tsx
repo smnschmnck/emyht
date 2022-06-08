@@ -1,6 +1,7 @@
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
+import { BigLink } from '../../components/atomic/Link';
 import DefaultLayout from '../../components/DefaultLayout';
 import { BACKEND_HOST } from '../../helpers/globals';
 import styles from '../../styles/VerifiyEmailPage.module.css';
@@ -53,9 +54,7 @@ const ConfirmNewEmailPage: NextPage<ConfirmNewEmailPageProps> = ({
             {verificationSuccess && (
               <>
                 <h1>E-Mail changed successfully 🥳</h1>
-                <Link href={'/'}>
-                  <a className={styles.startLink}>Get back to emyht</a>
-                </Link>
+                <BigLink href="/">Get back to emyht</BigLink>
               </>
             )}
             {!verificationSuccess && (

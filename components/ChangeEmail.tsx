@@ -1,7 +1,7 @@
 import { Input } from './atomic/Input';
 import styles from '../styles/ChangeEmailComponent.module.css';
 import { FormEvent, useState } from 'react';
-import BigButton from './atomic/Button';
+import { BigButton } from './atomic/Button';
 
 interface ChangeEmailProps {
   setCurEmail: (email: string) => void;

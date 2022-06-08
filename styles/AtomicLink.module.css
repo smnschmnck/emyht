@@ -1,0 +1,34 @@
+.bigLink {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  min-width: 250px;
+  margin: 0;
+  border-radius: 0;
+  background-color: var(--accent);
+  height: 50px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.bigLink:hover {
+  background-color: var(--accent-lighter);
+}
+
+.smallLink {
+  background-color: transparent;
+  font-weight: bold;
+  border: none;
+  color: var(--accent);
+  width: 70%;
+  margin-top: 10px;
+  height: 50px;
+  cursor: pointer;
+}
+
+.smallLink:hover {
+  text-decoration: underline;
+}
