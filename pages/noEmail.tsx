@@ -1,6 +1,7 @@
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import Head from 'next/head';
 import { useState } from 'react';
+import { SmallButton } from '../components/atomic/Button';
 import ChangeEmail from '../components/ChangeEmail';
 import DefaultLayout from '../components/DefaultLayout';
 import EmailSent from '../components/EmailSent';
@@ -85,17 +86,15 @@ const NoEmailPage: NextPage<UserProps> = ({ email }) => {
               </p>
               <h1>✉️</h1>
               <p className={styles.info}>You did not receive an E-Mail?</p>
-              <button className={styles.button} onClick={sendEmail}>
-                Resend E-Mail
-              </button>
+              <SmallButton onClick={sendEmail}>Resend E-Mail</SmallButton>
               <h2>🤔</h2>
               <p className={styles.info}>
                 <span className={styles.emailEmphasis}>{email}</span> does not
                 look like your E-Mail?
               </p>
-              <button className={styles.button} onClick={toggleShowChangeEmail}>
+              <SmallButton onClick={toggleShowChangeEmail}>
                 Change E-Mail address
-              </button>
+              </SmallButton>
             </div>
           )}
           {showEmailSent && <EmailSent email={curEmail} />}

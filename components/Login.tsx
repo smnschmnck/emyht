@@ -2,6 +2,7 @@ import { useFormik } from 'formik';
 import { useState } from 'react';
 import { Input, PasswordInput } from './atomic/Input';
 import styles from '../styles/LoginRegisterComponent.module.css';
+import { BigButton, SmallButton } from './atomic/Button';
 
 interface LoginProps {
   showLogin: boolean;
@@ -48,8 +49,9 @@ const Login: React.FC<LoginProps> = (props) => {
       <form
         onChange={() => setLoginError('')}
         onSubmit={formik.handleSubmit}
-        autoComplete='off'
-        className={styles.form}>
+        autoComplete="off"
+        className={styles.form}
+      >
         <Input
           type={'text'}
           placeholder={'E-Mail'}
@@ -67,18 +69,10 @@ const Login: React.FC<LoginProps> = (props) => {
           required={true}
           autoFocus={false}
         />
-        <button type='submit' className={styles.submitButton}>
-          Log In
-        </button>
+        <BigButton type="submit">Log In</BigButton>
       </form>
       {loginError && <p className={styles.errorP}>{loginError}</p>}
-      <div className={styles.switchButtonContainer}>
-        <button
-          onClick={props.toggleLoginRegister}
-          className={styles.switchButton}>
-          Sign Up
-        </button>
-      </div>
+      <SmallButton onClick={props.toggleLoginRegister}>Sign Up</SmallButton>
     </div>
   );
 };

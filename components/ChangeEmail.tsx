@@ -1,6 +1,7 @@
 import { Input } from './atomic/Input';
 import styles from '../styles/ChangeEmailComponent.module.css';
 import { FormEvent, useState } from 'react';
+import BigButton from './atomic/Button';
 
 interface ChangeEmailProps {
   setCurEmail: (email: string) => void;
@@ -59,9 +60,7 @@ const ChangeEmail: React.FC<ChangeEmailProps> = ({
           value={confirmNewEmail}
           onChange={(e) => setConfirmNewEmail(e.target.value)}
         />
-        <button type="submit" className={styles.submitButton}>
-          Submit
-        </button>
+        <BigButton type="submit">Submit</BigButton>
       </form>
       <p className={styles.errorP}>{error}</p>
       <button className={styles.cancelButton} onClick={toggleShowChangeEmail}>
