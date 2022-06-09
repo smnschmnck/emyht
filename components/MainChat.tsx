@@ -1,6 +1,7 @@
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import styles from '../styles/MainChatComponent.module.css';
+import { InputWithButton } from './atomic/InputWithButton';
 
 interface MainChatProps {
   chatID: string;
@@ -16,6 +17,7 @@ const MainChat: React.FC<MainChatProps> = ({ chatID, profilePictureUrl }) => {
   const [chatName, setChatName] = useState('');
   const [lastOnline, setLastOnline] = useState('');
   const [messages, setMessages] = useState<SingleMessageProps[]>([]);
+  const [messageInputValue, setMessageInputValue] = useState('');
 
   const fetchChatInfo = async () => {
     //TODO: fetch with chatid
@@ -31,6 +33,13 @@ const MainChat: React.FC<MainChatProps> = ({ chatID, profilePictureUrl }) => {
   const fetchMessages = async () => {
     //TODO: fetch with chatid
     //eg. fetch("/api/chatMessages/chatID")
+  };
+
+  const sendMessage = (event: FormEvent) => {
+    //TODO send message
+    event.preventDefault();
+    setMessageInputValue('');
+    alert(`Sending Message with content: ${messageInputValue}\nTo: ${chatID}`);
   };
 
   useEffect(() => {
@@ -57,8 +66,19 @@ const MainChat: React.FC<MainChatProps> = ({ chatID, profilePictureUrl }) => {
           </div>
         </div>
       </div>
-      <div className={styles.messageContainer}>
-        <p>{chatID}</p>
+      <div className={styles.chatContainer}>
+        <h2>{chatID}</h2>
+        <div className={styles.bottomControls}>
+          <div className={styles.sendFormWrapper}>
+            <InputWithButton
+              buttonText={'Send'}
+              inputPlaceHolder={'Type Message'}
+              value={messageInputValue}
+              setValue={setMessageInputValue}
+              submitHandler={sendMessage}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

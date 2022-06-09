@@ -1,0 +1,37 @@
+.form {
+  height: 40px;
+  width: 100%;
+}
+
+.input {
+  height: 100%;
+  width: 75%;
+  padding-left: 10px;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  border: 1px solid var(--lightGrey);
+  border-right: none;
+  margin: 0;
+  outline: none;
+}
+
+.input:focus {
+  border: 1px solid var(--accent);
+}
+
+.button {
+  height: 100%;
+  width: 25%;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  border: 1px solid var(--accent);
+  background-color: var(--accent);
+  color: white;
+  cursor: pointer;
+  border-left: none;
+  margin: 0;
+}
+
+.button:hover {
+  background-color: var(--accent-lighter);
+}
