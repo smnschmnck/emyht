@@ -4,7 +4,11 @@ import fallbackProfilePicure from '../assets/images/fallback-pp.webp';
 import ISingleChat from '../interfaces/ISingleChat';
 
 interface SingleChatProps extends ISingleChat {
-  openChat: (curChatID: string) => void;
+  openChat: (
+    curChatID: string,
+    profilePictureUrl: string,
+    chatName: string
+  ) => void;
 }
 
 const SingleChat: React.FC<SingleChatProps> = ({
@@ -23,7 +27,7 @@ const SingleChat: React.FC<SingleChatProps> = ({
     <div className={styles.wrapper}>
       <button
         className={styles.singleChatContainer}
-        onClick={() => openChat(chatID)}
+        onClick={() => openChat(chatID, profilePictureUrl, name)}
       >
         <div className={styles.singleChat}>
           <div className={styles.profilePictureWrapper}>

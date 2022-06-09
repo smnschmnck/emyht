@@ -5,13 +5,14 @@ import { useEffect, useState } from 'react';
 interface ChatInfoHeaderProps {
   profilePictureUrl: string;
   chatID: string;
+  chatName: string;
 }
 
 export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
   profilePictureUrl,
   chatID,
+  chatName,
 }) => {
-  const [chatName, setChatName] = useState('');
   const [lastOnline, setLastOnline] = useState('');
 
   const fetchChatInfo = async () => {
@@ -21,7 +22,6 @@ export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
       name: 'Shari Waelchi',
       lastOnline: '11:21',
     };
-    setChatName(json.name);
     setLastOnline(json.lastOnline);
   };
 

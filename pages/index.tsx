@@ -12,7 +12,7 @@ import Image from 'next/image';
 import logo from '../assets/images/logo-small.webp';
 import UserInfoAndSettings from '../components/UserInfoAndSettings';
 import MainChat from '../components/MainChat';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface UserProps {
   email: string;
@@ -57,12 +57,25 @@ const dummyPbUrl =
   'https://loremflickr.com/cache/resized/65535_52052815502_26e487ffd0_z_640_480_nofilter.jpg';
 
 const HomePage: NextPage<UserProps> = (props) => {
-  const [curChatID, setCurChatID] = useState('');
+  const curChat = fakeChats[0];
+  const [curChatID, setCurChatID] = useState(curChat.chatID);
+  const [curProfilePictureUrl, setCurProfilePictureUrl] = useState(
+    curChat.profilePictureUrl
+  );
+  const [curChatName, setCurChatName] = useState(curChat.name);
   const [chatOpened, setChatOpened] = useState(false);
-  const openChat = (chatID: string) => {
+
+  const openChat = (
+    chatID: string,
+    profilePictureUrl: string,
+    chatName: string
+  ) => {
     setCurChatID(chatID);
+    setCurProfilePictureUrl(profilePictureUrl);
+    setCurChatName(chatName);
     setChatOpened(true);
   };
+
   return (
     <>
       <Head>
@@ -85,7 +98,11 @@ const HomePage: NextPage<UserProps> = (props) => {
           className={styles.chatContainer}
           id={chatOpened ? undefined : styles.closed}
         >
-          <MainChat chatID={curChatID} profilePictureUrl={dummyPbUrl} />
+          <MainChat
+            chatID={curChatID}
+            profilePictureUrl={curProfilePictureUrl}
+            chatName={curChatName}
+          />
         </div>
       </div>
     </>

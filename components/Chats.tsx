@@ -8,7 +8,11 @@ import { useState } from 'react';
 
 interface ChatsProps {
   chats: ISingleChat[];
-  openChat: (curChatID: string) => void;
+  openChat: (
+    curChatID: string,
+    profilePictureUrl: string,
+    chatName: string
+  ) => void;
 }
 
 const Chats: React.FC<ChatsProps> = ({ chats, openChat }) => {

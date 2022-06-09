@@ -7,7 +7,7 @@ interface ISingleChat {
   unreadMessagesCount?: number;
   ownMessage: boolean;
   deliveryStatus?: string;
-  profilePictureUrl?: string;
+  profilePictureUrl: string;
 }
 
 export default ISingleChat;
