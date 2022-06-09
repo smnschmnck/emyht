@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from '../styles/MainChatComponent.module.css';
 import { SendMessageForm } from './SendMessageForm';
 
@@ -17,6 +17,7 @@ const MainChat: React.FC<MainChatProps> = ({ chatID, profilePictureUrl }) => {
   const [chatName, setChatName] = useState('');
   const [lastOnline, setLastOnline] = useState('');
   const [messages, setMessages] = useState<SingleMessageProps[]>([]);
+  const messageContainer = useRef<HTMLDivElement>(null);
 
   const fetchChatInfo = async () => {
     //TODO: fetch with chatid
@@ -35,8 +36,12 @@ const MainChat: React.FC<MainChatProps> = ({ chatID, profilePictureUrl }) => {
   };
 
   useEffect(() => {
+    if (messageContainer?.current) {
+      messageContainer.current.scrollTop =
+        messageContainer?.current?.scrollHeight;
+    }
     fetchChatInfo();
-  }, []);
+  }, [chatID]);
 
   return (
     <div className={styles.mainChat}>
@@ -59,18 +64,22 @@ const MainChat: React.FC<MainChatProps> = ({ chatID, profilePictureUrl }) => {
         </div>
       </div>
       <div className={styles.chatContainer}>
-        <h2>{chatID}</h2>
-        <h2>{chatID}</h2>
-        <h2>{chatID}</h2>
-        <h2>{chatID}</h2>
-        <h2>{chatID}</h2>
-        <h2>{chatID}</h2>
-        <h2>{chatID}</h2>
-        <h2>{chatID}</h2>
-        <h2>{chatID}</h2>
-        <h2>{chatID}</h2>
-        <h2>{chatID}</h2>
-        <h2>{chatID}</h2>
+        <div className={styles.messageContainer} ref={messageContainer}>
+          <div className={styles.messages}>
+            <h2>{chatID}</h2>
+            <h2>{chatID}</h2>
+            <h2>{chatID}</h2>
+            <h2>{chatID}</h2>
+            <h2>{chatID}</h2>
+            <h2>{chatID}</h2>
+            <h2>{chatID}</h2>
+            <h2>{chatID}</h2>
+            <h2>{chatID}</h2>
+            <h2>{chatID}</h2>
+            <h2>{chatID}</h2>
+            <h2>{chatID}</h2>
+          </div>
+        </div>
         <div className={styles.bottomControls}>
           <div className={styles.sendFormWrapper}>
             <SendMessageForm chatID={chatID} />
