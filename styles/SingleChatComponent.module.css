@@ -34,6 +34,7 @@
 
 .profilePicture {
   display: inline-block;
+  text-align: left;
   position: relative;
   height: 100%;
   width: 50px;
