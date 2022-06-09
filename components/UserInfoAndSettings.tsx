@@ -19,10 +19,10 @@ const UserInfoAndSettings: React.FC<UserInfoAndSettingsProps> = ({
         <h3 className={styles.usernameH3}>{username}</h3>
         <p className={styles.emailP}>{email}</p>
       </div>
-      <button className={styles.settingsButton} title="Settings">
+      <button className={styles.actionButton} title="Settings">
         <Image src={more} alt="settings" />
       </button>
-      <Logout className={styles.settingsButton}>
+      <Logout className={styles.actionButton}>
         <Image src={logout} alt="logout" />
       </Logout>
     </div>
