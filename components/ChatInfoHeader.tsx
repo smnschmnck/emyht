@@ -6,12 +6,14 @@ interface ChatInfoHeaderProps {
   profilePictureUrl: string;
   chatID: string;
   chatName: string;
+  closeChat: () => void;
 }
 
 export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
   profilePictureUrl,
   chatID,
   chatName,
+  closeChat,
 }) => {
   const [lastOnline, setLastOnline] = useState('');
 
@@ -32,6 +34,7 @@ export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
   return (
     <div className={styles.chatHeader}>
       <div className={styles.innerChatHeader}>
+        <button className={styles.closeButton} onClick={() => closeChat()} />
         <div className={styles.chatInfo}>
           <div className={styles.profilePicture}>
             <Image
@@ -46,6 +49,7 @@ export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
             <p className={styles.lastOnline}>{lastOnline}</p>
           </div>
         </div>
+        <button className={styles.moreButton} />
       </div>
     </div>
   );

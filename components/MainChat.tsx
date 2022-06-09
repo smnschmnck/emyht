@@ -8,12 +8,14 @@ interface MainChatProps {
   chatID: string;
   profilePictureUrl: string;
   chatName: string;
+  closeChat: () => void;
 }
 
 const MainChat: React.FC<MainChatProps> = ({
   chatID,
   profilePictureUrl,
   chatName,
+  closeChat,
 }) => {
   const messageContainer = useRef<HTMLDivElement>(null);
 
@@ -34,6 +36,7 @@ const MainChat: React.FC<MainChatProps> = ({
         profilePictureUrl={profilePictureUrl}
         chatID={chatID}
         chatName={chatName}
+        closeChat={closeChat}
       />
       <div className={styles.chatContainer}>
         <div className={styles.messageContainer} ref={messageContainer}>

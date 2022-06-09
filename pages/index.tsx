@@ -76,6 +76,10 @@ const HomePage: NextPage<UserProps> = (props) => {
     setChatOpened(true);
   };
 
+  const closeChat = () => {
+    setChatOpened(false);
+  };
+
   return (
     <>
       <Head>
@@ -102,6 +106,7 @@ const HomePage: NextPage<UserProps> = (props) => {
             chatID={curChatID}
             profilePictureUrl={curProfilePictureUrl}
             chatName={curChatName}
+            closeChat={closeChat}
           />
         </div>
       </div>
