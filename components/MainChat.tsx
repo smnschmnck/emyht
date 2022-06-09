@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import styles from '../styles/MainChatComponent.module.css';
+import { ChatMessageContainer } from './ChatMessageContainer';
 import { SendMessageForm } from './SendMessageForm';
 
 interface MainChatProps {
@@ -8,15 +9,9 @@ interface MainChatProps {
   profilePictureUrl: string;
 }
 
-interface SingleMessageProps {
-  messageID: string;
-  timeStamp: string;
-}
-
 const MainChat: React.FC<MainChatProps> = ({ chatID, profilePictureUrl }) => {
   const [chatName, setChatName] = useState('');
   const [lastOnline, setLastOnline] = useState('');
-  const [messages, setMessages] = useState<SingleMessageProps[]>([]);
   const messageContainer = useRef<HTMLDivElement>(null);
 
   const fetchChatInfo = async () => {
@@ -28,11 +23,6 @@ const MainChat: React.FC<MainChatProps> = ({ chatID, profilePictureUrl }) => {
     };
     setChatName(json.name);
     setLastOnline(json.lastOnline);
-  };
-
-  const fetchMessages = async () => {
-    //TODO: fetch with chatid
-    //eg. fetch("/api/chatMessages/chatID")
   };
 
   useEffect(() => {
@@ -65,20 +55,7 @@ const MainChat: React.FC<MainChatProps> = ({ chatID, profilePictureUrl }) => {
       </div>
       <div className={styles.chatContainer}>
         <div className={styles.messageContainer} ref={messageContainer}>
-          <div className={styles.messages}>
-            <h2>{chatID}</h2>
-            <h2>{chatID}</h2>
-            <h2>{chatID}</h2>
-            <h2>{chatID}</h2>
-            <h2>{chatID}</h2>
-            <h2>{chatID}</h2>
-            <h2>{chatID}</h2>
-            <h2>{chatID}</h2>
-            <h2>{chatID}</h2>
-            <h2>{chatID}</h2>
-            <h2>{chatID}</h2>
-            <h2>{chatID}</h2>
-          </div>
+          <ChatMessageContainer chatID={chatID} />
         </div>
         <div className={styles.bottomControls}>
           <div className={styles.sendFormWrapper}>
