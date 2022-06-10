@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import styles from '../styles/ChatMessagesContainer.module.css';
+import styles from '../styles/ChatMessagesContainerComponent.module.css';
 
 interface SingleMessageProps {
   messageID: string;
