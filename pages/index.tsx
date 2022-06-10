@@ -5,7 +5,7 @@ import type {
 } from 'next';
 import Head from 'next/head';
 import Chats from '../components/Chats';
-import { getLoginData } from '../helpers/loginHelpers';
+import { getLoginData, GetUserResponse } from '../helpers/loginHelpers';
 import styles from '../styles/IndexPage.module.css';
 import fakeChats from '../dev/dummyData/fakeChats.json';
 import Image from 'next/image';
@@ -13,12 +13,37 @@ import logo from '../assets/images/logo-small.webp';
 import UserInfoAndSettings from '../components/UserInfoAndSettings';
 import MainChat from '../components/MainChat';
 import { useState } from 'react';
+import { ServerResponse } from 'http';
 
 interface UserProps {
   email: string;
   username: string;
   isAdmin: boolean;
 }
+
+const redirectOnUnverifiedEmail = (res: ServerResponse) => {
+  res.writeHead(302, { Location: '/noEmail' });
+  res.end();
+};
+
+const redirectOnLoggedOut = (res: ServerResponse) => {
+  res.writeHead(302, { Location: '/login' });
+  res.end();
+};
+
+const makeUserProps = (getUserResponse: GetUserResponse) => {
+  return {
+    props: {
+      email: getUserResponse.email,
+      username: getUserResponse.username,
+      isAdmin: getUserResponse.isAdmin,
+    },
+  };
+};
+
+const emptyProps = {
+  props: {},
+};
 
 export const getServerSideProps: GetServerSideProps<UserProps | {}> = async (
   context: GetServerSidePropsContext
@@ -27,28 +52,13 @@ export const getServerSideProps: GetServerSideProps<UserProps | {}> = async (
   try {
     const getUserResponse = await getLoginData(cookies);
     if (!getUserResponse.emailActive) {
-      const res = context.res;
-      res.writeHead(302, { Location: '/noEmail' });
-      res.end();
-      return {
-        props: {},
-      };
+      redirectOnUnverifiedEmail(context.res);
+      return emptyProps;
     }
-    return {
-      props: {
-        email: getUserResponse.email,
-        username: getUserResponse.username,
-        isAdmin: getUserResponse.isAdmin,
-      },
-    };
+    return makeUserProps(getUserResponse);
   } catch {
-    //Not logged in
-    const res = context.res;
-    res.writeHead(302, { Location: '/login' });
-    res.end();
-    return {
-      props: {},
-    };
+    redirectOnLoggedOut(context.res);
+    return emptyProps;
   }
 };
 

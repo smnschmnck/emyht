@@ -1,7 +1,7 @@
 import { BACKEND_HOST } from './globals';
 import { NextApiRequestCookies } from 'next/dist/server/api-utils';
 
-interface GetUserResponse {
+export interface GetUserResponse {
   sessionID: string;
   username: string;
   email: string;
