@@ -12,7 +12,7 @@ import Image from 'next/image';
 import logo from '../assets/images/logo-small.webp';
 import UserInfoAndSettings from '../components/UserInfoAndSettings';
 import MainChat from '../components/MainChat';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 interface UserProps {
   email: string;
@@ -51,10 +51,6 @@ export const getServerSideProps: GetServerSideProps<UserProps | {}> = async (
     };
   }
 };
-
-//TODO fetch real profile pic
-const dummyPbUrl =
-  'https://loremflickr.com/cache/resized/65535_52052815502_26e487ffd0_z_640_480_nofilter.jpg';
 
 const HomePage: NextPage<UserProps> = (props) => {
   const curChat = fakeChats[0];
