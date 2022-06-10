@@ -13,6 +13,8 @@ var PGConfig = pgx.ConnConfig{
 	Database: "postgres",
 }
 
+var PGConnString string
+
 func LoadEnv() {
 	envHost := os.Getenv("PG_HOST")
 	envUser := os.Getenv("PG_USER")
@@ -34,4 +36,6 @@ func LoadEnv() {
 	if envDb != "" {
 		PGConfig.Database = envDb
 	}
+
+	PGConnString = "postgres://" + PGConfig.User + ":" + PGConfig.Password + "@" + PGConfig.Host + "/" + PGConfig.Database
 }

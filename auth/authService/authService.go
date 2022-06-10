@@ -29,7 +29,7 @@ type Session struct {
 	Email     string `json:"email"`
 }
 
-func getBearer(c *fiber.Ctx) (string, error) {
+func GetBearer(c *fiber.Ctx) (string, error) {
 	bearerArr := strings.Split(c.Get("authorization"), "Bearer ")
 
 	if len(bearerArr) <= 1 {
@@ -41,7 +41,7 @@ func getBearer(c *fiber.Ctx) (string, error) {
 }
 
 func GetUserBySession(c *fiber.Ctx) error {
-	sessionID, responseErr := getBearer(c)
+	sessionID, responseErr := GetBearer(c)
 	if responseErr != nil {
 		return c.Status(401).SendString("NOT AUTHORIZED")
 	}
@@ -135,7 +135,7 @@ func Register(c *fiber.Ctx) error {
 }
 
 func ResendVerificationEmail(c *fiber.Ctx) error {
-	sessionID, responseErr := getBearer(c)
+	sessionID, responseErr := GetBearer(c)
 	if responseErr != nil {
 		return c.Status(401).SendString("NOT AUTHORIZED")
 	}
@@ -245,7 +245,7 @@ func ChangeEmail(c *fiber.Ctx) error {
 		return c.Status(400).SendString("BAD REQUEST")
 	}
 
-	sessionID, responseErr := getBearer(c)
+	sessionID, responseErr := GetBearer(c)
 	if responseErr != nil {
 		return c.Status(401).SendString("NOT AUTHORIZED")
 	}
@@ -345,7 +345,7 @@ func ConfirmChangedEmail(c *fiber.Ctx) error {
 }
 
 func Logout(c *fiber.Ctx) error {
-	sessionID, err := getBearer(c)
+	sessionID, err := GetBearer(c)
 	if err != nil {
 		return c.Status(500).SendString("SOMETHING WENT WRONG")
 	}

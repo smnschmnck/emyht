@@ -2,6 +2,7 @@ package main
 
 import (
 	"chat/auth/authService"
+	"chat/chatService"
 	"chat/dbHelpers/postgresHelper"
 	"chat/dbHelpers/redisHelper"
 	"fmt"
@@ -53,6 +54,7 @@ func handleRequest() {
 	app.Post("/confirmChangedEmail", authService.ConfirmChangedEmail)
 	app.Post("/login", authService.Authenticate)
 	app.Get("/logout", authService.Logout)
+	app.Post("/startOneOnOneChat", chatService.StartOneOnOneChat)
 	app.Listen(PORT)
 }
 
