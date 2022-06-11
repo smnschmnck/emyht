@@ -47,8 +47,6 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 	}
 	defer conn.Close()
 
-	chatID := uuid.New().String()
-
 	//Complex SQL Query ahead
 	/*
 		SELECT ALL one_on_one chats which belong to one of two UUIDs
@@ -73,11 +71,11 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 			return c.Status(500).SendString("INTERNAL ERROR")
 		}
 	}
-
 	if chatExists {
 		return c.Status(409).SendString("CHAT EXISTS ALREADY")
 	}
 
+	chatID := uuid.New().String()
 	var dbChatID string
 	createChatQuery := "INSERT INTO chats(chat_id, name, picture_url, chat_type) " +
 		"VALUES ($1, '', '','one_on_one') " +
@@ -88,19 +86,19 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 
-	insertSelfQuery := "INSERT INTO user_chat(uuid, chat_id, unread_messages) " +
+	insertSelfIntoChatQuery := "INSERT INTO user_chat(uuid, chat_id, unread_messages) " +
 		"VALUES($1, $2, 0) " +
 		"RETURNING chat_id"
-	err = conn.QueryRow(ctx, insertSelfQuery, reqUUID, chatID).Scan(&dbChatID)
+	err = conn.QueryRow(ctx, insertSelfIntoChatQuery, reqUUID, chatID).Scan(&dbChatID)
 	if err != nil {
 		fmt.Println(err)
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 
-	insertParticipantQuery := "INSERT INTO user_chat(uuid, chat_id, unread_messages) " +
+	insertParticipantIntoChatQuery := "INSERT INTO user_chat(uuid, chat_id, unread_messages) " +
 		"VALUES((SELECT uuid FROM users WHERE email=$1), $2, 0) " +
 		"RETURNING chat_id"
-	err = conn.QueryRow(ctx, insertParticipantQuery, req.ParticipantEmail, chatID).Scan(&dbChatID)
+	err = conn.QueryRow(ctx, insertParticipantIntoChatQuery, req.ParticipantEmail, chatID).Scan(&dbChatID)
 	if err != nil {
 		fmt.Println(err)
 		return c.Status(500).SendString("INTERNAL ERROR")
