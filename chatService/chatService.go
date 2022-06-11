@@ -36,9 +36,9 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 		return c.Status(401).SendString("NOT AUTHORIZED")
 	}
 
-	user, respErr := userService.GetUserBySessionID(sessionID)
-	if respErr.StatusCode >= 300 {
-		return c.Status(respErr.StatusCode).SendString(respErr.Msg)
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		c.Status(500).SendString("INTERNAL ERROR")
 	}
 
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
@@ -63,7 +63,7 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 	insertSelfQuery := "INSERT INTO user_chat(uuid, chat_id, unread_messages) " +
 		"VALUES($1, $2, 0) " +
 		"RETURNING chat_id"
-	err = conn.QueryRow(ctx, insertSelfQuery, user.Uuid, chatID).Scan(&dbChatID)
+	err = conn.QueryRow(ctx, insertSelfQuery, reqUUID, chatID).Scan(&dbChatID)
 	if err != nil {
 		fmt.Println(err)
 		return c.Status(500).SendString("INTERNAL ERROR")

@@ -128,14 +128,22 @@ type ResponseError struct {
 	StatusCode int
 }
 
-func GetUserBySessionID(sessionID string) (User, ResponseError) {
+func GetUUIDBySessionID(sessionID string) (string, error) {
 	ctx := context.Background()
 	rdb := redis.NewClient(&redisHelper.RedisConfig)
 	uuid, err := rdb.Get(ctx, sessionID).Result()
 	if err != nil {
-		return User{}, ResponseError{Msg: "USER NOT FOUND", StatusCode: 404}
+		return "", err
 	}
 	rdb.Set(ctx, sessionID, uuid, 24*time.Hour)
+	return uuid, nil
+}
+
+func GetUserBySessionID(sessionID string) (User, ResponseError) {
+	uuid, err := GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return User{}, ResponseError{Msg: "USER NOT FOUND", StatusCode: 404}
+	}
 	user, err := GetUserByUUID(uuid)
 	if err != nil {
 		return User{}, ResponseError{Msg: "INTERNAL ERROR", StatusCode: 500}
