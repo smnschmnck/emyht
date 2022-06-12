@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
 
@@ -105,4 +106,74 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 	}
 
 	return c.SendString("SUCCESS")
+}
+
+func GetChats(c *fiber.Ctx) error {
+	sessionID, responseErr := authService.GetBearer(c)
+	if responseErr != nil {
+		fmt.Println(responseErr)
+		return c.Status(401).SendString("NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+
+	type singleChat struct {
+		ChatID         string  `json:"chatID"`
+		Name           string  `json:"chatName"`
+		PictureUrl     string  `json:"pictureUrl"`
+		UnreadMessages int     `json:"unreadMessages"`
+		MessageType    *string `json:"messageType"`
+		TextContent    *string `json:"textContent"`
+		Timestamp      *int    `json:"timestamp"`
+		DeliveryStatus *string `json:"deliveryStatus"`
+		SenderID       *string `json:"senderID"`
+	}
+
+	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+	defer conn.Close()
+
+	getChatsQuery := "SELECT c.chat_id, ( " +
+		"CASE c.chat_type WHEN 'one_on_one' THEN ( " +
+		"SELECT users.username AS name " +
+		"FROM users " +
+		"JOIN user_chat uc on users.uuid = uc.uuid " +
+		"JOIN chats c on uc.chat_id = c.chat_id " +
+		"WHERE c.chat_type='one_on_one' AND uc.uuid!=$1 " +
+		") ELSE c.name END " +
+		"), " +
+		"( " +
+		"CASE c.chat_type WHEN 'one_on_one' THEN ( " +
+		"SELECT users.picture_url AS picture_url " +
+		"FROM users " +
+		"JOIN user_chat uc on users.uuid = uc.uuid " +
+		"JOIN chats c on uc.chat_id = c.chat_id " +
+		"WHERE c.chat_type='one_on_one' AND uc.uuid!=$1 " +
+		") ELSE c.picture_url END " +
+		"), " +
+		"u.unread_messages, " +
+		"m.message_type, " +
+		"m.text_content, " +
+		"m.timestamp, " +
+		"m.delivery_status, " +
+		"m.sender_id " +
+		"FROM user_chat u " +
+		"JOIN chats c ON u.chat_id = c.chat_id " +
+		"LEFT JOIN chatmessages m ON m.message_id = c.last_message_id " +
+		"WHERE u.uuid=$1"
+	var chats []singleChat
+	err = pgxscan.Select(ctx, conn, &chats, getChatsQuery, reqUUID)
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+
+	return c.JSON(chats)
 }

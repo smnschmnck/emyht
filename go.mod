@@ -37,6 +37,7 @@ require (
 
 require (
 	github.com/aws/aws-sdk-go v1.44.23
+	github.com/georgysavva/scany v1.0.0
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.10.1

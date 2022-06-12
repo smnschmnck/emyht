@@ -46,6 +46,7 @@ func handleRequest() {
 		return fiber.ErrUpgradeRequired
 	})
 	app.Get("/ws", websocket.New(wsHandler))
+	//auth
 	app.Get("/user", authService.GetUserBySession)
 	app.Post("/register", authService.Register)
 	app.Post("/verifyEmail", authService.VerifyEmail)
@@ -54,7 +55,9 @@ func handleRequest() {
 	app.Post("/confirmChangedEmail", authService.ConfirmChangedEmail)
 	app.Post("/login", authService.Authenticate)
 	app.Get("/logout", authService.Logout)
+	//chats
 	app.Post("/startOneOnOneChat", chatService.StartOneOnOneChat)
+	app.Get("/getChats", chatService.GetChats)
 	app.Listen(PORT)
 }
 
