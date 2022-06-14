@@ -5,10 +5,24 @@ import { Modal } from './atomic/Modal';
 import group from '../assets/images/group.svg';
 import chat from '../assets/images/chat.svg';
 import { ContactList } from './ContactList';
+import { SingleContactProps } from './SingleContact';
 
 interface AddChatModalProps {
   closeHandler: () => void;
 }
+
+const fakeContacts: SingleContactProps[] = [
+  {
+    name: 'Maximilian Berger',
+    profilePictureUrl:
+      'https://loremflickr.com/cache/resized/65535_52016243732_73712e2714_b_640_480_nofilter.jpg',
+  },
+  {
+    name: 'John Doe',
+    profilePictureUrl:
+      'https://loremflickr.com/cache/resized/65535_51950170317_e4c7332e32_c_640_480_nofilter.jpg',
+  },
+];
 
 export const AddChatModal: React.FC<AddChatModalProps> = ({ closeHandler }) => {
   return (
@@ -33,7 +47,7 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({ closeHandler }) => {
               </div>
             </button>
           </div>
-          <ContactList />
+          <ContactList contacts={fakeContacts} />
           <div className={styles.buttons}>
             <BigButton>Start chat</BigButton>
             <SmallButton onClick={closeHandler}>Cancel</SmallButton>
