@@ -1,5 +1,7 @@
 .modal {
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: absolute;
   z-index: 999;
   height: 100%;
