@@ -13,9 +13,14 @@ interface ChatsProps {
     profilePictureUrl: string,
     chatName: string
   ) => void;
+  addChatButtonClickHandler: () => void;
 }
 
-const Chats: React.FC<ChatsProps> = ({ chats, openChat }) => {
+const Chats: React.FC<ChatsProps> = ({
+  chats,
+  openChat,
+  addChatButtonClickHandler,
+}) => {
   const [filteredChats, setFilteredChats] = useState(chats);
   const filterChats = (query: string) => {
     const lowerCaseQuery = query.toLowerCase();
@@ -32,7 +37,11 @@ const Chats: React.FC<ChatsProps> = ({ chats, openChat }) => {
         <div className={styles.chatContainer}>
           <div className={styles.chatsHeader}>
             <h2 className={styles.chatsHeading}>Chats</h2>
-            <button className={styles.addChatButton} title="Add new Chat">
+            <button
+              className={styles.addChatButton}
+              title="Add new Chat"
+              onClick={addChatButtonClickHandler}
+            >
               <Image src={plus} alt="Add Chat" />
             </button>
           </div>

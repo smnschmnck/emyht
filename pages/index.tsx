@@ -14,6 +14,7 @@ import UserInfoAndSettings from '../components/UserInfoAndSettings';
 import MainChat from '../components/MainChat';
 import { useState } from 'react';
 import { ServerResponse } from 'http';
+import { AddChatModal } from '../components/AddChatModal';
 
 interface IndexPageProps {
   email: string;
@@ -70,6 +71,7 @@ const HomePage: NextPage<IndexPageProps> = ({ username, email }) => {
   );
   const [curChatName, setCurChatName] = useState(curChat.name);
   const [chatOpened, setChatOpened] = useState(false);
+  const [showAddChatModal, setShowAddChatModal] = useState(false);
 
   const openChat = (
     chatID: string,
@@ -91,6 +93,11 @@ const HomePage: NextPage<IndexPageProps> = ({ username, email }) => {
       <Head>
         <title>emyht</title>
       </Head>
+      {showAddChatModal && (
+        <AddChatModal
+          closeHandler={() => setShowAddChatModal(false)}
+        ></AddChatModal>
+      )}
       <div className={styles.main}>
         <div
           className={styles.sidebar}
@@ -100,7 +107,11 @@ const HomePage: NextPage<IndexPageProps> = ({ username, email }) => {
             <div className={styles.logoContainer}>
               <Image src={logo} alt="emyht-logo" />
             </div>
-            <Chats chats={fakeChats} openChat={openChat} />
+            <Chats
+              chats={fakeChats}
+              openChat={openChat}
+              addChatButtonClickHandler={() => setShowAddChatModal(true)}
+            />
           </div>
           <UserInfoAndSettings username={username} email={email} />
         </div>
