@@ -1,10 +1,10 @@
 import styles from '../styles/AddChatModal.module.css';
 import Image from 'next/image';
 import { BigButton, SmallButton } from './atomic/Button';
-import { Input } from './atomic/Input';
 import { Modal } from './atomic/Modal';
 import group from '../assets/images/group.svg';
 import chat from '../assets/images/chat.svg';
+import { ContactList } from './ContactList';
 
 interface AddChatModalProps {
   closeHandler: () => void;
@@ -33,50 +33,7 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({ closeHandler }) => {
               </div>
             </button>
           </div>
-          <Input placeholder="Search contacts"></Input>
-          <div className={styles.contacts}>
-            {/* TODO: Refactor into component */}
-            <div className={styles.contact}>
-              <div className={styles.contactInfo}>
-                <div className={styles.profilePicContainer}>
-                  <div className={styles.profilePic}></div>
-                </div>
-                <p className={styles.contactName}>Maximilian Berger</p>
-              </div>
-            </div>
-            <div className={styles.contact}>
-              <div className={styles.contactInfo}>
-                <div className={styles.profilePicContainer}>
-                  <div className={styles.profilePic}></div>
-                </div>
-                <p className={styles.contactName}>Maximilian Berger</p>
-              </div>
-            </div>
-            <div className={styles.contact}>
-              <div className={styles.contactInfo}>
-                <div className={styles.profilePicContainer}>
-                  <div className={styles.profilePic}></div>
-                </div>
-                <p className={styles.contactName}>Maximilian Berger</p>
-              </div>
-            </div>
-            <div className={styles.contact}>
-              <div className={styles.contactInfo}>
-                <div className={styles.profilePicContainer}>
-                  <div className={styles.profilePic}></div>
-                </div>
-                <p className={styles.contactName}>Maximilian Berger</p>
-              </div>
-            </div>
-            <div className={styles.contact}>
-              <div className={styles.contactInfo}>
-                <div className={styles.profilePicContainer}>
-                  <div className={styles.profilePic}></div>
-                </div>
-                <p className={styles.contactName}>Maximilian Berger</p>
-              </div>
-            </div>
-          </div>
+          <ContactList />
           <div className={styles.buttons}>
             <BigButton>Start chat</BigButton>
             <SmallButton onClick={closeHandler}>Cancel</SmallButton>
