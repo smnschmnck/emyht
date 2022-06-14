@@ -15,7 +15,7 @@ import MainChat from '../components/MainChat';
 import { useState } from 'react';
 import { ServerResponse } from 'http';
 
-interface UserProps {
+interface IndexPageProps {
   email: string;
   username: string;
   isAdmin: boolean;
@@ -45,9 +45,9 @@ const emptyProps = {
   props: {},
 };
 
-export const getServerSideProps: GetServerSideProps<UserProps | {}> = async (
-  context: GetServerSidePropsContext
-) => {
+export const getServerSideProps: GetServerSideProps<
+  IndexPageProps | {}
+> = async (context: GetServerSidePropsContext) => {
   const cookies = context.req.cookies;
   try {
     const getUserResponse = await getLoginData(cookies);
@@ -62,7 +62,7 @@ export const getServerSideProps: GetServerSideProps<UserProps | {}> = async (
   }
 };
 
-const HomePage: NextPage<UserProps> = (props) => {
+const HomePage: NextPage<IndexPageProps> = ({ username, email }) => {
   const curChat = fakeChats[0];
   const [curChatID, setCurChatID] = useState(curChat.chatID);
   const [curProfilePictureUrl, setCurProfilePictureUrl] = useState(
@@ -102,7 +102,7 @@ const HomePage: NextPage<UserProps> = (props) => {
             </div>
             <Chats chats={fakeChats} openChat={openChat} />
           </div>
-          <UserInfoAndSettings username={props.username} email={props.email} />
+          <UserInfoAndSettings username={username} email={email} />
         </div>
         <div
           className={styles.chatContainer}
