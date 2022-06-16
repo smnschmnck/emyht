@@ -1,11 +1,11 @@
 import styles from '../styles/AddChatModal.module.css';
-import Image from 'next/image';
-import { BigButton, SmallButton } from './atomic/Button';
-import { Modal } from './atomic/Modal';
 import group from '../assets/images/group.svg';
 import chat from '../assets/images/chat.svg';
+import { BigButton, SmallButton } from './atomic/Button';
+import { Modal } from './atomic/Modal';
 import { ContactList } from './ContactList';
 import { SingleContactProps } from './SingleContact';
+import { Tab, Tabs } from './atomic/Tabs';
 
 interface AddChatModalProps {
   closeHandler: () => void;
@@ -32,26 +32,22 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({ closeHandler }) => {
           <h2 className={styles.heading}>New chat</h2>
         </div>
         <div className={styles.interface}>
-          {/* TODO: Refactor into atomic component */}
-          <div className={styles.selector}>
-            <button className={styles.selectorElement} id={styles.active}>
-              <div className={styles.selectorLabel}>
-                <Image src={chat} alt="group" objectFit={'contain'}></Image>
-                <p className={styles.selectorLabelText}>Chat</p>
+          <Tabs>
+            <Tab label="Foo" picture={chat}>
+              <ContactList contacts={fakeContacts} />
+              <div className={styles.buttons}>
+                <BigButton>Start chat</BigButton>
+                <SmallButton onClick={closeHandler}>Cancel</SmallButton>
               </div>
-            </button>
-            <button className={styles.selectorElement}>
-              <div className={styles.selectorLabel}>
-                <Image src={group} alt="group"></Image>
-                <p className={styles.selectorLabelText}>Group</p>
+            </Tab>
+            <Tab label="Bar" picture={group}>
+              <ContactList contacts={fakeContacts} />
+              <div className={styles.buttons}>
+                <BigButton>Create groupchat</BigButton>
+                <SmallButton onClick={closeHandler}>Cancel</SmallButton>
               </div>
-            </button>
-          </div>
-          <ContactList contacts={fakeContacts} />
-          <div className={styles.buttons}>
-            <BigButton>Start chat</BigButton>
-            <SmallButton onClick={closeHandler}>Cancel</SmallButton>
-          </div>
+            </Tab>
+          </Tabs>
         </div>
       </div>
     </Modal>
