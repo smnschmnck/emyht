@@ -33,14 +33,14 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({ closeHandler }) => {
         </div>
         <div className={styles.interface}>
           <Tabs>
-            <Tab label="Foo" picture={chat}>
+            <Tab label="Chat" picture={chat}>
               <ContactList contacts={fakeContacts} />
               <div className={styles.buttons}>
                 <BigButton>Start chat</BigButton>
                 <SmallButton onClick={closeHandler}>Cancel</SmallButton>
               </div>
             </Tab>
-            <Tab label="Bar" picture={group}>
+            <Tab label="Group" picture={group}>
               <ContactList contacts={fakeContacts} />
               <div className={styles.buttons}>
                 <BigButton>Create groupchat</BigButton>
