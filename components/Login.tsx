@@ -53,7 +53,7 @@ const Login: React.FC<LoginProps> = (props) => {
         className={styles.form}
       >
         <Input
-          type={'text'}
+          type={'email'}
           placeholder={'E-Mail'}
           name={'email'}
           value={formik.values.email}

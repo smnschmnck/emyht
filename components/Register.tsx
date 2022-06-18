@@ -63,7 +63,7 @@ const Register: React.FC<RegisterProps> = (props) => {
         autoComplete="off"
       >
         <Input
-          type={'text'}
+          type={'email'}
           placeholder={'E-Mail'}
           name={'email'}
           value={formik.values.email}
