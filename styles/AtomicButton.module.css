@@ -15,6 +15,18 @@
   background-color: var(--accent-lighter);
 }
 
+.submitButtonDisabled {
+  margin: 0;
+  border-radius: 0;
+  background-color: rgb(224, 224, 224);
+  height: 40px;
+  color: white;
+  border: none;
+  transition: 0.2s;
+  border-radius: 5px;
+  width: 100%;
+}
+
 .smallButtonContainer {
   display: flex;
   justify-content: center;
@@ -34,4 +46,13 @@
 
 .smallButton:hover {
   text-decoration: underline;
+}
+
+.smallButtonDisabled {
+  width: 50%;
+  height: 100%;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  color: rgb(224, 224, 224);
 }
