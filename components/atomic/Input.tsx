@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { HTMLInputTypeAttribute, useState } from 'react';
 import styles from '../../styles/AtomicInput.module.css';
 
 interface PasswordInputProps {
@@ -11,7 +11,7 @@ interface PasswordInputProps {
 }
 
 interface InputProps extends PasswordInputProps {
-  type?: 'text' | 'number';
+  type?: HTMLInputTypeAttribute;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -62,8 +62,9 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
         className={
           showPassword ? styles.hidePasswordButton : styles.showPasswordButton
         }
-        type='button'
-        onClick={() => setShowPassword(!showPassword)}></button>
+        type="button"
+        onClick={() => setShowPassword(!showPassword)}
+      ></button>
     </div>
   );
 };
