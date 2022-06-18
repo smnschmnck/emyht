@@ -12,11 +12,6 @@ export const Tab: React.FC<TabProps> = ({ children, label, picture }) => {
   return <>{children}</>;
 };
 
-interface TabsProps {
-  initialTab?: number;
-  children?: React.ReactElement<TabProps>[];
-}
-
 interface TabSelectorProps {
   tabNum: number;
   picture?: string;
@@ -46,9 +41,25 @@ const TabSelector: React.FC<TabSelectorProps> = ({
   );
 };
 
-export const Tabs: React.FC<TabsProps> = ({ children, initialTab }) => {
+interface TabsProps {
+  initialTab?: number;
+  onTabChange?: () => void;
+  children?: React.ReactElement<TabProps>[];
+}
+
+export const Tabs: React.FC<TabsProps> = ({
+  children,
+  initialTab,
+  onTabChange,
+}) => {
   const [curTab, setCurTab] = useState(initialTab ?? 0);
   const tabs = Children.toArray(children) as React.ReactElement<TabProps>[];
+  const changeTab = (tabNum: number) => {
+    if (onTabChange) {
+      onTabChange();
+    }
+    setCurTab(tabNum);
+  };
   return (
     <div className={styles.main}>
       <div className={styles.selector}>
@@ -59,7 +70,7 @@ export const Tabs: React.FC<TabsProps> = ({ children, initialTab }) => {
             picture={t.props.picture}
             label={t.props.label}
             active={i == curTab}
-            setCurTab={setCurTab}
+            setCurTab={changeTab}
           />
         ))}
       </div>

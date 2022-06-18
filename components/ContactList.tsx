@@ -1,13 +1,21 @@
 import { Input } from './atomic/Input';
 import styles from '../styles/ContactListComponent.module.css';
-import { SingleContact, SingleContactProps } from './SingleContact';
+import { SingleContact, Contact } from './SingleContact';
 import { useState } from 'react';
 
 interface ContactListProps {
-  contacts: SingleContactProps[];
+  selectedContacts: string[];
+  setSelectedContacts: (selectedContacts: string[]) => void;
+  contacts: Contact[];
+  multiselect?: boolean;
 }
 
-export const ContactList: React.FC<ContactListProps> = ({ contacts }) => {
+export const ContactList: React.FC<ContactListProps> = ({
+  selectedContacts,
+  setSelectedContacts,
+  contacts,
+  multiselect,
+}) => {
   const [filteredContacts, setFilteredContacts] = useState(contacts);
   const searchContacts = (query: string) => {
     const lowerCaseQuery = query.toLowerCase();
@@ -19,6 +27,20 @@ export const ContactList: React.FC<ContactListProps> = ({ contacts }) => {
     );
   };
 
+  const selectContact = (id: string) => {
+    if (selectedContacts.includes(id)) {
+      setSelectedContacts(
+        selectedContacts.filter((contactID) => contactID !== id)
+      );
+      return;
+    }
+    if (multiselect) {
+      setSelectedContacts([...selectedContacts, id]);
+      return;
+    }
+    setSelectedContacts([id]);
+  };
+
   return (
     <>
       <Input
@@ -28,9 +50,12 @@ export const ContactList: React.FC<ContactListProps> = ({ contacts }) => {
       <div className={styles.contacts}>
         {filteredContacts.map((contact) => (
           <SingleContact
-            key={contact.name}
+            key={contact.id}
+            id={contact.id}
             name={contact.name}
             profilePictureUrl={contact.profilePictureUrl}
+            selectContact={selectContact}
+            selected={selectedContacts.includes(contact.id)}
           />
         ))}
       </div>

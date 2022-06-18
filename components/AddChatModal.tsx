@@ -4,20 +4,23 @@ import chat from '../assets/images/chat.svg';
 import { BigButton, SmallButton } from './atomic/Button';
 import { Modal } from './atomic/Modal';
 import { ContactList } from './ContactList';
-import { SingleContactProps } from './SingleContact';
+import { Contact } from './SingleContact';
 import { Tab, Tabs } from './atomic/Tabs';
+import { useEffect, useState } from 'react';
 
 interface AddChatModalProps {
   closeHandler: () => void;
 }
 
-const fakeContacts: SingleContactProps[] = [
+const fakeContacts: Contact[] = [
   {
+    id: '44b566-b465f4-b4564564',
     name: 'Maximilian Berger',
     profilePictureUrl:
       'https://loremflickr.com/cache/resized/65535_52016243732_73712e2714_b_640_480_nofilter.jpg',
   },
   {
+    id: '3345-34g43gn3-3545',
     name: 'John Doe',
     profilePictureUrl:
       'https://loremflickr.com/cache/resized/65535_51950170317_e4c7332e32_c_640_480_nofilter.jpg',
@@ -25,6 +28,12 @@ const fakeContacts: SingleContactProps[] = [
 ];
 
 export const AddChatModal: React.FC<AddChatModalProps> = ({ closeHandler }) => {
+  const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
+
+  const resetSelectedContacts = () => {
+    setSelectedContacts([]);
+  };
+
   return (
     <Modal backgroundClickHandler={closeHandler} mobileFullscreen={true}>
       <div className={styles.main}>
@@ -32,16 +41,25 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({ closeHandler }) => {
           <h2 className={styles.heading}>New chat</h2>
         </div>
         <div className={styles.interface}>
-          <Tabs>
+          <Tabs onTabChange={resetSelectedContacts}>
             <Tab label="Chat" picture={chat}>
-              <ContactList contacts={fakeContacts} />
+              <ContactList
+                selectedContacts={selectedContacts}
+                setSelectedContacts={setSelectedContacts}
+                contacts={fakeContacts}
+              />
               <div className={styles.buttons}>
                 <BigButton>Start chat</BigButton>
                 <SmallButton onClick={closeHandler}>Cancel</SmallButton>
               </div>
             </Tab>
             <Tab label="Group" picture={group}>
-              <ContactList contacts={fakeContacts} />
+              <ContactList
+                selectedContacts={selectedContacts}
+                setSelectedContacts={setSelectedContacts}
+                contacts={fakeContacts}
+                multiselect={true}
+              />
               <div className={styles.buttons}>
                 <BigButton>Create groupchat</BigButton>
                 <SmallButton onClick={closeHandler}>Cancel</SmallButton>

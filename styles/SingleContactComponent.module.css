@@ -7,23 +7,41 @@
   border-bottom: 1px solid var(--lightGrey);
 }
 
-.contactInfo {
+.contactWrapper {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   height: 80%;
-  width: 100%;
+  width: 99%;
   border-radius: 7px;
   cursor: pointer;
+  color: black;
+  background-color: white;
+  border: none;
 }
 
-.contactInfo:hover {
+.contactWrapper:hover {
   background-color: var(--accentHover);
+}
+
+#selected.contactWrapper {
+  background-color: var(--accent);
+  color: white;
+}
+
+.contactInfo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: fit-content;
+  height: 80%;
 }
 
 .profilePicContainer {
   display: flex;
   justify-content: center;
-  height: 80%;
+  height: 100%;
   width: 60px;
 }
 
