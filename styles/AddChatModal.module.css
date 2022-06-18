@@ -15,14 +15,17 @@
   align-items: center;
   border-top-left-radius: 7px;
   border-top-right-radius: 7px;
-  height: 15%;
+  height: min-content;
   width: 100%;
-  background-color: var(--accent);
+  background-color: white;
 }
 
 .heading {
+  margin: 0;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
   width: 80%;
-  color: white;
+  color: var(--accent);
 }
 
 .interface {
