@@ -9,7 +9,7 @@ import { getLoginData, GetUserResponse } from '../helpers/loginHelpers';
 import styles from '../styles/IndexPage.module.css';
 import fakeChats from '../dev/dummyData/fakeChats.json';
 import Image from 'next/image';
-import logo from '../assets/images/logo-small.webp';
+import logo from '../assets/images/emyht-logo.svg';
 import UserInfoAndSettings from '../components/UserInfoAndSettings';
 import MainChat from '../components/MainChat';
 import { useState } from 'react';

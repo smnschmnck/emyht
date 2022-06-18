@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import styles from '../styles/DefaultLayout.module.css';
-import logo from '../assets/images/logo-small.webp';
+import logo from '../assets/images/emyht-logo.svg';
 import Link from 'next/link';
 
 interface DefaultLayoutProps {
@@ -18,7 +18,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 objectFit={'contain'}
                 width={'100px'}
                 src={logo}
-                alt='emyht-logo'></Image>
+                alt="emyht-logo"
+              ></Image>
             </Link>
           </div>
         </div>
