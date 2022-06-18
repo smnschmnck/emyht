@@ -34,6 +34,16 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({ closeHandler }) => {
     setSelectedContacts([]);
   };
 
+  const createGroupChat = () => {
+    //TODO: send to backend
+    alert('Creating groupchat with: ' + JSON.stringify(selectedContacts));
+  };
+
+  const createChat = () => {
+    //TODO: send to backend
+    alert('Creating chat with: ' + selectedContacts[0]);
+  };
+
   return (
     <Modal backgroundClickHandler={closeHandler} mobileFullscreen={true}>
       <div className={styles.main}>
@@ -49,7 +59,12 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({ closeHandler }) => {
                 contacts={fakeContacts}
               />
               <div className={styles.buttons}>
-                <BigButton>Start chat</BigButton>
+                <BigButton
+                  onClick={() => createChat()}
+                  disabled={selectedContacts.length <= 0}
+                >
+                  Start chat
+                </BigButton>
                 <SmallButton onClick={closeHandler}>Cancel</SmallButton>
               </div>
             </Tab>
@@ -61,7 +76,12 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({ closeHandler }) => {
                 multiselect={true}
               />
               <div className={styles.buttons}>
-                <BigButton>Create groupchat</BigButton>
+                <BigButton
+                  onClick={() => createGroupChat()}
+                  disabled={selectedContacts.length <= 0}
+                >
+                  Create groupchat
+                </BigButton>
                 <SmallButton onClick={closeHandler}>Cancel</SmallButton>
               </div>
             </Tab>
