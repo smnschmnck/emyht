@@ -44,7 +44,9 @@ const Chats: React.FC<ChatsProps> = ({
               <div className={styles.popupContent}>
                 <button
                   className={styles.popupOption}
-                  onClick={() => addChatButtonClickHandler()}
+                  onClick={() => {
+                    addChatButtonClickHandler();
+                  }}
                 >
                   <div className={styles.popupOptionContent}>
                     <Image src={chat} alt=""></Image>

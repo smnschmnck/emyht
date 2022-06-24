@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import styles from '../../styles/AtomicPopupButton.module.css';
 
@@ -19,12 +19,25 @@ export const PopupButton: React.FC<PopupButtonProps> = ({
   label,
   showPopUp,
 }) => {
-  const [showPopup, setShowPopup] = useState(showPopUp ?? false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const [elShowPopup, setElShowPopup] = useState(false);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setElShowPopup(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside, true);
+    return () => {
+      document.removeEventListener('click', handleClickOutside, true);
+    };
+  }, [showPopUp]);
   return (
     <>
-      <div>
+      <div ref={ref}>
         <button
-          onClick={() => setShowPopup(!showPopup)}
+          onClick={() => setElShowPopup(!elShowPopup)}
           className={buttonClassName ?? styles.button}
         >
           <div className={styles.buttonContent}>
@@ -32,7 +45,7 @@ export const PopupButton: React.FC<PopupButtonProps> = ({
             <span>{label}</span>
           </div>
         </button>
-        {showPopup && <div className={styles.popup}>{children}</div>}
+        {elShowPopup && <div className={styles.popup}>{children}</div>}
       </div>
     </>
   );
