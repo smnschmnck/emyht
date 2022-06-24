@@ -45,7 +45,11 @@ export const PopupButton: React.FC<PopupButtonProps> = ({
             <span>{label}</span>
           </div>
         </button>
-        {elShowPopup && <div className={styles.popup}>{children}</div>}
+        {elShowPopup && (
+          <div className={styles.popup} onClick={() => setElShowPopup(false)}>
+            {children}
+          </div>
+        )}
       </div>
     </>
   );
