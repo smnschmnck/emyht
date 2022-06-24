@@ -1,10 +1,13 @@
 import styles from '../styles/ChatsComponent.module.css';
 import plus from '../assets/images/plus.svg';
+import chat from '../assets/images/chat.svg';
+import addUser from '../assets/images/addUser.svg';
 import { Input } from './atomic/Input';
 import Image from 'next/image';
 import SingleChat from './SingleChat';
 import ISingleChat from '../interfaces/ISingleChat';
 import { useState } from 'react';
+import { PopupButton } from './atomic/PopupButton';
 
 interface ChatsProps {
   chats: ISingleChat[];
@@ -37,13 +40,26 @@ const Chats: React.FC<ChatsProps> = ({
         <div className={styles.chatContainer}>
           <div className={styles.chatsHeader}>
             <h2 className={styles.chatsHeading}>Chats</h2>
-            <button
-              className={styles.addChatButton}
-              title="Add new Chat"
-              onClick={addChatButtonClickHandler}
-            >
-              <Image src={plus} alt="Add Chat" />
-            </button>
+            <PopupButton buttonClassName={styles.addChatButton} icon={plus}>
+              <div className={styles.popupContent}>
+                <button
+                  className={styles.popupOption}
+                  onClick={() => addChatButtonClickHandler()}
+                >
+                  <div className={styles.popupOptionContent}>
+                    <Image src={chat} alt=""></Image>
+                    <span className={styles.popupOptionText}> Add chat</span>
+                  </div>
+                </button>
+                <button className={styles.popupOption}>
+                  {' '}
+                  <div className={styles.popupOptionContent}>
+                    <Image src={addUser} alt=""></Image>
+                    <span className={styles.popupOptionText}> Add contact</span>
+                  </div>
+                </button>
+              </div>
+            </PopupButton>
           </div>
           <Input
             placeholder="Search Chats"

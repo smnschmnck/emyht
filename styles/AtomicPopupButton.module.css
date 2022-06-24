@@ -1,0 +1,35 @@
+.popup {
+  position: absolute;
+  border-radius: 7px;
+  border: 1px solid var(--lightGrey);
+  background-color: white;
+  width: min-content;
+  height: min-content;
+  box-shadow: 1px 3px 15px 3px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--lightGrey);
+  border: none;
+  height: 40px;
+  width: 100%;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.2s;
+  color: var(--accent);
+}
+
+.button:hover {
+  background-color: var(--grey);
+}
+
+.buttonContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+}
