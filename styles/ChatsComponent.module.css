@@ -21,7 +21,8 @@
 }
 
 .addChatButton {
-  all: unset;
+  background-color: white;
+  border: none;
   display: flex;
   height: 35px;
   width: 35px;

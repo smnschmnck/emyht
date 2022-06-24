@@ -34,8 +34,6 @@
   border: none;
   padding: 0;
   margin: 0;
-  border: 1px solid transparent;
-  outline: none;
   justify-content: center;
   align-items: center;
   cursor: pointer;
@@ -43,10 +41,11 @@
   border-radius: 50%;
   aspect-ratio: 1/1;
   transition: 0.2s;
+  outline: none;
 }
 
 .actionButton:focus {
-  border: 1px solid white;
+  background-color: var(--accent-lighter);
 }
 
 .actionButton:hover {
