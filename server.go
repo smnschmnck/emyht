@@ -1,7 +1,7 @@
 package main
 
 import (
-	"chat/auth/authService"
+	"chat/authService"
 	"chat/chatService"
 	"chat/dbHelpers/postgresHelper"
 	"chat/dbHelpers/redisHelper"

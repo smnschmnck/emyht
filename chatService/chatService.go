@@ -1,9 +1,9 @@
 package chatService
 
 import (
-	"chat/auth/authService"
-	"chat/auth/userService"
+	"chat/authService"
 	"chat/dbHelpers/postgresHelper"
+	"chat/userService"
 	"context"
 	"fmt"
 

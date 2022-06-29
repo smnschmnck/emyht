@@ -1,10 +1,10 @@
 package authService
 
 import (
-	"chat/auth/userService"
 	"chat/dbHelpers/postgresHelper"
 	"chat/dbHelpers/redisHelper"
 	"chat/emailService"
+	"chat/userService"
 	"context"
 	"crypto/rand"
 	"encoding/base64"
