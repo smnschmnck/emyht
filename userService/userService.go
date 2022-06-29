@@ -13,10 +13,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-playground/validator/v10"
+
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx"
 )
+
+var validate = validator.New()
 
 type ReqUser struct {
 	Email    string `json:"email" validate:"required"`

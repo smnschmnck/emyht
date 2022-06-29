@@ -6,9 +6,11 @@ import (
 	"chat/userService"
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx"
 	"github.com/jackc/pgx/v4/pgxpool"
 
 	"github.com/go-playground/validator/v10"
@@ -17,6 +19,56 @@ import (
 
 var validate = validator.New()
 var ctx = context.Background()
+
+func SendFriendRequest(c *fiber.Ctx) error {
+	token, err := authService.GetBearer(c)
+	if err != nil {
+		return c.Status(401).SendString("NO AUTH")
+	}
+	type friendRequest struct {
+		FriendEmail string `json:"friendEmail" validate:"required"`
+	}
+	var friendReq friendRequest
+	err = c.BodyParser(&friendReq)
+	if err != nil {
+		return c.Status(400).SendString("BAD REQUEST")
+	}
+	err = validate.Struct(friendReq)
+	if err != nil {
+		return c.Status(400).SendString("BAD REQUEST")
+	}
+
+	user, respErr := userService.GetUserBySessionID(token)
+	if respErr.StatusCode >= 300 {
+		return c.Status(respErr.StatusCode).SendString(respErr.Msg)
+	}
+
+	if user.Email == friendReq.FriendEmail {
+		return c.Status(500).SendString("YOU CAN'T SEND A FRIEND REQUEST TO YOURSELF")
+	}
+
+	conn, err := pgx.Connect(postgresHelper.PGConfig)
+	if err != nil {
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+	defer conn.Close()
+
+	friendReqQuery := "INSERT INTO friends(sender, reciever, status) " +
+		"VALUES ($1, (SELECT uuid FROM users WHERE email=$2), 'pending') " +
+		"RETURNING status"
+
+	rows := conn.QueryRow(friendReqQuery, user.Uuid, friendReq.FriendEmail)
+	var status string
+	err = rows.Scan(&status)
+	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+			return c.Status(409).SendString("DUPLICATE FRIEND REQUEST")
+		}
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+
+	return c.SendString("SUCCESS")
+}
 
 func StartOneOnOneChat(c *fiber.Ctx) error {
 	type startReq struct {
