@@ -5,7 +5,7 @@ import type {
 } from 'next';
 import Head from 'next/head';
 import Chats from '../components/Chats';
-import { getLoginData, GetUserResponse } from '../helpers/loginHelpers';
+import { getLoginData } from '../helpers/loginHelpers';
 import styles from '../styles/IndexPage.module.css';
 import fakeChats from '../dev/dummyData/fakeChats.json';
 import Image from 'next/image';
@@ -22,6 +22,7 @@ interface IndexPageProps {
   email: string;
   username: string;
   isAdmin: boolean;
+  chats: ISingleChat[];
 }
 
 const redirectOnUnverifiedEmail = (res: ServerResponse) => {
@@ -34,14 +35,21 @@ const redirectOnLoggedOut = (res: ServerResponse) => {
   res.end();
 };
 
-const makeUserProps = (getUserResponse: GetUserResponse) => {
-  return {
-    props: {
-      email: getUserResponse.email,
-      username: getUserResponse.username,
-      isAdmin: getUserResponse.isAdmin,
-    },
-  };
+const getChats = () => {
+  //TODO Get actual chats
+  return fakeChats.map((c) => {
+    return {
+      chatID: c.chatID,
+      name: c.name,
+      time: c.time,
+      lastMessage: c.lastMessage,
+      read: c.read,
+      unreadMessagesCount: c.unreadMessagesCount,
+      ownMessage: c.ownMessage,
+      deliveryStatus: c.deliveryStatus,
+      profilePictureUrl: c.profilePictureUrl ?? fallBackProfilePicture.src,
+    };
+  });
 };
 
 const emptyProps = {
@@ -58,31 +66,22 @@ export const getServerSideProps: GetServerSideProps<
       redirectOnUnverifiedEmail(context.res);
       return emptyProps;
     }
-    return makeUserProps(getUserResponse);
+    return {
+      props: {
+        email: getUserResponse.email,
+        username: getUserResponse.username,
+        isAdmin: getUserResponse.isAdmin,
+        chats: getChats(),
+      },
+    };
   } catch {
     redirectOnLoggedOut(context.res);
     return emptyProps;
   }
 };
 
-const getChats = () => {
-  return fakeChats.map((c) => {
-    return {
-      chatID: c.chatID,
-      name: c.name,
-      time: c.time,
-      lastMessage: c.lastMessage,
-      read: c.read,
-      unreadMessagesCount: c.unreadMessagesCount,
-      ownMessage: c.ownMessage,
-      deliveryStatus: c.deliveryStatus,
-      profilePictureUrl: c.profilePictureUrl ?? fallBackProfilePicture.src,
-    };
-  });
-};
-
-const HomePage: NextPage<IndexPageProps> = ({ username, email }) => {
-  const curChat = getChats()[0];
+const HomePage: NextPage<IndexPageProps> = ({ username, email, chats }) => {
+  const curChat = chats[0];
   const [curChatID, setCurChatID] = useState(curChat.chatID);
   const [curProfilePictureUrl, setCurProfilePictureUrl] = useState(
     curChat.profilePictureUrl
@@ -126,7 +125,7 @@ const HomePage: NextPage<IndexPageProps> = ({ username, email }) => {
               <Image src={logo} alt="emyht-logo" />
             </div>
             <Chats
-              chats={getChats()}
+              chats={chats}
               openChat={openChat}
               addChatButtonClickHandler={() => setShowAddChatModal(true)}
             />
