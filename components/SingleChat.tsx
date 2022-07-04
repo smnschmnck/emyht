@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import styles from '../styles/SingleChatComponent.module.css';
-import fallbackProfilePicure from '../assets/images/fallback-pp.webp';
 import ISingleChat from '../interfaces/ISingleChat';
 
 interface SingleChatProps extends ISingleChat {
@@ -39,7 +38,7 @@ const SingleChat: React.FC<SingleChatProps> = ({
             <div className={styles.profilePicture}>
               <div className={styles.image}>
                 <Image
-                  src={profilePictureUrl ?? fallbackProfilePicure}
+                  src={profilePictureUrl}
                   objectFit="cover"
                   alt="pp"
                   layout="fill"

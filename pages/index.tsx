@@ -12,9 +12,11 @@ import Image from 'next/image';
 import logo from '../assets/images/emyht-logo.svg';
 import UserInfoAndSettings from '../components/UserInfoAndSettings';
 import MainChat from '../components/MainChat';
+import fallBackProfilePicture from '../assets/images/fallback-pp.webp';
 import { useState } from 'react';
 import { ServerResponse } from 'http';
 import { AddChatModal } from '../components/AddChatModal';
+import ISingleChat from '../interfaces/ISingleChat';
 
 interface IndexPageProps {
   email: string;
@@ -63,8 +65,24 @@ export const getServerSideProps: GetServerSideProps<
   }
 };
 
+const getChats = () => {
+  return fakeChats.map((c) => {
+    return {
+      chatID: c.chatID,
+      name: c.name,
+      time: c.time,
+      lastMessage: c.lastMessage,
+      read: c.read,
+      unreadMessagesCount: c.unreadMessagesCount,
+      ownMessage: c.ownMessage,
+      deliveryStatus: c.deliveryStatus,
+      profilePictureUrl: c.profilePictureUrl ?? fallBackProfilePicture.src,
+    };
+  });
+};
+
 const HomePage: NextPage<IndexPageProps> = ({ username, email }) => {
-  const curChat = fakeChats[0];
+  const curChat = getChats()[0];
   const [curChatID, setCurChatID] = useState(curChat.chatID);
   const [curProfilePictureUrl, setCurProfilePictureUrl] = useState(
     curChat.profilePictureUrl
@@ -108,7 +126,7 @@ const HomePage: NextPage<IndexPageProps> = ({ username, email }) => {
               <Image src={logo} alt="emyht-logo" />
             </div>
             <Chats
-              chats={fakeChats}
+              chats={getChats()}
               openChat={openChat}
               addChatButtonClickHandler={() => setShowAddChatModal(true)}
             />
