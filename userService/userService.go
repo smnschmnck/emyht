@@ -4,23 +4,20 @@ import (
 	"chat/dbHelpers/postgresHelper"
 	"chat/dbHelpers/redisHelper"
 	"context"
-	"crypto/rand"
 	"crypto/sha512"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"math/rand"
 	"os"
+	"strconv"
 	"strings"
 	"time"
-
-	"github.com/go-playground/validator/v10"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx"
 )
-
-var validate = validator.New()
 
 type ReqUser struct {
 	Email    string `json:"email" validate:"required"`
@@ -177,12 +174,6 @@ func AddUser(email string, username string, password string) (User, error) {
 		return User{}, errors.New("UNEXPECTED ERROR")
 	}
 
-	conn, err := pgx.Connect(postgresHelper.PGConfig)
-	if err != nil {
-		return User{}, err
-	}
-	defer conn.Close()
-
 	var dbUUID string
 	var dbEmail string
 	var dbUsername string
@@ -191,15 +182,23 @@ func AddUser(email string, username string, password string) (User, error) {
 	var dbUserIsAdmin bool
 	var dbUserEmailActive bool
 	var dbUserEmailToken string
+	var dbUserPictureUrl string
 
 	pepper := getPepper()
 	emailToken := uuid.New().String()
 	hashedPW := hashPW(password, salt, pepper)
 	userID := uuid.New().String()
-	q := "INSERT INTO users(uuid, email, username, password, salt, is_admin, email_active, email_token) " +
-		"VALUES ($1, $2, $3, $4, $5, $6, $7, $8) " +
-		"RETURNING uuid, email, username, password, salt, is_admin, email_active, email_token;"
-	rows := conn.QueryRow(q, userID, email, username, hashedPW, salt, false, false, emailToken)
+	randPictureInt := rand.Intn(10)
+	defaultPicture := "default_" + strconv.Itoa(randPictureInt)
+	conn, err := pgx.Connect(postgresHelper.PGConfig)
+	if err != nil {
+		return User{}, err
+	}
+	defer conn.Close()
+	q := "INSERT INTO users(uuid, email, username, password, salt, is_admin, email_active, email_token, picture_url) " +
+		"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) " +
+		"RETURNING uuid, email, username, password, salt, is_admin, email_active, email_token, picture_url;"
+	rows := conn.QueryRow(q, userID, email, username, hashedPW, salt, false, false, emailToken, defaultPicture)
 	err = rows.Scan(
 		&dbUUID,
 		&dbEmail,
@@ -208,7 +207,8 @@ func AddUser(email string, username string, password string) (User, error) {
 		&dbUserSalt,
 		&dbUserIsAdmin,
 		&dbUserEmailActive,
-		&dbUserEmailToken)
+		&dbUserEmailToken,
+		&dbUserPictureUrl)
 
 	if err != nil {
 		errString := err.Error()
