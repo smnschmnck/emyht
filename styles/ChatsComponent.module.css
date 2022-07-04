@@ -21,16 +21,16 @@
 }
 
 .addChatButton {
-  background-color: white;
-  border: none;
   display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  background-color: transparent;
   height: 35px;
   width: 35px;
   border-radius: 50%;
-  justify-content: center;
-  align-items: center;
-  transition: 0.2s;
   cursor: pointer;
+  padding: 0;
 }
 
 .addChatButton:hover {
@@ -52,6 +52,7 @@
   border: none;
   cursor: pointer;
   background-color: white;
+  color: black;
   border-radius: 5px;
   transition: 0.2s;
 }

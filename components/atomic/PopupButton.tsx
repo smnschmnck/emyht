@@ -41,7 +41,16 @@ export const PopupButton: React.FC<PopupButtonProps> = ({
           className={buttonClassName ?? styles.button}
         >
           <div className={styles.buttonContent}>
-            {icon && <Image src={icon} alt={iconAlt ?? ''}></Image>}
+            {icon && (
+              <div className={styles.iconWrapper}>
+                <Image
+                  src={icon}
+                  alt={iconAlt ?? ''}
+                  objectFit="cover"
+                  layout="fill"
+                />
+              </div>
+            )}
             <span>{label}</span>
           </div>
         </button>

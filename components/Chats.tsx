@@ -50,14 +50,14 @@ const Chats: React.FC<ChatsProps> = ({
                 >
                   <div className={styles.popupOptionContent}>
                     <Image src={chat} alt=""></Image>
-                    <span className={styles.popupOptionText}> Add chat</span>
+                    <span className={styles.popupOptionText}>Add chat</span>
                   </div>
                 </button>
                 <button className={styles.popupOption}>
                   {' '}
                   <div className={styles.popupOptionContent}>
                     <Image src={addUser} alt=""></Image>
-                    <span className={styles.popupOptionText}> Add contact</span>
+                    <span className={styles.popupOptionText}>Add contact</span>
                   </div>
                 </button>
               </div>
