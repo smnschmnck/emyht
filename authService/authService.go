@@ -26,7 +26,7 @@ var ctx = context.Background()
 
 type Session struct {
 	SessionID string `json:"sessionID"`
-	Email     string `json:"email"`
+	UserID    string `json:"userID"`
 }
 
 func GetBearer(c *fiber.Ctx) (string, error) {
