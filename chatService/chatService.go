@@ -10,7 +10,7 @@ import (
 
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx"
+	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 
 	"github.com/go-playground/validator/v10"
@@ -18,7 +18,6 @@ import (
 )
 
 var validate = validator.New()
-var ctx = context.Background()
 
 func SendFriendRequest(c *fiber.Ctx) error {
 	token, err := authService.GetBearer(c)
@@ -47,17 +46,18 @@ func SendFriendRequest(c *fiber.Ctx) error {
 		return c.Status(500).SendString("YOU CAN'T SEND A FRIEND REQUEST TO YOURSELF")
 	}
 
-	conn, err := pgx.Connect(postgresHelper.PGConfig)
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
-	defer conn.Close()
+	defer conn.Close(ctx)
 
 	friendReqQuery := "INSERT INTO friends(sender, reciever, status) " +
 		"VALUES ($1, (SELECT uuid FROM users WHERE email=$2), 'pending') " +
 		"RETURNING status"
 
-	rows := conn.QueryRow(friendReqQuery, user.Uuid, friendReq.FriendEmail)
+	rows := conn.QueryRow(ctx, friendReqQuery, user.Uuid, friendReq.FriendEmail)
 	var status string
 	err = rows.Scan(&status)
 	if err != nil {
@@ -94,6 +94,7 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 		c.Status(500).SendString("INTERNAL ERROR")
 	}
 
+	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
 		return c.Status(500).SendString("INTERNAL ERROR")
@@ -185,6 +186,7 @@ func GetChats(c *fiber.Ctx) error {
 		SenderID       *string `json:"senderID"`
 	}
 
+	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
 		fmt.Println(err)

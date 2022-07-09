@@ -15,14 +15,13 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx"
+	"github.com/jackc/pgx/v4"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
 var validate = validator.New()
-var ctx = context.Background()
 
 type Session struct {
 	SessionID string `json:"sessionID"`
@@ -85,7 +84,7 @@ func startSession(uuid string) (Session, error) {
 	}
 
 	rdb := redis.NewClient(&redisHelper.RedisConfig)
-
+	ctx := context.Background()
 	err = rdb.Set(ctx, token, uuid, 24*time.Hour).Err()
 
 	if err != nil {
@@ -171,14 +170,15 @@ func VerifyEmail(c *fiber.Ctx) error {
 		return c.Status(400).SendString("BAD REQUEST")
 	}
 
-	conn, err := pgx.Connect(postgresHelper.PGConfig)
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
-	defer conn.Close()
+	defer conn.Close(ctx)
 
 	selectQuery := "SELECT email_active FROM users WHERE email_token=$1"
-	rows := conn.QueryRow(selectQuery, emailToken.Token)
+	rows := conn.QueryRow(ctx, selectQuery, emailToken.Token)
 	var dbUserEmailActive bool
 	err = rows.Scan(&dbUserEmailActive)
 	if err != nil {
@@ -186,7 +186,7 @@ func VerifyEmail(c *fiber.Ctx) error {
 	}
 
 	insertQuery := "UPDATE users SET email_active=true, email_token=$1 WHERE email_token=$2 RETURNING email_active"
-	insertedRows := conn.QueryRow(insertQuery, nil, emailToken.Token)
+	insertedRows := conn.QueryRow(ctx, insertQuery, nil, emailToken.Token)
 	var active bool
 	err = insertedRows.Scan(&active)
 	if err != nil || !active {
@@ -255,17 +255,18 @@ func ChangeEmail(c *fiber.Ctx) error {
 		return c.Status(respErr.StatusCode).SendString(respErr.Msg)
 	}
 
-	conn, err := pgx.Connect(postgresHelper.PGConfig)
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
-	defer conn.Close()
+	defer conn.Close(ctx)
 
 	var emailExists bool
 	checkQuery := "SELECT count(1) > 0 " +
 		"FROM users " +
 		"WHERE email=$1"
-	rows := conn.QueryRow(checkQuery, changeReq.NewEmail)
+	rows := conn.QueryRow(ctx, checkQuery, changeReq.NewEmail)
 	err = rows.Scan(&emailExists)
 	if err != nil {
 		return c.Status(500).SendString("INTERNAL ERROR")
@@ -279,7 +280,7 @@ func ChangeEmail(c *fiber.Ctx) error {
 		"ON CONFLICT(uuid) DO UPDATE SET new_email=$2, confirmation_token=$3 " +
 		"RETURNING confirmation_token, new_email"
 	confirmationToken := uuid.New().String()
-	insertedRows := conn.QueryRow(insertQuery, user.Uuid, changeReq.NewEmail, confirmationToken)
+	insertedRows := conn.QueryRow(ctx, insertQuery, user.Uuid, changeReq.NewEmail, confirmationToken)
 	var dbConfirmationToken string
 	var dbNewEmail string
 	err = insertedRows.Scan(&dbConfirmationToken, &dbNewEmail)
@@ -311,11 +312,12 @@ func ConfirmChangedEmail(c *fiber.Ctx) error {
 		return c.Status(400).SendString("BAD REQUEST")
 	}
 
-	conn, err := pgx.Connect(postgresHelper.PGConfig)
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
-	defer conn.Close()
+	defer conn.Close(ctx)
 	updateQuery := "UPDATE users u " +
 		"SET email_active=true, email_token=$1, email=( " +
 		"SELECT c.new_email " +
@@ -328,7 +330,7 @@ func ConfirmChangedEmail(c *fiber.Ctx) error {
 		"WHERE c.confirmation_token=$2 " +
 		") " +
 		"RETURNING u.email;"
-	updatedRows := conn.QueryRow(updateQuery, nil, confirmToken.Token)
+	updatedRows := conn.QueryRow(ctx, updateQuery, nil, confirmToken.Token)
 	var dbNewEmail string
 	err = updatedRows.Scan(&dbNewEmail)
 	if err != nil || dbNewEmail == "" {
@@ -336,7 +338,7 @@ func ConfirmChangedEmail(c *fiber.Ctx) error {
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 	deleteQuery := "DELETE FROM change_email WHERE confirmation_token=$1"
-	_, err = conn.Query(deleteQuery, confirmToken.Token)
+	_, err = conn.Query(ctx, deleteQuery, confirmToken.Token)
 	if err != nil {
 		fmt.Print(err)
 		return c.Status(500).SendString("INTERNAL ERROR")
@@ -350,6 +352,7 @@ func Logout(c *fiber.Ctx) error {
 		return c.Status(500).SendString("SOMETHING WENT WRONG")
 	}
 	rdb := redis.NewClient(&redisHelper.RedisConfig)
+	ctx := context.Background()
 	_, err = rdb.Del(ctx, sessionID).Result()
 	if err != nil {
 		return c.Status(500).SendString("SOMETHING WENT WRONG")

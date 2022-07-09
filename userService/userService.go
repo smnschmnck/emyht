@@ -16,7 +16,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx"
+	"github.com/jackc/pgx/v4"
 )
 
 type ReqUser struct {
@@ -45,11 +45,12 @@ func getPepper() string {
 }
 
 func GetUserByUUID(uuid string) (User, error) {
-	conn, err := pgx.Connect(postgresHelper.PGConfig)
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
 		return User{}, errors.New("INTERNAL ERROR")
 	}
-	defer conn.Close()
+	defer conn.Close(ctx)
 
 	var dbUUID string
 	var dbEmail string
@@ -60,7 +61,7 @@ func GetUserByUUID(uuid string) (User, error) {
 	var dbUserEmailActive bool
 
 	q := "select uuid, email, username, password, salt, is_admin, email_active from users where uuid=$1"
-	rows := conn.QueryRow(q, uuid)
+	rows := conn.QueryRow(ctx, q, uuid)
 	err = rows.Scan(
 		&dbUUID,
 		&dbEmail,
@@ -85,11 +86,12 @@ func GetUserByUUID(uuid string) (User, error) {
 }
 
 func GetUserByEmail(email string) (User, error) {
-	conn, err := pgx.Connect(postgresHelper.PGConfig)
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
 		return User{}, errors.New("INTERNAL ERROR")
 	}
-	defer conn.Close()
+	defer conn.Close(ctx)
 
 	var dbUUID string
 	var dbEmail string
@@ -100,7 +102,7 @@ func GetUserByEmail(email string) (User, error) {
 	var dbUserEmailActive bool
 
 	q := "select uuid, email, username, password, salt, is_admin, email_active from users where email=$1"
-	rows := conn.QueryRow(q, email)
+	rows := conn.QueryRow(ctx, q, email)
 	err = rows.Scan(
 		&dbUUID,
 		&dbEmail,
@@ -190,15 +192,16 @@ func AddUser(email string, username string, password string) (User, error) {
 	userID := uuid.New().String()
 	randPictureInt := rand.Intn(10)
 	defaultPicture := "default_" + strconv.Itoa(randPictureInt)
-	conn, err := pgx.Connect(postgresHelper.PGConfig)
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
 		return User{}, err
 	}
-	defer conn.Close()
+	defer conn.Close(ctx)
 	q := "INSERT INTO users(uuid, email, username, password, salt, is_admin, email_active, email_token, picture_url) " +
 		"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) " +
 		"RETURNING uuid, email, username, password, salt, is_admin, email_active, email_token, picture_url;"
-	rows := conn.QueryRow(q, userID, email, username, hashedPW, salt, false, false, emailToken, defaultPicture)
+	rows := conn.QueryRow(ctx, q, userID, email, username, hashedPW, salt, false, false, emailToken, defaultPicture)
 	err = rows.Scan(
 		&dbUUID,
 		&dbEmail,
@@ -232,16 +235,17 @@ func AddUser(email string, username string, password string) (User, error) {
 }
 
 func RenewEmailToken(email string) (string, error) {
-	conn, err := pgx.Connect(postgresHelper.PGConfig)
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
 		return "", err
 	}
-	defer conn.Close()
+	defer conn.Close(ctx)
 
 	emailToken := uuid.New().String()
 	var dbEmailToken string
 	q := "UPDATE users SET email_token=$1 WHERE email=$2 RETURNING email_token"
-	rows := conn.QueryRow(q, emailToken, email)
+	rows := conn.QueryRow(ctx, q, emailToken, email)
 	err = rows.Scan(&dbEmailToken)
 	if err != nil {
 		return "", err
