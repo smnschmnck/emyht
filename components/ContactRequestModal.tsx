@@ -48,6 +48,8 @@ export const ContactRequestModal: React.FC<ContactRequestModalProps> = ({
                   placeholder="E-Mail address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  type="email"
+                  required
                 />
                 <BigButton type="submit">Send</BigButton>
               </form>
