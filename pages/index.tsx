@@ -17,6 +17,7 @@ import { useState } from 'react';
 import { ServerResponse } from 'http';
 import { AddChatModal } from '../components/AddChatModal';
 import ISingleChat from '../interfaces/ISingleChat';
+import { ContactRequestModal } from '../components/ContactRequestModal';
 
 interface IndexPageProps {
   email: string;
@@ -89,6 +90,7 @@ const HomePage: NextPage<IndexPageProps> = ({ username, email, chats }) => {
   const [curChatName, setCurChatName] = useState(curChat.name);
   const [chatOpened, setChatOpened] = useState(false);
   const [showAddChatModal, setShowAddChatModal] = useState(false);
+  const [showContactRequestModal, setShowContactRequestModal] = useState(false);
 
   const openChat = (
     chatID: string,
@@ -111,9 +113,12 @@ const HomePage: NextPage<IndexPageProps> = ({ username, email, chats }) => {
         <title>emyht</title>
       </Head>
       {showAddChatModal && (
-        <AddChatModal
-          closeHandler={() => setShowAddChatModal(false)}
-        ></AddChatModal>
+        <AddChatModal closeHandler={() => setShowAddChatModal(false)} />
+      )}
+      {showContactRequestModal && (
+        <ContactRequestModal
+          closeHandler={() => setShowContactRequestModal(false)}
+        />
       )}
       <div className={styles.main}>
         <div
@@ -128,6 +133,9 @@ const HomePage: NextPage<IndexPageProps> = ({ username, email, chats }) => {
               chats={chats}
               openChat={openChat}
               addChatButtonClickHandler={() => setShowAddChatModal(true)}
+              sendFriendRequestButtonClickHandler={() =>
+                setShowContactRequestModal(true)
+              }
             />
           </div>
           <UserInfoAndSettings username={username} email={email} />

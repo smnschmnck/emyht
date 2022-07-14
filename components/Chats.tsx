@@ -17,12 +17,14 @@ interface ChatsProps {
     chatName: string
   ) => void;
   addChatButtonClickHandler: () => void;
+  sendFriendRequestButtonClickHandler: () => void;
 }
 
 const Chats: React.FC<ChatsProps> = ({
   chats,
   openChat,
   addChatButtonClickHandler,
+  sendFriendRequestButtonClickHandler,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -52,8 +54,10 @@ const Chats: React.FC<ChatsProps> = ({
                     <span className={styles.popupOptionText}>Add chat</span>
                   </div>
                 </button>
-                <button className={styles.popupOption}>
-                  {' '}
+                <button
+                  className={styles.popupOption}
+                  onClick={() => sendFriendRequestButtonClickHandler()}
+                >
                   <div className={styles.popupOptionContent}>
                     <Image src={addUser} alt=""></Image>
                     <span className={styles.popupOptionText}>Add contact</span>
