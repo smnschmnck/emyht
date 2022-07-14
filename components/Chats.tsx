@@ -25,6 +25,14 @@ const Chats: React.FC<ChatsProps> = ({
   addChatButtonClickHandler,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+
+  const filterChats = () => {
+    return chats.filter((chat) => {
+      const lowerChatName = chat.name.toLowerCase();
+      const lowerChatQuery = searchQuery.toLowerCase();
+      return lowerChatName.includes(lowerChatQuery);
+    });
+  };
   return (
     <div className={styles.chatWrapper}>
       <div className={styles.controls}>
@@ -68,27 +76,24 @@ const Chats: React.FC<ChatsProps> = ({
             <p>Start a new chat</p>
           </div>
         )}
-        {chats
-          .filter((chat) => {
-            const lowerChatName = chat.name.toLowerCase();
-            const lowerChatQuery = searchQuery.toLowerCase();
-            return lowerChatName.includes(lowerChatQuery);
-          })
-          .map((chat) => (
-            <SingleChat
-              key={chat.chatID}
-              chatID={chat.chatID}
-              name={chat.name}
-              time={chat.time}
-              lastMessage={chat.lastMessage}
-              unreadMessagesCount={chat.unreadMessagesCount}
-              deliveryStatus={chat.deliveryStatus}
-              read={chat.read}
-              ownMessage={chat.ownMessage}
-              profilePictureUrl={chat.profilePictureUrl}
-              openChat={openChat}
-            />
-          ))}
+        {filterChats().map((chat) => (
+          <SingleChat
+            key={chat.chatID}
+            chatID={chat.chatID}
+            name={chat.name}
+            time={chat.time}
+            lastMessage={chat.lastMessage}
+            unreadMessagesCount={chat.unreadMessagesCount}
+            deliveryStatus={chat.deliveryStatus}
+            read={chat.read}
+            ownMessage={chat.ownMessage}
+            profilePictureUrl={chat.profilePictureUrl}
+            openChat={openChat}
+          />
+        ))}
+        {filterChats().length <= 0 && (
+          <h2 className={styles.noMatch}>No chat matching your search 👓</h2>
+        )}
       </div>
     </div>
   );
