@@ -30,7 +30,7 @@ func handleRequest() {
 	app.Post("/startOneOnOneChat", chatService.StartOneOnOneChat)
 	app.Get("/getChats", chatService.GetChats)
 	//misc
-	app.Post("/friendRequest", chatService.SendFriendRequest)
+	app.Post("/contactRequest", chatService.SendContactRequest)
 	app.Get("/pendingFriendRequests", chatService.GetChats)
 	app.Listen(PORT)
 }

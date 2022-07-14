@@ -19,20 +19,20 @@ import (
 
 var validate = validator.New()
 
-func SendFriendRequest(c *fiber.Ctx) error {
+func SendContactRequest(c *fiber.Ctx) error {
 	token, err := authService.GetBearer(c)
 	if err != nil {
 		return c.Status(401).SendString("NO AUTH")
 	}
-	type friendRequest struct {
-		FriendEmail string `json:"friendEmail" validate:"required"`
+	type contactRequest struct {
+		ContactEmail string `json:"contactEmail" validate:"required"`
 	}
-	var friendReq friendRequest
-	err = c.BodyParser(&friendReq)
+	var contactReq contactRequest
+	err = c.BodyParser(&contactReq)
 	if err != nil {
 		return c.Status(400).SendString("BAD REQUEST")
 	}
-	err = validate.Struct(friendReq)
+	err = validate.Struct(contactReq)
 	if err != nil {
 		return c.Status(400).SendString("BAD REQUEST")
 	}
@@ -42,8 +42,8 @@ func SendFriendRequest(c *fiber.Ctx) error {
 		return c.Status(respErr.StatusCode).SendString(respErr.Msg)
 	}
 
-	if user.Email == friendReq.FriendEmail {
-		return c.Status(500).SendString("YOU CAN'T SEND A FRIEND REQUEST TO YOURSELF")
+	if user.Email == contactReq.ContactEmail {
+		return c.Status(500).SendString("YOU CAN'T SEND A CONTACT REQUEST TO YOURSELF")
 	}
 
 	ctx := context.Background()
@@ -53,11 +53,11 @@ func SendFriendRequest(c *fiber.Ctx) error {
 	}
 	defer conn.Close(ctx)
 
-	friendReqQuery := "INSERT INTO friends(sender, reciever, status) " +
+	contactReqQuery := "INSERT INTO friends(sender, reciever, status) " +
 		"VALUES ($1, (SELECT uuid FROM users WHERE email=$2), 'pending') " +
 		"RETURNING status"
 
-	rows := conn.QueryRow(ctx, friendReqQuery, user.Uuid, friendReq.FriendEmail)
+	rows := conn.QueryRow(ctx, contactReqQuery, user.Uuid, contactReq.ContactEmail)
 	var status string
 	err = rows.Scan(&status)
 	if err != nil {
@@ -65,7 +65,7 @@ func SendFriendRequest(c *fiber.Ctx) error {
 			return c.Status(409).SendString("USER DOES NOT EXIST")
 		}
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
-			return c.Status(409).SendString("DUPLICATE FRIEND REQUEST")
+			return c.Status(409).SendString("DUPLICATE CONTACT REQUEST")
 		}
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
