@@ -61,6 +61,9 @@ func SendFriendRequest(c *fiber.Ctx) error {
 	var status string
 	err = rows.Scan(&status)
 	if err != nil {
+		if strings.Contains(err.Error(), `null value in column "reciever" violates not-null constraint`) {
+			return c.Status(409).SendString("USER DOES NOT EXIST")
+		}
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 			return c.Status(409).SendString("DUPLICATE FRIEND REQUEST")
 		}
