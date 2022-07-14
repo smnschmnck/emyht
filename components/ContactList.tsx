@@ -16,16 +16,7 @@ export const ContactList: React.FC<ContactListProps> = ({
   contacts,
   multiselect,
 }) => {
-  const [filteredContacts, setFilteredContacts] = useState(contacts);
-  const searchContacts = (query: string) => {
-    const lowerCaseQuery = query.toLowerCase();
-    setFilteredContacts(
-      contacts.filter((contact) => {
-        const lowerCaseContact = contact.name.toLowerCase();
-        return lowerCaseContact.includes(lowerCaseQuery);
-      })
-    );
-  };
+  const [searchQuery, setSearchQuery] = useState('');
 
   const selectContact = (id: string) => {
     if (selectedContacts.includes(id)) {
@@ -45,19 +36,25 @@ export const ContactList: React.FC<ContactListProps> = ({
     <>
       <Input
         placeholder="Search contacts"
-        onChange={(e) => searchContacts(e.target.value)}
+        onChange={(e) => setSearchQuery(e.target.value)}
       />
       <div className={styles.contacts}>
-        {filteredContacts.map((contact) => (
-          <SingleContact
-            key={contact.id}
-            id={contact.id}
-            name={contact.name}
-            profilePictureUrl={contact.profilePictureUrl}
-            selectContact={selectContact}
-            selected={selectedContacts.includes(contact.id)}
-          />
-        ))}
+        {contacts
+          .filter((contact) => {
+            const lowerCaseContact = contact.name.toLowerCase();
+            const lowerCaseQuery = searchQuery.toLowerCase();
+            return lowerCaseContact.includes(lowerCaseQuery);
+          })
+          .map((contact) => (
+            <SingleContact
+              key={contact.id}
+              id={contact.id}
+              name={contact.name}
+              profilePictureUrl={contact.profilePictureUrl}
+              selectContact={selectContact}
+              selected={selectedContacts.includes(contact.id)}
+            />
+          ))}
       </div>
     </>
   );

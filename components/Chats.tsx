@@ -24,16 +24,7 @@ const Chats: React.FC<ChatsProps> = ({
   openChat,
   addChatButtonClickHandler,
 }) => {
-  const [filteredChats, setFilteredChats] = useState(chats);
-  const filterChats = (query: string) => {
-    const lowerCaseQuery = query.toLowerCase();
-    setFilteredChats(
-      chats.filter((c) => {
-        const lowerCaseChat = c.name.toLowerCase();
-        return lowerCaseChat.includes(lowerCaseQuery);
-      })
-    );
-  };
+  const [searchQuery, setSearchQuery] = useState('');
   return (
     <div className={styles.chatWrapper}>
       <div className={styles.controls}>
@@ -65,7 +56,7 @@ const Chats: React.FC<ChatsProps> = ({
           </div>
           <Input
             placeholder="Search Chats"
-            onChange={(e) => filterChats(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value)}
           ></Input>
         </div>
       </div>
@@ -77,21 +68,27 @@ const Chats: React.FC<ChatsProps> = ({
             <p>Start a new chat</p>
           </div>
         )}
-        {filteredChats.map((chat) => (
-          <SingleChat
-            key={chat.chatID}
-            chatID={chat.chatID}
-            name={chat.name}
-            time={chat.time}
-            lastMessage={chat.lastMessage}
-            unreadMessagesCount={chat.unreadMessagesCount}
-            deliveryStatus={chat.deliveryStatus}
-            read={chat.read}
-            ownMessage={chat.ownMessage}
-            profilePictureUrl={chat.profilePictureUrl}
-            openChat={openChat}
-          />
-        ))}
+        {chats
+          .filter((chat) => {
+            const lowerChatName = chat.name.toLowerCase();
+            const lowerChatQuery = searchQuery.toLowerCase();
+            return lowerChatName.includes(lowerChatQuery);
+          })
+          .map((chat) => (
+            <SingleChat
+              key={chat.chatID}
+              chatID={chat.chatID}
+              name={chat.name}
+              time={chat.time}
+              lastMessage={chat.lastMessage}
+              unreadMessagesCount={chat.unreadMessagesCount}
+              deliveryStatus={chat.deliveryStatus}
+              read={chat.read}
+              ownMessage={chat.ownMessage}
+              profilePictureUrl={chat.profilePictureUrl}
+              openChat={openChat}
+            />
+          ))}
       </div>
     </div>
   );
