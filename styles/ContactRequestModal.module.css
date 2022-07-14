@@ -37,6 +37,23 @@
   gap: 1rem;
 }
 
+.requestError {
+  color: red;
+  font-weight: bold;
+}
+
+.success {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 80%;
+}
+
+.successMessage {
+  text-align: center;
+}
+
 @media only screen and (max-width: 600px) {
   .container {
     width: 100%;
