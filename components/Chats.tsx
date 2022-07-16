@@ -28,7 +28,7 @@ const Chats: React.FC<ChatsProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filterChats = () => {
+  const getFilteredChats = () => {
     return chats.filter((chat) => {
       const lowerChatName = chat.name.toLowerCase();
       const lowerChatQuery = searchQuery.toLowerCase();
@@ -80,7 +80,7 @@ const Chats: React.FC<ChatsProps> = ({
             <p>Start a new chat</p>
           </div>
         )}
-        {filterChats().map((chat) => (
+        {getFilteredChats().map((chat) => (
           <SingleChat
             key={chat.chatID}
             chatID={chat.chatID}
@@ -95,7 +95,7 @@ const Chats: React.FC<ChatsProps> = ({
             openChat={openChat}
           />
         ))}
-        {filterChats().length <= 0 && (
+        {chats.length > 0 && getFilteredChats().length <= 0 && (
           <h2 className={styles.noMatch}>No chat matching your search 👓</h2>
         )}
       </div>

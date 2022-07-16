@@ -82,24 +82,24 @@ export const getServerSideProps: GetServerSideProps<
 };
 
 const HomePage: NextPage<IndexPageProps> = ({ username, email, chats }) => {
-  const curChat = chats[0];
-  const [curChatID, setCurChatID] = useState(curChat.chatID);
-  const [curProfilePictureUrl, setCurProfilePictureUrl] = useState(
-    curChat.profilePictureUrl
-  );
-  const [curChatName, setCurChatName] = useState(curChat.name);
+  const getFirstChatID = () => {
+    if (!allChats[0]) {
+      return '';
+    }
+    if (!allChats[0].chatID) {
+      return '';
+    }
+    return allChats[0].chatID;
+  };
+
+  const [allChats, setAllChats] = useState(chats);
+  const [curChatID, setCurChatID] = useState(getFirstChatID());
   const [chatOpened, setChatOpened] = useState(false);
   const [showAddChatModal, setShowAddChatModal] = useState(false);
   const [showContactRequestModal, setShowContactRequestModal] = useState(false);
 
-  const openChat = (
-    chatID: string,
-    profilePictureUrl: string,
-    chatName: string
-  ) => {
+  const openChat = (chatID: string) => {
     setCurChatID(chatID);
-    setCurProfilePictureUrl(profilePictureUrl);
-    setCurChatName(chatName);
     setChatOpened(true);
   };
 
@@ -130,7 +130,7 @@ const HomePage: NextPage<IndexPageProps> = ({ username, email, chats }) => {
               <Image src={logo} alt="emyht-logo" />
             </div>
             <Chats
-              chats={chats}
+              chats={allChats}
               openChat={openChat}
               addChatButtonClickHandler={() => setShowAddChatModal(true)}
               sendFriendRequestButtonClickHandler={() =>
@@ -144,12 +144,20 @@ const HomePage: NextPage<IndexPageProps> = ({ username, email, chats }) => {
           className={styles.chatContainer}
           id={chatOpened ? undefined : styles.closed}
         >
-          <MainChat
-            chatID={curChatID}
-            profilePictureUrl={curProfilePictureUrl}
-            chatName={curChatName}
-            closeChat={closeChat}
-          />
+          {allChats.length > 0 &&
+            allChats
+              .filter((c) => c.chatID === curChatID)
+              .slice(0, 1)
+              .map((c) => (
+                <MainChat
+                  key={c.chatID}
+                  chatID={curChatID}
+                  profilePictureUrl={c.profilePictureUrl}
+                  chatName={c.name}
+                  closeChat={closeChat}
+                />
+              ))}
+          {allChats.length <= 0 && <h1>oop no chat</h1>}
         </div>
       </div>
     </>
