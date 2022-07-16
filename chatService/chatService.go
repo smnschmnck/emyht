@@ -53,16 +53,31 @@ func SendContactRequest(c *fiber.Ctx) error {
 	}
 	defer conn.Close(ctx)
 
+	checkDuplicateQuery := "SELECT EXISTS( " +
+		"SELECT 1 " +
+		"FROM friends " +
+		"WHERE reciever = $1 AND sender = (SELECT uuid FROM users WHERE email=$2) " +
+		") "
+	checkDuplicateRows := conn.QueryRow(ctx, checkDuplicateQuery, user.Uuid, contactReq.ContactEmail)
+	var duplicateExists bool
+	err = checkDuplicateRows.Scan(&duplicateExists)
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+	if duplicateExists {
+		return c.Status(409).SendString(contactReq.ContactEmail + " ALREADY SENT A FRIEND REQUEST TO YOU")
+	}
+
 	contactReqQuery := "INSERT INTO friends(sender, reciever, status) " +
 		"VALUES ($1, (SELECT uuid FROM users WHERE email=$2), 'pending') " +
 		"RETURNING status"
-
-	rows := conn.QueryRow(ctx, contactReqQuery, user.Uuid, contactReq.ContactEmail)
+	contactReqRows := conn.QueryRow(ctx, contactReqQuery, user.Uuid, contactReq.ContactEmail)
 	var status string
-	err = rows.Scan(&status)
+	err = contactReqRows.Scan(&status)
 	if err != nil {
 		if strings.Contains(err.Error(), `null value in column "reciever" violates not-null constraint`) {
-			return c.Status(409).SendString("USER DOES NOT EXIST")
+			return c.Status(404).SendString("USER DOES NOT EXIST")
 		}
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 			return c.Status(409).SendString("DUPLICATE CONTACT REQUEST")
