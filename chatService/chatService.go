@@ -109,7 +109,7 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 
 	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
 	if err != nil {
-		c.Status(500).SendString("INTERNAL ERROR")
+		return c.Status(401).SendString("NOT AUTHORIZED")
 	}
 
 	ctx := context.Background()
@@ -188,8 +188,7 @@ func GetChats(c *fiber.Ctx) error {
 
 	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
 	if err != nil {
-		fmt.Println(err)
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.Status(401).SendString("NOT AUTHORIZED")
 	}
 
 	type singleChat struct {
@@ -248,4 +247,46 @@ func GetChats(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(chats)
+}
+
+func GetPendingContactRequests(c *fiber.Ctx) error {
+	sessionID, responseErr := authService.GetBearer(c)
+	if responseErr != nil {
+		fmt.Println(responseErr)
+		return c.Status(401).SendString("NOT AUTHORIZED")
+	}
+	uuid, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.Status(401).SendString("NOT AUTHORIZED")
+	}
+
+	type singleContactRequest struct {
+		SenderID             string `json:"senderID"`
+		SenderUsername       string `json:"senderUsername"`
+		SenderProfilePicture string `json:"senderProfilePicture"`
+	}
+
+	ctx := context.Background()
+	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+	defer conn.Close()
+	pendingRequestQuery := "SELECT sender AS sender_id, u.username AS sender_username, u.picture_url AS sender_profile_picture " +
+		"FROM friends " +
+		"JOIN users u on friends.sender = u.uuid " +
+		"WHERE reciever=$1 AND status='pending' "
+	var contactRequests []singleContactRequest
+	err = pgxscan.Select(ctx, conn, &contactRequests, pendingRequestQuery, uuid)
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+
+	if contactRequests == nil {
+		return c.JSON(make([]string, 0))
+	}
+
+	return c.JSON(contactRequests)
 }
