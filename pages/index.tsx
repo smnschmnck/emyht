@@ -4,13 +4,10 @@ import type {
   NextPage,
 } from 'next';
 import Head from 'next/head';
-import Chats, { ContactRequest } from '../components/Chats';
+import { ContactRequest } from '../components/Chats';
 import { getLoginData } from '../helpers/loginHelpers';
 import styles from '../styles/IndexPage.module.css';
 import fakeChats from '../dev/dummyData/fakeChats.json';
-import Image from 'next/image';
-import logo from '../assets/images/emyht-logo.svg';
-import UserInfoAndSettings from '../components/UserInfoAndSettings';
 import MainChat from '../components/MainChat';
 import fallBackProfilePicture from '../assets/images/fallback-pp.webp';
 import { useState } from 'react';
@@ -20,6 +17,7 @@ import ISingleChat from '../interfaces/ISingleChat';
 import { ContactRequestModal } from '../components/ContactRequestModal';
 import { BACKEND_HOST } from '../helpers/globals';
 import { NextApiRequestCookies } from 'next/dist/server/api-utils';
+import { Sidebar } from '../components/Sidebar';
 
 interface IndexPageProps {
   email: string;
@@ -148,26 +146,16 @@ const HomePage: NextPage<IndexPageProps> = ({
         />
       )}
       <div className={styles.main}>
-        <div
-          className={styles.sidebar}
-          id={chatOpened ? styles.closed : undefined}
-        >
-          <div className={styles.innerSidebar}>
-            <div className={styles.logoContainer}>
-              <Image src={logo} alt="emyht-logo" />
-            </div>
-            <Chats
-              chats={allChats}
-              contactRequests={contactRequests}
-              openChat={openChat}
-              addChatButtonClickHandler={() => setShowAddChatModal(true)}
-              sendFriendRequestButtonClickHandler={() =>
-                setShowContactRequestModal(true)
-              }
-            />
-          </div>
-          <UserInfoAndSettings username={username} email={email} />
-        </div>
+        <Sidebar
+          chatOpened={chatOpened}
+          allChats={allChats}
+          contactRequests={contactRequests}
+          openChat={openChat}
+          username={username}
+          email={email}
+          setShowAddChatModal={setShowAddChatModal}
+          setShowContactRequestModal={setShowContactRequestModal}
+        />
         <div
           className={styles.chatContainer}
           id={chatOpened ? undefined : styles.closed}
