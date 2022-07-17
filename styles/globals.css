@@ -72,6 +72,13 @@ p {
   margin: 0;
 }
 
+hr {
+  width: 100px;
+  background-color: white;
+  border: 1px solid var(--lightGrey);
+  border-radius: 2px;
+}
+
 a {
   color: inherit;
   text-decoration: none;
