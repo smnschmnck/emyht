@@ -3,8 +3,10 @@
   flex-direction: column;
   background-color: var(--accent);
   border-radius: 14px;
-  width: 32%;
-  aspect-ratio: 1/1.2;
+  min-width: 95px;
+  min-height: 110px;
+  max-width: 95px;
+  max-height: 110px;
   transition: 0.2s;
   cursor: pointer;
   color: white;

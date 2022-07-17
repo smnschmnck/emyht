@@ -1,8 +1,9 @@
 .requestsContainer {
   display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 5px 0;
+  justify-content: flex-start;
+  overflow-x: scroll;
+  gap: 5px;
+  width: 100%;
 }
 
 .main {
