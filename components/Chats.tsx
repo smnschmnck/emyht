@@ -8,9 +8,17 @@ import SingleChat from './SingleChat';
 import ISingleChat from '../interfaces/ISingleChat';
 import { useState } from 'react';
 import { PopupButton } from './atomic/PopupButton';
+import { ContactRequests } from './ContactRequests';
+
+export interface ContactRequest {
+  senderID: string;
+  senderUsername: string;
+  senderProfilePicture: string;
+}
 
 interface ChatsProps {
   chats: ISingleChat[];
+  contactRequests: ContactRequest[];
   openChat: (
     curChatID: string,
     profilePictureUrl: string,
@@ -22,6 +30,7 @@ interface ChatsProps {
 
 const Chats: React.FC<ChatsProps> = ({
   chats,
+  contactRequests,
   openChat,
   addChatButtonClickHandler,
   sendFriendRequestButtonClickHandler,
@@ -80,6 +89,7 @@ const Chats: React.FC<ChatsProps> = ({
             <p>Start a new chat</p>
           </div>
         )}
+        <ContactRequests contactRequests={contactRequests} />
         {getFilteredChats().map((chat) => (
           <SingleChat
             key={chat.chatID}

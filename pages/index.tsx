@@ -4,7 +4,7 @@ import type {
   NextPage,
 } from 'next';
 import Head from 'next/head';
-import Chats from '../components/Chats';
+import Chats, { ContactRequest } from '../components/Chats';
 import { getLoginData } from '../helpers/loginHelpers';
 import styles from '../styles/IndexPage.module.css';
 import fakeChats from '../dev/dummyData/fakeChats.json';
@@ -18,12 +18,15 @@ import { ServerResponse } from 'http';
 import { AddChatModal } from '../components/AddChatModal';
 import ISingleChat from '../interfaces/ISingleChat';
 import { ContactRequestModal } from '../components/ContactRequestModal';
+import { BACKEND_HOST } from '../helpers/globals';
+import { NextApiRequestCookies } from 'next/dist/server/api-utils';
 
 interface IndexPageProps {
   email: string;
   username: string;
   isAdmin: boolean;
   chats: ISingleChat[];
+  contactRequests: ContactRequest[];
 }
 
 const redirectOnUnverifiedEmail = (res: ServerResponse) => {
@@ -34,6 +37,23 @@ const redirectOnUnverifiedEmail = (res: ServerResponse) => {
 const redirectOnLoggedOut = (res: ServerResponse) => {
   res.writeHead(302, { Location: '/login' });
   res.end();
+};
+
+const getContactRequests = async (cookies: NextApiRequestCookies) => {
+  try {
+    const res = await fetch(BACKEND_HOST + '/pendingContactRequests', {
+      headers: {
+        authorization: `Bearer ${cookies.SESSIONID}`,
+      },
+    });
+    if (!res.ok) {
+      return [];
+    }
+    const json = await res.json();
+    return json;
+  } catch (err) {
+    return [];
+  }
 };
 
 const getChats = () => {
@@ -62,6 +82,7 @@ export const getServerSideProps: GetServerSideProps<
 > = async (context: GetServerSidePropsContext) => {
   const cookies = context.req.cookies;
   try {
+    getContactRequests(cookies);
     const getUserResponse = await getLoginData(cookies);
     if (!getUserResponse.emailActive) {
       redirectOnUnverifiedEmail(context.res);
@@ -73,6 +94,7 @@ export const getServerSideProps: GetServerSideProps<
         username: getUserResponse.username,
         isAdmin: getUserResponse.isAdmin,
         chats: getChats(),
+        contactRequests: await getContactRequests(cookies),
       },
     };
   } catch {
@@ -81,7 +103,12 @@ export const getServerSideProps: GetServerSideProps<
   }
 };
 
-const HomePage: NextPage<IndexPageProps> = ({ username, email, chats }) => {
+const HomePage: NextPage<IndexPageProps> = ({
+  username,
+  email,
+  chats,
+  contactRequests,
+}) => {
   const getFirstChatID = () => {
     if (!allChats[0]) {
       return '';
@@ -131,6 +158,7 @@ const HomePage: NextPage<IndexPageProps> = ({ username, email, chats }) => {
             </div>
             <Chats
               chats={allChats}
+              contactRequests={contactRequests}
               openChat={openChat}
               addChatButtonClickHandler={() => setShowAddChatModal(true)}
               sendFriendRequestButtonClickHandler={() =>

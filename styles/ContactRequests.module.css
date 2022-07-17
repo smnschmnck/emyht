@@ -1,0 +1,11 @@
+.requestsContainer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 0;
+}
+
+.heading {
+  margin: 10px 0;
+  padding: 0;
+}

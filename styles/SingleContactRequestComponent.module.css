@@ -1,0 +1,45 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--accent);
+  border-radius: 14px;
+  width: 30%;
+  height: 100px;
+  transition: 0.2s;
+  cursor: pointer;
+  color: white;
+  border: none;
+}
+
+.container:hover {
+  background-color: var(--accent-lighter);
+}
+
+.upper {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  height: 50%;
+}
+
+.lower {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 50%;
+}
+
+.name {
+  width: 100%;
+  text-align: center;
+  word-wrap: break-word;
+}
+
+.profilePic {
+  background-color: darksalmon;
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+}
