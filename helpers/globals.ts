@@ -1,9 +1,3 @@
-import dotenv from 'dotenv';
-const out = dotenv.config();
-if (out.error) {
-  console.log('NO .env FILE!');
-}
-
 const alertNotDefined = (val: string) => {
   console.error('\x1b[31m%s\x1b[0m', `error - ${val} not defined in .env!`);
   return '';
