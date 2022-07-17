@@ -223,9 +223,6 @@ func Authenticate(c *fiber.Ctx) error {
 	}
 	session, err := startSession(user.Uuid)
 	if err != nil {
-		c.Status(500).SendString("SOMETHING WENT WRONG")
-	}
-	if err != nil {
 		return c.Status(500).SendString("SOMETHING WENT WRONG WHILE AUTHENTICATING")
 	}
 	return c.JSON(session)
