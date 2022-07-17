@@ -10,10 +10,31 @@ export const ContactRequests: React.FC<ContactRequestsProps> = ({
   contactRequests,
 }) => {
   return (
-    <div>
+    <div className={styles.main}>
       <h2 className={styles.heading}>Contact Requests</h2>
       <div className={styles.requestsContainer}>
-        {contactRequests.map((r) => (
+        {[
+          {
+            senderID: '1',
+            senderUsername: 'Anke Schmeinck',
+            senderProfilePicture: 'b',
+          },
+          {
+            senderID: '2',
+            senderUsername: 'Christof Schmeinck',
+            senderProfilePicture: 'b',
+          },
+          {
+            senderID: '3',
+            senderUsername: 'Johannes Schmeinck',
+            senderProfilePicture: 'b',
+          },
+          {
+            senderID: '4',
+            senderUsername: 'Bernd Westphal',
+            senderProfilePicture: 'b',
+          },
+        ].map((r) => (
           <SingleContactRequest
             key={r.senderID}
             senderID={r.senderID}
