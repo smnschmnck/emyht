@@ -18,6 +18,7 @@ import { ContactRequestModal } from '../components/ContactRequestModal';
 import { BACKEND_HOST } from '../helpers/globals';
 import { NextApiRequestCookies } from 'next/dist/server/api-utils';
 import { Sidebar } from '../components/Sidebar';
+import { ContactRequestResolver } from '../components/ContactRequestDialog';
 
 interface IndexPageProps {
   email: string;
@@ -117,19 +118,42 @@ const HomePage: NextPage<IndexPageProps> = ({
     return allChats[0].chatID;
   };
 
+  const getFirstContactRequestID = () => {
+    if (!allContactRequests[0]) {
+      return '';
+    }
+    if (!allContactRequests[0].senderID) {
+      return '';
+    }
+    return allContactRequests[0].senderID;
+  };
+
   const [allChats, setAllChats] = useState(chats);
+  const [allContactRequests, setAllContactRequests] = useState(contactRequests);
   const [curChatID, setCurChatID] = useState(getFirstChatID());
+  const [curContactRequestID, setCurContactRequestID] = useState(
+    getFirstContactRequestID()
+  );
   const [chatOpened, setChatOpened] = useState(false);
   const [showAddChatModal, setShowAddChatModal] = useState(false);
   const [showContactRequestModal, setShowContactRequestModal] = useState(false);
+  const [openedContactRequest, setOpenedContactRequest] = useState(false);
 
   const openChat = (chatID: string) => {
     setCurChatID(chatID);
     setChatOpened(true);
+    setOpenedContactRequest(false);
+  };
+
+  const openContactRequest = (contactRequestID: string) => {
+    setCurContactRequestID(contactRequestID);
+    setChatOpened(true);
+    setOpenedContactRequest(true);
   };
 
   const closeChat = () => {
     setChatOpened(false);
+    setOpenedContactRequest(false);
   };
 
   return (
@@ -149,8 +173,9 @@ const HomePage: NextPage<IndexPageProps> = ({
         <Sidebar
           chatOpened={chatOpened}
           allChats={allChats}
-          contactRequests={contactRequests}
+          contactRequests={allContactRequests}
           openChat={openChat}
+          openContactRequest={openContactRequest}
           username={username}
           email={email}
           setShowAddChatModal={setShowAddChatModal}
@@ -160,7 +185,8 @@ const HomePage: NextPage<IndexPageProps> = ({
           className={styles.chatContainer}
           id={chatOpened ? undefined : styles.closed}
         >
-          {allChats.length > 0 &&
+          {!openedContactRequest &&
+            allChats.length > 0 &&
             allChats
               .filter((c) => c.chatID === curChatID)
               .slice(0, 1)
@@ -174,6 +200,18 @@ const HomePage: NextPage<IndexPageProps> = ({
                 />
               ))}
           {allChats.length <= 0 && <h1>oop no chat</h1>}
+          {openedContactRequest &&
+            allContactRequests
+              .filter((r) => r.senderID === curContactRequestID)
+              .map((r) => (
+                <ContactRequestResolver
+                  key={r.senderID}
+                  closeChat={closeChat}
+                  senderID={r.senderID}
+                  senderUsername={r.senderUsername}
+                  senderProfilePicture={r.senderProfilePicture}
+                />
+              ))}
         </div>
       </div>
     </>

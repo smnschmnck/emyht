@@ -11,6 +11,7 @@ interface SidebarProps {
   allChats: ISingleChat[];
   contactRequests: ContactRequest[];
   openChat: (chatID: string) => void;
+  openContactRequest: (contactRequestID: string) => void;
   username: string;
   email: string;
   setShowAddChatModal: (show: boolean) => void;
@@ -26,6 +27,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   email,
   setShowAddChatModal,
   setShowContactRequestModal,
+  openContactRequest,
 }) => {
   return (
     <div className={styles.sidebar} id={chatOpened ? styles.closed : undefined}>
@@ -35,7 +37,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
         {contactRequests.length > 0 && (
           <div className={styles.contactRequestsWrapper}>
-            <ContactRequests contactRequests={contactRequests} />
+            <ContactRequests
+              openContactRequest={openContactRequest}
+              contactRequests={contactRequests}
+            />
           </div>
         )}
         <Chats

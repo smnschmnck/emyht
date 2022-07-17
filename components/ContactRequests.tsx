@@ -4,10 +4,12 @@ import styles from '../styles/ContactRequests.module.css';
 
 interface ContactRequestsProps {
   contactRequests: ContactRequest[];
+  openContactRequest: (contactRequestID: string) => void;
 }
 
 export const ContactRequests: React.FC<ContactRequestsProps> = ({
   contactRequests,
+  openContactRequest,
 }) => {
   return (
     <div className={styles.main}>
@@ -19,6 +21,7 @@ export const ContactRequests: React.FC<ContactRequestsProps> = ({
             senderID={r.senderID}
             senderUsername={r.senderUsername}
             senderProfilePicture={r.senderProfilePicture}
+            openContactRequest={openContactRequest}
           />
         ))}
       </div>
