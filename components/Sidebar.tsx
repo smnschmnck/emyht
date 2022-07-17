@@ -43,6 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             />
           </div>
         )}
+        <hr />
         <Chats
           chats={allChats}
           contactRequests={contactRequests}

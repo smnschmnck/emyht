@@ -6,12 +6,6 @@
   width: 100%;
 }
 
-.main {
-  background-color: var(--lightestGrey);
-  border-radius: 14px;
-  padding: 10px;
-}
-
 .heading {
   margin: 0;
   margin-bottom: 10px;

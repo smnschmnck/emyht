@@ -1,7 +1,6 @@
 .container {
   display: flex;
   flex-direction: column;
-  background-color: var(--accent);
   border-radius: 14px;
   min-width: 95px;
   min-height: 110px;
@@ -9,12 +8,13 @@
   max-height: 110px;
   transition: 0.2s;
   cursor: pointer;
-  color: white;
-  border: none;
+  color: black;
+  background-color: white;
+  border: 1px solid var(--lightGrey);
 }
 
 .container:hover {
-  background-color: var(--accent-lighter);
+  background-color: var(--accentHover);
 }
 
 .upper {
