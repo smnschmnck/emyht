@@ -89,7 +89,6 @@ const Chats: React.FC<ChatsProps> = ({
             <p>Start a new chat</p>
           </div>
         )}
-        <ContactRequests contactRequests={contactRequests} />
         {getFilteredChats().map((chat) => (
           <SingleChat
             key={chat.chatID}

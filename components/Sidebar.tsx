@@ -4,6 +4,7 @@ import logo from '../assets/images/emyht-logo.svg';
 import Chats, { ContactRequest } from './Chats';
 import ISingleChat from '../interfaces/ISingleChat';
 import UserInfoAndSettings from './UserInfoAndSettings';
+import { ContactRequests } from './ContactRequests';
 
 interface SidebarProps {
   chatOpened: boolean;
@@ -32,6 +33,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className={styles.logoContainer}>
           <Image src={logo} alt="emyht-logo" />
         </div>
+        {contactRequests.length > 0 && (
+          <div className={styles.contactRequestsWrapper}>
+            <ContactRequests contactRequests={contactRequests} />
+          </div>
+        )}
         <Chats
           chats={allChats}
           contactRequests={contactRequests}
