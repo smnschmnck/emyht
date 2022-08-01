@@ -31,6 +31,7 @@ func handleRequest() {
 	app.Get("/getChats", chatService.GetChats)
 	//misc
 	app.Post("/contactRequest", chatService.SendContactRequest)
+	app.Post("/handleContactRequest", chatService.HandleContactRequest)
 	app.Get("/pendingContactRequests", chatService.GetPendingContactRequests)
 	app.Listen(PORT)
 }

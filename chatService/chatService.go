@@ -290,3 +290,51 @@ func GetPendingContactRequests(c *fiber.Ctx) error {
 
 	return c.JSON(contactRequests)
 }
+
+func HandleContactRequest(c *fiber.Ctx) error {
+	token, err := authService.GetBearer(c)
+	if err != nil {
+		return c.Status(401).SendString("NO AUTH")
+	}
+	uuid, err := userService.GetUUIDBySessionID(token)
+	if err != nil {
+		return c.Status(401).SendString("NO AUTH")
+	}
+	type contactRequestResolution struct {
+		SenderID string `json:"senderID" validate:"required"`
+		Action   string `json:"action" validate:"required"`
+	}
+	var contactReqResolution contactRequestResolution
+	err = c.BodyParser(&contactReqResolution)
+	if err != nil {
+		return c.Status(400).SendString("BAD REQUEST")
+	}
+	err = validate.Struct(contactReqResolution)
+	if err != nil {
+		return c.Status(400).SendString("BAD REQUEST")
+	}
+
+	var query string
+	switch contactReqResolution.Action {
+	case "accept":
+		query = "UPDATE friends " +
+			"SET status = 'accepted' " +
+			"WHERE sender = $1 AND  reciever = $2"
+	case "decline":
+		query = ""
+	case "block":
+		query = "UPDATE friends " +
+			"SET status = 'blocked' " +
+			"WHERE sender = $1 AND  reciever = $2"
+	}
+
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+	defer conn.Close(ctx)
+	conn.QueryRow(ctx, query, contactReqResolution.SenderID, uuid)
+
+	return c.SendString("SUCCESS")
+}
