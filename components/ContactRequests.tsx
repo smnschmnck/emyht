@@ -1,6 +1,7 @@
 import { ContactRequest } from './Chats';
 import { SingleContactRequest } from './SingleContactRequest';
 import styles from '../styles/ContactRequests.module.css';
+import { useState } from 'react';
 
 interface ContactRequestsProps {
   contactRequests: ContactRequest[];

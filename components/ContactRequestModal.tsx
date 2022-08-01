@@ -20,7 +20,7 @@ export const ContactRequestModal: React.FC<ContactRequestModalProps> = ({
     const body = {
       contactEmail: email,
     };
-    const res = await fetch('/api/contactRequest', {
+    const res = await fetch('/api/sendContactRequest', {
       method: 'post',
       body: JSON.stringify(body),
     });

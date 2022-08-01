@@ -18,7 +18,7 @@ import { ContactRequestModal } from '../components/ContactRequestModal';
 import { BACKEND_HOST } from '../helpers/globals';
 import { NextApiRequestCookies } from 'next/dist/server/api-utils';
 import { Sidebar } from '../components/Sidebar';
-import { ContactRequestResolver } from '../components/ContactRequestDialog';
+import { ContactRequestDialog } from '../components/ContactRequestDialog';
 
 interface IndexPageProps {
   email: string;
@@ -156,6 +156,16 @@ const HomePage: NextPage<IndexPageProps> = ({
     setOpenedContactRequest(false);
   };
 
+  const refreshContactRequests = async () => {
+    const res = await fetch('/api/getPendingContactRequests');
+    if (!res.ok) {
+      alert(await res.text());
+      return;
+    }
+    const json = await res.json();
+    setAllContactRequests(json);
+  };
+
   return (
     <>
       <Head>
@@ -204,7 +214,8 @@ const HomePage: NextPage<IndexPageProps> = ({
             allContactRequests
               .filter((r) => r.senderID === curContactRequestID)
               .map((r) => (
-                <ContactRequestResolver
+                <ContactRequestDialog
+                  refreshContactRequests={refreshContactRequests}
                   key={r.senderID}
                   closeChat={closeChat}
                   senderID={r.senderID}
