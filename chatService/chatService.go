@@ -62,7 +62,6 @@ func SendContactRequest(c *fiber.Ctx) error {
 	var duplicateExists bool
 	err = checkDuplicateRows.Scan(&duplicateExists)
 	if err != nil {
-		fmt.Println(err)
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 	if duplicateExists {
@@ -163,7 +162,6 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 		"RETURNING chat_id"
 	err = conn.QueryRow(ctx, insertSelfIntoChatQuery, reqUUID, chatID).Scan(&dbChatID)
 	if err != nil {
-		fmt.Println(err)
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 
@@ -172,7 +170,6 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 		"RETURNING chat_id"
 	err = conn.QueryRow(ctx, insertParticipantIntoChatQuery, req.ParticipantEmail, chatID).Scan(&dbChatID)
 	if err != nil {
-		fmt.Println(err)
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 
@@ -182,7 +179,6 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 func GetChats(c *fiber.Ctx) error {
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
-		fmt.Println(responseErr)
 		return c.Status(401).SendString("NOT AUTHORIZED")
 	}
 
@@ -206,7 +202,6 @@ func GetChats(c *fiber.Ctx) error {
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		fmt.Println(err)
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 	defer conn.Close()
@@ -242,7 +237,6 @@ func GetChats(c *fiber.Ctx) error {
 	var chats []singleChat
 	err = pgxscan.Select(ctx, conn, &chats, getChatsQuery, reqUUID)
 	if err != nil {
-		fmt.Println(err)
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 
@@ -252,7 +246,6 @@ func GetChats(c *fiber.Ctx) error {
 func GetPendingContactRequests(c *fiber.Ctx) error {
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
-		fmt.Println(responseErr)
 		return c.Status(401).SendString("NOT AUTHORIZED")
 	}
 	uuid, err := userService.GetUUIDBySessionID(sessionID)
@@ -269,7 +262,6 @@ func GetPendingContactRequests(c *fiber.Ctx) error {
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		fmt.Println(err)
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 	defer conn.Close()
@@ -280,7 +272,6 @@ func GetPendingContactRequests(c *fiber.Ctx) error {
 	var contactRequests []singleContactRequest
 	err = pgxscan.Select(ctx, conn, &contactRequests, pendingRequestQuery, uuid)
 	if err != nil {
-		fmt.Println(err)
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 
@@ -321,7 +312,8 @@ func HandleContactRequest(c *fiber.Ctx) error {
 			"SET status = 'accepted' " +
 			"WHERE sender = $1 AND  reciever = $2"
 	case "decline":
-		query = ""
+		query = "DELETE FROM friends " +
+			"WHERE sender = $1 AND  reciever = $2"
 	case "block":
 		query = "UPDATE friends " +
 			"SET status = 'blocked' " +
