@@ -36,14 +36,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <Image src={logo} alt="emyht-logo" />
         </div>
         {contactRequests.length > 0 && (
-          <div className={styles.contactRequestsWrapper}>
-            <ContactRequests
-              openContactRequest={openContactRequest}
-              contactRequests={contactRequests}
-            />
-          </div>
+          <>
+            <div className={styles.contactRequestsWrapper}>
+              <ContactRequests
+                openContactRequest={openContactRequest}
+                contactRequests={contactRequests}
+              />
+            </div>
+            <hr />
+          </>
         )}
-        <hr />
         <Chats
           chats={allChats}
           contactRequests={contactRequests}

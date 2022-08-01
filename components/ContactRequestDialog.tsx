@@ -16,6 +16,23 @@ export const ContactRequestResolver: React.FC<ContactRequestResolverProps> = ({
   senderUsername,
   closeChat,
 }) => {
+  const handleContactReq = async (action: string) => {
+    const body = {
+      senderID: senderID,
+      action: action,
+    };
+
+    const res = await fetch('/api/handleContactRequest', {
+      method: 'post',
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      alert(await res.text());
+      return;
+    }
+  };
+
   return (
     <div className={styles.container}>
       <ChatInfoHeader
@@ -31,12 +48,21 @@ export const ContactRequestResolver: React.FC<ContactRequestResolverProps> = ({
             Allow {senderUsername} to contact you?
           </h2>
           <div className={styles.buttonContainer}>
-            <BigButton>Allow</BigButton>
-            <BigButtonGreyHover color="red">Decline</BigButtonGreyHover>
+            <BigButton onClick={() => handleContactReq('accept')}>
+              Allow
+            </BigButton>
+            <BigButtonGreyHover
+              color="red"
+              onClick={() => handleContactReq('decline')}
+            >
+              Decline
+            </BigButtonGreyHover>
           </div>
           <hr className={styles.dividerHr} />
           <div className={styles.blockContainer}>
-            <SmallButton color="red">Block</SmallButton>
+            <SmallButton color="red" onClick={() => handleContactReq('block')}>
+              Block
+            </SmallButton>
             <p className={styles.blockInfo}>
               This prevents {senderUsername} from ever sending you a contact
               request again
