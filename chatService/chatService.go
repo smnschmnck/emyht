@@ -47,11 +47,11 @@ func SendContactRequest(c *fiber.Ctx) error {
 	}
 
 	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
+	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
-	defer conn.Close(ctx)
+	defer conn.Close()
 
 	checkDuplicateQuery := "SELECT EXISTS( " +
 		"SELECT 1 " +
@@ -243,6 +243,40 @@ func GetChats(c *fiber.Ctx) error {
 	return c.JSON(chats)
 }
 
+func GetContacts(c *fiber.Ctx) error {
+	token, err := authService.GetBearer(c)
+	if err != nil {
+		return c.Status(401).SendString("NO AUTH")
+	}
+	uuid, err := userService.GetUUIDBySessionID(token)
+	if err != nil {
+		return c.Status(401).SendString("NO AUTH")
+	}
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+	defer conn.Close(ctx)
+	query := "SELECT u.username, u.uuid, u.picture_url " +
+		"FROM friends " +
+		"JOIN users u ON u.uuid = friends.sender OR friends.reciever = u.uuid " +
+		"WHERE (reciever=$1 OR sender=$1) AND u.uuid != $1"
+	type contact struct {
+		Username   string `json:"username"`
+		Uuid       string `json:"uuid"`
+		PictureUrl string `json:"pictureUrl"`
+	}
+	var contacts []contact
+	err = pgxscan.Select(ctx, conn, &contacts, query, uuid)
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+
+	return c.JSON(contacts)
+}
+
 func GetPendingContactRequests(c *fiber.Ctx) error {
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
@@ -318,6 +352,8 @@ func HandleContactRequest(c *fiber.Ctx) error {
 		query = "UPDATE friends " +
 			"SET status = 'blocked' " +
 			"WHERE sender = $1 AND  reciever = $2"
+	default:
+		return c.Status(400).SendString("BAD REQUEST")
 	}
 
 	ctx := context.Background()
@@ -326,7 +362,10 @@ func HandleContactRequest(c *fiber.Ctx) error {
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 	defer conn.Close(ctx)
-	conn.QueryRow(ctx, query, contactReqResolution.SenderID, uuid)
+	_, err = conn.Query(ctx, query, contactReqResolution.SenderID, uuid)
+	if err != nil {
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
 
 	return c.SendString("SUCCESS")
 }

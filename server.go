@@ -29,10 +29,11 @@ func handleRequest() {
 	//chats
 	app.Post("/startOneOnOneChat", chatService.StartOneOnOneChat)
 	app.Get("/getChats", chatService.GetChats)
-	//misc
+	//user relationships
 	app.Post("/contactRequest", chatService.SendContactRequest)
 	app.Post("/handleContactRequest", chatService.HandleContactRequest)
 	app.Get("/pendingContactRequests", chatService.GetPendingContactRequests)
+	app.Get("/contacts", chatService.GetContacts)
 	app.Listen(PORT)
 }
 
