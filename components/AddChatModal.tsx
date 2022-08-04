@@ -4,35 +4,37 @@ import chat from '../assets/images/chat.svg';
 import { BigButton, SmallButton } from './atomic/Button';
 import { Modal } from './atomic/Modal';
 import { ContactList } from './ContactList';
-import { Contact } from './SingleContact';
 import { Tab, Tabs } from './atomic/Tabs';
 import { useEffect, useState } from 'react';
+import { Contact } from './SingleContact';
 
 interface AddChatModalProps {
   closeHandler: () => void;
 }
 
-const fakeContacts: Contact[] = [
-  {
-    id: '44b566-b465f4-b4564564',
-    name: 'Maximilian Berger',
-    profilePictureUrl:
-      'https://loremflickr.com/cache/resized/65535_52016243732_73712e2714_b_640_480_nofilter.jpg',
-  },
-  {
-    id: '3345-34g43gn3-3545',
-    name: 'John Doe',
-    profilePictureUrl:
-      'https://loremflickr.com/cache/resized/65535_51950170317_e4c7332e32_c_640_480_nofilter.jpg',
-  },
-];
-
 export const AddChatModal: React.FC<AddChatModalProps> = ({ closeHandler }) => {
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const resetSelectedContacts = () => {
     setSelectedContacts([]);
   };
+
+  const fetchContacts = async () => {
+    const res = await fetch('/api/getContacts');
+    if (!res.ok) {
+      alert(await res.text());
+      return;
+    }
+    const json = await res.json();
+    setContacts(json);
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    fetchContacts();
+  }, []);
 
   const createGroupChat = () => {
     //TODO: send to backend
@@ -54,9 +56,10 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({ closeHandler }) => {
           <Tabs onTabChange={resetSelectedContacts}>
             <Tab label="Chat" picture={chat}>
               <ContactList
+                isLoading={isLoading}
                 selectedContacts={selectedContacts}
                 setSelectedContacts={setSelectedContacts}
-                contacts={fakeContacts}
+                contacts={contacts}
               />
               <div className={styles.buttons}>
                 <BigButton
@@ -70,9 +73,10 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({ closeHandler }) => {
             </Tab>
             <Tab label="Group" picture={group}>
               <ContactList
+                isLoading={isLoading}
                 selectedContacts={selectedContacts}
                 setSelectedContacts={setSelectedContacts}
-                contacts={fakeContacts}
+                contacts={contacts}
                 multiselect={true}
               />
               <div className={styles.buttons}>

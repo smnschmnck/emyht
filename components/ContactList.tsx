@@ -8,6 +8,7 @@ interface ContactListProps {
   setSelectedContacts: (selectedContacts: string[]) => void;
   contacts: Contact[];
   multiselect?: boolean;
+  isLoading?: boolean;
 }
 
 export const ContactList: React.FC<ContactListProps> = ({
@@ -15,6 +16,7 @@ export const ContactList: React.FC<ContactListProps> = ({
   setSelectedContacts,
   contacts,
   multiselect,
+  isLoading,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -38,24 +40,31 @@ export const ContactList: React.FC<ContactListProps> = ({
         placeholder="Search contacts"
         onChange={(e) => setSearchQuery(e.target.value)}
       />
-      <div className={styles.contacts}>
-        {contacts
-          .filter((contact) => {
-            const lowerCaseContact = contact.name.toLowerCase();
-            const lowerCaseQuery = searchQuery.toLowerCase();
-            return lowerCaseContact.includes(lowerCaseQuery);
-          })
-          .map((contact) => (
-            <SingleContact
-              key={contact.id}
-              id={contact.id}
-              name={contact.name}
-              profilePictureUrl={contact.profilePictureUrl}
-              selectContact={selectContact}
-              selected={selectedContacts.includes(contact.id)}
-            />
-          ))}
-      </div>
+      {!isLoading && (
+        <div className={styles.contacts}>
+          {contacts
+            .filter((contact) => {
+              const lowerCaseContact = contact.name.toLowerCase();
+              const lowerCaseQuery = searchQuery.toLowerCase();
+              return lowerCaseContact.includes(lowerCaseQuery);
+            })
+            .map((contact) => (
+              <SingleContact
+                key={contact.id}
+                id={contact.id}
+                name={contact.name}
+                profilePictureUrl={contact.profilePictureUrl}
+                selectContact={selectContact}
+                selected={selectedContacts.includes(contact.id)}
+              />
+            ))}
+        </div>
+      )}
+      {isLoading && (
+        <div className={styles.loading}>
+          <h2>Loading...</h2>
+        </div>
+      )}
     </>
   );
 };
