@@ -40,7 +40,7 @@ export const ContactList: React.FC<ContactListProps> = ({
         placeholder="Search contacts"
         onChange={(e) => setSearchQuery(e.target.value)}
       />
-      {!isLoading && (
+      {!isLoading && contacts.length > 0 && (
         <div className={styles.contacts}>
           {contacts
             .filter((contact) => {
@@ -61,8 +61,13 @@ export const ContactList: React.FC<ContactListProps> = ({
         </div>
       )}
       {isLoading && (
-        <div className={styles.loading}>
+        <div className={styles.info}>
           <h2>Loading...</h2>
+        </div>
+      )}
+      {!isLoading && contacts.length <= 0 && (
+        <div className={styles.info}>
+          <h2>No contacts</h2>
         </div>
       )}
     </>
