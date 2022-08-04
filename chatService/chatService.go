@@ -261,11 +261,11 @@ func GetContacts(c *fiber.Ctx) error {
 	query := "SELECT u.username, u.uuid, u.picture_url " +
 		"FROM friends " +
 		"JOIN users u ON u.uuid = friends.sender OR friends.reciever = u.uuid " +
-		"WHERE (reciever=$1 OR sender=$1) AND u.uuid != $1"
+		"WHERE (reciever=$1 OR sender=$1) AND status='accepted' AND u.uuid != $1"
 	type contact struct {
-		Username   string `json:"username"`
-		Uuid       string `json:"uuid"`
-		PictureUrl string `json:"pictureUrl"`
+		Username   string `json:"name"`
+		Uuid       string `json:"id"`
+		PictureUrl string `json:"profilePictureUrl"`
 	}
 	var contacts []contact
 	err = pgxscan.Select(ctx, conn, &contacts, query, uuid)
@@ -273,7 +273,9 @@ func GetContacts(c *fiber.Ctx) error {
 		fmt.Println(err)
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
-
+	if contacts == nil {
+		return c.JSON(make([]string, 0))
+	}
 	return c.JSON(contacts)
 }
 
@@ -366,6 +368,5 @@ func HandleContactRequest(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
-
 	return c.SendString("SUCCESS")
 }
