@@ -87,9 +87,10 @@ func SendContactRequest(c *fiber.Ctx) error {
 	return c.SendString("SUCCESS")
 }
 
+//TODO: check if contact requests are accepted
 func StartOneOnOneChat(c *fiber.Ctx) error {
 	type startReq struct {
-		ParticipantEmail string `json:"participantEmail" validate:"required"`
+		ParticipantUUID string `json:"participantUUID" validate:"required"`
 	}
 	var req startReq
 	err := c.BodyParser(&req)
@@ -128,12 +129,12 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 		"FROM user_chat " +
 		"JOIN chats c on user_chat.chat_id = c.chat_id " +
 		"WHERE chat_type='one_on_one' " +
-		"AND (uuid=$1 OR uuid=(SELECT uuid FROM users WHERE email=$2)) " +
+		"AND (uuid=$1 OR uuid=$2) " +
 		"GROUP BY c.chat_id " +
 		"ORDER BY chatcount DESC " +
 		"LIMIT 1"
 	var chatExists bool
-	err = conn.QueryRow(ctx, checkChatExistsQuery, reqUUID, req.ParticipantEmail).Scan(&chatExists)
+	err = conn.QueryRow(ctx, checkChatExistsQuery, reqUUID, req.ParticipantUUID).Scan(&chatExists)
 	if err != nil {
 		if err.Error() == "no rows in result set" {
 			chatExists = false
@@ -166,9 +167,9 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 	}
 
 	insertParticipantIntoChatQuery := "INSERT INTO user_chat(uuid, chat_id, unread_messages) " +
-		"VALUES((SELECT uuid FROM users WHERE email=$1), $2, 0) " +
+		"VALUES($1, $2, 0) " +
 		"RETURNING chat_id"
-	err = conn.QueryRow(ctx, insertParticipantIntoChatQuery, req.ParticipantEmail, chatID).Scan(&dbChatID)
+	err = conn.QueryRow(ctx, insertParticipantIntoChatQuery, req.ParticipantUUID, chatID).Scan(&dbChatID)
 	if err != nil {
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
