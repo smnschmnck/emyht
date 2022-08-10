@@ -16,6 +16,8 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({ closeHandler }) => {
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [success, setSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const resetSelectedContacts = () => {
     setSelectedContacts([]);
@@ -32,6 +34,11 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({ closeHandler }) => {
     setIsLoading(false);
   };
 
+  const setSelectedContactsWrapper = (selectedContactsList: string[]) => {
+    setSelectedContacts(selectedContactsList);
+    setErrorMessage('');
+  };
+
   useEffect(() => {
     fetchContacts();
   }, []);
@@ -41,57 +48,86 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({ closeHandler }) => {
     alert('Creating groupchat with: ' + JSON.stringify(selectedContacts));
   };
 
-  const createChat = () => {
+  const createChat = async () => {
     //TODO: send to backend
-    alert('Creating chat with: ' + selectedContacts[0]);
+    const participantUUID = selectedContacts[0];
+    const body = {
+      participantUUID: participantUUID,
+    };
+    const res = await fetch('/api/startOneOnOneChat', {
+      method: 'post',
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      setErrorMessage(await res.text());
+      resetSelectedContacts();
+      return;
+    }
+    setSuccess(true);
   };
 
   return (
     <Modal backgroundClickHandler={closeHandler} mobileFullscreen={true}>
-      <div className={styles.main}>
-        <div className={styles.header}>
-          <h2 className={styles.heading}>New chat</h2>
+      {!success && (
+        <div className={styles.main}>
+          <div className={styles.header}>
+            <h2 className={styles.heading}>New chat</h2>
+          </div>
+          <div className={styles.interface}>
+            <Tabs onTabChange={resetSelectedContacts}>
+              <Tab label="Chat" picture={chat}>
+                <ContactList
+                  isLoading={isLoading}
+                  selectedContacts={selectedContacts}
+                  setSelectedContacts={setSelectedContactsWrapper}
+                  contacts={contacts}
+                />
+                <div className={styles.buttons}>
+                  <BigButton
+                    onClick={() => createChat()}
+                    disabled={selectedContacts.length <= 0}
+                  >
+                    Start chat
+                  </BigButton>
+                  {errorMessage && (
+                    <p className={styles.errorMessage}>{errorMessage}</p>
+                  )}
+                  <SmallButton onClick={closeHandler}>Cancel</SmallButton>
+                </div>
+              </Tab>
+              <Tab label="Group" picture={group}>
+                <ContactList
+                  isLoading={isLoading}
+                  selectedContacts={selectedContacts}
+                  setSelectedContacts={setSelectedContactsWrapper}
+                  contacts={contacts}
+                  multiselect={true}
+                />
+                <div className={styles.buttons}>
+                  <BigButton
+                    onClick={() => createGroupChat()}
+                    disabled={selectedContacts.length <= 0}
+                  >
+                    Create groupchat
+                  </BigButton>
+                  {errorMessage && (
+                    <p className={styles.errorMessage}>{errorMessage}</p>
+                  )}
+                  <SmallButton onClick={closeHandler}>Cancel</SmallButton>
+                </div>
+              </Tab>
+            </Tabs>
+          </div>
         </div>
-        <div className={styles.interface}>
-          <Tabs onTabChange={resetSelectedContacts}>
-            <Tab label="Chat" picture={chat}>
-              <ContactList
-                isLoading={isLoading}
-                selectedContacts={selectedContacts}
-                setSelectedContacts={setSelectedContacts}
-                contacts={contacts}
-              />
-              <div className={styles.buttons}>
-                <BigButton
-                  onClick={() => createChat()}
-                  disabled={selectedContacts.length <= 0}
-                >
-                  Start chat
-                </BigButton>
-                <SmallButton onClick={closeHandler}>Cancel</SmallButton>
-              </div>
-            </Tab>
-            <Tab label="Group" picture={group}>
-              <ContactList
-                isLoading={isLoading}
-                selectedContacts={selectedContacts}
-                setSelectedContacts={setSelectedContacts}
-                contacts={contacts}
-                multiselect={true}
-              />
-              <div className={styles.buttons}>
-                <BigButton
-                  onClick={() => createGroupChat()}
-                  disabled={selectedContacts.length <= 0}
-                >
-                  Create groupchat
-                </BigButton>
-                <SmallButton onClick={closeHandler}>Cancel</SmallButton>
-              </div>
-            </Tab>
-          </Tabs>
+      )}
+      {success && (
+        <div className={styles.successContainer}>
+          <div className={styles.innerSuccessContainer}>
+            <h2>Chat created Succesfully 🥳</h2>
+            <SmallButton onClick={closeHandler}>Continue</SmallButton>
+          </div>
         </div>
-      </div>
+      )}
     </Modal>
   );
 };
