@@ -168,66 +168,77 @@ const HomePage: NextPage<IndexPageProps> = ({
     setAllContactRequests(json);
   };
 
+  const refreshChats = async () => {
+    const res = await fetch('/api/getChats');
+    if (!res.ok) {
+      alert(await res.text());
+      return;
+    }
+    const json = await res.json();
+    setAllChats(json);
+  };
+
   return (
-    <>
+    <UserCtx.Provider value={user}>
       <Head>
         <title>emyht</title>
       </Head>
       {showAddChatModal && (
-        <AddChatModal closeHandler={() => setShowAddChatModal(false)} />
+        <AddChatModal
+          refreshChats={refreshChats}
+          closeHandler={() => setShowAddChatModal(false)}
+        />
       )}
       {showContactRequestModal && (
         <ContactRequestModal
           closeHandler={() => setShowContactRequestModal(false)}
         />
       )}
-      <UserCtx.Provider value={user}>
-        <div className={styles.main}>
-          <Sidebar
-            chatOpened={chatOpened}
-            allChats={allChats}
-            contactRequests={allContactRequests}
-            openChat={openChat}
-            openContactRequest={openContactRequest}
-            setShowAddChatModal={setShowAddChatModal}
-            setShowContactRequestModal={setShowContactRequestModal}
-          />
-          <div
-            className={styles.chatContainer}
-            id={chatOpened ? undefined : styles.closed}
-          >
-            {!openedContactRequest &&
-              allChats.length > 0 &&
-              allChats
-                .filter((c) => c.chatID === curChatID)
-                .slice(0, 1)
-                .map((c) => (
-                  <MainChat
-                    key={c.chatID}
-                    chatID={curChatID}
-                    profilePictureUrl={c.pictureUrl}
-                    chatName={c.chatName}
-                    closeChat={closeChat}
-                  />
-                ))}
-            {allChats.length <= 0 && !chatOpened && <h1>oop no chat</h1>}
-            {openedContactRequest &&
-              allContactRequests
-                .filter((r) => r.senderID === curContactRequestID)
-                .map((r) => (
-                  <ContactRequestDialog
-                    refreshContactRequests={refreshContactRequests}
-                    key={r.senderID}
-                    closeChat={closeChat}
-                    senderID={r.senderID}
-                    senderUsername={r.senderUsername}
-                    senderProfilePicture={r.senderProfilePicture}
-                  />
-                ))}
-          </div>
+      <div className={styles.main}>
+        <Sidebar
+          chatOpened={chatOpened}
+          allChats={allChats}
+          contactRequests={allContactRequests}
+          openChat={openChat}
+          openContactRequest={openContactRequest}
+          setShowAddChatModal={setShowAddChatModal}
+          setShowContactRequestModal={setShowContactRequestModal}
+        />
+        <div
+          className={styles.chatContainer}
+          id={chatOpened ? undefined : styles.closed}
+        >
+          {!openedContactRequest &&
+            allChats.length > 0 &&
+            allChats
+              .filter((c) => c.chatID === curChatID)
+              .slice(0, 1)
+              .map((c) => (
+                <MainChat
+                  key={c.chatID}
+                  chatID={curChatID}
+                  profilePictureUrl={c.pictureUrl}
+                  chatName={c.chatName}
+                  closeChat={closeChat}
+                />
+              ))}
+          {allChats.length <= 0 && !chatOpened && <h1>oop no chat</h1>}
+          {openedContactRequest &&
+            allContactRequests
+              .filter((r) => r.senderID === curContactRequestID)
+              .map((r) => (
+                <ContactRequestDialog
+                  refreshContactRequests={refreshContactRequests}
+                  key={r.senderID}
+                  closeChat={closeChat}
+                  senderID={r.senderID}
+                  senderUsername={r.senderUsername}
+                  senderProfilePicture={r.senderProfilePicture}
+                />
+              ))}
         </div>
-      </UserCtx.Provider>
-    </>
+      </div>
+    </UserCtx.Provider>
   );
 };
 

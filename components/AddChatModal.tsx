@@ -10,9 +10,13 @@ import { Contact } from './SingleContact';
 
 interface AddChatModalProps {
   closeHandler: () => void;
+  refreshChats: () => void;
 }
 
-export const AddChatModal: React.FC<AddChatModalProps> = ({ closeHandler }) => {
+export const AddChatModal: React.FC<AddChatModalProps> = ({
+  closeHandler,
+  refreshChats,
+}) => {
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -63,6 +67,7 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({ closeHandler }) => {
       resetSelectedContacts();
       return;
     }
+    refreshChats();
     setSuccess(true);
   };
 
