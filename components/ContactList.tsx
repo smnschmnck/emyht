@@ -2,6 +2,7 @@ import { Input } from './atomic/Input';
 import styles from '../styles/ContactListComponent.module.css';
 import { SingleContact, Contact } from './SingleContact';
 import { useState } from 'react';
+import { Loader } from './atomic/Loader';
 
 interface ContactListProps {
   selectedContacts: string[];
@@ -62,7 +63,9 @@ export const ContactList: React.FC<ContactListProps> = ({
       )}
       {isLoading && (
         <div className={styles.info}>
-          <h2>Loading...</h2>
+          <div className={styles.spinnerWrapper}>
+            <Loader></Loader>
+          </div>
         </div>
       )}
       {!isLoading && contacts.length <= 0 && (

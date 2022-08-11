@@ -1,0 +1,16 @@
+.circle{
+  width: 100%;
+  aspect-ratio: 1/1;
+  display: inline-block;
+  border: 10px solid var(--accentHover);
+  border-radius: 50%;
+  border-top-color: var(--accent);
+  animation: 1s spin infinite ease-in-out;
+  margin: 0;
+}
+
+@keyframes spin{
+  to{
+    transform: rotate(360deg);
+  }
+}

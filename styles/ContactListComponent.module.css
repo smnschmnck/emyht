@@ -13,3 +13,7 @@
   width: 100%;
   flex-grow: 1;
 }
+
+.spinnerWrapper{
+  width: 5rem;
+}
