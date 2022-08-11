@@ -210,7 +210,7 @@ const HomePage: NextPage<IndexPageProps> = ({
                     closeChat={closeChat}
                   />
                 ))}
-            {allChats.length <= 0 && <h1>oop no chat</h1>}
+            {allChats.length <= 0 && !chatOpened && <h1>oop no chat</h1>}
             {openedContactRequest &&
               allContactRequests
                 .filter((r) => r.senderID === curContactRequestID)
