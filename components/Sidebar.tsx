@@ -5,6 +5,8 @@ import Chats, { ContactRequest } from './Chats';
 import ISingleChat from '../interfaces/ISingleChat';
 import UserInfoAndSettings from './UserInfoAndSettings';
 import { ContactRequests } from './ContactRequests';
+import { useContext } from 'react';
+import { UserCtx } from '../pages';
 
 interface SidebarProps {
   chatOpened: boolean;
@@ -12,8 +14,6 @@ interface SidebarProps {
   contactRequests: ContactRequest[];
   openChat: (chatID: string) => void;
   openContactRequest: (contactRequestID: string) => void;
-  username: string;
-  email: string;
   setShowAddChatModal: (show: boolean) => void;
   setShowContactRequestModal: (show: boolean) => void;
 }
@@ -23,12 +23,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   allChats,
   contactRequests,
   openChat,
-  username,
-  email,
   setShowAddChatModal,
   setShowContactRequestModal,
   openContactRequest,
 }) => {
+  const user = useContext(UserCtx);
   return (
     <div className={styles.sidebar} id={chatOpened ? styles.closed : undefined}>
       <div className={styles.innerSidebar}>
@@ -56,7 +55,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           }
         />
       </div>
-      <UserInfoAndSettings username={username} email={email} />
+      <UserInfoAndSettings
+        username={user?.username ?? 'error'}
+        email={user?.email ?? 'error'}
+      />
     </div>
   );
 };

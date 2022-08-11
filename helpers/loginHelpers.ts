@@ -1,10 +1,9 @@
 import { BACKEND_HOST } from './globals';
 import { NextApiRequestCookies } from 'next/dist/server/api-utils';
+import IUser from '../interfaces/IUser';
 
-export interface GetUserResponse {
+export interface GetUserResponse extends IUser{
   sessionID: string;
-  username: string;
-  email: string;
   isAdmin: boolean;
   emailActive: boolean;
 }

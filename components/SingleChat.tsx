@@ -2,22 +2,26 @@ import Image from 'next/image';
 import styles from '../styles/SingleChatComponent.module.css';
 import ISingleChat from '../interfaces/ISingleChat';
 import { formatPicURL } from '../helpers/picHelpers';
+import { useContext } from 'react';
+import { UserCtx } from '../pages';
 
 interface SingleChatProps extends ISingleChat {
   openChat: (chatID: string) => void;
 }
 
 const SingleChat: React.FC<SingleChatProps> = ({
-  chatName: name,
-  timestamp: time,
-  textContent: message,
-  unreadMessages: unreadMessagesCount,
-  senderID: ownMessage,
-  deliveryStatus,
-  pictureUrl: profilePictureUrl,
-  openChat,
   chatID,
+  chatName,
+  timestamp,
+  textContent,
+  unreadMessages,
+  senderID,
+  deliveryStatus,
+  pictureUrl,
+  openChat,
 }) => {
+  const user = useContext(UserCtx);
+  const ownMessage = user?.uuid === senderID;
   return (
     <div className={styles.wrapper}>
       <button
@@ -26,15 +30,15 @@ const SingleChat: React.FC<SingleChatProps> = ({
       >
         <div className={styles.singleChat}>
           <div className={styles.profilePictureWrapper}>
-            {!ownMessage && unreadMessagesCount > 0 && (
+            {!ownMessage && unreadMessages > 0 && (
               <span className={styles.unreadMessagesNum}>
-                {unreadMessagesCount < 9 ? unreadMessagesCount : '9+'}
+                {unreadMessages < 9 ? unreadMessages : '9+'}
               </span>
             )}
             <div className={styles.profilePicture}>
               <div className={styles.image}>
                 <Image
-                  src={formatPicURL(profilePictureUrl)}
+                  src={formatPicURL(pictureUrl)}
                   objectFit="cover"
                   alt="pp"
                   layout="fill"
@@ -44,17 +48,17 @@ const SingleChat: React.FC<SingleChatProps> = ({
           </div>
           <div className={styles.chatContent}>
             <div className={styles.chatNameTime}>
-              <h3 className={styles.name}>{name}</h3>
+              <h3 className={styles.name}>{chatName}</h3>
               <h3
                 className={styles.time}
-                id={
-                  unreadMessagesCount <= 0 || ownMessage ? styles.readTime : ''
-                }
+                id={unreadMessages <= 0 || ownMessage ? styles.readTime : ''}
               >
-                {time}
+                {timestamp}
               </h3>
             </div>
-            <p className={styles.chatText}>{message}</p>
+            <p className={styles.chatText}>
+              {textContent ?? `Send a message to ${chatName}`}
+            </p>
           </div>
         </div>
       </button>

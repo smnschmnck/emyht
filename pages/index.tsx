@@ -8,7 +8,7 @@ import { ContactRequest } from '../components/Chats';
 import { getLoginData } from '../helpers/loginHelpers';
 import styles from '../styles/IndexPage.module.css';
 import MainChat from '../components/MainChat';
-import { useState } from 'react';
+import { createContext, useState } from 'react';
 import { ServerResponse } from 'http';
 import { AddChatModal } from '../components/AddChatModal';
 import ISingleChat from '../interfaces/ISingleChat';
@@ -17,10 +17,10 @@ import { BACKEND_HOST } from '../helpers/globals';
 import { NextApiRequestCookies } from 'next/dist/server/api-utils';
 import { Sidebar } from '../components/Sidebar';
 import { ContactRequestDialog } from '../components/ContactRequestDialog';
+import IUser from '../interfaces/IUser';
 
 interface IndexPageProps {
-  email: string;
-  username: string;
+  user: IUser;
   isAdmin: boolean;
   chats: ISingleChat[];
   contactRequests: ContactRequest[];
@@ -74,6 +74,8 @@ const emptyProps = {
   props: {},
 };
 
+export const UserCtx = createContext<IUser | null>(null);
+
 export const getServerSideProps: GetServerSideProps<
   IndexPageProps | {}
 > = async (context: GetServerSidePropsContext) => {
@@ -81,15 +83,18 @@ export const getServerSideProps: GetServerSideProps<
   try {
     getContactRequests(cookies);
     const getUserResponse = await getLoginData(cookies);
+    const user: IUser = {
+      uuid: getUserResponse.uuid,
+      username: getUserResponse.username,
+      email: getUserResponse.email,
+    };
     if (!getUserResponse.emailActive) {
       redirectOnUnverifiedEmail(context.res);
       return emptyProps;
     }
     return {
       props: {
-        email: getUserResponse.email,
-        username: getUserResponse.username,
-        isAdmin: getUserResponse.isAdmin,
+        user: user,
         chats: await getChats(cookies),
         contactRequests: await getContactRequests(cookies),
       },
@@ -101,8 +106,7 @@ export const getServerSideProps: GetServerSideProps<
 };
 
 const HomePage: NextPage<IndexPageProps> = ({
-  username,
-  email,
+  user,
   chats,
   contactRequests,
 }) => {
@@ -177,52 +181,52 @@ const HomePage: NextPage<IndexPageProps> = ({
           closeHandler={() => setShowContactRequestModal(false)}
         />
       )}
-      <div className={styles.main}>
-        <Sidebar
-          chatOpened={chatOpened}
-          allChats={allChats}
-          contactRequests={allContactRequests}
-          openChat={openChat}
-          openContactRequest={openContactRequest}
-          username={username}
-          email={email}
-          setShowAddChatModal={setShowAddChatModal}
-          setShowContactRequestModal={setShowContactRequestModal}
-        />
-        <div
-          className={styles.chatContainer}
-          id={chatOpened ? undefined : styles.closed}
-        >
-          {!openedContactRequest &&
-            allChats.length > 0 &&
-            allChats
-              .filter((c) => c.chatID === curChatID)
-              .slice(0, 1)
-              .map((c) => (
-                <MainChat
-                  key={c.chatID}
-                  chatID={curChatID}
-                  profilePictureUrl={c.pictureUrl}
-                  chatName={c.chatName}
-                  closeChat={closeChat}
-                />
-              ))}
-          {allChats.length <= 0 && <h1>oop no chat</h1>}
-          {openedContactRequest &&
-            allContactRequests
-              .filter((r) => r.senderID === curContactRequestID)
-              .map((r) => (
-                <ContactRequestDialog
-                  refreshContactRequests={refreshContactRequests}
-                  key={r.senderID}
-                  closeChat={closeChat}
-                  senderID={r.senderID}
-                  senderUsername={r.senderUsername}
-                  senderProfilePicture={r.senderProfilePicture}
-                />
-              ))}
+      <UserCtx.Provider value={user}>
+        <div className={styles.main}>
+          <Sidebar
+            chatOpened={chatOpened}
+            allChats={allChats}
+            contactRequests={allContactRequests}
+            openChat={openChat}
+            openContactRequest={openContactRequest}
+            setShowAddChatModal={setShowAddChatModal}
+            setShowContactRequestModal={setShowContactRequestModal}
+          />
+          <div
+            className={styles.chatContainer}
+            id={chatOpened ? undefined : styles.closed}
+          >
+            {!openedContactRequest &&
+              allChats.length > 0 &&
+              allChats
+                .filter((c) => c.chatID === curChatID)
+                .slice(0, 1)
+                .map((c) => (
+                  <MainChat
+                    key={c.chatID}
+                    chatID={curChatID}
+                    profilePictureUrl={c.pictureUrl}
+                    chatName={c.chatName}
+                    closeChat={closeChat}
+                  />
+                ))}
+            {allChats.length <= 0 && <h1>oop no chat</h1>}
+            {openedContactRequest &&
+              allContactRequests
+                .filter((r) => r.senderID === curContactRequestID)
+                .map((r) => (
+                  <ContactRequestDialog
+                    refreshContactRequests={refreshContactRequests}
+                    key={r.senderID}
+                    closeChat={closeChat}
+                    senderID={r.senderID}
+                    senderUsername={r.senderUsername}
+                    senderProfilePicture={r.senderProfilePicture}
+                  />
+                ))}
+          </div>
         </div>
-      </div>
+      </UserCtx.Provider>
     </>
   );
 };
