@@ -3,6 +3,7 @@ package main
 import (
 	"chat/authService"
 	"chat/chatService"
+	"chat/contactService"
 	"chat/dbHelpers/postgresHelper"
 	"chat/dbHelpers/redisHelper"
 	"fmt"
@@ -30,10 +31,10 @@ func handleRequest() {
 	app.Post("/startOneOnOneChat", chatService.StartOneOnOneChat)
 	app.Get("/chats", chatService.GetChats)
 	//user relationships
-	app.Post("/contactRequest", chatService.SendContactRequest)
-	app.Post("/handleContactRequest", chatService.HandleContactRequest)
-	app.Get("/pendingContactRequests", chatService.GetPendingContactRequests)
-	app.Get("/contacts", chatService.GetContacts)
+	app.Post("/contactRequest", contactService.SendContactRequest)
+	app.Post("/handleContactRequest", contactService.HandleContactRequest)
+	app.Get("/pendingContactRequests", contactService.GetPendingContactRequests)
+	app.Get("/contacts", contactService.GetContacts)
 	app.Listen(PORT)
 }
 
