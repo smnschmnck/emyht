@@ -1,13 +1,13 @@
 interface ISingleChat {
   chatID: string;
-  name: string;
-  time: string;
-  lastMessage: string;
-  read: boolean;
-  unreadMessagesCount?: number;
-  ownMessage: boolean;
+  chatName: string;
+  pictureUrl?: string;
+  unreadMessages: number;
+  messageType?: string;
+  textContent?: string;
+  timestamp?: string;
   deliveryStatus?: string;
-  profilePictureUrl: string;
+  senderID?: string;
 }
 
 export default ISingleChat;

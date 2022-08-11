@@ -6,7 +6,7 @@ import { SendMessageForm } from './SendMessageForm';
 
 interface MainChatProps {
   chatID: string;
-  profilePictureUrl: string;
+  profilePictureUrl?: string;
   chatName: string;
   closeChat: () => void;
 }

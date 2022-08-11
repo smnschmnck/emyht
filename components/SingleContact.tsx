@@ -1,6 +1,6 @@
 import styles from '../styles/SingleContactComponent.module.css';
 import Image from 'next/image';
-import { url } from 'inspector';
+import { formatPicURL } from '../helpers/picHelpers';
 
 export interface Contact {
   id: string;
@@ -20,15 +20,6 @@ export const SingleContact: React.FC<SingleContactProps> = ({
   selectContact,
   selected,
 }) => {
-  const formatPicURL = (profilePictureUrl: string) => {
-    const defaultPpRegeEx = /^default_[0-9]$/i;
-    if (profilePictureUrl.match(defaultPpRegeEx)) {
-      const num = profilePictureUrl.replace('default_', '');
-      return '/default_profile_pictures/default_' + num + '.png';
-    }
-    return profilePictureUrl;
-  };
-
   return (
     <div className={styles.contact}>
       <button

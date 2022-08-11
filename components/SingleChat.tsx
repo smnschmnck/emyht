@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import styles from '../styles/SingleChatComponent.module.css';
 import ISingleChat from '../interfaces/ISingleChat';
+import { formatPicURL } from '../helpers/picHelpers';
 
 interface SingleChatProps extends ISingleChat {
   openChat: (
@@ -11,14 +12,13 @@ interface SingleChatProps extends ISingleChat {
 }
 
 const SingleChat: React.FC<SingleChatProps> = ({
-  name,
-  time,
-  lastMessage: message,
-  read,
-  unreadMessagesCount,
-  ownMessage,
+  chatName: name,
+  timestamp: time,
+  textContent: message,
+  unreadMessages: unreadMessagesCount,
+  senderID: ownMessage,
   deliveryStatus,
-  profilePictureUrl,
+  pictureUrl: profilePictureUrl,
   openChat,
   chatID,
 }) => {
@@ -30,7 +30,7 @@ const SingleChat: React.FC<SingleChatProps> = ({
       >
         <div className={styles.singleChat}>
           <div className={styles.profilePictureWrapper}>
-            {!ownMessage && !read && unreadMessagesCount && (
+            {!ownMessage && unreadMessagesCount > 0 && (
               <span className={styles.unreadMessagesNum}>
                 {unreadMessagesCount < 9 ? unreadMessagesCount : '9+'}
               </span>
@@ -38,7 +38,7 @@ const SingleChat: React.FC<SingleChatProps> = ({
             <div className={styles.profilePicture}>
               <div className={styles.image}>
                 <Image
-                  src={profilePictureUrl}
+                  src={formatPicURL(profilePictureUrl)}
                   objectFit="cover"
                   alt="pp"
                   layout="fill"
@@ -51,7 +51,9 @@ const SingleChat: React.FC<SingleChatProps> = ({
               <h3 className={styles.name}>{name}</h3>
               <h3
                 className={styles.time}
-                id={read || ownMessage ? styles.readTime : ''}
+                id={
+                  unreadMessagesCount <= 0 || ownMessage ? styles.readTime : ''
+                }
               >
                 {time}
               </h3>

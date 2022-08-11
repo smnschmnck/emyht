@@ -1,9 +1,10 @@
 import styles from '../styles/ChatInfoHeaderComponent.module.css';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { formatPicURL as formatProfilePicURL } from '../helpers/picHelpers';
 
 interface ChatInfoHeaderProps {
-  profilePictureUrl: string;
+  profilePictureUrl?: string;
   chatID: string;
   chatName: string;
   closeChat: () => void;
@@ -38,7 +39,7 @@ export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
         <div className={styles.chatInfo}>
           <div className={styles.profilePicture}>
             <Image
-              src={profilePictureUrl}
+              src={formatProfilePicURL(profilePictureUrl)}
               alt="profile-picture"
               layout="fill"
               objectFit="cover"

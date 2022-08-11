@@ -39,7 +39,7 @@ const Chats: React.FC<ChatsProps> = ({
 
   const getFilteredChats = () => {
     return chats.filter((chat) => {
-      const lowerChatName = chat.name.toLowerCase();
+      const lowerChatName = chat.chatName.toLowerCase();
       const lowerChatQuery = searchQuery.toLowerCase();
       return lowerChatName.includes(lowerChatQuery);
     });
@@ -93,14 +93,13 @@ const Chats: React.FC<ChatsProps> = ({
           <SingleChat
             key={chat.chatID}
             chatID={chat.chatID}
-            name={chat.name}
-            time={chat.time}
-            lastMessage={chat.lastMessage}
-            unreadMessagesCount={chat.unreadMessagesCount}
+            chatName={chat.chatName}
+            timestamp={chat.timestamp}
+            textContent={chat.textContent}
+            unreadMessages={chat.unreadMessages}
             deliveryStatus={chat.deliveryStatus}
-            read={chat.read}
-            ownMessage={chat.ownMessage}
-            profilePictureUrl={chat.profilePictureUrl}
+            senderID={chat.senderID}
+            pictureUrl={chat.pictureUrl}
             openChat={openChat}
           />
         ))}

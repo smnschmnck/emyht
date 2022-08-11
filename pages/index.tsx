@@ -7,9 +7,7 @@ import Head from 'next/head';
 import { ContactRequest } from '../components/Chats';
 import { getLoginData } from '../helpers/loginHelpers';
 import styles from '../styles/IndexPage.module.css';
-import fakeChats from '../dev/dummyData/fakeChats.json';
 import MainChat from '../components/MainChat';
-import fallBackProfilePicture from '../assets/images/fallback-pp.webp';
 import { useState } from 'react';
 import { ServerResponse } from 'http';
 import { AddChatModal } from '../components/AddChatModal';
@@ -55,21 +53,21 @@ const getContactRequests = async (cookies: NextApiRequestCookies) => {
   }
 };
 
-const getChats = () => {
-  //TODO Get actual chats
-  return fakeChats.map((c) => {
-    return {
-      chatID: c.chatID,
-      name: c.name,
-      time: c.time,
-      lastMessage: c.lastMessage,
-      read: c.read,
-      unreadMessagesCount: c.unreadMessagesCount,
-      ownMessage: c.ownMessage,
-      deliveryStatus: c.deliveryStatus,
-      profilePictureUrl: c.profilePictureUrl ?? fallBackProfilePicture.src,
-    };
-  });
+const getChats = async (cookies: NextApiRequestCookies) => {
+  try {
+    const res = await fetch(BACKEND_HOST + '/chats', {
+      headers: {
+        authorization: `Bearer ${cookies.SESSIONID}`,
+      },
+    });
+    if (!res.ok) {
+      return [];
+    }
+    const json = (await res.json()) as ISingleChat[];
+    return json;
+  } catch (err) {
+    return [];
+  }
 };
 
 const emptyProps = {
@@ -92,7 +90,7 @@ export const getServerSideProps: GetServerSideProps<
         email: getUserResponse.email,
         username: getUserResponse.username,
         isAdmin: getUserResponse.isAdmin,
-        chats: getChats(),
+        chats: await getChats(cookies),
         contactRequests: await getContactRequests(cookies),
       },
     };
@@ -204,8 +202,8 @@ const HomePage: NextPage<IndexPageProps> = ({
                 <MainChat
                   key={c.chatID}
                   chatID={curChatID}
-                  profilePictureUrl={c.profilePictureUrl}
-                  chatName={c.name}
+                  profilePictureUrl={c.pictureUrl}
+                  chatName={c.chatName}
                   closeChat={closeChat}
                 />
               ))}
