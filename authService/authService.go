@@ -38,6 +38,14 @@ func GetBearer(c *fiber.Ctx) (string, error) {
 	return sessionID, nil
 }
 
+type UserRes struct {
+	UUID        string `json:"uuid"`
+	Email       string `json:"email"`
+	Username    string `json:"username"`
+	IsAdmin     bool   `json:"isAdmin"`
+	EmailActive bool   `json:"emailActive"`
+}
+
 func GetUserBySession(c *fiber.Ctx) error {
 	sessionID, responseErr := GetBearer(c)
 	if responseErr != nil {
@@ -49,18 +57,12 @@ func GetUserBySession(c *fiber.Ctx) error {
 		return c.Status(respErr.StatusCode).SendString(respErr.Msg)
 	}
 	res := UserRes{
+		UUID:        user.Uuid,
 		Email:       user.Email,
 		Username:    user.Username,
 		IsAdmin:     user.IsAdmin,
 		EmailActive: user.EmailActive}
 	return c.JSON(res)
-}
-
-type UserRes struct {
-	Email       string `json:"email"`
-	Username    string `json:"username"`
-	IsAdmin     bool   `json:"isAdmin"`
-	EmailActive bool   `json:"emailActive"`
 }
 
 type Credentials struct {
