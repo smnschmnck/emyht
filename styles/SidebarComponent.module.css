@@ -3,7 +3,7 @@
   flex-direction: column;
   height: 100%;
   max-width: 350px;
-  min-width: 250px;
+  min-width: 350px;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
   -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
   -moz-box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
@@ -26,6 +26,14 @@
 .contactRequestsWrapper {
   margin-bottom: 1rem;
 }
+
+@media only screen and (max-width: 800px) {
+  .sidebar {
+    min-width: 250px;
+    max-width: 250px;
+  }
+}
+
 
 @media only screen and (max-width: 600px) {
   .sidebar {

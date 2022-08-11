@@ -4,11 +4,7 @@ import ISingleChat from '../interfaces/ISingleChat';
 import { formatPicURL } from '../helpers/picHelpers';
 
 interface SingleChatProps extends ISingleChat {
-  openChat: (
-    curChatID: string,
-    profilePictureUrl: string,
-    chatName: string
-  ) => void;
+  openChat: (chatID: string) => void;
 }
 
 const SingleChat: React.FC<SingleChatProps> = ({
@@ -26,7 +22,7 @@ const SingleChat: React.FC<SingleChatProps> = ({
     <div className={styles.wrapper}>
       <button
         className={styles.singleChatContainer}
-        onClick={() => openChat(chatID, profilePictureUrl, name)}
+        onClick={() => openChat(chatID)}
       >
         <div className={styles.singleChat}>
           <div className={styles.profilePictureWrapper}>

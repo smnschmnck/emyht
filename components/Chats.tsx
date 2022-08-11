@@ -19,11 +19,7 @@ export interface ContactRequest {
 interface ChatsProps {
   chats: ISingleChat[];
   contactRequests: ContactRequest[];
-  openChat: (
-    curChatID: string,
-    profilePictureUrl: string,
-    chatName: string
-  ) => void;
+  openChat: (chatID: string) => void;
   addChatButtonClickHandler: () => void;
   sendFriendRequestButtonClickHandler: () => void;
 }
