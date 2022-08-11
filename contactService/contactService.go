@@ -86,6 +86,12 @@ func SendContactRequest(c *fiber.Ctx) error {
 }
 
 func GetContacts(c *fiber.Ctx) error {
+	type contact struct {
+		Username   string `json:"name"`
+		Uuid       string `json:"id"`
+		PictureUrl string `json:"profilePictureUrl"`
+	}
+
 	token, err := authService.GetBearer(c)
 	if err != nil {
 		return c.Status(401).SendString("NO AUTH")
@@ -94,27 +100,25 @@ func GetContacts(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(401).SendString("NO AUTH")
 	}
+
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 	defer conn.Close(ctx)
+
 	query := "SELECT u.username, u.uuid, u.picture_url " +
 		"FROM friends " +
 		"JOIN users u ON u.uuid = friends.sender OR friends.reciever = u.uuid " +
 		"WHERE (reciever=$1 OR sender=$1) AND status='accepted' AND u.uuid != $1"
-	type contact struct {
-		Username   string `json:"name"`
-		Uuid       string `json:"id"`
-		PictureUrl string `json:"profilePictureUrl"`
-	}
 	var contacts []contact
 	err = pgxscan.Select(ctx, conn, &contacts, query, uuid)
 	if err != nil {
 		fmt.Println(err)
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
+
 	if contacts == nil {
 		return c.JSON(make([]string, 0))
 	}
