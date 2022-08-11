@@ -28,7 +28,7 @@ func handleRequest() {
 	app.Get("/logout", authService.Logout)
 	//chats
 	app.Post("/startOneOnOneChat", chatService.StartOneOnOneChat)
-	app.Get("/getChats", chatService.GetChats)
+	app.Get("/chats", chatService.GetChats)
 	//user relationships
 	app.Post("/contactRequest", chatService.SendContactRequest)
 	app.Post("/handleContactRequest", chatService.HandleContactRequest)

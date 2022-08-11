@@ -241,6 +241,10 @@ func GetChats(c *fiber.Ctx) error {
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 
+	if chats == nil {
+		return c.JSON(make([]string, 0))
+	}
+
 	return c.JSON(chats)
 }
 
