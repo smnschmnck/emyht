@@ -5,6 +5,7 @@ import (
 	"chat/dbHelpers/postgresHelper"
 	"chat/userService"
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -85,26 +86,17 @@ func SendContactRequest(c *fiber.Ctx) error {
 	return c.SendString("SUCCESS")
 }
 
-func GetContacts(c *fiber.Ctx) error {
-	type contact struct {
-		Username   string `json:"name"`
-		Uuid       string `json:"id"`
-		PictureUrl string `json:"profilePictureUrl"`
-	}
+type contact struct {
+	Username   string `json:"name"`
+	Uuid       string `json:"id"`
+	PictureUrl string `json:"profilePictureUrl"`
+}
 
-	token, err := authService.GetBearer(c)
-	if err != nil {
-		return c.Status(401).SendString("NO AUTH")
-	}
-	uuid, err := userService.GetUUIDBySessionID(token)
-	if err != nil {
-		return c.Status(401).SendString("NO AUTH")
-	}
-
+func GetUserContactsbyUUID(uuid string) ([]contact, error) {
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return []contact{}, errors.New("INTERNAL ERROR")
 	}
 	defer conn.Close(ctx)
 
@@ -116,12 +108,31 @@ func GetContacts(c *fiber.Ctx) error {
 	err = pgxscan.Select(ctx, conn, &contacts, query, uuid)
 	if err != nil {
 		fmt.Println(err)
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return []contact{}, errors.New("INTERNAL ERROR")
 	}
 
 	if contacts == nil {
-		return c.JSON(make([]string, 0))
+		return make([]contact, 0), nil
 	}
+	return contacts, nil
+}
+
+func GetContacts(c *fiber.Ctx) error {
+	token, err := authService.GetBearer(c)
+	if err != nil {
+		return c.Status(401).SendString("NO AUTH")
+	}
+	uuid, err := userService.GetUUIDBySessionID(token)
+	if err != nil {
+		return c.Status(401).SendString("NO AUTH")
+	}
+
+	contacts, err := GetUserContactsbyUUID(uuid)
+
+	if err != nil {
+		return c.Status(500).SendString(err.Error())
+	}
+
 	return c.JSON(contacts)
 }
 

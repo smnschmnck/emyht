@@ -2,10 +2,10 @@ package chatService
 
 import (
 	"chat/authService"
+	"chat/contactService"
 	"chat/dbHelpers/postgresHelper"
 	"chat/userService"
 	"context"
-	"fmt"
 
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
@@ -19,19 +19,6 @@ var validate = validator.New()
 
 //TODO: check if contact requests are accepted
 func StartOneOnOneChat(c *fiber.Ctx) error {
-	type startReq struct {
-		ParticipantUUID string `json:"participantUUID" validate:"required"`
-	}
-	var req startReq
-	err := c.BodyParser(&req)
-	if err != nil {
-		return c.Status(400).SendString("BAD REQUEST")
-	}
-	err = validate.Struct(req)
-	if err != nil {
-		return c.Status(400).SendString("BAD REQUEST")
-	}
-
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
 		return c.Status(401).SendString("NOT AUTHORIZED")
@@ -40,6 +27,35 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
 	if err != nil {
 		return c.Status(401).SendString("NOT AUTHORIZED")
+	}
+
+	type startReq struct {
+		ParticipantUUID string `json:"participantUUID" validate:"required"`
+	}
+	var req startReq
+	err = c.BodyParser(&req)
+	if err != nil {
+		return c.Status(400).SendString("BAD REQUEST")
+	}
+	err = validate.Struct(req)
+	if err != nil {
+		return c.Status(400).SendString("BAD REQUEST")
+	}
+
+	contacts, err := contactService.GetUserContactsbyUUID(reqUUID)
+	if err != nil {
+		return c.Status(500).SendString(err.Error())
+	}
+
+	isInContacts := false
+	for _, c := range contacts {
+		if c.Uuid == req.ParticipantUUID {
+			isInContacts = true
+			break
+		}
+	}
+	if !isInContacts {
+		return c.Status(500).SendString("USER NOT IN CONTACTS")
 	}
 
 	ctx := context.Background()
@@ -69,7 +85,6 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 		if err.Error() == "no rows in result set" {
 			chatExists = false
 		} else {
-			fmt.Print(err)
 			return c.Status(500).SendString("INTERNAL ERROR")
 		}
 	}
@@ -84,7 +99,6 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 		"RETURNING chat_id"
 	err = conn.QueryRow(ctx, createChatQuery, chatID).Scan(&dbChatID)
 	if err != nil {
-		fmt.Print(err)
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 
