@@ -9,7 +9,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -146,7 +145,6 @@ func ResendVerificationEmail(c *fiber.Ctx) error {
 	}
 	emailToken, err := userService.RenewEmailToken(user.Email)
 	if err != nil {
-		fmt.Println(err)
 		return c.Status(500).SendString("ERROR WHILE SENDING EMAIL")
 	}
 	err = emailService.SendVerificationEmail(user.Username, user.Email, emailToken)
@@ -209,12 +207,9 @@ func Authenticate(c *fiber.Ctx) error {
 	lowerCaseEmail := strings.ToLower(credentials.Email)
 	user, err := userService.GetUserByEmail(lowerCaseEmail)
 	if err != nil {
-		c.Status(500).SendString("SOMETHING WENT WRONG")
-	}
-	pwCorrect, err := userService.CheckPW(user, lowerCaseEmail, credentials.Password)
-	if err != nil {
 		return c.Status(500).SendString(err.Error())
 	}
+	pwCorrect := userService.CheckPW(user, lowerCaseEmail, credentials.Password)
 	if !pwCorrect {
 		return c.Status(401).SendString("WRONG CREDENTIALS")
 	}
@@ -282,7 +277,6 @@ func ChangeEmail(c *fiber.Ctx) error {
 	var dbNewEmail string
 	err = insertedRows.Scan(&dbConfirmationToken, &dbNewEmail)
 	if err != nil {
-		fmt.Println(err)
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 
@@ -331,13 +325,11 @@ func ConfirmChangedEmail(c *fiber.Ctx) error {
 	var dbNewEmail string
 	err = updatedRows.Scan(&dbNewEmail)
 	if err != nil || dbNewEmail == "" {
-		fmt.Print(err)
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 	deleteQuery := "DELETE FROM change_email WHERE confirmation_token=$1"
 	_, err = conn.Query(ctx, deleteQuery, confirmToken.Token)
 	if err != nil {
-		fmt.Print(err)
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 	return c.SendString("SUCCESS")

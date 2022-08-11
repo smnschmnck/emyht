@@ -7,7 +7,6 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"math/rand"
 	"os"
 	"strconv"
@@ -195,7 +194,7 @@ func AddUser(email string, username string, password string) (User, error) {
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return User{}, err
+		return User{}, errors.New("INTERNAL ERROR")
 	}
 	defer conn.Close(ctx)
 	q := "INSERT INTO users(uuid, email, username, password, salt, is_admin, email_active, email_token, picture_url) " +
@@ -218,7 +217,6 @@ func AddUser(email string, username string, password string) (User, error) {
 		if strings.Contains(errString, `duplicate key value violates unique constraint`) {
 			return User{}, errors.New("USER EXISTS ALREADY")
 		}
-		fmt.Println(errString)
 		return User{}, errors.New("INTERNAL ERROR")
 	}
 
@@ -253,8 +251,8 @@ func RenewEmailToken(email string) (string, error) {
 	return dbEmailToken, nil
 }
 
-func CheckPW(user User, email string, password string) (bool, error) {
+func CheckPW(user User, email string, password string) bool {
 	pepper := getPepper()
 	hashedPW := hashPW(password, user.Salt, pepper)
-	return hashedPW == user.Password, nil
+	return hashedPW == user.Password
 }
