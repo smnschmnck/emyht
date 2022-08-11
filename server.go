@@ -30,6 +30,7 @@ func handleRequest() {
 	//chats
 	app.Post("/startOneOnOneChat", chatService.StartOneOnOneChat)
 	app.Get("/chats", chatService.GetChats)
+	app.Post("/message", chatService.SendMessage)
 	//user relationships
 	app.Post("/contactRequest", contactService.SendContactRequest)
 	app.Post("/handleContactRequest", contactService.HandleContactRequest)

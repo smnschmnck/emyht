@@ -6,9 +6,12 @@ import (
 	"chat/dbHelpers/postgresHelper"
 	"chat/userService"
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 
 	"github.com/go-playground/validator/v10"
@@ -17,7 +20,6 @@ import (
 
 var validate = validator.New()
 
-//TODO: check if contact requests are accepted
 func StartOneOnOneChat(c *fiber.Ctx) error {
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
@@ -190,4 +192,62 @@ func GetChats(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(chats)
+}
+
+func SendMessage(c *fiber.Ctx) error {
+	sessionID, responseErr := authService.GetBearer(c)
+	if responseErr != nil {
+		return c.Status(401).SendString("NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.Status(401).SendString("NOT AUTHORIZED")
+	}
+
+	//TODO check if user is in chat
+	//TODO make sure platform only media URLs are being sent. TLDR: More comprehensive validation
+	type reqBody struct {
+		ChatID      string `json:"chatID" validate:"required"`
+		TextContent string `json:"textContent" validate:"required"`
+		MessageType string `json:"messageType" validate:"required"`
+		MediaUrl    string `json:"mediaUrl"`
+	}
+
+	var req reqBody
+	err = c.BodyParser(&req)
+	if err != nil {
+		return c.Status(400).SendString("BAD REQUEST")
+	}
+	err = validate.Struct(req)
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(400).SendString("BAD REQUEST")
+	}
+
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+	defer conn.Close(ctx)
+
+	query := "INSERT INTO chatmessages(message_id, chat_id, sender_id, text_content, message_type, media_url, timestamp, delivery_status) " +
+		"VALUES ($1, $2, $3, $4, $5, $6, $7, 'sent') " +
+		"RETURNING message_id"
+
+	rows := conn.QueryRow(ctx, query, uuid.New(), req.ChatID, reqUUID, req.TextContent, req.MessageType, req.MediaUrl, time.Now().Unix())
+	var messageID string
+	err = rows.Scan(&messageID)
+	if err != nil {
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+
+	type resBody struct {
+		MessageID string `json:"messageID"`
+	}
+
+	//TODO add into chats as last_message_id
+
+	return c.JSON(resBody{MessageID: messageID})
 }
