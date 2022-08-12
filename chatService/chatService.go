@@ -217,7 +217,7 @@ func SendMessage(c *fiber.Ctx) error {
 
 	type reqBody struct {
 		ChatID      string `json:"chatID" validate:"required"`
-		TextContent string `json:"textContent" validate:"required"`
+		TextContent string `json:"textContent"`
 		MessageType string `json:"messageType" validate:"required"`
 		MediaUrl    string `json:"mediaUrl"`
 	}
@@ -243,6 +243,10 @@ func SendMessage(c *fiber.Ctx) error {
 		if hasWrongDomain {
 			return c.Status(400).SendString("BAD MEDIA URL DOMAIN")
 		}
+	}
+
+	if req.MessageType == "plaintext" && len(req.TextContent) < 1 {
+		return c.Status(400).SendString("MESSAGE TOO SHORT")
 	}
 
 	//check if user is in chat
