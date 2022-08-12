@@ -11,7 +11,6 @@ import (
 
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 
 	"github.com/go-playground/validator/v10"
@@ -226,28 +225,42 @@ func SendMessage(c *fiber.Ctx) error {
 	}
 
 	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
+	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
-	defer conn.Close(ctx)
+	defer conn.Close()
 
-	query := "INSERT INTO chatmessages(message_id, chat_id, sender_id, text_content, message_type, media_url, timestamp, delivery_status) " +
+	messageQuery := "INSERT INTO chatmessages(message_id, chat_id, sender_id, text_content, message_type, media_url, timestamp, delivery_status) " +
 		"VALUES ($1, $2, $3, $4, $5, $6, $7, 'sent') " +
 		"RETURNING message_id"
 
-	rows := conn.QueryRow(ctx, query, uuid.New(), req.ChatID, reqUUID, req.TextContent, req.MessageType, req.MediaUrl, time.Now().Unix())
+	rows := conn.QueryRow(ctx, messageQuery, uuid.New(), req.ChatID, reqUUID, req.TextContent, req.MessageType, req.MediaUrl, time.Now().Unix())
 	var messageID string
 	err = rows.Scan(&messageID)
 	if err != nil {
 		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 
-	type resBody struct {
-		MessageID string `json:"messageID"`
+	var chatID string
+	//add into chats as last_message_id
+	lastChatMessageQuery := "UPDATE chats " +
+		"SET last_message_id=$1 " +
+		"WHERE chat_id=$2 " +
+		"RETURNING chat_id"
+	rows = conn.QueryRow(ctx, lastChatMessageQuery, messageID, req.ChatID)
+	err = rows.Scan(&chatID)
+	if err != nil {
+		return c.Status(500).SendString("INTERNAL ERROR")
 	}
 
-	//TODO add into chats as last_message_id
-
-	return c.JSON(resBody{MessageID: messageID})
+	type resBody struct {
+		ChatID    string `json:"chatID"`
+		MessageID string `json:"messageID"`
+	}
+	res := resBody{
+		ChatID:    chatID,
+		MessageID: messageID,
+	}
+	return c.JSON(res)
 }
