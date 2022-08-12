@@ -6,6 +6,7 @@ import (
 	"chat/dbHelpers/postgresHelper"
 	"chat/userService"
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -122,33 +123,23 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 	return c.SendString("SUCCESS")
 }
 
-func GetChats(c *fiber.Ctx) error {
-	sessionID, responseErr := authService.GetBearer(c)
-	if responseErr != nil {
-		return c.Status(401).SendString("NOT AUTHORIZED")
-	}
+type singleChat struct {
+	ChatID         string  `json:"chatID"`
+	Name           string  `json:"chatName"`
+	PictureUrl     string  `json:"pictureUrl"`
+	UnreadMessages int     `json:"unreadMessages"`
+	MessageType    *string `json:"messageType"`
+	TextContent    *string `json:"textContent"`
+	Timestamp      *int    `json:"timestamp"`
+	DeliveryStatus *string `json:"deliveryStatus"`
+	SenderID       *string `json:"senderID"`
+}
 
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
-	if err != nil {
-		return c.Status(401).SendString("NOT AUTHORIZED")
-	}
-
-	type singleChat struct {
-		ChatID         string  `json:"chatID"`
-		Name           string  `json:"chatName"`
-		PictureUrl     string  `json:"pictureUrl"`
-		UnreadMessages int     `json:"unreadMessages"`
-		MessageType    *string `json:"messageType"`
-		TextContent    *string `json:"textContent"`
-		Timestamp      *int    `json:"timestamp"`
-		DeliveryStatus *string `json:"deliveryStatus"`
-		SenderID       *string `json:"senderID"`
-	}
-
+func GetChatsByUUID(uuid string) ([]singleChat, error) {
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return []singleChat{}, errors.New("INTERNAL ERROR")
 	}
 	defer conn.Close()
 
@@ -181,13 +172,32 @@ func GetChats(c *fiber.Ctx) error {
 		"LEFT JOIN chatmessages m ON m.message_id = c.last_message_id " +
 		"WHERE u.uuid=$1"
 	var chats []singleChat
-	err = pgxscan.Select(ctx, conn, &chats, getChatsQuery, reqUUID)
+	err = pgxscan.Select(ctx, conn, &chats, getChatsQuery, uuid)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return []singleChat{}, errors.New("INTERNAL ERROR")
 	}
 
 	if chats == nil {
-		return c.JSON(make([]string, 0))
+		return make([]singleChat, 0), nil
+	}
+
+	return chats, nil
+}
+
+func GetChats(c *fiber.Ctx) error {
+	sessionID, responseErr := authService.GetBearer(c)
+	if responseErr != nil {
+		return c.Status(401).SendString("NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.Status(401).SendString("NOT AUTHORIZED")
+	}
+
+	chats, err := GetChatsByUUID(reqUUID)
+	if err != nil {
+		return c.Status(500).SendString(err.Error())
 	}
 
 	return c.JSON(chats)
@@ -204,7 +214,6 @@ func SendMessage(c *fiber.Ctx) error {
 		return c.Status(401).SendString("NOT AUTHORIZED")
 	}
 
-	//TODO check if user is in chat
 	//TODO make sure platform only media URLs are being sent. TLDR: More comprehensive validation
 	type reqBody struct {
 		ChatID      string `json:"chatID" validate:"required"`
@@ -222,6 +231,22 @@ func SendMessage(c *fiber.Ctx) error {
 	if err != nil {
 		fmt.Println(err)
 		return c.Status(400).SendString("BAD REQUEST")
+	}
+
+	//check if user is in chat
+	inChat := false
+	chats, err := GetChatsByUUID(reqUUID)
+	if err != nil {
+		return c.Status(500).SendString(err.Error())
+	}
+	for _, chat := range chats {
+		if chat.ChatID == req.ChatID {
+			inChat = true
+			break
+		}
+	}
+	if !inChat {
+		return c.Status(401).SendString("USER NOT IN CHAT")
 	}
 
 	ctx := context.Background()
