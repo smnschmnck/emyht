@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/georgysavva/scany/pgxscan"
@@ -214,7 +215,6 @@ func SendMessage(c *fiber.Ctx) error {
 		return c.Status(401).SendString("NOT AUTHORIZED")
 	}
 
-	//TODO make sure platform only media URLs are being sent. TLDR: More comprehensive validation
 	type reqBody struct {
 		ChatID      string `json:"chatID" validate:"required"`
 		TextContent string `json:"textContent" validate:"required"`
@@ -231,6 +231,18 @@ func SendMessage(c *fiber.Ctx) error {
 	if err != nil {
 		fmt.Println(err)
 		return c.Status(400).SendString("BAD REQUEST")
+	}
+
+	//make sure platform only media URLs are being sent. TLDR: More comprehensive validation
+	mediaUrlExists := len(req.MediaUrl) > 0
+	if mediaUrlExists {
+		if req.MessageType == "plaintext" {
+			return c.Status(400).SendString("MEDIA URL NOT ALLOWED FOR TYPE PLAINTEXT")
+		}
+		hasWrongDomain := !strings.HasPrefix(req.MediaUrl, "storage.emyht.com/")
+		if hasWrongDomain {
+			return c.Status(400).SendString("BAD MEDIA URL DOMAIN")
+		}
 	}
 
 	//check if user is in chat
