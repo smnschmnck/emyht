@@ -1,7 +1,7 @@
 import styles from '../styles/ChatInfoHeaderComponent.module.css';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { formatPicURL as formatProfilePicURL } from '../helpers/picHelpers';
+import { formatPicURL as formatProfilePicURL } from '../helpers/stringFormatters';
 
 interface ChatInfoHeaderProps {
   profilePictureUrl?: string;

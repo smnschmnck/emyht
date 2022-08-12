@@ -1,6 +1,6 @@
 import styles from '../styles/SingleContactComponent.module.css';
 import Image from 'next/image';
-import { formatPicURL } from '../helpers/picHelpers';
+import { formatPicURL } from '../helpers/stringFormatters';
 
 export interface Contact {
   id: string;
