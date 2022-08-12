@@ -20,6 +20,9 @@ export const formatPicURL = (profilePictureUrl?: string) => {
 
 export const formatTimestamp = (timestamp: number) => {
   const millisecondTimestamp = timestamp * 1000;
+  if (millisecondTimestamp <= 0) {
+    return '';
+  }
   if (isToday(millisecondTimestamp)) {
     return new Intl.DateTimeFormat('en-GB', {
       hour: '2-digit',

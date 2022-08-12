@@ -30,7 +30,5 @@ export const isWithinYear = (timestamp: number) => {
     year: 'numeric',
   }).format();
 
-  console.log(curYear);
-
   return timestampYear === curYear;
 };
