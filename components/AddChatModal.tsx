@@ -53,7 +53,6 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({
   };
 
   const createChat = async () => {
-    //TODO: send to backend
     const participantUUID = selectedContacts[0];
     const body = {
       participantUUID: participantUUID,

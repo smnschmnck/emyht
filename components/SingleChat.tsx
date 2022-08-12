@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import styles from '../styles/SingleChatComponent.module.css';
 import ISingleChat from '../interfaces/ISingleChat';
-import { formatPicURL } from '../helpers/picHelpers';
+import { formatTimestamp, formatPicURL } from '../helpers/stringFormatters';
 import { useContext } from 'react';
 import { UserCtx } from '../pages';
 
@@ -53,7 +53,7 @@ const SingleChat: React.FC<SingleChatProps> = ({
                 className={styles.time}
                 id={unreadMessages <= 0 || ownMessage ? styles.readTime : ''}
               >
-                {timestamp}
+                {formatTimestamp(Number(timestamp))}
               </h3>
             </div>
             <p className={styles.chatText}>
