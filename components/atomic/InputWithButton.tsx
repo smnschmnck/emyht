@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import styles from '../../styles/AtomicInputWithButton.module.css';
 
 interface InputWithButtonProps {
@@ -7,6 +6,7 @@ interface InputWithButtonProps {
   value: string;
   setValue: (...args: any) => void;
   submitHandler: (...args: any) => any;
+  buttonDisabled?: boolean;
 }
 
 export const InputWithButton: React.FC<InputWithButtonProps> = ({
@@ -15,6 +15,7 @@ export const InputWithButton: React.FC<InputWithButtonProps> = ({
   value,
   setValue,
   submitHandler,
+  buttonDisabled,
 }) => {
   return (
     <form className={styles.form} onSubmit={submitHandler}>
@@ -25,7 +26,12 @@ export const InputWithButton: React.FC<InputWithButtonProps> = ({
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
-      <button type="submit" className={styles.button}>
+      <button
+        type="submit"
+        className={styles.button}
+        id={buttonDisabled ? styles.buttonDisabled : ''}
+        disabled={buttonDisabled}
+      >
         {buttonText}
       </button>
     </form>
