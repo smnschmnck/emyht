@@ -7,6 +7,7 @@ interface InputWithButtonProps {
   setValue: (...args: any) => void;
   submitHandler: (...args: any) => any;
   buttonDisabled?: boolean;
+  autofocus?: boolean;
 }
 
 export const InputWithButton: React.FC<InputWithButtonProps> = ({
@@ -16,6 +17,7 @@ export const InputWithButton: React.FC<InputWithButtonProps> = ({
   setValue,
   submitHandler,
   buttonDisabled,
+  autofocus,
 }) => {
   return (
     <form className={styles.form} onSubmit={submitHandler}>
@@ -25,6 +27,7 @@ export const InputWithButton: React.FC<InputWithButtonProps> = ({
         className={styles.input}
         value={value}
         onChange={(e) => setValue(e.target.value)}
+        autoFocus={autofocus}
       />
       <button
         type="submit"
