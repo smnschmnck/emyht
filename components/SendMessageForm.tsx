@@ -29,11 +29,12 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
   };
   return (
     <InputWithButton
-      buttonText={'Send'}
+      buttonText={messageInputValue.length <= 0 ? 'Type Message' : 'Send'}
       inputPlaceHolder={'Type Message'}
       value={messageInputValue}
       setValue={setMessageInputValue}
       submitHandler={sendMessage}
+      buttonDisabled={messageInputValue.length <= 0}
     />
   );
 };
