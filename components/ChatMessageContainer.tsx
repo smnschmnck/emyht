@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { formatTimestamp } from '../helpers/stringFormatters';
 import { UserCtx } from '../pages';
 import styles from '../styles/ChatMessagesContainerComponent.module.css';
+import { OwnMessage, ParticipantMessage } from './SingleChatMessage';
 
 interface ISingleMessage {
   messageID: string;
@@ -54,11 +55,21 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
   return (
     <div className={styles.messages} ref={messageContainer}>
       {messages.map((message) => (
-        <div key={message.messageID}>
-          {message.senderID !== user?.uuid && <h3>{message.senderUsername}</h3>}
-          <p>{message.textContent}</p>
-          <p>{formatTimestamp(message.timestamp)}</p>
-        </div>
+        <>
+          {message.senderID === user?.uuid && (
+            <OwnMessage
+              timestamp={message.timestamp}
+              textContent={message.textContent}
+            />
+          )}
+          {message.senderID !== user?.uuid && (
+            <ParticipantMessage
+              username={message.senderUsername}
+              timestamp={message.timestamp}
+              textContent={message.textContent}
+            />
+          )}
+        </>
       ))}
     </div>
   );
