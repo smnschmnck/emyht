@@ -204,6 +204,19 @@ func GetChats(c *fiber.Ctx) error {
 	return c.JSON(chats)
 }
 
+func isUserInChat(uuid string, chatID string) (bool, error) {
+	chats, err := GetChatsByUUID(uuid)
+	if err != nil {
+		return false, err
+	}
+	for _, chat := range chats {
+		if chat.ChatID == chatID {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 func SendMessage(c *fiber.Ctx) error {
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
@@ -249,17 +262,9 @@ func SendMessage(c *fiber.Ctx) error {
 		return c.Status(400).SendString("MESSAGE TOO SHORT")
 	}
 
-	//check if user is in chat
-	inChat := false
-	chats, err := GetChatsByUUID(reqUUID)
+	inChat, err := isUserInChat(reqUUID, req.ChatID)
 	if err != nil {
 		return c.Status(500).SendString(err.Error())
-	}
-	for _, chat := range chats {
-		if chat.ChatID == req.ChatID {
-			inChat = true
-			break
-		}
 	}
 	if !inChat {
 		return c.Status(401).SendString("USER NOT IN CHAT")
@@ -304,4 +309,63 @@ func SendMessage(c *fiber.Ctx) error {
 		MessageID: messageID,
 	}
 	return c.JSON(res)
+}
+
+type singleMessage struct {
+	MessageID      string `json:"messageID" validate:"required"`
+	SenderID       string `json:"senderID" validate:"required"`
+	SenderUsername string `json:"senderUsername" validate:"required"`
+	TextContent    string `json:"textContent" validate:"required"`
+	MessageType    string `json:"messageType" validate:"required"`
+	MediaUrl       string `json:"medieUrl" validate:"required"`
+	Timestamp      int    `json:"timestamp" validate:"required"`
+	DeliveryStatus string `json:"deliveryStatus" validate:"required"`
+}
+
+func GetMessages(c *fiber.Ctx) error {
+	sessionID, responseErr := authService.GetBearer(c)
+	if responseErr != nil {
+		return c.Status(401).SendString("NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.Status(401).SendString("NOT AUTHORIZED")
+	}
+
+	chatID := c.Params("chatID")
+	if len(chatID) <= 0 {
+		c.Status(500).SendString("MISSING CHAT ID")
+	}
+
+	inChat, err := isUserInChat(reqUUID, chatID)
+	if err != nil {
+		return c.Status(500).SendString(err.Error())
+	}
+	if !inChat {
+		return c.Status(401).SendString("USER NOT IN CHAT")
+	}
+
+	ctx := context.Background()
+	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+	defer conn.Close()
+
+	query := "SELECT message_id, sender_id, username AS sender_username, text_content, message_type, media_url, timestamp, delivery_status " +
+		"FROM chatmessages " +
+		"JOIN users u on u.uuid = chatmessages.sender_id " +
+		"WHERE chat_id=$1"
+	var messages []singleMessage
+	err = pgxscan.Select(ctx, conn, &messages, query, chatID)
+	if err != nil {
+		return c.Status(500).SendString("INTERNAL ERROR")
+	}
+
+	if messages == nil {
+		return c.JSON(make([]singleChat, 0))
+	}
+
+	return c.JSON(messages)
 }
