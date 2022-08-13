@@ -1,5 +1,4 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import { formatTimestamp } from '../helpers/stringFormatters';
 import { UserCtx } from '../pages';
 import styles from '../styles/ChatMessagesContainerComponent.module.css';
 import { OwnMessage, ParticipantMessage } from './SingleChatMessage';
