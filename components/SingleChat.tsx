@@ -57,6 +57,7 @@ const SingleChat: React.FC<SingleChatProps> = ({
               </h3>
             </div>
             <p className={styles.chatText}>
+              {/* TODO show message type */}
               {textContent ?? `Send a message to ${chatName}`}
             </p>
           </div>

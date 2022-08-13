@@ -1,9 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { formatTimestamp } from '../helpers/stringFormatters';
+import { UserCtx } from '../pages';
 import styles from '../styles/ChatMessagesContainerComponent.module.css';
 
-interface SingleMessageProps {
+interface ISingleMessage {
   messageID: string;
-  timeStamp: string;
+  senderID: string;
+  senderUsername: string;
+  textContent: string;
+  messageType: string;
+  medieUrl: string;
+  timestamp: number;
+  deliveryStatus: string;
 }
 
 interface ChatMessageContainerProps {
@@ -13,11 +21,30 @@ interface ChatMessageContainerProps {
 export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
   chatID,
 }) => {
-  const [messages, setMessages] = useState<SingleMessageProps[]>([]);
+  const [messages, setMessages] = useState<ISingleMessage[]>([]);
+  const user = useContext(UserCtx);
+
+  const messageContainer = useRef<HTMLDivElement>(null);
+
+  const scrollMessagesToTop = () => {
+    if (messageContainer?.current) {
+      messageContainer.current.scrollTop =
+        messageContainer?.current?.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    scrollMessagesToTop();
+  });
 
   const fetchMessages = async () => {
-    //TODO: fetch with chatid
-    //eg. fetch("/api/chatMessages/chatID")
+    const res = await fetch(`/api/getChatMessages/${chatID}`);
+    if (!res.ok) {
+      alert(await res.text());
+      return;
+    }
+    const json = (await res.json()) as ISingleMessage[];
+    setMessages(json);
   };
 
   useEffect(() => {
@@ -25,22 +52,14 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
   }, []);
 
   return (
-    <div className={styles.messages}>
+    <div className={styles.messages} ref={messageContainer}>
       {messages.map((message) => (
-        <p key={message.messageID}>{message.messageID}</p>
+        <div key={message.messageID}>
+          {message.senderID !== user?.uuid && <h3>{message.senderUsername}</h3>}
+          <p>{message.textContent}</p>
+          <p>{formatTimestamp(message.timestamp)}</p>
+        </div>
       ))}
-      <h2>{chatID}</h2>
-      <h2>{chatID}</h2>
-      <h2>{chatID}</h2>
-      <h2>{chatID}</h2>
-      <h2>{chatID}</h2>
-      <h2>{chatID}</h2>
-      <h2>{chatID}</h2>
-      <h2>{chatID}</h2>
-      <h2>{chatID}</h2>
-      <h2>{chatID}</h2>
-      <h2>{chatID}</h2>
-      <h2>{chatID}</h2>
     </div>
   );
 };
