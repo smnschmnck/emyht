@@ -18,6 +18,7 @@ import { NextApiRequestCookies } from 'next/dist/server/api-utils';
 import { Sidebar } from '../components/Sidebar';
 import { ContactRequestDialog } from '../components/ContactRequestDialog';
 import IUser from '../interfaces/IUser';
+import { io } from 'socket.io-client';
 
 interface IndexPageProps {
   user: IUser;
