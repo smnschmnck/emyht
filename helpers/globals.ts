@@ -7,3 +7,7 @@ const alertNotDefined = (val: string) => {
 export const BACKEND_HOST = process.env.BACKEND_HOST
   ? process.env.BACKEND_HOST
   : alertNotDefined('BACKEND_HOST');
+
+export const WEBSOCKET_HOST = process.env.WEBSOCKET_HOST
+  ? process.env.WEBSOCKET_HOST
+  : alertNotDefined('WEBSOCKET_HOST');
