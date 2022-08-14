@@ -8,6 +8,6 @@ export const BACKEND_HOST = process.env.BACKEND_HOST
   ? process.env.BACKEND_HOST
   : alertNotDefined('BACKEND_HOST');
 
-export const WEBSOCKET_HOST = process.env.WEBSOCKET_HOST
-  ? process.env.WEBSOCKET_HOST
-  : alertNotDefined('WEBSOCKET_HOST');
+export const WEBSOCKET_HOST = process.env.NEXT_PUBLIC_WEBSOCKET_HOST
+  ? process.env.NEXT_PUBLIC_WEBSOCKET_HOST
+  : alertNotDefined('NEXT_PUBLIC_WEBSOCKET_HOST');
