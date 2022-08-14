@@ -22,7 +22,7 @@ var validate = validator.New()
 func SendContactRequest(c echo.Context) error {
 	token, err := authService.GetBearer(c)
 	if err != nil {
-		return c.String(401, "NO AUTH")
+		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
 	type contactRequest struct {
 		ContactEmail string `json:"contactEmail" validate:"required"`
@@ -30,11 +30,11 @@ func SendContactRequest(c echo.Context) error {
 	contactReq := new(contactRequest)
 	err = c.Bind(contactReq)
 	if err != nil {
-		return c.String(400, "BAD REQUEST")
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 	err = validate.Struct(contactReq)
 	if err != nil {
-		return c.String(400, "BAD REQUEST")
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
 	user, respErr := userService.GetUserBySessionID(token)
@@ -43,13 +43,13 @@ func SendContactRequest(c echo.Context) error {
 	}
 
 	if user.Email == contactReq.ContactEmail {
-		return c.String(500, "YOU CAN'T SEND A CONTACT REQUEST TO YOURSELF")
+		return c.String(http.StatusInternalServerError, "YOU CAN'T SEND A CONTACT REQUEST TO YOURSELF")
 	}
 
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 	defer conn.Close()
 
@@ -62,10 +62,10 @@ func SendContactRequest(c echo.Context) error {
 	var duplicateExists bool
 	err = checkDuplicateRows.Scan(&duplicateExists)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 	if duplicateExists {
-		return c.String(409, contactReq.ContactEmail+" ALREADY SENT A FRIEND REQUEST TO YOU")
+		return c.String(http.StatusConflict, contactReq.ContactEmail+" ALREADY SENT A FRIEND REQUEST TO YOU")
 	}
 
 	contactReqQuery := "INSERT INTO friends(sender, reciever, status) " +
@@ -76,12 +76,12 @@ func SendContactRequest(c echo.Context) error {
 	err = contactReqRows.Scan(&status)
 	if err != nil {
 		if strings.Contains(err.Error(), `null value in column "reciever" violates not-null constraint`) {
-			return c.String(404, "USER DOES NOT EXIST")
+			return c.String(http.StatusNotFound, "USER DOES NOT EXIST")
 		}
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
-			return c.String(409, "DUPLICATE CONTACT REQUEST")
+			return c.String(http.StatusConflict, "DUPLICATE CONTACT REQUEST")
 		}
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	return c.String(http.StatusOK, "SUCCESS")
@@ -121,17 +121,17 @@ func GetUserContactsbyUUID(uuid string) ([]contact, error) {
 func GetContacts(c echo.Context) error {
 	token, err := authService.GetBearer(c)
 	if err != nil {
-		return c.String(401, "NO AUTH")
+		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
 	uuid, err := userService.GetUUIDBySessionID(token)
 	if err != nil {
-		return c.String(401, "NO AUTH")
+		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
 
 	contacts, err := GetUserContactsbyUUID(uuid)
 
 	if err != nil {
-		return c.String(500, err.Error())
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, contacts)
@@ -140,11 +140,11 @@ func GetContacts(c echo.Context) error {
 func GetPendingContactRequests(c echo.Context) error {
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
-		return c.String(401, "NOT AUTHORIZED")
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 	uuid, err := userService.GetUUIDBySessionID(sessionID)
 	if err != nil {
-		return c.String(401, "NOT AUTHORIZED")
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
 	type singleContactRequest struct {
@@ -156,7 +156,7 @@ func GetPendingContactRequests(c echo.Context) error {
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 	defer conn.Close()
 	pendingRequestQuery := "SELECT sender AS sender_id, u.username AS sender_username, u.picture_url AS sender_profile_picture " +
@@ -166,7 +166,7 @@ func GetPendingContactRequests(c echo.Context) error {
 	var contactRequests []singleContactRequest
 	err = pgxscan.Select(ctx, conn, &contactRequests, pendingRequestQuery, uuid)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	if contactRequests == nil {
@@ -179,11 +179,11 @@ func GetPendingContactRequests(c echo.Context) error {
 func HandleContactRequest(c echo.Context) error {
 	token, err := authService.GetBearer(c)
 	if err != nil {
-		return c.String(401, "NO AUTH")
+		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
 	uuid, err := userService.GetUUIDBySessionID(token)
 	if err != nil {
-		return c.String(401, "NO AUTH")
+		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
 	type contactRequestResolution struct {
 		SenderID string `json:"senderID" validate:"required"`
@@ -192,11 +192,11 @@ func HandleContactRequest(c echo.Context) error {
 	contactReqResolution := new(contactRequestResolution)
 	err = c.Bind(contactReqResolution)
 	if err != nil {
-		return c.String(400, "BAD REQUEST")
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 	err = validate.Struct(contactReqResolution)
 	if err != nil {
-		return c.String(400, "BAD REQUEST")
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
 	var query string
@@ -213,18 +213,18 @@ func HandleContactRequest(c echo.Context) error {
 			"SET status = 'blocked' " +
 			"WHERE sender = $1 AND  reciever = $2"
 	default:
-		return c.String(400, "BAD REQUEST")
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 	defer conn.Close(ctx)
 	_, err = conn.Query(ctx, query, contactReqResolution.SenderID, uuid)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 	return c.String(http.StatusOK, "SUCCESS")
 }

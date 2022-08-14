@@ -25,12 +25,12 @@ var validate = validator.New()
 func StartOneOnOneChat(c echo.Context) error {
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
-		return c.String(401, "NOT AUTHORIZED")
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
 	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
 	if err != nil {
-		return c.String(401, "NOT AUTHORIZED")
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
 	type startReq struct {
@@ -39,16 +39,16 @@ func StartOneOnOneChat(c echo.Context) error {
 	req := new(startReq)
 	err = c.Bind(&req)
 	if err != nil {
-		return c.String(400, "BAD REQUEST")
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 	err = validate.Struct(req)
 	if err != nil {
-		return c.String(400, "BAD REQUEST")
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
 	contacts, err := contactService.GetUserContactsbyUUID(reqUUID)
 	if err != nil {
-		return c.String(500, err.Error())
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	isInContacts := false
@@ -59,13 +59,13 @@ func StartOneOnOneChat(c echo.Context) error {
 		}
 	}
 	if !isInContacts {
-		return c.String(500, "USER NOT IN CONTACTS")
+		return c.String(http.StatusInternalServerError, "USER NOT IN CONTACTS")
 	}
 
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 	defer conn.Close()
 
@@ -89,11 +89,11 @@ func StartOneOnOneChat(c echo.Context) error {
 		if err.Error() == "no rows in result set" {
 			chatExists = false
 		} else {
-			return c.String(500, "INTERNAL ERROR")
+			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 		}
 	}
 	if chatExists {
-		return c.String(409, "CHAT EXISTS ALREADY")
+		return c.String(http.StatusConflict, "CHAT EXISTS ALREADY")
 	}
 
 	chatID := uuid.New().String()
@@ -103,7 +103,7 @@ func StartOneOnOneChat(c echo.Context) error {
 		"RETURNING chat_id"
 	err = conn.QueryRow(ctx, createChatQuery, chatID).Scan(&dbChatID)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	insertSelfIntoChatQuery := "INSERT INTO user_chat(uuid, chat_id, unread_messages) " +
@@ -111,7 +111,7 @@ func StartOneOnOneChat(c echo.Context) error {
 		"RETURNING chat_id"
 	err = conn.QueryRow(ctx, insertSelfIntoChatQuery, reqUUID, chatID).Scan(&dbChatID)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	insertParticipantIntoChatQuery := "INSERT INTO user_chat(uuid, chat_id, unread_messages) " +
@@ -119,7 +119,7 @@ func StartOneOnOneChat(c echo.Context) error {
 		"RETURNING chat_id"
 	err = conn.QueryRow(ctx, insertParticipantIntoChatQuery, req.ParticipantUUID, chatID).Scan(&dbChatID)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	return c.String(http.StatusOK, "SUCCESS")
@@ -190,17 +190,17 @@ func GetChatsByUUID(uuid string) ([]singleChat, error) {
 func GetChats(c echo.Context) error {
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
-		return c.String(401, "NOT AUTHORIZED")
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
 	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
 	if err != nil {
-		return c.String(401, "NOT AUTHORIZED")
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
 	chats, err := GetChatsByUUID(reqUUID)
 	if err != nil {
-		return c.String(500, err.Error())
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, chats)
@@ -222,12 +222,12 @@ func isUserInChat(uuid string, chatID string) (bool, error) {
 func SendMessage(c echo.Context) error {
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
-		return c.String(401, "NOT AUTHORIZED")
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
 	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
 	if err != nil {
-		return c.String(401, "NOT AUTHORIZED")
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
 	type reqBody struct {
@@ -240,42 +240,42 @@ func SendMessage(c echo.Context) error {
 	req := new(reqBody)
 	err = c.Bind(&req)
 	if err != nil {
-		return c.String(400, "BAD REQUEST")
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 	err = validate.Struct(req)
 	if err != nil {
 		fmt.Println(err)
-		return c.String(400, "BAD REQUEST")
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
 	//make sure platform only media URLs are being sent. TLDR: More comprehensive validation
 	mediaUrlExists := len(req.MediaUrl) > 0
 	if mediaUrlExists {
 		if req.MessageType == "plaintext" {
-			return c.String(400, "MEDIA URL NOT ALLOWED FOR TYPE PLAINTEXT")
+			return c.String(http.StatusBadRequest, "MEDIA URL NOT ALLOWED FOR TYPE PLAINTEXT")
 		}
 		hasWrongDomain := !strings.HasPrefix(req.MediaUrl, "storage.emyht.com/")
 		if hasWrongDomain {
-			return c.String(400, "BAD MEDIA URL DOMAIN")
+			return c.String(http.StatusBadRequest, "BAD MEDIA URL DOMAIN")
 		}
 	}
 
 	if req.MessageType == "plaintext" && len(req.TextContent) < 1 {
-		return c.String(400, "MESSAGE TOO SHORT")
+		return c.String(http.StatusBadRequest, "MESSAGE TOO SHORT")
 	}
 
 	inChat, err := isUserInChat(reqUUID, req.ChatID)
 	if err != nil {
-		return c.String(500, err.Error())
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	if !inChat {
-		return c.String(401, "USER NOT IN CHAT")
+		return c.String(http.StatusUnauthorized, "USER NOT IN CHAT")
 	}
 
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 	defer conn.Close()
 
@@ -287,7 +287,7 @@ func SendMessage(c echo.Context) error {
 	var messageID string
 	err = rows.Scan(&messageID)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	var chatID string
@@ -299,7 +299,7 @@ func SendMessage(c echo.Context) error {
 	rows = conn.QueryRow(ctx, lastChatMessageQuery, messageID, req.ChatID)
 	err = rows.Scan(&chatID)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	type resBody struct {
@@ -327,31 +327,31 @@ type singleMessage struct {
 func GetMessages(c echo.Context) error {
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
-		return c.String(401, "NOT AUTHORIZED")
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
 	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
 	if err != nil {
-		return c.String(401, "NOT AUTHORIZED")
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
 	chatID := c.Param("chatID")
 	if len(chatID) <= 0 {
-		c.String(500, "MISSING CHAT ID")
+		c.String(http.StatusInternalServerError, "MISSING CHAT ID")
 	}
 
 	inChat, err := isUserInChat(reqUUID, chatID)
 	if err != nil {
-		return c.String(500, err.Error())
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	if !inChat {
-		return c.String(401, "USER NOT IN CHAT")
+		return c.String(http.StatusUnauthorized, "USER NOT IN CHAT")
 	}
 
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 	defer conn.Close()
 
@@ -362,7 +362,7 @@ func GetMessages(c echo.Context) error {
 	var messages []singleMessage
 	err = pgxscan.Select(ctx, conn, &messages, query, chatID)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	if messages == nil {

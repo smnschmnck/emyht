@@ -50,7 +50,7 @@ type UserRes struct {
 func GetUserBySession(c echo.Context) error {
 	sessionID, responseErr := GetBearer(c)
 	if responseErr != nil {
-		return c.String(401, "NOT AUTHORIZED")
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
 	user, respErr := userService.GetUserBySessionID(sessionID)
@@ -100,14 +100,14 @@ func Register(c echo.Context) error {
 	reqUser := new(userService.ReqUser)
 	err := c.Bind(reqUser)
 	if err != nil {
-		return c.String(400, "BAD REQUEST")
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 	err = validate.Struct(reqUser)
 	if err != nil {
-		return c.String(400, "BAD REQUEST")
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 	if len(reqUser.Password) < 8 {
-		return c.String(403, "PASSWORD TOO SHORT")
+		return c.String(http.StatusForbidden, "PASSWORD TOO SHORT")
 	}
 
 	lowerCaseEmail := strings.ToLower(reqUser.Email)
@@ -116,20 +116,20 @@ func Register(c echo.Context) error {
 	if err != nil {
 		errString := err.Error()
 		if errString == "USER EXISTS ALREADY" {
-			return c.String(409, errString)
+			return c.String(http.StatusConflict, errString)
 		}
-		return c.String(500, errString)
+		return c.String(http.StatusInternalServerError, errString)
 	}
 	session, err := startSession(user.Uuid)
 
 	if err != nil {
-		return c.String(500, "SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
+		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
 	}
 
 	err = emailService.SendVerificationEmail(reqUser.Username, reqUser.Email, user.EmailToken)
 
 	if err != nil {
-		return c.String(500, "SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
+		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
 	}
 
 	return c.JSON(http.StatusOK, session)
@@ -138,7 +138,7 @@ func Register(c echo.Context) error {
 func ResendVerificationEmail(c echo.Context) error {
 	sessionID, responseErr := GetBearer(c)
 	if responseErr != nil {
-		return c.String(401, "NOT AUTHORIZED")
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
 	user, respErr := userService.GetUserBySessionID(sessionID)
@@ -148,11 +148,11 @@ func ResendVerificationEmail(c echo.Context) error {
 	}
 	emailToken, err := userService.RenewEmailToken(user.Email)
 	if err != nil {
-		return c.String(500, "ERROR WHILE SENDING EMAIL")
+		return c.String(http.StatusInternalServerError, "ERROR WHILE SENDING EMAIL")
 	}
 	err = emailService.SendVerificationEmail(user.Username, user.Email, emailToken)
 	if err != nil {
-		return c.String(500, "ERROR WHILE SENDING EMAIL")
+		return c.String(http.StatusInternalServerError, "ERROR WHILE SENDING EMAIL")
 	}
 	return c.String(http.StatusOK, "SUCCESS")
 }
@@ -164,17 +164,17 @@ func VerifyEmail(c echo.Context) error {
 	emailToken := new(EmailToken)
 	err := c.Bind(emailToken)
 	if err != nil {
-		c.String(400, "BAD REQUEST")
+		c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 	err = validate.Struct(emailToken)
 	if err != nil {
-		return c.String(400, "BAD REQUEST")
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 	defer conn.Close(ctx)
 
@@ -183,7 +183,7 @@ func VerifyEmail(c echo.Context) error {
 	var dbUserEmailActive bool
 	err = rows.Scan(&dbUserEmailActive)
 	if err != nil {
-		return c.String(404, "COULD NOT FIND E-MAIL ADDRESS MATHCHING THE SUPPLIED LINK")
+		return c.String(http.StatusNotFound, "COULD NOT FIND E-MAIL ADDRESS MATHCHING THE SUPPLIED LINK")
 	}
 
 	insertQuery := "UPDATE users SET email_active=true, email_token=$1 WHERE email_token=$2 RETURNING email_active"
@@ -191,7 +191,7 @@ func VerifyEmail(c echo.Context) error {
 	var active bool
 	err = insertedRows.Scan(&active)
 	if err != nil || !active {
-		return c.String(500, "SOMETHING WENT WRONG WHILE VERIYFING YOUR E-MAIL")
+		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE VERIYFING YOUR E-MAIL")
 	}
 
 	return c.String(http.StatusOK, "EMAIL VERIFIED SUCCESSFULLY")
@@ -201,27 +201,27 @@ func Authenticate(c echo.Context) error {
 	credentials := new(Credentials)
 	err := c.Bind(&credentials)
 	if err != nil {
-		return c.String(500, "SOMETHING WENT WRONG")
+		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
 	err = validate.Struct(credentials)
 	if err != nil {
-		return c.String(400, "BAD REQUEST")
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 	lowerCaseEmail := strings.ToLower(credentials.Email)
 	user, err := userService.GetUserByEmail(lowerCaseEmail)
 	if err != nil {
-		return c.String(500, err.Error())
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	pwCorrect := userService.CheckPW(user, lowerCaseEmail, credentials.Password)
 	if !pwCorrect {
-		return c.String(401, "WRONG CREDENTIALS")
+		return c.String(http.StatusUnauthorized, "WRONG CREDENTIALS")
 	}
 	if err != nil {
-		c.String(500, "SOMETHING WENT WRONG")
+		c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
 	session, err := startSession(user.Uuid)
 	if err != nil {
-		return c.String(500, "SOMETHING WENT WRONG WHILE AUTHENTICATING")
+		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE AUTHENTICATING")
 	}
 	return c.JSON(http.StatusOK, session)
 }
@@ -233,16 +233,16 @@ func ChangeEmail(c echo.Context) error {
 	changeReq := new(ChangeReq)
 	err := c.Bind(&changeReq)
 	if err != nil {
-		return c.String(400, "BAD REQUEST")
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 	err = validate.Struct(changeReq)
 	if err != nil {
-		return c.String(400, "BAD REQUEST")
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
 	sessionID, responseErr := GetBearer(c)
 	if responseErr != nil {
-		return c.String(401, "NOT AUTHORIZED")
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
 	user, respErr := userService.GetUserBySessionID(sessionID)
@@ -253,7 +253,7 @@ func ChangeEmail(c echo.Context) error {
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 	defer conn.Close(ctx)
 
@@ -264,10 +264,10 @@ func ChangeEmail(c echo.Context) error {
 	rows := conn.QueryRow(ctx, checkQuery, changeReq.NewEmail)
 	err = rows.Scan(&emailExists)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 	if emailExists {
-		return c.String(409, "EMAIL EXISTS ALREADY")
+		return c.String(http.StatusConflict, "EMAIL EXISTS ALREADY")
 	}
 
 	insertQuery := "INSERT INTO change_email(uuid, new_email, confirmation_token) " +
@@ -280,13 +280,13 @@ func ChangeEmail(c echo.Context) error {
 	var dbNewEmail string
 	err = insertedRows.Scan(&dbConfirmationToken, &dbNewEmail)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	err = emailService.SendVerifyEmailChangeEmail(user.Username, dbNewEmail, dbConfirmationToken)
 
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	return c.String(http.StatusOK, "SUCCESS")
@@ -299,17 +299,17 @@ func ConfirmChangedEmail(c echo.Context) error {
 	confirmToken := new(ConfirmToken)
 	err := c.Bind(&confirmToken)
 	if err != nil {
-		c.String(400, "BAD REQUEST")
+		c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 	err = validate.Struct(confirmToken)
 	if err != nil {
-		return c.String(400, "BAD REQUEST")
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 	defer conn.Close(ctx)
 	updateQuery := "UPDATE users u " +
@@ -328,12 +328,12 @@ func ConfirmChangedEmail(c echo.Context) error {
 	var dbNewEmail string
 	err = updatedRows.Scan(&dbNewEmail)
 	if err != nil || dbNewEmail == "" {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 	deleteQuery := "DELETE FROM change_email WHERE confirmation_token=$1"
 	_, err = conn.Query(ctx, deleteQuery, confirmToken.Token)
 	if err != nil {
-		return c.String(500, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 	return c.String(http.StatusOK, "SUCCESS")
 }
@@ -341,13 +341,13 @@ func ConfirmChangedEmail(c echo.Context) error {
 func Logout(c echo.Context) error {
 	sessionID, err := GetBearer(c)
 	if err != nil {
-		return c.String(500, "SOMETHING WENT WRONG")
+		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
 	rdb := redis.NewClient(&redisHelper.RedisConfig)
 	ctx := context.Background()
 	_, err = rdb.Del(ctx, sessionID).Result()
 	if err != nil {
-		return c.String(500, "SOMETHING WENT WRONG")
+		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
 	return c.String(http.StatusOK, "SUCCESSFULLY LOGGED OUT")
 }
