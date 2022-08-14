@@ -7,48 +7,49 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/labstack/echo/v4"
 )
 
 var validate = validator.New()
 
-func SendContactRequest(c *fiber.Ctx) error {
+func SendContactRequest(c echo.Context) error {
 	token, err := authService.GetBearer(c)
 	if err != nil {
-		return c.Status(401).SendString("NO AUTH")
+		return c.String(401, "NO AUTH")
 	}
 	type contactRequest struct {
 		ContactEmail string `json:"contactEmail" validate:"required"`
 	}
-	var contactReq contactRequest
-	err = c.BodyParser(&contactReq)
+	contactReq := new(contactRequest)
+	err = c.Bind(contactReq)
 	if err != nil {
-		return c.Status(400).SendString("BAD REQUEST")
+		return c.String(400, "BAD REQUEST")
 	}
 	err = validate.Struct(contactReq)
 	if err != nil {
-		return c.Status(400).SendString("BAD REQUEST")
+		return c.String(400, "BAD REQUEST")
 	}
 
 	user, respErr := userService.GetUserBySessionID(token)
 	if respErr.StatusCode >= 300 {
-		return c.Status(respErr.StatusCode).SendString(respErr.Msg)
+		return c.String(respErr.StatusCode, respErr.Msg)
 	}
 
 	if user.Email == contactReq.ContactEmail {
-		return c.Status(500).SendString("YOU CAN'T SEND A CONTACT REQUEST TO YOURSELF")
+		return c.String(500, "YOU CAN'T SEND A CONTACT REQUEST TO YOURSELF")
 	}
 
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 	defer conn.Close()
 
@@ -61,10 +62,10 @@ func SendContactRequest(c *fiber.Ctx) error {
 	var duplicateExists bool
 	err = checkDuplicateRows.Scan(&duplicateExists)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 	if duplicateExists {
-		return c.Status(409).SendString(contactReq.ContactEmail + " ALREADY SENT A FRIEND REQUEST TO YOU")
+		return c.String(409, contactReq.ContactEmail+" ALREADY SENT A FRIEND REQUEST TO YOU")
 	}
 
 	contactReqQuery := "INSERT INTO friends(sender, reciever, status) " +
@@ -75,15 +76,15 @@ func SendContactRequest(c *fiber.Ctx) error {
 	err = contactReqRows.Scan(&status)
 	if err != nil {
 		if strings.Contains(err.Error(), `null value in column "reciever" violates not-null constraint`) {
-			return c.Status(404).SendString("USER DOES NOT EXIST")
+			return c.String(404, "USER DOES NOT EXIST")
 		}
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
-			return c.Status(409).SendString("DUPLICATE CONTACT REQUEST")
+			return c.String(409, "DUPLICATE CONTACT REQUEST")
 		}
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 
-	return c.SendString("SUCCESS")
+	return c.String(http.StatusOK, "SUCCESS")
 }
 
 type contact struct {
@@ -117,33 +118,33 @@ func GetUserContactsbyUUID(uuid string) ([]contact, error) {
 	return contacts, nil
 }
 
-func GetContacts(c *fiber.Ctx) error {
+func GetContacts(c echo.Context) error {
 	token, err := authService.GetBearer(c)
 	if err != nil {
-		return c.Status(401).SendString("NO AUTH")
+		return c.String(401, "NO AUTH")
 	}
 	uuid, err := userService.GetUUIDBySessionID(token)
 	if err != nil {
-		return c.Status(401).SendString("NO AUTH")
+		return c.String(401, "NO AUTH")
 	}
 
 	contacts, err := GetUserContactsbyUUID(uuid)
 
 	if err != nil {
-		return c.Status(500).SendString(err.Error())
+		return c.String(500, err.Error())
 	}
 
-	return c.JSON(contacts)
+	return c.JSON(http.StatusOK, contacts)
 }
 
-func GetPendingContactRequests(c *fiber.Ctx) error {
+func GetPendingContactRequests(c echo.Context) error {
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
-		return c.Status(401).SendString("NOT AUTHORIZED")
+		return c.String(401, "NOT AUTHORIZED")
 	}
 	uuid, err := userService.GetUUIDBySessionID(sessionID)
 	if err != nil {
-		return c.Status(401).SendString("NOT AUTHORIZED")
+		return c.String(401, "NOT AUTHORIZED")
 	}
 
 	type singleContactRequest struct {
@@ -155,7 +156,7 @@ func GetPendingContactRequests(c *fiber.Ctx) error {
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 	defer conn.Close()
 	pendingRequestQuery := "SELECT sender AS sender_id, u.username AS sender_username, u.picture_url AS sender_profile_picture " +
@@ -165,37 +166,37 @@ func GetPendingContactRequests(c *fiber.Ctx) error {
 	var contactRequests []singleContactRequest
 	err = pgxscan.Select(ctx, conn, &contactRequests, pendingRequestQuery, uuid)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 
 	if contactRequests == nil {
-		return c.JSON(make([]string, 0))
+		return c.JSON(http.StatusOK, make([]string, 0))
 	}
 
-	return c.JSON(contactRequests)
+	return c.JSON(http.StatusOK, contactRequests)
 }
 
-func HandleContactRequest(c *fiber.Ctx) error {
+func HandleContactRequest(c echo.Context) error {
 	token, err := authService.GetBearer(c)
 	if err != nil {
-		return c.Status(401).SendString("NO AUTH")
+		return c.String(401, "NO AUTH")
 	}
 	uuid, err := userService.GetUUIDBySessionID(token)
 	if err != nil {
-		return c.Status(401).SendString("NO AUTH")
+		return c.String(401, "NO AUTH")
 	}
 	type contactRequestResolution struct {
 		SenderID string `json:"senderID" validate:"required"`
 		Action   string `json:"action" validate:"required"`
 	}
-	var contactReqResolution contactRequestResolution
-	err = c.BodyParser(&contactReqResolution)
+	contactReqResolution := new(contactRequestResolution)
+	err = c.Bind(contactReqResolution)
 	if err != nil {
-		return c.Status(400).SendString("BAD REQUEST")
+		return c.String(400, "BAD REQUEST")
 	}
 	err = validate.Struct(contactReqResolution)
 	if err != nil {
-		return c.Status(400).SendString("BAD REQUEST")
+		return c.String(400, "BAD REQUEST")
 	}
 
 	var query string
@@ -212,18 +213,18 @@ func HandleContactRequest(c *fiber.Ctx) error {
 			"SET status = 'blocked' " +
 			"WHERE sender = $1 AND  reciever = $2"
 	default:
-		return c.Status(400).SendString("BAD REQUEST")
+		return c.String(400, "BAD REQUEST")
 	}
 
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 	defer conn.Close(ctx)
 	_, err = conn.Query(ctx, query, contactReqResolution.SenderID, uuid)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
-	return c.SendString("SUCCESS")
+	return c.String(http.StatusOK, "SUCCESS")
 }

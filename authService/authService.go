@@ -9,15 +9,16 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"net/http"
 	"strings"
 	"time"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
+	"github.com/labstack/echo/v4"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
 )
 
 var validate = validator.New()
@@ -27,8 +28,8 @@ type Session struct {
 	UserID    string `json:"userID"`
 }
 
-func GetBearer(c *fiber.Ctx) (string, error) {
-	bearerArr := strings.Split(c.Get("authorization"), "Bearer ")
+func GetBearer(c echo.Context) (string, error) {
+	bearerArr := strings.Split(c.Request().Header.Get("authorization"), "Bearer ")
 
 	if len(bearerArr) <= 1 {
 		return "", errors.New("NOT AUTHORIZED")
@@ -46,15 +47,15 @@ type UserRes struct {
 	EmailActive bool   `json:"emailActive"`
 }
 
-func GetUserBySession(c *fiber.Ctx) error {
+func GetUserBySession(c echo.Context) error {
 	sessionID, responseErr := GetBearer(c)
 	if responseErr != nil {
-		return c.Status(401).SendString("NOT AUTHORIZED")
+		return c.String(401, "NOT AUTHORIZED")
 	}
 
 	user, respErr := userService.GetUserBySessionID(sessionID)
 	if respErr.StatusCode >= 300 {
-		return c.Status(respErr.StatusCode).SendString(respErr.Msg)
+		return c.String(respErr.StatusCode, respErr.Msg)
 	}
 	res := UserRes{
 		UUID:        user.Uuid,
@@ -62,7 +63,7 @@ func GetUserBySession(c *fiber.Ctx) error {
 		Username:    user.Username,
 		IsAdmin:     user.IsAdmin,
 		EmailActive: user.EmailActive}
-	return c.JSON(res)
+	return c.JSON(http.StatusOK, res)
 }
 
 type Credentials struct {
@@ -95,18 +96,18 @@ func startSession(uuid string) (Session, error) {
 	return tmpSession, nil
 }
 
-func Register(c *fiber.Ctx) error {
-	var reqUser userService.ReqUser
-	err := c.BodyParser(&reqUser)
+func Register(c echo.Context) error {
+	reqUser := new(userService.ReqUser)
+	err := c.Bind(reqUser)
 	if err != nil {
-		return c.Status(400).SendString("BAD REQUEST")
+		return c.String(400, "BAD REQUEST")
 	}
 	err = validate.Struct(reqUser)
 	if err != nil {
-		return c.Status(400).SendString("BAD REQUEST")
+		return c.String(400, "BAD REQUEST")
 	}
 	if len(reqUser.Password) < 8 {
-		return c.Status(403).SendString("PASSWORD TOO SHORT")
+		return c.String(403, "PASSWORD TOO SHORT")
 	}
 
 	lowerCaseEmail := strings.ToLower(reqUser.Email)
@@ -115,65 +116,65 @@ func Register(c *fiber.Ctx) error {
 	if err != nil {
 		errString := err.Error()
 		if errString == "USER EXISTS ALREADY" {
-			return c.Status(409).SendString(errString)
+			return c.String(409, errString)
 		}
-		return c.Status(500).SendString(errString)
+		return c.String(500, errString)
 	}
 	session, err := startSession(user.Uuid)
 
 	if err != nil {
-		return c.Status(500).SendString("SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
+		return c.String(500, "SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
 	}
 
 	err = emailService.SendVerificationEmail(reqUser.Username, reqUser.Email, user.EmailToken)
 
 	if err != nil {
-		return c.Status(500).SendString("SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
+		return c.String(500, "SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
 	}
 
-	return c.JSON(session)
+	return c.JSON(http.StatusOK, session)
 }
 
-func ResendVerificationEmail(c *fiber.Ctx) error {
+func ResendVerificationEmail(c echo.Context) error {
 	sessionID, responseErr := GetBearer(c)
 	if responseErr != nil {
-		return c.Status(401).SendString("NOT AUTHORIZED")
+		return c.String(401, "NOT AUTHORIZED")
 	}
 
 	user, respErr := userService.GetUserBySessionID(sessionID)
 
 	if respErr.StatusCode >= 300 {
-		return c.Status(respErr.StatusCode).SendString(respErr.Msg)
+		return c.String(respErr.StatusCode, respErr.Msg)
 	}
 	emailToken, err := userService.RenewEmailToken(user.Email)
 	if err != nil {
-		return c.Status(500).SendString("ERROR WHILE SENDING EMAIL")
+		return c.String(500, "ERROR WHILE SENDING EMAIL")
 	}
 	err = emailService.SendVerificationEmail(user.Username, user.Email, emailToken)
 	if err != nil {
-		return c.Status(500).SendString("ERROR WHILE SENDING EMAIL")
+		return c.String(500, "ERROR WHILE SENDING EMAIL")
 	}
-	return c.SendString("SUCCESS")
+	return c.String(http.StatusOK, "SUCCESS")
 }
 
-func VerifyEmail(c *fiber.Ctx) error {
+func VerifyEmail(c echo.Context) error {
 	type EmailToken struct {
 		Token string `json:"emailToken" validate:"required"`
 	}
-	var emailToken EmailToken
-	err := c.BodyParser(&emailToken)
+	emailToken := new(EmailToken)
+	err := c.Bind(emailToken)
 	if err != nil {
-		c.Status(400).SendString("BAD REQUEST")
+		c.String(400, "BAD REQUEST")
 	}
 	err = validate.Struct(emailToken)
 	if err != nil {
-		return c.Status(400).SendString("BAD REQUEST")
+		return c.String(400, "BAD REQUEST")
 	}
 
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 	defer conn.Close(ctx)
 
@@ -182,7 +183,7 @@ func VerifyEmail(c *fiber.Ctx) error {
 	var dbUserEmailActive bool
 	err = rows.Scan(&dbUserEmailActive)
 	if err != nil {
-		return c.Status(404).SendString("COULD NOT FIND E-MAIL ADDRESS MATHCHING THE SUPPLIED LINK")
+		return c.String(404, "COULD NOT FIND E-MAIL ADDRESS MATHCHING THE SUPPLIED LINK")
 	}
 
 	insertQuery := "UPDATE users SET email_active=true, email_token=$1 WHERE email_token=$2 RETURNING email_active"
@@ -190,69 +191,69 @@ func VerifyEmail(c *fiber.Ctx) error {
 	var active bool
 	err = insertedRows.Scan(&active)
 	if err != nil || !active {
-		return c.Status(500).SendString("SOMETHING WENT WRONG WHILE VERIYFING YOUR E-MAIL")
+		return c.String(500, "SOMETHING WENT WRONG WHILE VERIYFING YOUR E-MAIL")
 	}
 
-	return c.SendString("EMAIL VERIFIED SUCCESSFULLY")
+	return c.String(http.StatusOK, "EMAIL VERIFIED SUCCESSFULLY")
 }
 
-func Authenticate(c *fiber.Ctx) error {
-	var credentials Credentials
-	err := c.BodyParser(&credentials)
+func Authenticate(c echo.Context) error {
+	credentials := new(Credentials)
+	err := c.Bind(&credentials)
 	if err != nil {
-		return c.Status(500).SendString("SOMETHING WENT WRONG")
+		return c.String(500, "SOMETHING WENT WRONG")
 	}
 	err = validate.Struct(credentials)
 	if err != nil {
-		return c.Status(400).SendString("BAD REQUEST")
+		return c.String(400, "BAD REQUEST")
 	}
 	lowerCaseEmail := strings.ToLower(credentials.Email)
 	user, err := userService.GetUserByEmail(lowerCaseEmail)
 	if err != nil {
-		return c.Status(500).SendString(err.Error())
+		return c.String(500, err.Error())
 	}
 	pwCorrect := userService.CheckPW(user, lowerCaseEmail, credentials.Password)
 	if !pwCorrect {
-		return c.Status(401).SendString("WRONG CREDENTIALS")
+		return c.String(401, "WRONG CREDENTIALS")
 	}
 	if err != nil {
-		c.Status(500).SendString("SOMETHING WENT WRONG")
+		c.String(500, "SOMETHING WENT WRONG")
 	}
 	session, err := startSession(user.Uuid)
 	if err != nil {
-		return c.Status(500).SendString("SOMETHING WENT WRONG WHILE AUTHENTICATING")
+		return c.String(500, "SOMETHING WENT WRONG WHILE AUTHENTICATING")
 	}
-	return c.JSON(session)
+	return c.JSON(http.StatusOK, session)
 }
 
-func ChangeEmail(c *fiber.Ctx) error {
+func ChangeEmail(c echo.Context) error {
 	type ChangeReq struct {
 		NewEmail string `json:"newEmail" validate:"required"`
 	}
-	var changeReq ChangeReq
-	err := c.BodyParser(&changeReq)
+	changeReq := new(ChangeReq)
+	err := c.Bind(&changeReq)
 	if err != nil {
-		return c.Status(400).SendString("BAD REQUEST")
+		return c.String(400, "BAD REQUEST")
 	}
 	err = validate.Struct(changeReq)
 	if err != nil {
-		return c.Status(400).SendString("BAD REQUEST")
+		return c.String(400, "BAD REQUEST")
 	}
 
 	sessionID, responseErr := GetBearer(c)
 	if responseErr != nil {
-		return c.Status(401).SendString("NOT AUTHORIZED")
+		return c.String(401, "NOT AUTHORIZED")
 	}
 
 	user, respErr := userService.GetUserBySessionID(sessionID)
 	if respErr.StatusCode >= 300 {
-		return c.Status(respErr.StatusCode).SendString(respErr.Msg)
+		return c.String(respErr.StatusCode, respErr.Msg)
 	}
 
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 	defer conn.Close(ctx)
 
@@ -263,10 +264,10 @@ func ChangeEmail(c *fiber.Ctx) error {
 	rows := conn.QueryRow(ctx, checkQuery, changeReq.NewEmail)
 	err = rows.Scan(&emailExists)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 	if emailExists {
-		return c.Status(409).SendString("EMAIL EXISTS ALREADY")
+		return c.String(409, "EMAIL EXISTS ALREADY")
 	}
 
 	insertQuery := "INSERT INTO change_email(uuid, new_email, confirmation_token) " +
@@ -279,36 +280,36 @@ func ChangeEmail(c *fiber.Ctx) error {
 	var dbNewEmail string
 	err = insertedRows.Scan(&dbConfirmationToken, &dbNewEmail)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 
 	err = emailService.SendVerifyEmailChangeEmail(user.Username, dbNewEmail, dbConfirmationToken)
 
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 
-	return c.SendString("SUCCESS")
+	return c.String(http.StatusOK, "SUCCESS")
 }
 
-func ConfirmChangedEmail(c *fiber.Ctx) error {
+func ConfirmChangedEmail(c echo.Context) error {
 	type ConfirmToken struct {
 		Token string `json:"confirmToken" validate:"required"`
 	}
-	var confirmToken ConfirmToken
-	err := c.BodyParser(&confirmToken)
+	confirmToken := new(ConfirmToken)
+	err := c.Bind(&confirmToken)
 	if err != nil {
-		c.Status(400).SendString("BAD REQUEST")
+		c.String(400, "BAD REQUEST")
 	}
 	err = validate.Struct(confirmToken)
 	if err != nil {
-		return c.Status(400).SendString("BAD REQUEST")
+		return c.String(400, "BAD REQUEST")
 	}
 
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 	defer conn.Close(ctx)
 	updateQuery := "UPDATE users u " +
@@ -327,26 +328,26 @@ func ConfirmChangedEmail(c *fiber.Ctx) error {
 	var dbNewEmail string
 	err = updatedRows.Scan(&dbNewEmail)
 	if err != nil || dbNewEmail == "" {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 	deleteQuery := "DELETE FROM change_email WHERE confirmation_token=$1"
 	_, err = conn.Query(ctx, deleteQuery, confirmToken.Token)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
-	return c.SendString("SUCCESS")
+	return c.String(http.StatusOK, "SUCCESS")
 }
 
-func Logout(c *fiber.Ctx) error {
+func Logout(c echo.Context) error {
 	sessionID, err := GetBearer(c)
 	if err != nil {
-		return c.Status(500).SendString("SOMETHING WENT WRONG")
+		return c.String(500, "SOMETHING WENT WRONG")
 	}
 	rdb := redis.NewClient(&redisHelper.RedisConfig)
 	ctx := context.Background()
 	_, err = rdb.Del(ctx, sessionID).Result()
 	if err != nil {
-		return c.Status(500).SendString("SOMETHING WENT WRONG")
+		return c.String(500, "SOMETHING WENT WRONG")
 	}
-	return c.SendString("SUCCESSFULLY LOGGED OUT")
+	return c.String(http.StatusOK, "SUCCESSFULLY LOGGED OUT")
 }

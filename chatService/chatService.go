@@ -8,46 +8,47 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/labstack/echo/v4"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
 )
 
 var validate = validator.New()
 
-func StartOneOnOneChat(c *fiber.Ctx) error {
+func StartOneOnOneChat(c echo.Context) error {
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
-		return c.Status(401).SendString("NOT AUTHORIZED")
+		return c.String(401, "NOT AUTHORIZED")
 	}
 
 	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
 	if err != nil {
-		return c.Status(401).SendString("NOT AUTHORIZED")
+		return c.String(401, "NOT AUTHORIZED")
 	}
 
 	type startReq struct {
 		ParticipantUUID string `json:"participantUUID" validate:"required"`
 	}
-	var req startReq
-	err = c.BodyParser(&req)
+	req := new(startReq)
+	err = c.Bind(&req)
 	if err != nil {
-		return c.Status(400).SendString("BAD REQUEST")
+		return c.String(400, "BAD REQUEST")
 	}
 	err = validate.Struct(req)
 	if err != nil {
-		return c.Status(400).SendString("BAD REQUEST")
+		return c.String(400, "BAD REQUEST")
 	}
 
 	contacts, err := contactService.GetUserContactsbyUUID(reqUUID)
 	if err != nil {
-		return c.Status(500).SendString(err.Error())
+		return c.String(500, err.Error())
 	}
 
 	isInContacts := false
@@ -58,13 +59,13 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 		}
 	}
 	if !isInContacts {
-		return c.Status(500).SendString("USER NOT IN CONTACTS")
+		return c.String(500, "USER NOT IN CONTACTS")
 	}
 
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 	defer conn.Close()
 
@@ -88,11 +89,11 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 		if err.Error() == "no rows in result set" {
 			chatExists = false
 		} else {
-			return c.Status(500).SendString("INTERNAL ERROR")
+			return c.String(500, "INTERNAL ERROR")
 		}
 	}
 	if chatExists {
-		return c.Status(409).SendString("CHAT EXISTS ALREADY")
+		return c.String(409, "CHAT EXISTS ALREADY")
 	}
 
 	chatID := uuid.New().String()
@@ -102,7 +103,7 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 		"RETURNING chat_id"
 	err = conn.QueryRow(ctx, createChatQuery, chatID).Scan(&dbChatID)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 
 	insertSelfIntoChatQuery := "INSERT INTO user_chat(uuid, chat_id, unread_messages) " +
@@ -110,7 +111,7 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 		"RETURNING chat_id"
 	err = conn.QueryRow(ctx, insertSelfIntoChatQuery, reqUUID, chatID).Scan(&dbChatID)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 
 	insertParticipantIntoChatQuery := "INSERT INTO user_chat(uuid, chat_id, unread_messages) " +
@@ -118,10 +119,11 @@ func StartOneOnOneChat(c *fiber.Ctx) error {
 		"RETURNING chat_id"
 	err = conn.QueryRow(ctx, insertParticipantIntoChatQuery, req.ParticipantUUID, chatID).Scan(&dbChatID)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 
-	return c.SendString("SUCCESS")
+	return c.String(http.StatusOK, "SUCCESS")
+
 }
 
 type singleChat struct {
@@ -185,23 +187,23 @@ func GetChatsByUUID(uuid string) ([]singleChat, error) {
 	return chats, nil
 }
 
-func GetChats(c *fiber.Ctx) error {
+func GetChats(c echo.Context) error {
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
-		return c.Status(401).SendString("NOT AUTHORIZED")
+		return c.String(401, "NOT AUTHORIZED")
 	}
 
 	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
 	if err != nil {
-		return c.Status(401).SendString("NOT AUTHORIZED")
+		return c.String(401, "NOT AUTHORIZED")
 	}
 
 	chats, err := GetChatsByUUID(reqUUID)
 	if err != nil {
-		return c.Status(500).SendString(err.Error())
+		return c.String(500, err.Error())
 	}
 
-	return c.JSON(chats)
+	return c.JSON(http.StatusOK, chats)
 }
 
 func isUserInChat(uuid string, chatID string) (bool, error) {
@@ -217,15 +219,15 @@ func isUserInChat(uuid string, chatID string) (bool, error) {
 	return false, nil
 }
 
-func SendMessage(c *fiber.Ctx) error {
+func SendMessage(c echo.Context) error {
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
-		return c.Status(401).SendString("NOT AUTHORIZED")
+		return c.String(401, "NOT AUTHORIZED")
 	}
 
 	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
 	if err != nil {
-		return c.Status(401).SendString("NOT AUTHORIZED")
+		return c.String(401, "NOT AUTHORIZED")
 	}
 
 	type reqBody struct {
@@ -235,45 +237,45 @@ func SendMessage(c *fiber.Ctx) error {
 		MediaUrl    string `json:"mediaUrl"`
 	}
 
-	var req reqBody
-	err = c.BodyParser(&req)
+	req := new(reqBody)
+	err = c.Bind(&req)
 	if err != nil {
-		return c.Status(400).SendString("BAD REQUEST")
+		return c.String(400, "BAD REQUEST")
 	}
 	err = validate.Struct(req)
 	if err != nil {
 		fmt.Println(err)
-		return c.Status(400).SendString("BAD REQUEST")
+		return c.String(400, "BAD REQUEST")
 	}
 
 	//make sure platform only media URLs are being sent. TLDR: More comprehensive validation
 	mediaUrlExists := len(req.MediaUrl) > 0
 	if mediaUrlExists {
 		if req.MessageType == "plaintext" {
-			return c.Status(400).SendString("MEDIA URL NOT ALLOWED FOR TYPE PLAINTEXT")
+			return c.String(400, "MEDIA URL NOT ALLOWED FOR TYPE PLAINTEXT")
 		}
 		hasWrongDomain := !strings.HasPrefix(req.MediaUrl, "storage.emyht.com/")
 		if hasWrongDomain {
-			return c.Status(400).SendString("BAD MEDIA URL DOMAIN")
+			return c.String(400, "BAD MEDIA URL DOMAIN")
 		}
 	}
 
 	if req.MessageType == "plaintext" && len(req.TextContent) < 1 {
-		return c.Status(400).SendString("MESSAGE TOO SHORT")
+		return c.String(400, "MESSAGE TOO SHORT")
 	}
 
 	inChat, err := isUserInChat(reqUUID, req.ChatID)
 	if err != nil {
-		return c.Status(500).SendString(err.Error())
+		return c.String(500, err.Error())
 	}
 	if !inChat {
-		return c.Status(401).SendString("USER NOT IN CHAT")
+		return c.String(401, "USER NOT IN CHAT")
 	}
 
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 	defer conn.Close()
 
@@ -285,7 +287,7 @@ func SendMessage(c *fiber.Ctx) error {
 	var messageID string
 	err = rows.Scan(&messageID)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 
 	var chatID string
@@ -297,7 +299,7 @@ func SendMessage(c *fiber.Ctx) error {
 	rows = conn.QueryRow(ctx, lastChatMessageQuery, messageID, req.ChatID)
 	err = rows.Scan(&chatID)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 
 	type resBody struct {
@@ -308,7 +310,7 @@ func SendMessage(c *fiber.Ctx) error {
 		ChatID:    chatID,
 		MessageID: messageID,
 	}
-	return c.JSON(res)
+	return c.JSON(http.StatusOK, res)
 }
 
 type singleMessage struct {
@@ -322,34 +324,34 @@ type singleMessage struct {
 	DeliveryStatus string `json:"deliveryStatus" validate:"required"`
 }
 
-func GetMessages(c *fiber.Ctx) error {
+func GetMessages(c echo.Context) error {
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
-		return c.Status(401).SendString("NOT AUTHORIZED")
+		return c.String(401, "NOT AUTHORIZED")
 	}
 
 	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
 	if err != nil {
-		return c.Status(401).SendString("NOT AUTHORIZED")
+		return c.String(401, "NOT AUTHORIZED")
 	}
 
-	chatID := c.Params("chatID")
+	chatID := c.Param("chatID")
 	if len(chatID) <= 0 {
-		c.Status(500).SendString("MISSING CHAT ID")
+		c.String(500, "MISSING CHAT ID")
 	}
 
 	inChat, err := isUserInChat(reqUUID, chatID)
 	if err != nil {
-		return c.Status(500).SendString(err.Error())
+		return c.String(500, err.Error())
 	}
 	if !inChat {
-		return c.Status(401).SendString("USER NOT IN CHAT")
+		return c.String(401, "USER NOT IN CHAT")
 	}
 
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 	defer conn.Close()
 
@@ -360,12 +362,12 @@ func GetMessages(c *fiber.Ctx) error {
 	var messages []singleMessage
 	err = pgxscan.Select(ctx, conn, &messages, query, chatID)
 	if err != nil {
-		return c.Status(500).SendString("INTERNAL ERROR")
+		return c.String(500, "INTERNAL ERROR")
 	}
 
 	if messages == nil {
-		return c.JSON(make([]singleChat, 0))
+		return c.JSON(http.StatusOK, make([]singleChat, 0))
 	}
 
-	return c.JSON(messages)
+	return c.JSON(http.StatusOK, messages)
 }
