@@ -54,7 +54,7 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
   return (
     <div className={styles.messages} ref={messageContainer}>
       {messages.map((message) => (
-        <>
+        <span key={message.messageID}>
           {message.senderID === user?.uuid && (
             <OwnMessage
               timestamp={message.timestamp}
@@ -68,7 +68,7 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
               textContent={message.textContent}
             />
           )}
-        </>
+        </span>
       ))}
     </div>
   );
