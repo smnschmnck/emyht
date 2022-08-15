@@ -14,6 +14,7 @@ import (
 
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/labstack/echo/v4"
 
@@ -219,7 +220,7 @@ func isUserInChat(uuid string, chatID string) (bool, error) {
 	return false, nil
 }
 
-func SendMessage(c echo.Context) error {
+func SendMessage(c echo.Context, wsConnections []*websocket.Conn) error {
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
@@ -310,6 +311,11 @@ func SendMessage(c echo.Context) error {
 		ChatID:    chatID,
 		MessageID: messageID,
 	}
+
+	for _, ws := range wsConnections {
+		ws.WriteMessage(websocket.TextMessage, []byte("RECIEVED MESSAGE: "+req.TextContent))
+	}
+
 	return c.JSON(http.StatusOK, res)
 }
 
@@ -358,7 +364,8 @@ func GetMessages(c echo.Context) error {
 	query := "SELECT message_id, sender_id, username AS sender_username, text_content, message_type, media_url, timestamp, delivery_status " +
 		"FROM chatmessages " +
 		"JOIN users u on u.uuid = chatmessages.sender_id " +
-		"WHERE chat_id=$1"
+		"WHERE chat_id=$1 " +
+		"ORDER BY timestamp ASC"
 	var messages []singleMessage
 	err = pgxscan.Select(ctx, conn, &messages, query, chatID)
 	if err != nil {
