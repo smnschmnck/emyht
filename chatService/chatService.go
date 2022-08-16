@@ -14,7 +14,6 @@ import (
 
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
-	"github.com/gorilla/websocket"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/labstack/echo/v4"
 
@@ -220,7 +219,7 @@ func isUserInChat(uuid string, chatID string) (bool, error) {
 	return false, nil
 }
 
-func SendMessage(c echo.Context, wsConnections []*websocket.Conn) error {
+func SendMessage(c echo.Context) error {
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
@@ -310,10 +309,6 @@ func SendMessage(c echo.Context, wsConnections []*websocket.Conn) error {
 	res := resBody{
 		ChatID:    chatID,
 		MessageID: messageID,
-	}
-
-	for _, ws := range wsConnections {
-		ws.WriteMessage(websocket.TextMessage, []byte("RECIEVED MESSAGE: "+req.TextContent))
 	}
 
 	return c.JSON(http.StatusOK, res)
