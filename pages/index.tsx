@@ -8,7 +8,7 @@ import { ContactRequest } from '../components/Chats';
 import { getLoginData } from '../helpers/loginHelpers';
 import styles from '../styles/IndexPage.module.css';
 import MainChat from '../components/MainChat';
-import { createContext, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { ServerResponse } from 'http';
 import { AddChatModal } from '../components/AddChatModal';
 import ISingleChat from '../interfaces/ISingleChat';
@@ -18,7 +18,6 @@ import { NextApiRequestCookies } from 'next/dist/server/api-utils';
 import { Sidebar } from '../components/Sidebar';
 import { ContactRequestDialog } from '../components/ContactRequestDialog';
 import IUser from '../interfaces/IUser';
-
 interface IndexPageProps {
   user: IUser;
   isAdmin: boolean;
@@ -105,41 +104,62 @@ export const getServerSideProps: GetServerSideProps<
   }
 };
 
+interface WebSocketData {
+  event: string;
+  payload: any;
+}
+
 const HomePage: NextPage<IndexPageProps> = ({
   user,
   chats,
   contactRequests,
 }) => {
-  const getFirstChatID = () => {
-    if (!allChats[0]) {
-      return '';
-    }
-    if (!allChats[0].chatID) {
-      return '';
-    }
-    return allChats[0].chatID;
-  };
-
-  const getFirstContactRequestID = () => {
-    if (!allContactRequests[0]) {
-      return '';
-    }
-    if (!allContactRequests[0].senderID) {
-      return '';
-    }
-    return allContactRequests[0].senderID;
-  };
-
   const [allChats, setAllChats] = useState(chats);
   const [allContactRequests, setAllContactRequests] = useState(contactRequests);
-  const [curChatID, setCurChatID] = useState(getFirstChatID());
+  const [curChatID, setCurChatID] = useState(allChats[0]?.chatID ?? '');
   const [curContactRequestID, setCurContactRequestID] = useState(
-    getFirstContactRequestID()
+    allContactRequests[0]?.senderID ?? ''
   );
   const [chatOpened, setChatOpened] = useState(false);
   const [showAddChatModal, setShowAddChatModal] = useState(false);
   const [showContactRequestModal, setShowContactRequestModal] = useState(false);
   const [openedContactRequest, setOpenedContactRequest] = useState(false);
+
+  const sendSocketAuthRequest = async (id: string) => {
+    const body = {
+      id: id,
+    };
+    const res = await fetch('/api/authenticateSocketConnection', {
+      method: 'post',
+      body: JSON.stringify(body),
+    });
+  };
+
+  const socketInit = () => {
+    const WEBSOCKET_HOST = process.env.NEXT_PUBLIC_WEBSOCKET_HOST ?? '';
+    const socket = new WebSocket(WEBSOCKET_HOST);
+
+    socket.onmessage = (msg) => {
+      const json: WebSocketData = JSON.parse(msg.data);
+      const event = json.event;
+      const payload = json.payload;
+      switch (event) {
+        case 'message':
+          console.log(JSON.stringify(payload));
+          break;
+        case 'auth':
+          const authPayload: { id: string } = payload;
+          sendSocketAuthRequest(authPayload.id);
+          break;
+        default:
+          break;
+      }
+    };
+  };
+
+  useEffect(() => {
+    socketInit();
+  }, []);
 
   const openChat = (chatID: string) => {
     setCurChatID(chatID);
