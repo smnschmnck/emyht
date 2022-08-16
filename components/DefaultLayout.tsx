@@ -14,12 +14,14 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         <div className={styles.logoContainer}>
           <div className={styles.logo}>
             <Link href={'/'} passHref>
-              <Image
-                objectFit={'contain'}
-                width={'100px'}
-                src={logo}
-                alt="emyht-logo"
-              ></Image>
+              <a>
+                <Image
+                  objectFit={'contain'}
+                  width={'100px'}
+                  src={logo}
+                  alt="emyht-logo"
+                />
+              </a>
             </Link>
           </div>
         </div>
