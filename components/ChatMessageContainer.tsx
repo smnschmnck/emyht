@@ -33,10 +33,6 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
     }
   };
 
-  useEffect(() => {
-    scrollMessagesToTop();
-  });
-
   const fetchMessages = async () => {
     const res = await fetch(`/api/getChatMessages/${chatID}`);
     if (!res.ok) {
@@ -48,6 +44,7 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
   };
 
   useEffect(() => {
+    scrollMessagesToTop();
     fetchMessages();
   }, []);
 
