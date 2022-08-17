@@ -24,13 +24,10 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
   const [messages, setMessages] = useState<ISingleMessage[]>([]);
   const user = useContext(UserCtx);
 
-  const messageContainer = useRef<HTMLDivElement>(null);
+  const messageBottom = useRef<HTMLSpanElement>(null);
 
-  const scrollMessagesToTop = () => {
-    if (messageContainer?.current) {
-      messageContainer.current.scrollTop =
-        messageContainer?.current?.scrollHeight;
-    }
+  const scrollMessagesToBottom = () => {
+    messageBottom.current?.scrollIntoView({ behavior: 'auto' });
   };
 
   const fetchMessages = async () => {
@@ -44,12 +41,15 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
   };
 
   useEffect(() => {
-    scrollMessagesToTop();
     fetchMessages();
   }, []);
 
+  useEffect(() => {
+    scrollMessagesToBottom();
+  }, [messages]);
+
   return (
-    <div className={styles.messages} ref={messageContainer}>
+    <div className={styles.messages}>
       {messages.map((message) => (
         <span key={message.messageID}>
           {message.senderID === user?.uuid && (
@@ -67,6 +67,7 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
           )}
         </span>
       ))}
+      <span ref={messageBottom} />
     </div>
   );
 };
