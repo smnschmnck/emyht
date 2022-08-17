@@ -25,7 +25,7 @@ const authProxy = async (
     return res
       .setHeader(
         'set-cookie',
-        `SESSIONID=${sessionID}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/; httponly`
+        `SESSIONID=${sessionID}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/; httponly; SameSite=Lax`
       )
       .send('SUCCESS');
   } catch {
