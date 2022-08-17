@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sync"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -16,6 +17,7 @@ import (
 )
 
 var validate = validator.New()
+var mutex = &sync.Mutex{}
 
 var socketIdToConn = make(map[string]*websocket.Conn)
 var uuidToWebsocketID = make(map[string][]string)
@@ -37,13 +39,6 @@ var upgrader = websocket.Upgrader{
 type wsData struct {
 	Event   string `json:"event"`
 	Payload any    `json:"payload"`
-}
-
-//If payload is a struct remember to export your fields
-func WriteStruct(ws *websocket.Conn, event string, payload any) error {
-	out, err := json.Marshal(wsData{Event: event, Payload: payload})
-	ws.WriteMessage(websocket.TextMessage, out)
-	return err
 }
 
 func recieveIncomingWebsocketMessages(ws *websocket.Conn) error {
@@ -73,10 +68,20 @@ func deleteWsIdFromUuidToWsId(websocketID string) {
 }
 
 func handleWsClose(websocketID string) error {
+	mutex.Lock()
 	delete(socketIdToConn, websocketID)
 	deleteWsIdFromUuidToWsId(websocketID)
 	delete(websocketIDToUuid, websocketID)
+	mutex.Unlock()
 	return errors.New("SOCKET NOT FOUND")
+}
+
+func sendInitialSocketID(ws *websocket.Conn, uuid string) error {
+	type socketAuthID struct {
+		Id string `json:"id"`
+	}
+	err := WriteStruct(ws, "auth", socketAuthID{Id: uuid})
+	return err
 }
 
 func InitializeNewSocketConnection(c echo.Context) error {
@@ -92,14 +97,6 @@ func InitializeNewSocketConnection(c echo.Context) error {
 		handleWsClose(websocketID)
 	}
 	return nil
-}
-
-func sendInitialSocketID(ws *websocket.Conn, uuid string) error {
-	type socketAuthID struct {
-		Id string `json:"id"`
-	}
-	err := WriteStruct(ws, "auth", socketAuthID{Id: uuid})
-	return err
 }
 
 func AuthenticateSocketConnection(c echo.Context) error {
@@ -146,4 +143,34 @@ func GetSocketsByUUID(uuid string) []*websocket.Conn {
 		connArray[i] = socketIdToConn[websocketID]
 	}
 	return connArray
+}
+
+//If payload is a struct remember to export your fields
+func WriteStruct(ws *websocket.Conn, event string, payload any) error {
+	out, err := json.Marshal(wsData{Event: event, Payload: payload})
+	if err != nil {
+		return err
+	}
+	err = ws.WriteMessage(websocket.TextMessage, out)
+	return err
+}
+
+func WriteStructToSingleUUID(uuid string, event string, payload any) error {
+	sockets := GetSocketsByUUID(uuid)
+	var err error
+	for _, socket := range sockets {
+		err = WriteStruct(socket, event, payload)
+	}
+	return err
+}
+
+func WriteStructToMultipleUUIDs(uuids []string, event string, payload any) error {
+	var err error
+	for _, uuid := range uuids {
+		sockets := GetSocketsByUUID(uuid)
+		for _, socket := range sockets {
+			err = WriteStruct(socket, event, payload)
+		}
+	}
+	return err
 }
