@@ -133,31 +133,35 @@ const HomePage: NextPage<IndexPageProps> = ({
       method: 'post',
       body: JSON.stringify(body),
     });
-  };
-
-  const socketInit = () => {
-    const WEBSOCKET_HOST = process.env.NEXT_PUBLIC_WEBSOCKET_HOST ?? '';
-    const socket = new WebSocket(WEBSOCKET_HOST);
-
-    socket.onmessage = (msg) => {
-      const json: WebSocketData = JSON.parse(msg.data);
-      const event = json.event;
-      const payload = json.payload;
-      switch (event) {
-        case 'message':
-          console.log(JSON.stringify(payload));
-          break;
-        case 'auth':
-          const authPayload: { id: string } = payload;
-          sendSocketAuthRequest(authPayload.id);
-          break;
-        default:
-          break;
-      }
-    };
+    if (!res.ok) {
+      alert(await res.text());
+      return;
+    }
+    return;
   };
 
   useEffect(() => {
+    const socketInit = () => {
+      const WEBSOCKET_HOST = process.env.NEXT_PUBLIC_WEBSOCKET_HOST ?? '';
+      const socket = new WebSocket(WEBSOCKET_HOST);
+
+      socket.onmessage = (msg) => {
+        const json: WebSocketData = JSON.parse(msg.data);
+        const event = json.event;
+        const payload = json.payload;
+        switch (event) {
+          case 'message':
+            console.log(JSON.stringify(payload));
+            break;
+          case 'auth':
+            const authPayload: { id: string } = payload;
+            sendSocketAuthRequest(authPayload.id);
+            break;
+          default:
+            break;
+        }
+      };
+    };
     socketInit();
   }, []);
 

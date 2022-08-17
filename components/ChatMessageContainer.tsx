@@ -25,24 +25,22 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
   const user = useContext(UserCtx);
 
   const messageBottom = useRef<HTMLSpanElement>(null);
-
   const scrollMessagesToBottom = () => {
     messageBottom.current?.scrollIntoView({ behavior: 'auto' });
   };
 
-  const fetchMessages = async () => {
-    const res = await fetch(`/api/getChatMessages/${chatID}`);
-    if (!res.ok) {
-      alert(await res.text());
-      return;
-    }
-    const json = (await res.json()) as ISingleMessage[];
-    setMessages(json);
-  };
-
   useEffect(() => {
+    const fetchMessages = async () => {
+      const res = await fetch(`/api/getChatMessages/${chatID}`);
+      if (!res.ok) {
+        alert(await res.text());
+        return;
+      }
+      const json = (await res.json()) as ISingleMessage[];
+      setMessages(json);
+    };
     fetchMessages();
-  }, []);
+  }, [chatID]);
 
   useEffect(() => {
     scrollMessagesToBottom();
