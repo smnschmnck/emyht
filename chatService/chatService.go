@@ -5,6 +5,7 @@ import (
 	"chat/contactService"
 	"chat/dbHelpers/postgresHelper"
 	"chat/userService"
+	"chat/wsService"
 	"context"
 	"errors"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/labstack/echo/v4"
 
@@ -311,6 +313,11 @@ func SendMessage(c echo.Context) error {
 		MessageID: messageID,
 	}
 
+	err = sendNewMessageNotification(chatID)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	return c.JSON(http.StatusOK, res)
 }
 
@@ -372,4 +379,32 @@ func GetMessages(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, messages)
+}
+
+func getChatMembers(chatId string) ([]string, error) {
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close(ctx)
+
+	query := "SELECT uuid " +
+		"FROM user_chat " +
+		"WHERE chat_id = $1"
+	var uuids []string
+	err = pgxscan.Select(ctx, conn, &uuids, query, chatId)
+	if err != nil {
+		return nil, err
+	}
+	return uuids, nil
+}
+
+func sendNewMessageNotification(chatId string) error {
+	uuids, err := getChatMembers(chatId)
+	if err != nil {
+		return err
+	}
+
+	return wsService.WriteStructToMultipleUUIDs(uuids, "message", "new message broski")
 }

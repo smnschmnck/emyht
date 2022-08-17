@@ -155,6 +155,7 @@ func WriteStruct(ws *websocket.Conn, event string, payload any) error {
 	return err
 }
 
+//If payload is a struct remember to export your fields
 func WriteStructToSingleUUID(uuid string, event string, payload any) error {
 	sockets := GetSocketsByUUID(uuid)
 	var err error
@@ -164,6 +165,7 @@ func WriteStructToSingleUUID(uuid string, event string, payload any) error {
 	return err
 }
 
+//If payload is a struct remember to export your fields
 func WriteStructToMultipleUUIDs(uuids []string, event string, payload any) error {
 	var err error
 	for _, uuid := range uuids {
