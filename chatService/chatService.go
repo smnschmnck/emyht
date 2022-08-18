@@ -140,7 +140,7 @@ type singleChat struct {
 	SenderID       *string `json:"senderID"`
 }
 
-func GetChatsByUUID(uuid string) ([]singleChat, error) {
+func getChatsByUUID(uuid string) ([]singleChat, error) {
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
@@ -200,7 +200,7 @@ func GetChats(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	chats, err := GetChatsByUUID(reqUUID)
+	chats, err := getChatsByUUID(reqUUID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -209,7 +209,7 @@ func GetChats(c echo.Context) error {
 }
 
 func isUserInChat(uuid string, chatID string) (bool, error) {
-	chats, err := GetChatsByUUID(uuid)
+	chats, err := getChatsByUUID(uuid)
 	if err != nil {
 		return false, err
 	}
@@ -304,21 +304,16 @@ func SendMessage(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	type resBody struct {
-		ChatID    string `json:"chatID"`
-		MessageID string `json:"messageID"`
-	}
-	res := resBody{
-		ChatID:    chatID,
-		MessageID: messageID,
-	}
-
 	err = sendNewMessageNotification(chatID)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	return c.JSON(http.StatusOK, res)
+	messages, err := getMessagesByChatID(chatID, reqUUID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, messages)
 }
 
 type singleMessage struct {
@@ -330,6 +325,40 @@ type singleMessage struct {
 	MediaUrl       string `json:"medieUrl" validate:"required"`
 	Timestamp      int    `json:"timestamp" validate:"required"`
 	DeliveryStatus string `json:"deliveryStatus" validate:"required"`
+}
+
+func getMessagesByChatID(chatID string, uuid string) ([]singleMessage, error) {
+	inChat, err := isUserInChat(uuid, chatID)
+	if err != nil {
+		return make([]singleMessage, 0), err
+	}
+	if !inChat {
+		return make([]singleMessage, 0), errors.New("USER NOT IN CHAT")
+	}
+
+	ctx := context.Background()
+	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		return make([]singleMessage, 0), errors.New("INTERNAL ERROR")
+	}
+	defer conn.Close()
+
+	query := "SELECT message_id, sender_id, username AS sender_username, text_content, message_type, media_url, timestamp, delivery_status " +
+		"FROM chatmessages " +
+		"JOIN users u on u.uuid = chatmessages.sender_id " +
+		"WHERE chat_id=$1 " +
+		"ORDER BY timestamp ASC"
+	var messages []singleMessage
+	err = pgxscan.Select(ctx, conn, &messages, query, chatID)
+	if err != nil {
+		return make([]singleMessage, 0), errors.New("INTERNAL ERROR")
+	}
+
+	if messages == nil {
+		return make([]singleMessage, 0), nil
+	}
+
+	return messages, nil
 }
 
 func GetMessages(c echo.Context) error {
@@ -345,37 +374,13 @@ func GetMessages(c echo.Context) error {
 
 	chatID := c.Param("chatID")
 	if len(chatID) <= 0 {
-		c.String(http.StatusInternalServerError, "MISSING CHAT ID")
+		c.String(http.StatusBadRequest, "MISSING CHAT ID")
 	}
 
-	inChat, err := isUserInChat(reqUUID, chatID)
+	messages, err := getMessagesByChatID(chatID, reqUUID)
+
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	if !inChat {
-		return c.String(http.StatusUnauthorized, "USER NOT IN CHAT")
-	}
-
-	ctx := context.Background()
-	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
-	}
-	defer conn.Close()
-
-	query := "SELECT message_id, sender_id, username AS sender_username, text_content, message_type, media_url, timestamp, delivery_status " +
-		"FROM chatmessages " +
-		"JOIN users u on u.uuid = chatmessages.sender_id " +
-		"WHERE chat_id=$1 " +
-		"ORDER BY timestamp ASC"
-	var messages []singleMessage
-	err = pgxscan.Select(ctx, conn, &messages, query, chatID)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
-	}
-
-	if messages == nil {
-		return c.JSON(http.StatusOK, make([]singleChat, 0))
 	}
 
 	return c.JSON(http.StatusOK, messages)
