@@ -1,6 +1,5 @@
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import Head from 'next/head';
-import Link from 'next/link';
 import { BigLink } from '../../components/atomic/Link';
 import DefaultLayout from '../../components/DefaultLayout';
 import { BACKEND_HOST } from '../../helpers/globals';

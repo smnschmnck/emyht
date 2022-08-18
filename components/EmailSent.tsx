@@ -1,5 +1,4 @@
 import styles from '../styles/EmailSentComponent.module.css';
-import Link from 'next/link';
 import { SmallLink } from './atomic/Link';
 
 const EmailSent: React.FC<{ email: string }> = ({ email }) => {

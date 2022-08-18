@@ -8,7 +8,6 @@ import SingleChat from './SingleChat';
 import ISingleChat from '../interfaces/ISingleChat';
 import { useState } from 'react';
 import { PopupButton } from './atomic/PopupButton';
-import { ContactRequests } from './ContactRequests';
 
 export interface ContactRequest {
   senderID: string;
