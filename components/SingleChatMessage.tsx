@@ -4,16 +4,20 @@ import styles from '../styles/SingleChatMessageComponent.module.css';
 interface OwnMessageProps {
   timestamp: number;
   textContent: string;
+  isPreview: boolean;
 }
 
 export const OwnMessage: React.FC<OwnMessageProps> = ({
   timestamp,
   textContent,
+  isPreview,
 }) => {
   return (
     <div className={styles.ownMessageWrapper}>
       <div className={styles.ownTextContentWrapper}>
-        <p className={styles.textContent}>{textContent}</p>
+        <p className={styles.textContent} id={isPreview ? styles.preview : ''}>
+          {textContent}
+        </p>
       </div>
       <p className={styles.timestamp}>{formatTimestamp(timestamp)}</p>
     </div>

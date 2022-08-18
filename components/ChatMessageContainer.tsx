@@ -1,46 +1,22 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { UserCtx } from '../pages';
 import styles from '../styles/ChatMessagesContainerComponent.module.css';
+import { ISingleMessage } from './MainChat';
 import { OwnMessage, ParticipantMessage } from './SingleChatMessage';
 
-interface ISingleMessage {
-  messageID: string;
-  senderID: string;
-  senderUsername: string;
-  textContent: string;
-  messageType: string;
-  medieUrl: string;
-  timestamp: number;
-  deliveryStatus: string;
-}
-
 interface ChatMessageContainerProps {
-  chatID: string;
+  messages: ISingleMessage[];
 }
 
 export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
-  chatID,
+  messages,
 }) => {
-  const [messages, setMessages] = useState<ISingleMessage[]>([]);
   const user = useContext(UserCtx);
 
   const messageBottom = useRef<HTMLSpanElement>(null);
   const scrollMessagesToBottom = () => {
     messageBottom.current?.scrollIntoView({ behavior: 'auto' });
   };
-
-  useEffect(() => {
-    const fetchMessages = async () => {
-      const res = await fetch(`/api/getChatMessages/${chatID}`);
-      if (!res.ok) {
-        alert(await res.text());
-        return;
-      }
-      const json = (await res.json()) as ISingleMessage[];
-      setMessages(json);
-    };
-    fetchMessages();
-  }, [chatID]);
 
   useEffect(() => {
     scrollMessagesToBottom();
@@ -52,6 +28,7 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
         <span key={message.messageID}>
           {message.senderID === user?.uuid && (
             <OwnMessage
+              isPreview={message.messageID === 'preview'}
               timestamp={message.timestamp}
               textContent={message.textContent}
             />
