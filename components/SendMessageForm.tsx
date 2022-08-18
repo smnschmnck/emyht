@@ -49,6 +49,7 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({
       messageType: 'plaintext',
       mediaUrl: '',
     };
+    setMessageInputValue('');
     createMessagePreview(body);
     const res = await fetch('/api/sendMessage', {
       method: 'post',
@@ -58,7 +59,8 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({
       alert(await res.text());
       return;
     }
-    setMessageInputValue('');
+    const json: ISingleMessage[] = await res.json();
+    setMessages(json);
   };
   return (
     <InputWithButton
