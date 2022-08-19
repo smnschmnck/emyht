@@ -175,6 +175,7 @@ const HomePage: NextPage<IndexPageProps> = ({
 
   useEffect(() => {
     const socketInit = () => {
+      //When encountering connection bugs please check for correct HOST in .env first!!!
       const WEBSOCKET_HOST = process.env.NEXT_PUBLIC_WEBSOCKET_HOST ?? '';
       const socket = new WebSocket(WEBSOCKET_HOST);
 
