@@ -7,7 +7,7 @@ import Head from 'next/head';
 import { ContactRequest } from '../components/Chats';
 import { getLoginData } from '../helpers/loginHelpers';
 import styles from '../styles/IndexPage.module.css';
-import MainChat from '../components/MainChat';
+import MainChat, { ISingleMessage } from '../components/MainChat';
 import { createContext, useEffect, useState } from 'react';
 import { ServerResponse } from 'http';
 import { AddChatModal } from '../components/AddChatModal';
@@ -18,11 +18,16 @@ import { NextApiRequestCookies } from 'next/dist/server/api-utils';
 import { Sidebar } from '../components/Sidebar';
 import { ContactRequestDialog } from '../components/ContactRequestDialog';
 import IUser from '../interfaces/IUser';
+
+export const UserCtx = createContext<IUser | null>(null);
+
 interface IndexPageProps {
   user: IUser;
   isAdmin: boolean;
   chats: ISingleChat[];
+  firstChatID: string;
   contactRequests: ContactRequest[];
+  firstChatMessages: ISingleMessage[];
 }
 
 const redirectOnUnverifiedEmail = (res: ServerResponse) => {
@@ -69,11 +74,29 @@ const getChats = async (cookies: NextApiRequestCookies) => {
   }
 };
 
+const getChatMessages = async (
+  chatID: string,
+  cookies: NextApiRequestCookies
+) => {
+  try {
+    const res = await fetch(`${BACKEND_HOST}/chatMessages/${chatID}`, {
+      headers: {
+        authorization: `Bearer ${cookies.SESSIONID}`,
+      },
+    });
+    if (!res.ok) {
+      return [];
+    }
+    const json = (await res.json()) as ISingleMessage[];
+    return json;
+  } catch (err) {
+    return [];
+  }
+};
+
 const emptyProps = {
   props: {},
 };
-
-export const UserCtx = createContext<IUser | null>(null);
 
 export const getServerSideProps: GetServerSideProps<
   IndexPageProps | {}
@@ -91,11 +114,18 @@ export const getServerSideProps: GetServerSideProps<
       redirectOnUnverifiedEmail(context.res);
       return emptyProps;
     }
+    const chats = await getChats(cookies);
+    const firstChatID = chats[0]?.chatID ?? '';
+    const firstChatMessages: ISingleMessage[] = firstChatID
+      ? await getChatMessages(firstChatID, cookies)
+      : [];
     return {
       props: {
         user: user,
-        chats: await getChats(cookies),
+        chats: chats,
+        firstChatID: firstChatID,
         contactRequests: await getContactRequests(cookies),
+        firstChatMessages: firstChatMessages,
       },
     };
   } catch {
@@ -112,11 +142,14 @@ interface WebSocketData {
 const HomePage: NextPage<IndexPageProps> = ({
   user,
   chats,
+  firstChatID,
   contactRequests,
+  firstChatMessages,
 }) => {
   const [allChats, setAllChats] = useState(chats);
+  const [messages, setMessages] = useState<ISingleMessage[]>(firstChatMessages);
   const [allContactRequests, setAllContactRequests] = useState(contactRequests);
-  const [curChatID, setCurChatID] = useState(allChats[0]?.chatID ?? '');
+  const [curChatID, setCurChatID] = useState(firstChatID);
   const [curContactRequestID, setCurContactRequestID] = useState(
     allContactRequests[0]?.senderID ?? ''
   );
@@ -151,7 +184,7 @@ const HomePage: NextPage<IndexPageProps> = ({
         const payload = json.payload;
         switch (event) {
           case 'message':
-            console.log(JSON.stringify(payload));
+            setMessages(payload);
             break;
           case 'auth':
             const authPayload: { id: string } = payload;
@@ -165,8 +198,19 @@ const HomePage: NextPage<IndexPageProps> = ({
     socketInit();
   }, []);
 
+  const fetchMessages = async (chatID: string) => {
+    const res = await fetch(`/api/getChatMessages/${chatID}`);
+    if (!res.ok) {
+      alert(await res.text());
+      return;
+    }
+    const json = (await res.json()) as ISingleMessage[];
+    setMessages(json);
+  };
+
   const openChat = (chatID: string) => {
     setCurChatID(chatID);
+    fetchMessages(chatID);
     setChatOpened(true);
     setOpenedContactRequest(false);
   };
@@ -243,6 +287,8 @@ const HomePage: NextPage<IndexPageProps> = ({
                   chatID={curChatID}
                   profilePictureUrl={c.pictureUrl}
                   chatName={c.chatName}
+                  messages={messages}
+                  setMessages={setMessages}
                   closeChat={closeChat}
                 />
               ))}

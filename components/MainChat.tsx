@@ -8,6 +8,8 @@ interface MainChatProps {
   chatID: string;
   profilePictureUrl?: string;
   chatName: string;
+  messages: ISingleMessage[];
+  setMessages: (messages: ISingleMessage[]) => void;
   closeChat: () => void;
 }
 
@@ -26,23 +28,10 @@ const MainChat: React.FC<MainChatProps> = ({
   chatID,
   profilePictureUrl,
   chatName,
+  messages,
+  setMessages,
   closeChat,
 }) => {
-  const [messages, setMessages] = useState<ISingleMessage[]>([]);
-
-  useEffect(() => {
-    const fetchMessages = async () => {
-      const res = await fetch(`/api/getChatMessages/${chatID}`);
-      if (!res.ok) {
-        alert(await res.text());
-        return;
-      }
-      const json = (await res.json()) as ISingleMessage[];
-      setMessages(json);
-    };
-    fetchMessages();
-  }, [chatID]);
-
   return (
     <div className={styles.mainChat}>
       <ChatInfoHeader
