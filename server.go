@@ -21,7 +21,6 @@ var PORT string
 func handleRequest() {
 	e := echo.New()
 	//Websocket
-	//FIXME: IOS/Safari not connecting to websocket
 	e.Any("/ws", wsService.InitializeNewSocketConnection)
 	e.POST("/authenticateSocketConnection", wsService.AuthenticateSocketConnection)
 	//auth
