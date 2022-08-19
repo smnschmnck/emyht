@@ -27,14 +27,6 @@
   margin-bottom: 1rem;
 }
 
-@media only screen and (max-width: 800px) {
-  .sidebar {
-    min-width: 250px;
-    max-width: 250px;
-  }
-}
-
-
 @media only screen and (max-width: 600px) {
   .sidebar {
     min-width: 100%;
