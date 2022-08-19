@@ -304,15 +304,16 @@ func SendMessage(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	err = sendNewMessageNotification(chatID)
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	messages, err := getMessagesByChatID(chatID, reqUUID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
+
+	err = sendNewMessageNotification(chatID, messages)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	return c.JSON(http.StatusOK, messages)
 }
 
@@ -405,11 +406,11 @@ func getChatMembers(chatId string) ([]string, error) {
 	return uuids, nil
 }
 
-func sendNewMessageNotification(chatId string) error {
+func sendNewMessageNotification(chatId string, messages []singleMessage) error {
 	uuids, err := getChatMembers(chatId)
 	if err != nil {
 		return err
 	}
 
-	return wsService.WriteStructToMultipleUUIDs(uuids, "message", "new message broski")
+	return wsService.WriteStructToMultipleUUIDs(uuids, "message", messages)
 }
