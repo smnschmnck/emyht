@@ -1,8 +1,8 @@
 import { ChatInfoHeader } from './ChatInfoHeader';
-import fallBackPP from '../assets/images/fallback-pp.webp';
 import styles from '../styles/ContactRequestDialogComponent.module.css';
 import { BigButton, BigButtonGreyHover, SmallButton } from './atomic/Button';
 import { useState } from 'react';
+import { formatPicURL } from '../helpers/stringFormatters';
 
 interface ContactRequestDialogProps {
   senderID: string;
@@ -63,7 +63,7 @@ export const ContactRequestDialog: React.FC<ContactRequestDialogProps> = ({
   return (
     <div className={styles.container}>
       <ChatInfoHeader
-        profilePictureUrl={fallBackPP.src}
+        profilePictureUrl={formatPicURL(senderProfilePicture)}
         chatID={senderID}
         chatName={senderUsername}
         closeChat={closeChat}

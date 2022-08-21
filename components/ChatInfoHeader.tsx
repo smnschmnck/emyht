@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { formatPicURL as formatProfilePicURL } from '../helpers/stringFormatters';
 
 interface ChatInfoHeaderProps {
-  profilePictureUrl?: string;
+  profilePictureUrl: string;
   chatID: string;
   chatName: string;
   closeChat: () => void;
