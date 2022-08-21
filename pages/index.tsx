@@ -139,6 +139,11 @@ interface WebSocketData {
   payload: any;
 }
 
+interface IMessagePayload {
+  chatID: string;
+  messages: ISingleMessage[];
+}
+
 const HomePage: NextPage<IndexPageProps> = ({
   user,
   chats,
@@ -157,6 +162,7 @@ const HomePage: NextPage<IndexPageProps> = ({
   const [showAddChatModal, setShowAddChatModal] = useState(false);
   const [showContactRequestModal, setShowContactRequestModal] = useState(false);
   const [openedContactRequest, setOpenedContactRequest] = useState(false);
+  const [webSocket, setWs] = useState<WebSocket | null>(null);
 
   const sendSocketAuthRequest = async (id: string) => {
     const body = {
@@ -178,26 +184,32 @@ const HomePage: NextPage<IndexPageProps> = ({
       //When encountering connection bugs please check for correct HOST in .env first!!!
       const WEBSOCKET_HOST = process.env.NEXT_PUBLIC_WEBSOCKET_HOST ?? '';
       const socket = new WebSocket(WEBSOCKET_HOST);
-
-      socket.onmessage = (msg) => {
-        const json: WebSocketData = JSON.parse(msg.data);
-        const event = json.event;
-        const payload = json.payload;
-        switch (event) {
-          case 'message':
-            setMessages(payload);
-            break;
-          case 'auth':
-            const authPayload: { id: string } = payload;
-            sendSocketAuthRequest(authPayload.id);
-            break;
-          default:
-            break;
-        }
-      };
+      setWs(socket);
     };
     socketInit();
   }, []);
+
+  useEffect(() => {
+    if (!webSocket) return;
+    webSocket.onmessage = (msg) => {
+      const json: WebSocketData = JSON.parse(msg.data);
+      const event = json.event;
+      const payload = json.payload;
+      switch (event) {
+        case 'message':
+          const messagePayload: IMessagePayload = payload;
+          if (messagePayload.chatID !== curChatID) return;
+          setMessages(messagePayload.messages);
+          break;
+        case 'auth':
+          const authPayload: { id: string } = payload;
+          sendSocketAuthRequest(authPayload.id);
+          break;
+        default:
+          break;
+      }
+    };
+  }, [webSocket, curChatID]);
 
   const fetchMessages = async (chatID: string) => {
     const res = await fetch(`/api/getChatMessages/${chatID}`);
