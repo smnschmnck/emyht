@@ -39,6 +39,18 @@ const Chats: React.FC<ChatsProps> = ({
       return lowerChatName.includes(lowerChatQuery);
     });
   };
+
+  const compareTimeStamps = (a: ISingleChat, b: ISingleChat) => {
+    const aTimestamp = parseInt(a.timestamp ?? '0');
+    const bTimestamp = parseInt(b.timestamp ?? '0');
+    if (aTimestamp > bTimestamp) {
+      return -1;
+    }
+    if (aTimestamp < bTimestamp) {
+      return 1;
+    }
+    return 0;
+  };
   return (
     <div className={styles.chatWrapper}>
       <div className={styles.controls}>
@@ -84,20 +96,22 @@ const Chats: React.FC<ChatsProps> = ({
             <p>Start a new chat</p>
           </div>
         )}
-        {getFilteredChats().map((chat) => (
-          <SingleChat
-            key={chat.chatID}
-            chatID={chat.chatID}
-            chatName={chat.chatName}
-            timestamp={chat.timestamp}
-            textContent={chat.textContent}
-            unreadMessages={chat.unreadMessages}
-            deliveryStatus={chat.deliveryStatus}
-            senderID={chat.senderID}
-            pictureUrl={chat.pictureUrl}
-            openChat={openChat}
-          />
-        ))}
+        {getFilteredChats()
+          .sort(compareTimeStamps)
+          .map((chat) => (
+            <SingleChat
+              key={chat.chatID}
+              chatID={chat.chatID}
+              chatName={chat.chatName}
+              timestamp={chat.timestamp}
+              textContent={chat.textContent}
+              unreadMessages={chat.unreadMessages}
+              deliveryStatus={chat.deliveryStatus}
+              senderID={chat.senderID}
+              pictureUrl={chat.pictureUrl}
+              openChat={openChat}
+            />
+          ))}
         {chats.length > 0 && getFilteredChats().length <= 0 && (
           <h2 className={styles.noMatch}>No chat matching your search 👓</h2>
         )}

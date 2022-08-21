@@ -205,6 +205,10 @@ const HomePage: NextPage<IndexPageProps> = ({
           const authPayload: { id: string } = payload;
           sendSocketAuthRequest(authPayload.id);
           break;
+        case 'chat':
+          const chatPayload: ISingleChat[] = payload;
+          setAllChats(chatPayload);
+          break;
         default:
           break;
       }
