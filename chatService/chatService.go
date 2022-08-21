@@ -422,5 +422,18 @@ func sendNewMessageNotification(chatId string, messages []singleMessage) error {
 		Messages: messages,
 	}
 
-	return wsService.WriteStructToMultipleUUIDs(uuids, "message", body)
+	err = wsService.WriteStructToMultipleUUIDs(uuids, "message", body)
+
+	for _, uuid := range uuids {
+		err = sendUpdatedChats(uuid)
+	}
+	return err
+}
+
+func sendUpdatedChats(uuid string) error {
+	chats, err := getChatsByUUID(uuid)
+	if err != nil {
+		return err
+	}
+	return wsService.WriteStructToSingleUUID(uuid, "chat", chats)
 }
