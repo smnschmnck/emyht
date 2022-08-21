@@ -124,6 +124,9 @@ func StartOneOnOneChat(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
+	sendUpdatedChats(reqUUID)
+	sendUpdatedChats(req.ParticipantUUID)
+
 	return c.String(http.StatusOK, "SUCCESS")
 
 }
