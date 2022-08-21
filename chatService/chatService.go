@@ -412,5 +412,15 @@ func sendNewMessageNotification(chatId string, messages []singleMessage) error {
 	}
 
 	//TODO also send chats
-	return wsService.WriteStructToMultipleUUIDs(uuids, "message", messages)
+	type newMessageNotification struct {
+		ChatID   string          `json:"chatID"`
+		Messages []singleMessage `json:"messages"`
+	}
+
+	body := newMessageNotification{
+		ChatID:   chatId,
+		Messages: messages,
+	}
+
+	return wsService.WriteStructToMultipleUUIDs(uuids, "message", body)
 }
