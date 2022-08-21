@@ -39,9 +39,19 @@
   word-wrap: break-word;
 }
 
-.profilePic {
-  background-color: darksalmon;
+.profilePicture {
+  display: inline-block;
+  position: relative;
   height: 40px;
   width: 40px;
+  overflow: hidden;
+}
+
+.image {
+  display: inline-block;
+  position: relative;
   border-radius: 50%;
+  height: 100%;
+  aspect-ratio: 1/1;
+  overflow: hidden;
 }
