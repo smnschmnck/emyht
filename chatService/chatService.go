@@ -153,8 +153,7 @@ func getChatsByUUID(uuid string) ([]singleChat, error) {
 		"SELECT users.username AS name " +
 		"FROM users " +
 		"JOIN user_chat uc on users.uuid = uc.uuid " +
-		"JOIN chats c on uc.chat_id = c.chat_id " +
-		"WHERE c.chat_type='one_on_one' AND uc.uuid!=$1 " +
+		"WHERE c.chat_id=uc.chat_id AND uc.uuid!=$1 " +
 		") ELSE c.name END " +
 		"), " +
 		"( " +
@@ -162,8 +161,7 @@ func getChatsByUUID(uuid string) ([]singleChat, error) {
 		"SELECT users.picture_url AS picture_url " +
 		"FROM users " +
 		"JOIN user_chat uc on users.uuid = uc.uuid " +
-		"JOIN chats c on uc.chat_id = c.chat_id " +
-		"WHERE c.chat_type='one_on_one' AND uc.uuid!=$1 " +
+		"WHERE c.chat_id=uc.chat_id AND uc.uuid!=$1 " +
 		") ELSE c.picture_url END " +
 		"), " +
 		"u.unread_messages, " +
@@ -179,6 +177,7 @@ func getChatsByUUID(uuid string) ([]singleChat, error) {
 	var chats []singleChat
 	err = pgxscan.Select(ctx, conn, &chats, getChatsQuery, uuid)
 	if err != nil {
+		fmt.Println(err)
 		return []singleChat{}, errors.New("INTERNAL ERROR")
 	}
 
@@ -412,5 +411,6 @@ func sendNewMessageNotification(chatId string, messages []singleMessage) error {
 		return err
 	}
 
+	//TODO also send chats
 	return wsService.WriteStructToMultipleUUIDs(uuids, "message", messages)
 }
