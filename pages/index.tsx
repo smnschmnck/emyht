@@ -187,6 +187,7 @@ const HomePage: NextPage<IndexPageProps> = ({
       setWs(socket);
     };
     socketInit();
+    confirmCurChatAsRead();
   }, []);
 
   useEffect(() => {
@@ -225,7 +226,8 @@ const HomePage: NextPage<IndexPageProps> = ({
     setMessages(json);
   };
 
-  const confirmCurChatAsRead = async (chats: ISingleChat[]) => {
+  const confirmCurChatAsRead = async (newChats?: ISingleChat[]) => {
+    chats = newChats ?? allChats;
     const curChat = chats.find((c) => c.chatID === curChatID);
     const curUnreadMessages = curChat?.unreadMessages ?? 0;
     if (!(curUnreadMessages > 0)) {
