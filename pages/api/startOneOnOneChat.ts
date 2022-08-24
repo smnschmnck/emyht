@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { postProxyWithAuth } from '../../helpers/proxy';
+import { postProxy } from '../../helpers/proxyWithAuth';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  return postProxyWithAuth(req, res, '/startOneOnOneChat');
+  return postProxy(req, res, '/startOneOnOneChat');
 };
 
 export default handler;

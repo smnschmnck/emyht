@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { BACKEND_HOST } from './globals';
 
-export const postProxyWithAuth = async (
+export const postProxy = async (
   req: NextApiRequest,
   res: NextApiResponse,
   endpoint: string
