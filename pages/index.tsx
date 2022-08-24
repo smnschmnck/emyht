@@ -207,7 +207,7 @@ const HomePage: NextPage<IndexPageProps> = ({
           break;
         case 'chat':
           const chatPayload: ISingleChat[] = payload;
-          setAllChats(chatPayload);
+          confirmCurChatAsRead(chatPayload);
           break;
         default:
           break;
@@ -225,9 +225,42 @@ const HomePage: NextPage<IndexPageProps> = ({
     setMessages(json);
   };
 
+  const confirmCurChatAsRead = async (chats: ISingleChat[]) => {
+    const curChat = chats.find((c) => c.chatID === curChatID);
+    const curUnreadMessages = curChat?.unreadMessages ?? 0;
+    if (!(curUnreadMessages > 0)) {
+      setAllChats(chats);
+      return;
+    }
+    const body = {
+      chatID: curChatID,
+    };
+    const res = await fetch('/api/confirmReadChat', {
+      method: 'post',
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      alert(await res.text());
+      return;
+    }
+    const json: ISingleChat[] = await res.json();
+    setAllChats(json);
+  };
+
+  const setChatAsRead = (chatID: string) => {
+    const tmpChats = allChats.map((c) => {
+      if (c.chatID === chatID) {
+        c.unreadMessages = 0;
+      }
+      return c;
+    });
+    setAllChats(tmpChats);
+  };
+
   const openChat = (chatID: string) => {
     setCurChatID(chatID);
     fetchMessages(chatID);
+    setChatAsRead(chatID);
     setChatOpened(true);
     setOpenedContactRequest(false);
   };
