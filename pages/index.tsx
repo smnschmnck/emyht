@@ -187,10 +187,34 @@ const HomePage: NextPage<IndexPageProps> = ({
       setWs(socket);
     };
     socketInit();
-    confirmCurChatAsRead();
   }, []);
 
   useEffect(() => {
+    const confirmCurChatAsRead = async (newChats?: ISingleChat[]) => {
+      const chats = newChats ?? allChats;
+      const curChat = chats.find((c) => c.chatID === curChatID);
+      const curUnreadMessages = curChat?.unreadMessages ?? 0;
+      if (!(curUnreadMessages > 0)) {
+        setAllChats(chats);
+        return;
+      }
+      const body = {
+        chatID: curChatID,
+      };
+      const res = await fetch('/api/confirmReadChat', {
+        method: 'post',
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        alert(await res.text());
+        return;
+      }
+      const json: ISingleChat[] = await res.json();
+      setAllChats(json);
+    };
+
+    confirmCurChatAsRead();
+
     if (!webSocket) return;
     webSocket.onmessage = (msg) => {
       const json: WebSocketData = JSON.parse(msg.data);
@@ -214,7 +238,7 @@ const HomePage: NextPage<IndexPageProps> = ({
           break;
       }
     };
-  }, [webSocket, curChatID]);
+  }, [webSocket, curChatID, allChats]);
 
   const fetchMessages = async (chatID: string) => {
     const res = await fetch(`/api/getChatMessages/${chatID}`);
@@ -224,29 +248,6 @@ const HomePage: NextPage<IndexPageProps> = ({
     }
     const json = (await res.json()) as ISingleMessage[];
     setMessages(json);
-  };
-
-  const confirmCurChatAsRead = async (newChats?: ISingleChat[]) => {
-    chats = newChats ?? allChats;
-    const curChat = chats.find((c) => c.chatID === curChatID);
-    const curUnreadMessages = curChat?.unreadMessages ?? 0;
-    if (!(curUnreadMessages > 0)) {
-      setAllChats(chats);
-      return;
-    }
-    const body = {
-      chatID: curChatID,
-    };
-    const res = await fetch('/api/confirmReadChat', {
-      method: 'post',
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      alert(await res.text());
-      return;
-    }
-    const json: ISingleChat[] = await res.json();
-    setAllChats(json);
   };
 
   const setChatAsRead = (chatID: string) => {
