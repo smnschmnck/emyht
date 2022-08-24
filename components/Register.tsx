@@ -10,7 +10,7 @@ interface RegisterProps {
   showRegister: boolean;
   setShowRegister: (showRegister: boolean) => void;
   toggleLoginRegister: () => void;
-  newLogin: (email: string, username: string) => void;
+  newLogin: () => void;
 }
 
 const Register: React.FC<RegisterProps> = (props) => {
@@ -39,19 +39,9 @@ const Register: React.FC<RegisterProps> = (props) => {
         setLoginError(await res.text());
         return;
       }
-      loadUser();
+      props.newLogin();
     },
   });
-
-  const loadUser = async () => {
-    const res = await fetch('/api/user');
-    if (!res.ok) {
-      setLoginError(await res.text());
-      return;
-    }
-    const json = await res.json();
-    props.newLogin(json.username, json.email);
-  };
 
   return (
     <div className={styles.content}>

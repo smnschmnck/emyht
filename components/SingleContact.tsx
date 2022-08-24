@@ -5,7 +5,7 @@ import { formatPicURL } from '../helpers/stringFormatters';
 export interface Contact {
   id: string;
   name: string;
-  profilePictureUrl: string;
+  profilePictureUrl?: string;
 }
 
 interface SingleContactProps extends Contact {

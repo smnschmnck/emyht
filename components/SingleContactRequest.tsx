@@ -5,7 +5,7 @@ import Image from 'next/image';
 interface SingleContactRequestProps {
   senderID: string;
   senderUsername: string;
-  senderProfilePicture: string;
+  senderProfilePicture?: string;
   openContactRequest: (contactRequestID: string) => void;
 }
 

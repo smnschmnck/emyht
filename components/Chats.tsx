@@ -12,7 +12,7 @@ import { PopupButton } from './atomic/PopupButton';
 export interface ContactRequest {
   senderID: string;
   senderUsername: string;
-  senderProfilePicture: string;
+  senderProfilePicture?: string;
 }
 
 interface ChatsProps {

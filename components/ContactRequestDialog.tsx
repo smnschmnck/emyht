@@ -6,7 +6,7 @@ import { formatPicURL } from '../helpers/stringFormatters';
 
 interface ContactRequestDialogProps {
   senderID: string;
-  senderProfilePicture: string;
+  senderProfilePicture?: string;
   senderUsername: string;
   closeChat: () => void;
   refreshContactRequests: () => void;

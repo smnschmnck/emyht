@@ -10,7 +10,7 @@ interface LoginProps {
   showRegister: boolean;
   setShowRegister: (showRegister: boolean) => void;
   toggleLoginRegister: () => void;
-  newLogin: (email: string, username: string) => void;
+  newLogin: () => void;
 }
 
 const Login: React.FC<LoginProps> = (props) => {
@@ -29,19 +29,9 @@ const Login: React.FC<LoginProps> = (props) => {
         setLoginError(await res.text());
         return;
       }
-      loadUser();
+      props.newLogin();
     },
   });
-
-  const loadUser = async () => {
-    const res = await fetch('/api/user');
-    if (!res.ok) {
-      setLoginError(await res.text());
-      return;
-    }
-    const json = await res.json();
-    props.newLogin(json.email, json.username);
-  };
 
   return (
     <div className={styles.content}>
