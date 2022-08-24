@@ -178,7 +178,7 @@ func getChatsByUUID(uuid string) ([]singleChat, error) {
 		"JOIN chats c ON u.chat_id = c.chat_id " +
 		"LEFT JOIN chatmessages m ON m.message_id = c.last_message_id " +
 		"WHERE u.uuid=$1 " +
-		"ORDER BY m.timestamp, c.creation_timestamp DESC"
+		"ORDER BY CASE m.timestamp WHEN null THEN c.creation_timestamp ELSE m.timestamp END DESC"
 	var chats []singleChat
 	err = pgxscan.Select(ctx, conn, &chats, getChatsQuery, uuid)
 	if err != nil {
