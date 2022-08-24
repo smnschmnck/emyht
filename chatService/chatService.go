@@ -306,6 +306,17 @@ func SendMessage(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
+	querySuccess := false
+	incrementUnreadMessagesQuery := "UPDATE user_chat " +
+		"SET unread_messages=(unread_messages + 1) " +
+		"WHERE chat_id=$1 AND uuid!=$2 " +
+		"RETURNING true"
+	rows = conn.QueryRow(ctx, incrementUnreadMessagesQuery, chatID, reqUUID)
+	err = rows.Scan(&querySuccess)
+	if err != nil || !querySuccess {
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
 	messages, err := getMessagesByChatID(chatID, reqUUID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
