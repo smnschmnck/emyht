@@ -132,15 +132,16 @@ func StartOneOnOneChat(c echo.Context) error {
 }
 
 type singleChat struct {
-	ChatID         string  `json:"chatID"`
-	Name           string  `json:"chatName"`
-	PictureUrl     string  `json:"pictureUrl"`
-	UnreadMessages int     `json:"unreadMessages"`
-	MessageType    *string `json:"messageType"`
-	TextContent    *string `json:"textContent"`
-	Timestamp      *int    `json:"timestamp"`
-	DeliveryStatus *string `json:"deliveryStatus"`
-	SenderID       *string `json:"senderID"`
+	ChatID            string  `json:"chatID"`
+	CreationTimestamp int     `json:"creationTimestamp"`
+	Name              string  `json:"chatName"`
+	PictureUrl        string  `json:"pictureUrl"`
+	UnreadMessages    int     `json:"unreadMessages"`
+	MessageType       *string `json:"messageType"`
+	TextContent       *string `json:"textContent"`
+	Timestamp         *int    `json:"timestamp"`
+	DeliveryStatus    *string `json:"deliveryStatus"`
+	SenderID          *string `json:"senderID"`
 }
 
 func getChatsByUUID(uuid string) ([]singleChat, error) {
@@ -151,7 +152,7 @@ func getChatsByUUID(uuid string) ([]singleChat, error) {
 	}
 	defer conn.Close()
 
-	getChatsQuery := "SELECT c.chat_id, ( " +
+	getChatsQuery := "SELECT c.chat_id, c.creation_timestamp, ( " +
 		"CASE c.chat_type WHEN 'one_on_one' THEN ( " +
 		"SELECT users.username AS name " +
 		"FROM users " +
@@ -177,7 +178,7 @@ func getChatsByUUID(uuid string) ([]singleChat, error) {
 		"JOIN chats c ON u.chat_id = c.chat_id " +
 		"LEFT JOIN chatmessages m ON m.message_id = c.last_message_id " +
 		"WHERE u.uuid=$1 " +
-		"ORDER BY m.timestamp DESC"
+		"ORDER BY m.timestamp, c.creation_timestamp DESC"
 	var chats []singleChat
 	err = pgxscan.Select(ctx, conn, &chats, getChatsQuery, uuid)
 	if err != nil {
