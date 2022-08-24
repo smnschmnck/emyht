@@ -1,5 +1,6 @@
 interface ISingleChat {
   chatID: string;
+  creationTimestamp: string;
   chatName: string;
   pictureUrl?: string;
   unreadMessages: number;

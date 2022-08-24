@@ -101,6 +101,7 @@ const Chats: React.FC<ChatsProps> = ({
           .map((chat) => (
             <SingleChat
               key={chat.chatID}
+              creationTimestamp={chat.creationTimestamp}
               chatID={chat.chatID}
               chatName={chat.chatName}
               timestamp={chat.timestamp}
