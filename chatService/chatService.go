@@ -389,7 +389,7 @@ func GetMessages(c echo.Context) error {
 
 	chatID := c.Param("chatID")
 	if len(chatID) <= 0 {
-		c.String(http.StatusBadRequest, "MISSING CHAT ID")
+		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
 	}
 
 	messages, err := getMessagesByChatID(chatID, reqUUID)
