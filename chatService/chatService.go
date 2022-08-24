@@ -397,7 +397,34 @@ func GetMessages(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
+	err = markMessagesRead(reqUUID, chatID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
 	return c.JSON(http.StatusOK, messages)
+}
+
+func markMessagesRead(uuid string, chatID string) error {
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		return errors.New("INTERNAL ERROR")
+	}
+	defer conn.Close(ctx)
+
+	querySuccess := false
+	query := "UPDATE user_chat " +
+		"SET unread_messages=0 " +
+		"WHERE chat_id=$1 AND uuid=$2 " +
+		"RETURNING true"
+	rows := conn.QueryRow(ctx, query, chatID, uuid)
+	err = rows.Scan(&querySuccess)
+	if err != nil || !querySuccess {
+		return errors.New("INTERNAL ERROR")
+	}
+
+	return nil
 }
 
 func getChatMembers(chatId string) ([]string, error) {
