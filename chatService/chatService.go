@@ -398,7 +398,7 @@ func GetMessages(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	err = markMessagesRead(reqUUID, chatID)
+	err = markChatAsRead(reqUUID, chatID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -406,7 +406,44 @@ func GetMessages(c echo.Context) error {
 	return c.JSON(http.StatusOK, messages)
 }
 
-func markMessagesRead(uuid string, chatID string) error {
+func ConfirmReadChat(c echo.Context) error {
+	sessionID, responseErr := authService.GetBearer(c)
+	if responseErr != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	type reqBody struct {
+		ChatID string `json:"chatID" validate:"required"`
+	}
+
+	req := new(reqBody)
+	err = c.Bind(&req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	err = validate.Struct(req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	err = markChatAsRead(reqUUID, req.ChatID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	chats, err := getChatsByUUID(reqUUID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, chats)
+}
+
+func markChatAsRead(uuid string, chatID string) error {
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
