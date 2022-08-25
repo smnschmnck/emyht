@@ -17,7 +17,6 @@ export interface ContactRequest {
 
 interface ChatsProps {
   chats: ISingleChat[];
-  contactRequests: ContactRequest[];
   openChat: (chatID: string) => void;
   addChatButtonClickHandler: () => void;
   sendFriendRequestButtonClickHandler: () => void;
@@ -25,7 +24,6 @@ interface ChatsProps {
 
 const Chats: React.FC<ChatsProps> = ({
   chats,
-  contactRequests,
   openChat,
   addChatButtonClickHandler,
   sendFriendRequestButtonClickHandler,
@@ -40,17 +38,6 @@ const Chats: React.FC<ChatsProps> = ({
     });
   };
 
-  const compareTimeStamps = (a: ISingleChat, b: ISingleChat) => {
-    const aTimestamp = parseInt(a.timestamp ?? '0');
-    const bTimestamp = parseInt(b.timestamp ?? '0');
-    if (aTimestamp > bTimestamp) {
-      return -1;
-    }
-    if (aTimestamp < bTimestamp) {
-      return 1;
-    }
-    return 0;
-  };
   return (
     <div className={styles.chatWrapper}>
       <div className={styles.controls}>
@@ -96,23 +83,21 @@ const Chats: React.FC<ChatsProps> = ({
             <p>Start a new chat</p>
           </div>
         )}
-        {getFilteredChats()
-          .sort(compareTimeStamps)
-          .map((chat) => (
-            <SingleChat
-              key={chat.chatID}
-              creationTimestamp={chat.creationTimestamp}
-              chatID={chat.chatID}
-              chatName={chat.chatName}
-              timestamp={chat.timestamp}
-              textContent={chat.textContent}
-              unreadMessages={chat.unreadMessages}
-              deliveryStatus={chat.deliveryStatus}
-              senderID={chat.senderID}
-              pictureUrl={chat.pictureUrl}
-              openChat={openChat}
-            />
-          ))}
+        {getFilteredChats().map((chat) => (
+          <SingleChat
+            key={chat.chatID}
+            creationTimestamp={chat.creationTimestamp}
+            chatID={chat.chatID}
+            chatName={chat.chatName}
+            timestamp={chat.timestamp}
+            textContent={chat.textContent}
+            unreadMessages={chat.unreadMessages}
+            deliveryStatus={chat.deliveryStatus}
+            senderID={chat.senderID}
+            pictureUrl={chat.pictureUrl}
+            openChat={openChat}
+          />
+        ))}
         {chats.length > 0 && getFilteredChats().length <= 0 && (
           <h2 className={styles.noMatch}>No chat matching your search 👓</h2>
         )}

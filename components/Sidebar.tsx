@@ -47,7 +47,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
         <Chats
           chats={allChats}
-          contactRequests={contactRequests}
           openChat={openChat}
           addChatButtonClickHandler={() => setShowAddChatModal(true)}
           sendFriendRequestButtonClickHandler={() =>
