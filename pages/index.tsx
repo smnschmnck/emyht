@@ -238,9 +238,13 @@ const HomePage: NextPage<IndexPageProps> = ({
     };
 
     window.onresize = () => {
-      if (window.innerWidth >= WIDTH_BREAKPOINT) {
+      if (window.innerWidth > WIDTH_BREAKPOINT) {
         if (!chatOpened) {
           setChatOpened(true);
+        }
+      } else {
+        if (!chatOpened) {
+          setChatOpened(false);
         }
       }
     };
