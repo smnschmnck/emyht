@@ -27,7 +27,6 @@ interface IndexPageProps {
   chats: ISingleChat[];
   firstChatID: string;
   contactRequests: ContactRequest[];
-  firstChatMessages: ISingleMessage[];
 }
 
 const redirectOnUnverifiedEmail = (res: ServerResponse) => {
@@ -116,16 +115,12 @@ export const getServerSideProps: GetServerSideProps<
     }
     const chats = await getChats(cookies);
     const firstChatID = chats[0]?.chatID ?? '';
-    const firstChatMessages: ISingleMessage[] = firstChatID
-      ? await getChatMessages(firstChatID, cookies)
-      : [];
     return {
       props: {
         user: user,
         chats: chats,
         firstChatID: firstChatID,
         contactRequests: await getContactRequests(cookies),
-        firstChatMessages: firstChatMessages,
       },
     };
   } catch {
@@ -149,10 +144,9 @@ const HomePage: NextPage<IndexPageProps> = ({
   chats,
   firstChatID,
   contactRequests,
-  firstChatMessages,
 }) => {
   const [allChats, setAllChats] = useState(chats);
-  const [messages, setMessages] = useState<ISingleMessage[]>(firstChatMessages);
+  const [messages, setMessages] = useState<ISingleMessage[]>([]);
   const [allContactRequests, setAllContactRequests] = useState(contactRequests);
   const [curChatID, setCurChatID] = useState(firstChatID);
   const [curContactRequestID, setCurContactRequestID] = useState(
@@ -196,10 +190,12 @@ const HomePage: NextPage<IndexPageProps> = ({
       const curUnreadMessages = curChat?.unreadMessages ?? 0;
       const chatIsOpened = chatOpened && !openedContactRequest;
       const isSmallScreen = window.innerWidth <= WIDTH_BREAKPOINT;
+
       if (curUnreadMessages <= 0 || (!chatIsOpened && isSmallScreen)) {
         setAllChats(chats);
         return;
       }
+
       const body = {
         chatID: curChatID,
       };
@@ -252,6 +248,14 @@ const HomePage: NextPage<IndexPageProps> = ({
     setMessages(json);
   };
 
+  useEffect(() => {
+    const isSmallScreen = window.innerWidth <= WIDTH_BREAKPOINT;
+    if (isSmallScreen && !chatOpened) {
+      return;
+    }
+    fetchMessages(curChatID);
+  }, [chatOpened, curChatID]);
+
   const setChatAsRead = (chatID: string) => {
     const tmpChats = allChats.map((c) => {
       if (c.chatID === chatID) {
@@ -264,7 +268,6 @@ const HomePage: NextPage<IndexPageProps> = ({
 
   const openChat = (chatID: string) => {
     setCurChatID(chatID);
-    fetchMessages(chatID);
     setChatAsRead(chatID);
     setChatOpened(true);
     setOpenedContactRequest(false);
