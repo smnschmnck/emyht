@@ -236,6 +236,14 @@ const HomePage: NextPage<IndexPageProps> = ({
           break;
       }
     };
+
+    window.onresize = () => {
+      if (window.innerWidth >= WIDTH_BREAKPOINT) {
+        if (!chatOpened) {
+          setChatOpened(true);
+        }
+      }
+    };
   }, [webSocket, curChatID, allChats, chatOpened, openedContactRequest]);
 
   const fetchMessages = async (chatID: string) => {
