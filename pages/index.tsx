@@ -13,7 +13,7 @@ import { ServerResponse } from 'http';
 import { AddChatModal } from '../components/AddChatModal';
 import ISingleChat from '../interfaces/ISingleChat';
 import { ContactRequestModal } from '../components/ContactRequestModal';
-import { BACKEND_HOST } from '../helpers/globals';
+import { BACKEND_HOST, WIDTH_BREAKPOINT } from '../helpers/globals';
 import { NextApiRequestCookies } from 'next/dist/server/api-utils';
 import { Sidebar } from '../components/Sidebar';
 import { ContactRequestDialog } from '../components/ContactRequestDialog';
@@ -194,7 +194,9 @@ const HomePage: NextPage<IndexPageProps> = ({
       const chats = newChats ?? allChats;
       const curChat = chats.find((c) => c.chatID === curChatID);
       const curUnreadMessages = curChat?.unreadMessages ?? 0;
-      if (!(curUnreadMessages > 0)) {
+      const chatIsOpened = chatOpened && !openedContactRequest;
+      const isSmallScreen = window.innerWidth <= WIDTH_BREAKPOINT;
+      if (curUnreadMessages <= 0 || (!chatIsOpened && isSmallScreen)) {
         setAllChats(chats);
         return;
       }
@@ -238,7 +240,7 @@ const HomePage: NextPage<IndexPageProps> = ({
           break;
       }
     };
-  }, [webSocket, curChatID, allChats]);
+  }, [webSocket, curChatID, allChats, chatOpened, openedContactRequest]);
 
   const fetchMessages = async (chatID: string) => {
     const res = await fetch(`/api/getChatMessages/${chatID}`);
