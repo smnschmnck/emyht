@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -100,11 +101,12 @@ func StartOneOnOneChat(c echo.Context) error {
 
 	chatID := uuid.New().String()
 	var dbChatID string
-	createChatQuery := "INSERT INTO chats(chat_id, name, picture_url, chat_type) " +
-		"VALUES ($1, '', '','one_on_one') " +
+	createChatQuery := "INSERT INTO chats(chat_id, name, picture_url, chat_type, creation_timestamp) " +
+		"VALUES ($1, '', '','one_on_one', $2) " +
 		"RETURNING chat_id"
-	err = conn.QueryRow(ctx, createChatQuery, chatID).Scan(&dbChatID)
+	err = conn.QueryRow(ctx, createChatQuery, chatID, time.Now().Unix()).Scan(&dbChatID)
 	if err != nil {
+		fmt.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
@@ -177,8 +179,7 @@ func getChatsByUUID(uuid string) ([]singleChat, error) {
 		"FROM user_chat u " +
 		"JOIN chats c ON u.chat_id = c.chat_id " +
 		"LEFT JOIN chatmessages m ON m.message_id = c.last_message_id " +
-		"WHERE u.uuid=$1 " +
-		"ORDER BY CASE m.timestamp WHEN null THEN c.creation_timestamp ELSE m.timestamp END DESC"
+		"WHERE u.uuid=$1"
 	var chats []singleChat
 	err = pgxscan.Select(ctx, conn, &chats, getChatsQuery, uuid)
 	if err != nil {
@@ -189,6 +190,26 @@ func getChatsByUUID(uuid string) ([]singleChat, error) {
 	if chats == nil {
 		return make([]singleChat, 0), nil
 	}
+
+	sort.SliceStable(chats, func(i, j int) bool {
+		var a int
+		var b int
+		c1 := chats[i]
+		c2 := chats[j]
+		t1 := c1.Timestamp
+		t2 := c2.Timestamp
+		if t1 != nil {
+			a = *t1
+		} else {
+			a = c1.CreationTimestamp
+		}
+		if t2 != nil {
+			b = *t2
+		} else {
+			b = c2.CreationTimestamp
+		}
+		return a > b
+	})
 
 	return chats, nil
 }
