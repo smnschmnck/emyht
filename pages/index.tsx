@@ -251,6 +251,7 @@ const HomePage: NextPage<IndexPageProps> = ({
   }, [webSocket, curChatID, allChats, chatOpened, openedContactRequest]);
 
   const fetchMessages = async (chatID: string) => {
+    if (!chatID) return;
     const res = await fetch(`/api/getChatMessages/${chatID}`);
     if (!res.ok) {
       alert(await res.text());
