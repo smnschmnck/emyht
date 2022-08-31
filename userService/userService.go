@@ -7,6 +7,7 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"math/rand"
 	"os"
 	"strconv"
@@ -194,6 +195,7 @@ func AddUser(email string, username string, password string) (User, error) {
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
+		fmt.Println(err.Error())
 		return User{}, errors.New("INTERNAL ERROR")
 	}
 	defer conn.Close(ctx)
@@ -217,6 +219,7 @@ func AddUser(email string, username string, password string) (User, error) {
 		if strings.Contains(errString, `duplicate key value violates unique constraint`) {
 			return User{}, errors.New("USER EXISTS ALREADY")
 		}
+		fmt.Println(err.Error())
 		return User{}, errors.New("INTERNAL ERROR")
 	}
 
