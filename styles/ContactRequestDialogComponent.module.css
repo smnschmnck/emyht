@@ -21,6 +21,7 @@
   justify-content: center;
   height: 100px;
   gap: 2rem;
+  width: 90%;
 }
 
 .heading {

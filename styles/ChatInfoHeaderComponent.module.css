@@ -21,8 +21,9 @@
 
 .chatInfo {
   display: flex;
-  justify-content: space-between;
-  width: fit-content;
+  justify-content: center;
+  width: 50%;
+  min-width: fit-content;
   gap: 10px;
 }
 
