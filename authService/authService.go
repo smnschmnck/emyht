@@ -212,7 +212,6 @@ func LogJSONRawBody(c echo.Context) {
 }
 
 func Authenticate(c echo.Context) error {
-	LogJSONRawBody(c)
 	credentials := new(Credentials)
 	fmt.Println(c)
 	err := c.Bind(&credentials)
