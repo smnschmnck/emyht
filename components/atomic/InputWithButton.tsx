@@ -8,6 +8,7 @@ interface InputWithButtonProps {
   submitHandler: (...args: any) => any;
   buttonDisabled?: boolean;
   autofocus?: boolean;
+  error?: string;
 }
 
 export const InputWithButton: React.FC<InputWithButtonProps> = ({
@@ -18,25 +19,30 @@ export const InputWithButton: React.FC<InputWithButtonProps> = ({
   submitHandler,
   buttonDisabled,
   autofocus,
+  error,
 }) => {
   return (
-    <form className={styles.form} onSubmit={submitHandler}>
-      <input
-        type="text"
-        placeholder={inputPlaceHolder}
-        className={styles.input}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        autoFocus={autofocus}
-      />
-      <button
-        type="submit"
-        className={styles.button}
-        id={buttonDisabled ? styles.buttonDisabled : ''}
-        disabled={buttonDisabled}
-      >
-        {buttonText}
-      </button>
-    </form>
+    <div className={styles.wrapper}>
+      <p className={styles.error}>{error}</p>
+      <form className={styles.form} onSubmit={submitHandler}>
+        <input
+          type="text"
+          placeholder={inputPlaceHolder}
+          className={styles.input}
+          id={buttonDisabled || error ? styles.isError : ''}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          autoFocus={autofocus}
+        />
+        <button
+          type="submit"
+          className={styles.button}
+          id={buttonDisabled || error ? styles.buttonDisabled : ''}
+          disabled={buttonDisabled || !!error}
+        >
+          {buttonText}
+        </button>
+      </form>
+    </div>
   );
 };
