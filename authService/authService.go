@@ -8,6 +8,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -18,6 +19,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -198,7 +200,19 @@ func VerifyEmail(c echo.Context) error {
 	return c.String(http.StatusOK, "EMAIL VERIFIED SUCCESSFULLY")
 }
 
+func LogJSONRawBody(c echo.Context) {
+
+	jsonBody := make(map[string]interface{})
+	err := json.NewDecoder(c.Request().Body).Decode(&jsonBody)
+	if err != nil {
+		log.Error("empty json body")
+		return
+	}
+	fmt.Println(jsonBody)
+}
+
 func Authenticate(c echo.Context) error {
+	LogJSONRawBody(c)
 	credentials := new(Credentials)
 	fmt.Println(c)
 	err := c.Bind(&credentials)
