@@ -9,6 +9,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -201,10 +202,12 @@ func Authenticate(c echo.Context) error {
 	credentials := new(Credentials)
 	err := c.Bind(&credentials)
 	if err != nil {
+		fmt.Println(err)
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
 	err = validate.Struct(credentials)
 	if err != nil {
+		fmt.Println(err)
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 	lowerCaseEmail := strings.ToLower(credentials.Email)
@@ -217,6 +220,7 @@ func Authenticate(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "WRONG CREDENTIALS")
 	}
 	if err != nil {
+		fmt.Println(err)
 		c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
 	session, err := startSession(user.Uuid)
