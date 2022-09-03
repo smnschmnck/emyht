@@ -185,6 +185,12 @@ const HomePage: NextPage<IndexPageProps> = ({
   }, []);
 
   useEffect(() => {
+    if (handledContactReqs.length > 0 && !openedContactRequest) {
+      refreshContactRequests();
+    }
+  }, [handledContactReqs.length, openedContactRequest]);
+
+  useEffect(() => {
     const confirmCurChatAsRead = async (newChats?: ISingleChat[]) => {
       const chats = newChats ?? allChats;
       const curChat = chats.find((c) => c.chatID === curChatID);
