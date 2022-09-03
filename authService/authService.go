@@ -8,9 +8,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -19,7 +17,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/log"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -200,28 +197,14 @@ func VerifyEmail(c echo.Context) error {
 	return c.String(http.StatusOK, "EMAIL VERIFIED SUCCESSFULLY")
 }
 
-func LogJSONRawBody(c echo.Context) {
-
-	jsonBody := make(map[string]interface{})
-	err := json.NewDecoder(c.Request().Body).Decode(&jsonBody)
-	if err != nil {
-		log.Error("empty json body")
-		return
-	}
-	fmt.Println(jsonBody)
-}
-
 func Authenticate(c echo.Context) error {
 	credentials := new(Credentials)
-	fmt.Println(c)
 	err := c.Bind(&credentials)
 	if err != nil {
-		fmt.Println(err)
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
 	err = validate.Struct(credentials)
 	if err != nil {
-		fmt.Println(err)
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 	lowerCaseEmail := strings.ToLower(credentials.Email)
@@ -234,7 +217,6 @@ func Authenticate(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "WRONG CREDENTIALS")
 	}
 	if err != nil {
-		fmt.Println(err)
 		c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
 	session, err := startSession(user.Uuid)
