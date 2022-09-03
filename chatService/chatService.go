@@ -126,11 +126,104 @@ func StartOneOnOneChat(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	sendUpdatedChats(reqUUID)
 	sendUpdatedChats(req.ParticipantUUID)
+	chats, err := getChatsByUUID(reqUUID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
 
-	return c.String(http.StatusOK, "SUCCESS")
+	return c.JSON(http.StatusOK, chats)
+}
 
+func StartGroupChat(c echo.Context) error {
+	sessionID, responseErr := authService.GetBearer(c)
+	if responseErr != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	type startReq struct {
+		ChatName         string   `json:"chatName" validate:"required"`
+		ParticipantUUIDs []string `json:"participantUUIDs" validate:"required"`
+	}
+	req := new(startReq)
+	err = c.Bind(&req)
+	if err != nil {
+		fmt.Println(err)
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	err = validate.Struct(req)
+	if err != nil {
+		fmt.Println(err)
+
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	contacts, err := contactService.GetUserContactsbyUUID(reqUUID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	isInContacts := false
+	for _, participant := range req.ParticipantUUIDs {
+		isInContacts = false
+		for _, contact := range contacts {
+			if contact.Uuid == participant {
+				isInContacts = true
+				break
+			}
+		}
+	}
+	if !isInContacts {
+		return c.String(http.StatusUnauthorized, "NOT ALL USERS IN CONTACTS")
+	}
+
+	ctx := context.Background()
+	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+	defer conn.Close()
+
+	//CREATE CHAT
+	chatID := uuid.New().String()
+	var dbChatID string
+	createChatQuery := "INSERT INTO chats(chat_id, name, picture_url, chat_type, creation_timestamp) " +
+		"VALUES ($1, $2, 'TODO','group', $3) " +
+		"RETURNING chat_id"
+	err = conn.QueryRow(ctx, createChatQuery, chatID, req.ChatName, time.Now().Unix()).Scan(&dbChatID)
+	if err != nil {
+		fmt.Println(err)
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
+	//TODO INSERT ALL PARTICIPANTS INTO CHAT
+	rows := [][]any{}
+	rows = append(rows, []any{reqUUID, chatID, 0})
+	for _, p := range req.ParticipantUUIDs {
+		rows = append(rows, []any{p, chatID, 0})
+	}
+
+	copyCount, err := conn.CopyFrom(
+		ctx,
+		pgx.Identifier{"user_chat"},
+		[]string{"uuid", "chat_id", "unread_messages"},
+		pgx.CopyFromRows(rows),
+	)
+	if err != nil || int(copyCount) != len(req.ParticipantUUIDs)+1 {
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
+	chats, err := getChatsByUUID(reqUUID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
+	return c.JSON(http.StatusOK, chats)
 }
 
 type singleChat struct {
