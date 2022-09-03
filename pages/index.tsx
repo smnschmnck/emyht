@@ -378,6 +378,7 @@ const HomePage: NextPage<IndexPageProps> = ({
               messages={messages}
               setMessages={setMessages}
               closeChat={closeChat}
+              fetchMessages={fetchMessages}
             />
           )}
           {allChats.length <= 0 && !chatOpened && <h1>oop no chat</h1>}

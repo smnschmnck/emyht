@@ -1,5 +1,4 @@
 import { FormEvent, useContext, useState } from 'react';
-import { WIDTH_BREAKPOINT } from '../helpers/globals';
 import { UserCtx } from '../pages';
 import { InputWithButton } from './atomic/InputWithButton';
 import { ISingleMessage } from './MainChat';
@@ -8,6 +7,7 @@ interface SendMessageFormProps {
   chatID: string;
   messages: ISingleMessage[];
   setMessages: (messages: ISingleMessage[]) => void;
+  fetchMessages: (chatID: string) => void;
 }
 
 interface INewMessage {
@@ -22,9 +22,12 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({
   chatID,
   messages,
   setMessages,
+  fetchMessages,
 }) => {
   const [messageInputValue, setMessageInputValue] = useState('');
+  const [error, setError] = useState('');
   const user = useContext(UserCtx);
+  const MAX_MESSAGE_LENGTH = 4096;
 
   const createMessagePreview = (newMessage: INewMessage) => {
     const timeStamp = Math.round(new Date().getTime() / 1000);
@@ -43,6 +46,10 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({
 
   const sendMessage = async (event: FormEvent) => {
     event.preventDefault();
+    if (messageInputValue.length > MAX_MESSAGE_LENGTH) {
+      setError('Your message is too long');
+      return;
+    }
     const body = {
       chatID: chatID,
       textContent: messageInputValue,
@@ -57,11 +64,22 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({
       body: JSON.stringify(body),
     });
     if (!res.ok) {
-      alert(await res.text());
+      setError('FAILED TO SEND MESSAGE');
+      fetchMessages(chatID);
       return;
     }
     const json: ISingleMessage[] = await res.json();
     setMessages(json);
+  };
+
+  const setValueWithLengthCheck = (val: string) => {
+    if (val.length > MAX_MESSAGE_LENGTH + 1) {
+      setError('Your message is too long');
+      return;
+    } else {
+      setError('');
+    }
+    setMessageInputValue(val);
   };
 
   return (
@@ -69,9 +87,10 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({
       buttonText={'Send'}
       inputPlaceHolder={'Type Message'}
       value={messageInputValue}
-      setValue={setMessageInputValue}
+      setValue={setValueWithLengthCheck}
       submitHandler={sendMessage}
       buttonDisabled={messageInputValue.length <= 0}
+      error={error}
     />
   );
 };

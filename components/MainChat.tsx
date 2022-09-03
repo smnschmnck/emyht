@@ -11,6 +11,7 @@ interface MainChatProps {
   messages: ISingleMessage[];
   setMessages: (messages: ISingleMessage[]) => void;
   closeChat: () => void;
+  fetchMessages: (chatID: string) => void;
 }
 
 export interface ISingleMessage {
@@ -31,6 +32,7 @@ const MainChat: React.FC<MainChatProps> = ({
   messages,
   setMessages,
   closeChat,
+  fetchMessages,
 }) => {
   return (
     <div className={styles.mainChat}>
@@ -45,8 +47,9 @@ const MainChat: React.FC<MainChatProps> = ({
           <ChatMessageContainer messages={messages} />
         </div>
         <div className={styles.bottomControls}>
-          <div className={styles.sendFormWrapper}>
+          <div className={styles.wrapper}>
             <SendMessageForm
+              fetchMessages={fetchMessages}
               chatID={chatID}
               messages={messages}
               setMessages={setMessages}
