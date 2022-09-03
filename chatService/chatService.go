@@ -148,6 +148,7 @@ func StartGroupChat(c echo.Context) error {
 
 	type startReq struct {
 		ChatName         string   `json:"chatName" validate:"required"`
+		ChatPicture      string   `json:"chatPicture"`
 		ParticipantUUIDs []string `json:"participantUUIDs" validate:"required"`
 	}
 	req := new(startReq)
@@ -193,9 +194,9 @@ func StartGroupChat(c echo.Context) error {
 	chatID := uuid.New().String()
 	var dbChatID string
 	createChatQuery := "INSERT INTO chats(chat_id, name, picture_url, chat_type, creation_timestamp) " +
-		"VALUES ($1, $2, 'TODO','group', $3) " +
+		"VALUES ($1, $2, $3,'group', $4) " +
 		"RETURNING chat_id"
-	err = conn.QueryRow(ctx, createChatQuery, chatID, req.ChatName, time.Now().Unix()).Scan(&dbChatID)
+	err = conn.QueryRow(ctx, createChatQuery, chatID, req.ChatName, req.ChatPicture, time.Now().Unix()).Scan(&dbChatID)
 	if err != nil {
 		fmt.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -221,6 +222,10 @@ func StartGroupChat(c echo.Context) error {
 	chats, err := getChatsByUUID(reqUUID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
+	for _, p := range req.ParticipantUUIDs {
+		sendUpdatedChats(p)
 	}
 
 	return c.JSON(http.StatusOK, chats)
