@@ -4,6 +4,7 @@ import (
 	"chat/authService"
 	"chat/dbHelpers/postgresHelper"
 	"chat/userService"
+	"chat/wsService"
 	"context"
 	"errors"
 	"fmt"
@@ -84,7 +85,24 @@ func SendContactRequest(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
+	sendNewContactReqNotification(contactReq.ContactEmail)
+
 	return c.String(http.StatusOK, "SUCCESS")
+}
+
+func sendNewContactReqNotification(email string) error {
+	user, err := userService.GetUserByEmail(email)
+	if err != nil {
+		return err
+	}
+	uuid := user.Uuid
+
+	contacts, err := GetUserContactsbyUUID(uuid)
+	if err != nil {
+		return err
+	}
+
+	return wsService.WriteStructToSingleUUID(uuid, "contactRequest", contacts)
 }
 
 type contact struct {
@@ -137,6 +155,36 @@ func GetContacts(c echo.Context) error {
 	return c.JSON(http.StatusOK, contacts)
 }
 
+type singleContactRequest struct {
+	SenderID             string `json:"senderID"`
+	SenderUsername       string `json:"senderUsername"`
+	SenderProfilePicture string `json:"senderProfilePicture"`
+}
+
+func GetPendingContactRequestsByUUID(uuid string) ([]singleContactRequest, error) {
+	ctx := context.Background()
+	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		return make([]singleContactRequest, 0), errors.New("INTERNAL ERROR")
+	}
+	defer conn.Close()
+	pendingRequestQuery := "SELECT sender AS sender_id, u.username AS sender_username, u.picture_url AS sender_profile_picture " +
+		"FROM friends " +
+		"JOIN users u on friends.sender = u.uuid " +
+		"WHERE reciever=$1 AND status='pending' "
+	var contactRequests []singleContactRequest
+	err = pgxscan.Select(ctx, conn, &contactRequests, pendingRequestQuery, uuid)
+	if err != nil {
+		return make([]singleContactRequest, 0), errors.New("INTERNAL ERROR")
+	}
+
+	if contactRequests == nil {
+		return make([]singleContactRequest, 0), nil
+	}
+
+	return contactRequests, nil
+}
+
 func GetPendingContactRequests(c echo.Context) error {
 	sessionID, responseErr := authService.GetBearer(c)
 	if responseErr != nil {
@@ -147,30 +195,9 @@ func GetPendingContactRequests(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	type singleContactRequest struct {
-		SenderID             string `json:"senderID"`
-		SenderUsername       string `json:"senderUsername"`
-		SenderProfilePicture string `json:"senderProfilePicture"`
-	}
-
-	ctx := context.Background()
-	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
+	contactRequests, err := GetPendingContactRequestsByUUID(uuid)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
-	}
-	defer conn.Close()
-	pendingRequestQuery := "SELECT sender AS sender_id, u.username AS sender_username, u.picture_url AS sender_profile_picture " +
-		"FROM friends " +
-		"JOIN users u on friends.sender = u.uuid " +
-		"WHERE reciever=$1 AND status='pending' "
-	var contactRequests []singleContactRequest
-	err = pgxscan.Select(ctx, conn, &contactRequests, pendingRequestQuery, uuid)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
-	}
-
-	if contactRequests == nil {
-		return c.JSON(http.StatusOK, make([]string, 0))
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, contactRequests)
