@@ -76,7 +76,7 @@ func SendContactRequest(c echo.Context) error {
 	var status string
 	err = contactReqRows.Scan(&status)
 	if err != nil {
-		if strings.Contains(err.Error(), `null value in column "reciever" violates not-null constraint`) {
+		if strings.Contains(err.Error(), "violates not-null constraint") {
 			return c.String(http.StatusNotFound, "USER DOES NOT EXIST")
 		}
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
