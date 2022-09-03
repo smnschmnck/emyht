@@ -29,7 +29,7 @@ export const InputWithButton: React.FC<InputWithButtonProps> = ({
           type="text"
           placeholder={inputPlaceHolder}
           className={styles.input}
-          id={buttonDisabled || error ? styles.isError : ''}
+          id={error ? styles.isError : ''}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           autoFocus={autofocus}
