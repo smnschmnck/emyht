@@ -48,9 +48,24 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({
     fetchContacts();
   }, []);
 
-  const createGroupChat = () => {
-    //TODO: send to backend
-    alert('Creating groupchat with: ' + JSON.stringify(selectedContacts));
+  const createGroupChat = async () => {
+    const body = {
+      chatName: 'blaa',
+      chatPicture: '',
+      participantUUIDs: selectedContacts,
+    };
+
+    const res = await fetch('/api/startGroupChat', {
+      method: 'post',
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      alert(await res.text());
+      return;
+    }
+    const json: ISingleChat[] = await res.json();
+    setChats(json);
+    setSuccess(true);
   };
 
   const createChat = async () => {
