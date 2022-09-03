@@ -113,7 +113,9 @@ export const ContactRequestDialog: React.FC<ContactRequestDialogProps> = ({
         {handledSuccessfully && (
           <div className={styles.successContainer}>
             <h2>{successMessage}</h2>
-            <BigButton onClick={closeAndRefresh}>Close</BigButton>
+            <div className={styles.closeButton}>
+              <BigButton onClick={closeAndRefresh}>Close</BigButton>
+            </div>
           </div>
         )}
       </div>
