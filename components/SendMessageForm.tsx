@@ -1,4 +1,5 @@
 import { FormEvent, useContext, useState } from 'react';
+import { WIDTH_BREAKPOINT } from '../helpers/globals';
 import { UserCtx } from '../pages';
 import { InputWithButton } from './atomic/InputWithButton';
 import { ISingleMessage } from './MainChat';
@@ -62,6 +63,7 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({
     const json: ISingleMessage[] = await res.json();
     setMessages(json);
   };
+
   return (
     <InputWithButton
       buttonText={'Send'}
@@ -70,7 +72,6 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({
       setValue={setMessageInputValue}
       submitHandler={sendMessage}
       buttonDisabled={messageInputValue.length <= 0}
-      autofocus
     />
   );
 };
