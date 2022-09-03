@@ -200,6 +200,7 @@ func VerifyEmail(c echo.Context) error {
 
 func Authenticate(c echo.Context) error {
 	credentials := new(Credentials)
+	fmt.Println(c)
 	err := c.Bind(&credentials)
 	if err != nil {
 		fmt.Println(err)
