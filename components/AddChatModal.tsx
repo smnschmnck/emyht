@@ -7,15 +7,16 @@ import { ContactList } from './ContactList';
 import { Tab, Tabs } from './atomic/Tabs';
 import { useEffect, useState } from 'react';
 import { Contact } from './SingleContact';
+import ISingleChat from '../interfaces/ISingleChat';
 
 interface AddChatModalProps {
   closeHandler: () => void;
-  refreshChats: () => void;
+  setChats: (chats: ISingleChat[]) => void;
 }
 
 export const AddChatModal: React.FC<AddChatModalProps> = ({
   closeHandler,
-  refreshChats,
+  setChats,
 }) => {
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -66,7 +67,8 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({
       resetSelectedContacts();
       return;
     }
-    refreshChats();
+    const json: ISingleChat[] = await res.json();
+    setChats(json);
     setSuccess(true);
   };
 

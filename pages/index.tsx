@@ -345,7 +345,7 @@ const HomePage: NextPage<IndexPageProps> = ({
       </Head>
       {showAddChatModal && (
         <AddChatModal
-          refreshChats={refreshChats}
+          setChats={setAllChats}
           closeHandler={() => setShowAddChatModal(false)}
         />
       )}
