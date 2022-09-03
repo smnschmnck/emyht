@@ -252,6 +252,7 @@ const HomePage: NextPage<IndexPageProps> = ({
 
   const fetchMessages = async (chatID: string) => {
     if (!chatID) return;
+    setMessages([]);
     const res = await fetch(`/api/getChatMessages/${chatID}`);
     if (!res.ok) {
       alert(await res.text());
@@ -280,10 +281,10 @@ const HomePage: NextPage<IndexPageProps> = ({
   };
 
   const openChat = (chatID: string) => {
-    setCurChatID(chatID);
-    setChatAsRead(chatID);
     setChatOpened(true);
     setOpenedContactRequest(false);
+    setCurChatID(chatID);
+    setChatAsRead(chatID);
   };
 
   const openContactRequest = (contactRequestID: string) => {
