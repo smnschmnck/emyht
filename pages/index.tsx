@@ -282,7 +282,10 @@ const HomePage: NextPage<IndexPageProps> = ({
 
   const openChat = (chatID: string) => {
     setChatOpened(true);
-    setOpenedContactRequest(false);
+    if (openedContactRequest) {
+      refreshContactRequests();
+      setOpenedContactRequest(false);
+    }
     setCurChatID(chatID);
     setChatAsRead(chatID);
   };
@@ -318,6 +321,14 @@ const HomePage: NextPage<IndexPageProps> = ({
     setAllChats(json);
   };
 
+  const getCurChat = () => {
+    return allChats.find((c) => c.chatID === curChatID);
+  };
+
+  const getCurContactRequest = () => {
+    return allContactRequests.find((r) => r.senderID === curContactRequestID);
+  };
+
   return (
     <UserCtx.Provider value={user}>
       <Head>
@@ -348,36 +359,30 @@ const HomePage: NextPage<IndexPageProps> = ({
           className={styles.chatContainer}
           id={chatOpened ? undefined : styles.closed}
         >
-          {!openedContactRequest &&
-            allChats.length > 0 &&
-            allChats
-              .filter((c) => c.chatID === curChatID)
-              .slice(0, 1)
-              .map((c) => (
-                <MainChat
-                  key={c.chatID}
-                  chatID={curChatID}
-                  profilePictureUrl={c.pictureUrl}
-                  chatName={c.chatName}
-                  messages={messages}
-                  setMessages={setMessages}
-                  closeChat={closeChat}
-                />
-              ))}
+          {!openedContactRequest && getCurChat() && (
+            <MainChat
+              key={getCurChat()?.chatID}
+              chatID={curChatID}
+              profilePictureUrl={getCurChat()?.pictureUrl}
+              chatName={getCurChat()?.chatName ?? ''}
+              messages={messages}
+              setMessages={setMessages}
+              closeChat={closeChat}
+            />
+          )}
           {allChats.length <= 0 && !chatOpened && <h1>oop no chat</h1>}
-          {openedContactRequest &&
-            allContactRequests
-              .filter((r) => r.senderID === curContactRequestID)
-              .map((r) => (
-                <ContactRequestDialog
-                  refreshContactRequests={refreshContactRequests}
-                  key={r.senderID}
-                  closeChat={closeChat}
-                  senderID={r.senderID}
-                  senderUsername={r.senderUsername}
-                  senderProfilePicture={r.senderProfilePicture}
-                />
-              ))}
+          {openedContactRequest && getCurContactRequest() && (
+            <ContactRequestDialog
+              refreshContactRequests={refreshContactRequests}
+              key={getCurContactRequest()?.senderID}
+              closeChat={closeChat}
+              senderID={getCurContactRequest()?.senderID ?? ''}
+              senderUsername={getCurContactRequest()?.senderUsername ?? ''}
+              senderProfilePicture={
+                getCurContactRequest()?.senderProfilePicture
+              }
+            />
+          )}
         </div>
       </div>
     </UserCtx.Provider>

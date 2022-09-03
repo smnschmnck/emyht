@@ -57,6 +57,10 @@ export const ContactRequestDialog: React.FC<ContactRequestDialogProps> = ({
       default:
         break;
     }
+  };
+
+  const closeAndRefresh = () => {
+    closeChat();
     refreshContactRequests();
   };
 
@@ -66,7 +70,7 @@ export const ContactRequestDialog: React.FC<ContactRequestDialogProps> = ({
         profilePictureUrl={formatPicURL(senderProfilePicture)}
         chatID={senderID}
         chatName={senderUsername}
-        closeChat={closeChat}
+        closeChat={closeAndRefresh}
       />
       <div className={styles.main}>
         {!handledSuccessfully && (
@@ -101,7 +105,12 @@ export const ContactRequestDialog: React.FC<ContactRequestDialogProps> = ({
             </div>
           </div>
         )}
-        {handledSuccessfully && <h2>{successMessage}</h2>}
+        {handledSuccessfully && (
+          <div className={styles.successContainer}>
+            <h2>{successMessage}</h2>
+            <BigButton onClick={closeAndRefresh}>Close</BigButton>
+          </div>
+        )}
       </div>
     </div>
   );
