@@ -63,4 +63,5 @@
   background-color: var(--lightGrey);
   border-color: var(--lightGrey);
   color: var(--lightestGrey);
+  cursor: unset;
 }
