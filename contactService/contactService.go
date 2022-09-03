@@ -97,12 +97,12 @@ func sendNewContactReqNotification(email string) error {
 	}
 	uuid := user.Uuid
 
-	contacts, err := GetUserContactsbyUUID(uuid)
+	contactRequests, err := GetPendingContactRequestsByUUID(uuid)
 	if err != nil {
 		return err
 	}
 
-	return wsService.WriteStructToSingleUUID(uuid, "contactRequest", contacts)
+	return wsService.WriteStructToSingleUUID(uuid, "contactRequest", contactRequests)
 }
 
 type contact struct {
