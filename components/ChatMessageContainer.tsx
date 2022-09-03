@@ -13,7 +13,7 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
 }) => {
   const user = useContext(UserCtx);
 
-  const messageBottom = useRef<HTMLSpanElement>(null);
+  const messageBottom = useRef<HTMLDivElement>(null);
   const scrollMessagesToBottom = () => {
     messageBottom.current?.scrollIntoView({ behavior: 'auto' });
   };
@@ -42,7 +42,7 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
           )}
         </span>
       ))}
-      <span ref={messageBottom} />
+      <div ref={messageBottom} />
     </div>
   );
 };
