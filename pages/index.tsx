@@ -239,6 +239,10 @@ const HomePage: NextPage<IndexPageProps> = ({
           const chatPayload: ISingleChat[] = payload;
           confirmCurChatAsRead(chatPayload);
           break;
+        case 'contactRequest':
+          const contactRequestPayload: ContactRequest[] = payload;
+          setAllContactRequests(contactRequestPayload);
+          break;
         default:
           break;
       }
