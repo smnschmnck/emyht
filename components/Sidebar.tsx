@@ -12,6 +12,7 @@ interface SidebarProps {
   chatOpened: boolean;
   allChats: ISingleChat[];
   contactRequests: ContactRequest[];
+  handledContactReqs: string[];
   openChat: (chatID: string) => void;
   openContactRequest: (contactRequestID: string) => void;
   setShowAddChatModal: (show: boolean) => void;
@@ -22,6 +23,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   chatOpened,
   allChats,
   contactRequests,
+  handledContactReqs,
   openChat,
   setShowAddChatModal,
   setShowContactRequestModal,
@@ -34,17 +36,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className={styles.logoContainer}>
           <Image src={logo} alt="emyht-logo" />
         </div>
-        {contactRequests.length > 0 && (
-          <>
-            <div className={styles.contactRequestsWrapper}>
-              <ContactRequests
-                openContactRequest={openContactRequest}
-                contactRequests={contactRequests}
-              />
-            </div>
-            <hr />
-          </>
-        )}
+        {contactRequests.length > 0 &&
+          !(contactRequests.length === handledContactReqs.length) && (
+            <>
+              <div className={styles.contactRequestsWrapper}>
+                <ContactRequests
+                  openContactRequest={openContactRequest}
+                  contactRequests={contactRequests}
+                  handledContactReqs={handledContactReqs}
+                />
+              </div>
+              <hr />
+            </>
+          )}
         <Chats
           chats={allChats}
           openChat={openChat}

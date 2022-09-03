@@ -8,6 +8,8 @@ interface ContactRequestDialogProps {
   senderID: string;
   senderProfilePicture?: string;
   senderUsername: string;
+  handledContactReqs: string[];
+  setHandledContactReqs: (handledContactReqs: string[]) => void;
   closeChat: () => void;
   refreshContactRequests: () => void;
 }
@@ -17,6 +19,8 @@ export const ContactRequestDialog: React.FC<ContactRequestDialogProps> = ({
   senderProfilePicture,
   senderUsername,
   closeChat,
+  handledContactReqs,
+  setHandledContactReqs,
   refreshContactRequests,
 }) => {
   const [successMessage, setSuccessMessage] = useState('');
@@ -38,6 +42,7 @@ export const ContactRequestDialog: React.FC<ContactRequestDialogProps> = ({
     }
 
     sethandledSuccessfully(true);
+    setHandledContactReqs([...handledContactReqs, senderID]);
     switch (action) {
       case 'accept':
         setSuccessMessage(

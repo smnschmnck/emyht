@@ -152,6 +152,7 @@ const HomePage: NextPage<IndexPageProps> = ({
   const [curContactRequestID, setCurContactRequestID] = useState(
     allContactRequests[0]?.senderID ?? ''
   );
+  const [handledContactReqs, setHandledContactReqs] = useState<string[]>([]);
   const [chatOpened, setChatOpened] = useState(false);
   const [showAddChatModal, setShowAddChatModal] = useState(false);
   const [showContactRequestModal, setShowContactRequestModal] = useState(false);
@@ -282,10 +283,7 @@ const HomePage: NextPage<IndexPageProps> = ({
 
   const openChat = (chatID: string) => {
     setChatOpened(true);
-    if (openedContactRequest) {
-      refreshContactRequests();
-      setOpenedContactRequest(false);
-    }
+    setOpenedContactRequest(false);
     setCurChatID(chatID);
     setChatAsRead(chatID);
   };
@@ -309,6 +307,7 @@ const HomePage: NextPage<IndexPageProps> = ({
     }
     const json = await res.json();
     setAllContactRequests(json);
+    setHandledContactReqs([]);
   };
 
   const refreshChats = async () => {
@@ -354,6 +353,7 @@ const HomePage: NextPage<IndexPageProps> = ({
           openContactRequest={openContactRequest}
           setShowAddChatModal={setShowAddChatModal}
           setShowContactRequestModal={setShowContactRequestModal}
+          handledContactReqs={handledContactReqs}
         />
         <div
           className={styles.chatContainer}
@@ -381,6 +381,8 @@ const HomePage: NextPage<IndexPageProps> = ({
               senderProfilePicture={
                 getCurContactRequest()?.senderProfilePicture
               }
+              handledContactReqs={handledContactReqs}
+              setHandledContactReqs={setHandledContactReqs}
             />
           )}
         </div>
