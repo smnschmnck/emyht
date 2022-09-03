@@ -275,6 +275,10 @@ func SendMessage(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
+	if len(req.TextContent) > 4096 {
+		return c.String(http.StatusBadRequest, "MESSAGE TOO LONG")
+	}
+
 	//make sure platform only media URLs are being sent. TLDR: More comprehensive validation
 	mediaUrlExists := len(req.MediaUrl) > 0
 	if mediaUrlExists {
