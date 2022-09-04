@@ -10,10 +10,17 @@ export const formatPicURL = (profilePictureUrl?: string) => {
   if (!profilePictureUrl) {
     return fallBackProfilePictureURL.src;
   }
+
   const defaultPpRegEx = /^default_[0-9]$/i;
   if (profilePictureUrl.match(defaultPpRegEx)) {
     const num = profilePictureUrl.replace('default_', '');
     return '/default_profile_pictures/' + num + '.svg';
+  }
+
+  const defaultGroupPicRegEx = /^default_group_[0-9]$/i;
+  if (profilePictureUrl.match(defaultGroupPicRegEx)) {
+    const num = profilePictureUrl.replace('default_group_', '');
+    return '/default_group_pictures/' + num + '.svg';
   }
   return profilePictureUrl;
 };
