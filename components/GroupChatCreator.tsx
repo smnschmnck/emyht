@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BigButton, BigButtonGreyHover, SmallButton } from './atomic/Button';
+import { BigButton, SmallButton } from './atomic/Button';
 import { ContactList } from './ContactList';
 import styles from '../styles/GroupchatCreator.module.css';
 import ISingleChat from '../interfaces/ISingleChat';
