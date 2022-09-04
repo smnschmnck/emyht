@@ -9,8 +9,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -190,13 +192,22 @@ func StartGroupChat(c echo.Context) error {
 	}
 	defer conn.Close()
 
+	var chatPicture string
+	if req.ChatPicture != "" {
+		chatPicture = req.ChatPicture
+	} else {
+		randPictureInt := rand.Intn(10)
+		defaultPicture := "default_group_" + strconv.Itoa(randPictureInt)
+		chatPicture = defaultPicture
+	}
+
 	//CREATE CHAT
 	chatID := uuid.New().String()
 	var dbChatID string
 	createChatQuery := "INSERT INTO chats(chat_id, name, picture_url, chat_type, creation_timestamp) " +
 		"VALUES ($1, $2, $3,'group', $4) " +
 		"RETURNING chat_id"
-	err = conn.QueryRow(ctx, createChatQuery, chatID, req.ChatName, req.ChatPicture, time.Now().Unix()).Scan(&dbChatID)
+	err = conn.QueryRow(ctx, createChatQuery, chatID, req.ChatName, chatPicture, time.Now().Unix()).Scan(&dbChatID)
 	if err != nil {
 		fmt.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
