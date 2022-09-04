@@ -13,7 +13,7 @@ export const formatPicURL = (profilePictureUrl?: string) => {
   const defaultPpRegEx = /^default_[0-9]$/i;
   if (profilePictureUrl.match(defaultPpRegEx)) {
     const num = profilePictureUrl.replace('default_', '');
-    return '/default_profile_pictures/default_' + num + '.png';
+    return '/default_profile_pictures/' + num + '.svg';
   }
   return profilePictureUrl;
 };
