@@ -1,11 +1,10 @@
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
 import { BigButton, BigButtonGreyHover, SmallButton } from './atomic/Button';
 import { ContactList } from './ContactList';
-//TODO use seperate css file
-import styles from '../styles/AddChatModal.module.css';
+import styles from '../styles/GroupchatCreator.module.css';
 import ISingleChat from '../interfaces/ISingleChat';
 import { Contact } from './SingleContact';
-import { Input } from './atomic/Input';
+import { GroupChatCreationSettings } from './GroupchatCreationSettings';
 
 interface GroupChatCreaterProps {
   contacts: Contact[];
@@ -25,31 +24,6 @@ export const GroupChatCreator: React.FC<GroupChatCreaterProps> = ({
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [showChatSettings, setShowChatSettings] = useState(false);
-  const [chatName, setChatName] = useState('');
-
-  const createGroupChat = async (e: FormEvent) => {
-    e.preventDefault();
-    const body = {
-      chatName: chatName,
-      //TODO add functionality to add picture
-      chatPicture: '',
-      participantUUIDs: selectedContacts,
-    };
-
-    const res = await fetch('/api/startGroupChat', {
-      method: 'post',
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      setErrorMessage(await res.text());
-      resetSelectedContacts();
-      return;
-    }
-
-    const json: ISingleChat[] = await res.json();
-    setChats(json);
-    setSuccess(true);
-  };
 
   const resetSelectedContacts = () => {
     setSelectedContacts([]);
@@ -59,6 +33,7 @@ export const GroupChatCreator: React.FC<GroupChatCreaterProps> = ({
     setSelectedContacts(selectedContactsList);
     setErrorMessage('');
   };
+
   return (
     <>
       {!showChatSettings && (
@@ -77,29 +52,19 @@ export const GroupChatCreator: React.FC<GroupChatCreaterProps> = ({
             >
               Next Step
             </BigButton>
-            {errorMessage && (
-              <p className={styles.errorMessage}>{errorMessage}</p>
-            )}
             <SmallButton onClick={closeHandler}>Cancel</SmallButton>
           </div>
         </>
       )}
       {showChatSettings && (
-        <>
-          <form className={styles.groupchatSettings} onSubmit={createGroupChat}>
-            <h2 className={styles.groupchatSettingsHeading}>Chat settings</h2>
-            <Input
-              placeholder="Chat name"
-              value={chatName}
-              onChange={(e) => setChatName(e.target.value)}
-              autoFocus
-            />
-            <BigButtonGreyHover>Select a picture</BigButtonGreyHover>
-            <BigButton type="submit" disabled={chatName.length <= 0}>
-              Create Groupchat
-            </BigButton>
-          </form>
-        </>
+        <GroupChatCreationSettings
+          errorMessage={errorMessage}
+          setSuccess={setSuccess}
+          selectedContacts={selectedContacts}
+          setErrorMessage={setErrorMessage}
+          setChats={setChats}
+          resetSelectedContacts={resetSelectedContacts}
+        />
       )}
     </>
   );

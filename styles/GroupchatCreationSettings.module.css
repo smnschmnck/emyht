@@ -1,0 +1,18 @@
+.groupchatSettings {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  gap: 1rem;
+  text-align: left;
+}
+
+.groupchatSettingsHeading {
+  width: 100%;
+  text-align: left;
+}
+
+.errorMessage {
+  color: rgb(255, 0, 0);
+  font-weight: bold;
+}

@@ -1,0 +1,11 @@
+.buttons {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+}
+
+.errorMessage {
+  color: rgb(255, 0, 0);
+  font-weight: bold;
+}
