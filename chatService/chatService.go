@@ -213,7 +213,7 @@ func StartGroupChat(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	//TODO INSERT ALL PARTICIPANTS INTO CHAT
+	//INSERT ALL PARTICIPANTS INTO CHAT
 	rows := [][]any{}
 	rows = append(rows, []any{reqUUID, chatID, 0})
 	for _, p := range req.ParticipantUUIDs {
@@ -255,6 +255,7 @@ type singleChat struct {
 	SenderID          *string `json:"senderID"`
 }
 
+//TODO send chat type and sender username for last message
 func getChatsByUUID(uuid string) ([]singleChat, error) {
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
@@ -620,12 +621,11 @@ func getChatMembers(chatId string) ([]string, error) {
 }
 
 func sendNewMessageNotification(chatId string, messages []singleMessage) error {
-	uuids, err := getChatMembers(chatId)
+	chatmembers, err := getChatMembers(chatId)
 	if err != nil {
 		return err
 	}
 
-	//TODO also send chats
 	type newMessageNotification struct {
 		ChatID   string          `json:"chatID"`
 		Messages []singleMessage `json:"messages"`
@@ -636,9 +636,9 @@ func sendNewMessageNotification(chatId string, messages []singleMessage) error {
 		Messages: messages,
 	}
 
-	err = wsService.WriteStructToMultipleUUIDs(uuids, "message", body)
+	err = wsService.WriteStructToMultipleUUIDs(chatmembers, "message", body)
 
-	for _, uuid := range uuids {
+	for _, uuid := range chatmembers {
 		err = sendUpdatedChats(uuid)
 	}
 	return err
