@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BigButton, SmallButton } from './atomic/Button';
 import { ContactList } from './ContactList';
+//TODO use seperate css file
 import styles from '../styles/AddChatModal.module.css';
 import ISingleChat from '../interfaces/ISingleChat';
 import { Contact } from './SingleContact';

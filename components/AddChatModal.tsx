@@ -1,9 +1,8 @@
 import styles from '../styles/AddChatModal.module.css';
 import group from '../assets/images/group.svg';
 import chat from '../assets/images/chat.svg';
-import { BigButton, SmallButton } from './atomic/Button';
+import { SmallButton } from './atomic/Button';
 import { Modal } from './atomic/Modal';
-import { ContactList } from './ContactList';
 import { Tab, Tabs } from './atomic/Tabs';
 import { useEffect, useState } from 'react';
 import { Contact } from './SingleContact';

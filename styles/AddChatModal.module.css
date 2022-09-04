@@ -72,6 +72,20 @@
   font-weight: bold;
 }
 
+.groupchatSettings{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  gap: 1rem;
+  text-align: left;
+}
+
+.groupchatSettingsHeading{
+  width: 100%;
+  text-align: left;
+}
+
 @media only screen and (max-width: 600px) {
   .main {
     width: 100%;
