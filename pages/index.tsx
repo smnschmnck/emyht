@@ -74,26 +74,6 @@ const getChats = async (cookies: NextApiRequestCookies) => {
   }
 };
 
-const getChatMessages = async (
-  chatID: string,
-  cookies: NextApiRequestCookies
-) => {
-  try {
-    const res = await fetch(`${BACKEND_HOST}/chatMessages/${chatID}`, {
-      headers: {
-        authorization: `Bearer ${cookies.SESSIONID}`,
-      },
-    });
-    if (!res.ok) {
-      return [];
-    }
-    const json = (await res.json()) as ISingleMessage[];
-    return json;
-  } catch (err) {
-    return [];
-  }
-};
-
 const emptyProps = {
   props: {},
 };
