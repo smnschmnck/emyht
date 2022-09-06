@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { BACKEND_HOST } from '../../helpers/globals';
+import { BACKEND_HOST } from '../../helpers/serverGlobals';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const sessionID = req.cookies.SESSIONID;

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { BACKEND_HOST } from '../../helpers/globals';
+import { BACKEND_HOST } from '../../helpers/serverGlobals';
 
 /** Not for reuse! Reuse only when you know what you are doing! */
 const authProxy = async (

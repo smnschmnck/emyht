@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { BACKEND_HOST } from './globals';
+import { BACKEND_HOST } from './serverGlobals';
 
 export const postProxy = async (
   req: NextApiRequest,
