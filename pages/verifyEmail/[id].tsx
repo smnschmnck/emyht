@@ -2,7 +2,7 @@ import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import Head from 'next/head';
 import { BigLink } from '../../components/atomic/Link';
 import DefaultLayout from '../../components/DefaultLayout';
-import { BACKEND_HOST } from '../../helpers/globals';
+import { BACKEND_HOST } from '../../helpers/serverGlobals';
 import styles from '../../styles/VerifiyEmailPage.module.css';
 
 interface EmailVerificationPageProps {
