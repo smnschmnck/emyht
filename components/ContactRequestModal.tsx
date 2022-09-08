@@ -3,6 +3,7 @@ import styles from '../styles/ContactRequestModal.module.css';
 import { Input } from './atomic/Input';
 import { BigButton, SmallButton } from './atomic/Button';
 import { FormEvent, useState } from 'react';
+import { Error } from './atomic/Error';
 
 interface ContactRequestModalProps {
   closeHandler: () => void;
@@ -53,9 +54,7 @@ export const ContactRequestModal: React.FC<ContactRequestModalProps> = ({
                 />
                 <BigButton type="submit">Send</BigButton>
               </form>
-              {requestError && (
-                <p className={styles.requestError}>{requestError}</p>
-              )}
+              {requestError && <Error errorMessage={requestError} />}
               <SmallButton onClick={() => closeHandler()} type="button">
                 Cancel
               </SmallButton>

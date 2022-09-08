@@ -4,6 +4,7 @@ import { ContactList } from './ContactList';
 import styles from '../styles/ChatCreator.module.css';
 import ISingleChat from '../interfaces/ISingleChat';
 import { Contact } from './SingleContact';
+import { Error } from './atomic/Error';
 
 interface ChatCreaterProps {
   contacts: Contact[];
@@ -61,7 +62,7 @@ export const ChatCreator: React.FC<ChatCreaterProps> = ({
         <BigButton onClick={() => createChat()} disabled={!selectedContact}>
           Start chat
         </BigButton>
-        {errorMessage && <p className={styles.errorMessage}>{errorMessage}</p>}
+        {errorMessage && <Error errorMessage={errorMessage} />}
         <SmallButton onClick={closeHandler}>Cancel</SmallButton>
       </div>
     </>

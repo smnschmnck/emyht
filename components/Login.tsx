@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Input, PasswordInput } from './atomic/Input';
 import styles from '../styles/LoginRegisterComponent.module.css';
 import { BigButton, SmallButton } from './atomic/Button';
+import { Error } from './atomic/Error';
 
 interface LoginProps {
   showLogin: boolean;
@@ -61,7 +62,7 @@ const Login: React.FC<LoginProps> = (props) => {
         />
         <BigButton type="submit">Log In</BigButton>
       </form>
-      {loginError && <p className={styles.errorP}>{loginError}</p>}
+      {loginError && <Error errorMessage={loginError} />}
       <SmallButton onClick={props.toggleLoginRegister}>Sign Up</SmallButton>
     </div>
   );

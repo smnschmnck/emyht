@@ -2,6 +2,7 @@ import { useFormik } from 'formik';
 import { useState } from 'react';
 import styles from '../styles/LoginRegisterComponent.module.css';
 import { BigButton, SmallButton } from './atomic/Button';
+import { Error } from './atomic/Error';
 import { Input, PasswordInput } from './atomic/Input';
 
 interface RegisterProps {
@@ -84,7 +85,7 @@ const Register: React.FC<RegisterProps> = (props) => {
         />
         <BigButton type="submit">Register</BigButton>
       </form>
-      {loginError && <p className={styles.errorP}>{loginError}</p>}
+      {loginError && <Error errorMessage={loginError} />}
       <SmallButton onClick={props.toggleLoginRegister}>Log In</SmallButton>
     </div>
   );

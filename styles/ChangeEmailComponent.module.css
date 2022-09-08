@@ -19,12 +19,6 @@
   gap: 20px;
 }
 
-.errorP {
-  font-weight: bold;
-  text-align: center;
-  color: red;
-}
-
 .cancelButton {
   background-color: transparent;
   border: none;
