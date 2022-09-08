@@ -9,6 +9,7 @@ interface SingleChatProps extends ISingleChat {
   openChat: (chatID: string) => void;
 }
 
+//TODO For groupchat show sender username of last message
 const SingleChat: React.FC<SingleChatProps> = ({
   chatID,
   chatName,
