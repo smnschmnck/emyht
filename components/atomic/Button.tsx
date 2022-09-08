@@ -6,6 +6,7 @@ interface ButtonProps {
   onClick?: (...args: any) => any;
   color?: string;
   children?: React.ReactNode;
+  loading?: boolean;
 }
 
 export const BigButton: React.FC<ButtonProps> = ({
@@ -14,16 +15,22 @@ export const BigButton: React.FC<ButtonProps> = ({
   children,
   disabled,
   color,
+  loading,
 }) => {
   return (
     <button
       style={{ color: color }}
       type={type}
-      className={disabled ? styles.submitButtonDisabled : styles.submitButton}
-      disabled={disabled}
+      className={styles.submitButton}
+      id={disabled || loading ? styles.disabled : styles.enabled}
+      disabled={disabled || loading}
       onClick={onClick}
     >
-      {children}
+      <span className={styles.submitButtonContent}>
+        {loading && <div className={styles.circle} />}
+        <span className={styles.submitButtonText}>{children}</span>
+        {loading && <div className={styles.spacer} />}
+      </span>
     </button>
   );
 };
