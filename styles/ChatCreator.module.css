@@ -4,8 +4,3 @@
   flex-direction: column;
   width: 100%;
 }
-
-.errorMessage {
-  color: rgb(255, 0, 0);
-  font-weight: bold;
-}

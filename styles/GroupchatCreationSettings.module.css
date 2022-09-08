@@ -11,8 +11,3 @@
   width: 100%;
   text-align: left;
 }
-
-.errorMessage {
-  color: rgb(255, 0, 0);
-  font-weight: bold;
-}

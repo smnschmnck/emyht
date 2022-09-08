@@ -37,11 +37,6 @@
   gap: 1rem;
 }
 
-.requestError {
-  color: red;
-  font-weight: bold;
-}
-
 .success {
   display: flex;
   flex-direction: column;
