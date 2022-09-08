@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react';
 import ISingleChat from '../interfaces/ISingleChat';
 import styles from '../styles/GroupchatCreationSettings.module.css';
 import { BigButton, BigButtonGreyHover } from './atomic/Button';
+import { Error } from './atomic/Error';
 import { Input } from './atomic/Input';
 
 interface GroupChatCreationSettingsProps {
@@ -62,7 +63,7 @@ export const GroupChatCreationSettings: React.FC<
         <BigButton type="submit" disabled={chatName.length <= 0}>
           Create Groupchat
         </BigButton>
-        {errorMessage && <p className={styles.errorMessage}>{errorMessage}</p>}
+        {errorMessage && <Error errorMessage={errorMessage} />}
       </form>
     </>
   );
