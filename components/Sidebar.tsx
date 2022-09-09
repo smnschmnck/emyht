@@ -56,6 +56,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           sendFriendRequestButtonClickHandler={() =>
             setShowContactRequestModal(true)
           }
+          setShowAddChatModal={setShowAddChatModal}
         />
       </div>
       <UserInfoAndSettings

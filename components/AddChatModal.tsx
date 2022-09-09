@@ -1,7 +1,7 @@
 import styles from '../styles/AddChatModal.module.css';
 import group from '../assets/images/group.svg';
 import chat from '../assets/images/chat.svg';
-import { SmallButton } from './atomic/Button';
+import { BigButton, SmallButton } from './atomic/Button';
 import { Modal } from './atomic/Modal';
 import { Tab, Tabs } from './atomic/Tabs';
 import { useEffect, useState } from 'react';
@@ -13,11 +13,13 @@ import { GroupChatCreator } from './GroupChatCreator';
 interface AddChatModalProps {
   closeHandler: () => void;
   setChats: (chats: ISingleChat[]) => void;
+  showContactReqModal: () => void;
 }
 
 export const AddChatModal: React.FC<AddChatModalProps> = ({
   closeHandler,
   setChats,
+  showContactReqModal,
 }) => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,28 +47,38 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({
           <div className={styles.header}>
             <h2 className={styles.heading}>New chat</h2>
           </div>
-          <div className={styles.interface}>
-            <Tabs>
-              <Tab label="Chat" picture={chat}>
-                <ChatCreator
-                  contacts={contacts}
-                  closeHandler={closeHandler}
-                  setChats={setChats}
-                  setSuccess={setSuccess}
-                  isLoading={isLoading}
-                />
-              </Tab>
-              <Tab label="Group" picture={group}>
-                <GroupChatCreator
-                  contacts={contacts}
-                  closeHandler={closeHandler}
-                  setChats={setChats}
-                  setSuccess={setSuccess}
-                  isLoading={isLoading}
-                />
-              </Tab>
-            </Tabs>
-          </div>
+          {contacts.length > 0 && (
+            <div className={styles.interface}>
+              <Tabs>
+                <Tab label="Chat" picture={chat}>
+                  <ChatCreator
+                    contacts={contacts}
+                    closeHandler={closeHandler}
+                    setChats={setChats}
+                    setSuccess={setSuccess}
+                    isLoading={isLoading}
+                  />
+                </Tab>
+                <Tab label="Group" picture={group}>
+                  <GroupChatCreator
+                    contacts={contacts}
+                    closeHandler={closeHandler}
+                    setChats={setChats}
+                    setSuccess={setSuccess}
+                    isLoading={isLoading}
+                  />
+                </Tab>
+              </Tabs>
+            </div>
+          )}
+          {contacts.length <= 0 && (
+            <div className={styles.noContacts}>
+              <h2>No contacts</h2>
+              <BigButton onClick={showContactReqModal}>
+                Send a contact request
+              </BigButton>
+            </div>
+          )}
         </div>
       )}
       {success && (

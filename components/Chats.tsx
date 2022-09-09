@@ -8,6 +8,7 @@ import SingleChat from './SingleChat';
 import ISingleChat from '../interfaces/ISingleChat';
 import { useState } from 'react';
 import { PopupButton } from './atomic/PopupButton';
+import { BigButton } from './atomic/Button';
 
 export interface ContactRequest {
   senderID: string;
@@ -20,6 +21,7 @@ interface ChatsProps {
   openChat: (chatID: string) => void;
   addChatButtonClickHandler: () => void;
   sendFriendRequestButtonClickHandler: () => void;
+  setShowAddChatModal: (show: boolean) => void;
 }
 
 const Chats: React.FC<ChatsProps> = ({
@@ -27,6 +29,7 @@ const Chats: React.FC<ChatsProps> = ({
   openChat,
   addChatButtonClickHandler,
   sendFriendRequestButtonClickHandler,
+  setShowAddChatModal,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -80,7 +83,9 @@ const Chats: React.FC<ChatsProps> = ({
           //TODO make message more beautiful
           <div>
             <h2>Looks empty in here</h2>
-            <p>Start a new chat</p>
+            <BigButton onClick={() => setShowAddChatModal(true)}>
+              Start a new chat
+            </BigButton>
           </div>
         )}
         {getFilteredChats().map((chat) => (

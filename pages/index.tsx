@@ -19,6 +19,7 @@ import { NextApiRequestCookies } from 'next/dist/server/api-utils';
 import { Sidebar } from '../components/Sidebar';
 import { ContactRequestDialog } from '../components/ContactRequestDialog';
 import IUser from '../interfaces/IUser';
+import { BigButton } from '../components/atomic/Button';
 
 export const UserCtx = createContext<IUser | null>(null);
 
@@ -303,6 +304,11 @@ const HomePage: NextPage<IndexPageProps> = ({
     setHandledContactReqs([]);
   };
 
+  const switchToContactReqModal = () => {
+    setShowAddChatModal(false);
+    setShowContactRequestModal(true);
+  };
+
   const refreshChats = async () => {
     const res = await fetch('/api/getChats');
     if (!res.ok) {
@@ -328,6 +334,7 @@ const HomePage: NextPage<IndexPageProps> = ({
       </Head>
       {showAddChatModal && (
         <AddChatModal
+          showContactReqModal={switchToContactReqModal}
           setChats={setAllChats}
           closeHandler={() => setShowAddChatModal(false)}
         />
@@ -365,7 +372,12 @@ const HomePage: NextPage<IndexPageProps> = ({
             />
           )}
           {allChats.length <= 0 && !(chatOpened || openedContactRequest) && (
-            <h1>oop no chat</h1>
+            <>
+              <h1>oop no chat</h1>
+              <BigButton onClick={() => setShowAddChatModal(true)}>
+                Start a new Chat
+              </BigButton>
+            </>
           )}
           {openedContactRequest && getCurContactRequest() && (
             <ContactRequestDialog
