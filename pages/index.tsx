@@ -372,7 +372,7 @@ const HomePage: NextPage<IndexPageProps> = ({
               fetchMessages={fetchMessages}
             />
           )}
-          {allChats.length <= 0 && (
+          {allChats.length <= 0 && allContactRequests.length <= 0 && (
             <NoChatsInfo setShowAddChatModal={setShowAddChatModal} />
           )}
           {openedContactRequest && getCurContactRequest() && (
