@@ -19,7 +19,6 @@ import { NextApiRequestCookies } from 'next/dist/server/api-utils';
 import { Sidebar } from '../components/Sidebar';
 import { ContactRequestDialog } from '../components/ContactRequestDialog';
 import IUser from '../interfaces/IUser';
-import { BigButton } from '../components/atomic/Button';
 import { NoChatsInfo } from '../components/NoChatsInfo';
 
 export const UserCtx = createContext<IUser | null>(null);

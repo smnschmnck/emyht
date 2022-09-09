@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import styles from '../styles/MainChatComponent.module.css';
 import { ChatInfoHeader } from './ChatInfoHeader';
 import { ChatMessageContainer } from './ChatMessageContainer';
