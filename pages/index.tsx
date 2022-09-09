@@ -138,7 +138,7 @@ const HomePage: NextPage<IndexPageProps> = ({
   const [showAddChatModal, setShowAddChatModal] = useState(false);
   const [showContactRequestModal, setShowContactRequestModal] = useState(false);
   const [openedContactRequest, setOpenedContactRequest] = useState(
-    !firstChatID
+    Boolean(!firstChatID && curContactRequestID)
   );
   const [webSocket, setWs] = useState<WebSocket | null>(null);
 
