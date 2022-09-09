@@ -26,7 +26,7 @@ interface IndexPageProps {
   user: IUser;
   isAdmin: boolean;
   chats: ISingleChat[];
-  firstChatID: string;
+  firstChatID?: string;
   contactRequests: ContactRequest[];
 }
 
@@ -95,7 +95,7 @@ export const getServerSideProps: GetServerSideProps<
       return emptyProps;
     }
     const chats = await getChats(cookies);
-    const firstChatID = chats[0]?.chatID ?? '';
+    const firstChatID = chats[0]?.chatID ?? null;
     return {
       props: {
         user: user,
@@ -129,7 +129,7 @@ const HomePage: NextPage<IndexPageProps> = ({
   const [allChats, setAllChats] = useState(chats);
   const [messages, setMessages] = useState<ISingleMessage[]>([]);
   const [allContactRequests, setAllContactRequests] = useState(contactRequests);
-  const [curChatID, setCurChatID] = useState(firstChatID);
+  const [curChatID, setCurChatID] = useState(firstChatID ?? '');
   const [curContactRequestID, setCurContactRequestID] = useState(
     allContactRequests[0]?.senderID ?? ''
   );
@@ -137,7 +137,9 @@ const HomePage: NextPage<IndexPageProps> = ({
   const [chatOpened, setChatOpened] = useState(false);
   const [showAddChatModal, setShowAddChatModal] = useState(false);
   const [showContactRequestModal, setShowContactRequestModal] = useState(false);
-  const [openedContactRequest, setOpenedContactRequest] = useState(false);
+  const [openedContactRequest, setOpenedContactRequest] = useState(
+    !firstChatID
+  );
   const [webSocket, setWs] = useState<WebSocket | null>(null);
 
   const sendSocketAuthRequest = async (id: string) => {
@@ -362,7 +364,9 @@ const HomePage: NextPage<IndexPageProps> = ({
               fetchMessages={fetchMessages}
             />
           )}
-          {allChats.length <= 0 && !chatOpened && <h1>oop no chat</h1>}
+          {allChats.length <= 0 && !(chatOpened || openedContactRequest) && (
+            <h1>oop no chat</h1>
+          )}
           {openedContactRequest && getCurContactRequest() && (
             <ContactRequestDialog
               refreshContactRequests={refreshContactRequests}
