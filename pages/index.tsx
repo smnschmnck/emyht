@@ -20,6 +20,7 @@ import { Sidebar } from '../components/Sidebar';
 import { ContactRequestDialog } from '../components/ContactRequestDialog';
 import IUser from '../interfaces/IUser';
 import { BigButton } from '../components/atomic/Button';
+import { NoChatsInfo } from '../components/NoChatsInfo';
 
 export const UserCtx = createContext<IUser | null>(null);
 
@@ -233,6 +234,7 @@ const HomePage: NextPage<IndexPageProps> = ({
     };
 
     window.onresize = () => {
+      if (allChats.length <= 0) return;
       if (window.innerWidth > WIDTH_BREAKPOINT) {
         if (!chatOpened) {
           setChatOpened(true);
@@ -371,13 +373,8 @@ const HomePage: NextPage<IndexPageProps> = ({
               fetchMessages={fetchMessages}
             />
           )}
-          {allChats.length <= 0 && !(chatOpened || openedContactRequest) && (
-            <>
-              <h1>oop no chat</h1>
-              <BigButton onClick={() => setShowAddChatModal(true)}>
-                Start a new Chat
-              </BigButton>
-            </>
+          {allChats.length <= 0 && (
+            <NoChatsInfo setShowAddChatModal={setShowAddChatModal} />
           )}
           {openedContactRequest && getCurContactRequest() && (
             <ContactRequestDialog
