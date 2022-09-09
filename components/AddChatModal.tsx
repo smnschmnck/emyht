@@ -47,7 +47,7 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({
           <div className={styles.header}>
             <h2 className={styles.heading}>New chat</h2>
           </div>
-          {contacts.length > 0 && (
+          {(contacts.length > 0 || isLoading) && (
             <div className={styles.interface}>
               <Tabs>
                 <Tab label="Chat" picture={chat}>
@@ -71,7 +71,7 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({
               </Tabs>
             </div>
           )}
-          {contacts.length <= 0 && (
+          {contacts.length <= 0 && !isLoading && (
             <div className={styles.noContacts}>
               <h2>No contacts</h2>
               <BigButton onClick={showContactReqModal}>
