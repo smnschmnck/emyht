@@ -77,6 +77,7 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({
               <BigButton onClick={showContactReqModal}>
                 Send a contact request
               </BigButton>
+              <SmallButton onClick={closeHandler}>Close</SmallButton>
             </div>
           )}
         </div>

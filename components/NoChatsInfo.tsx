@@ -11,7 +11,7 @@ export const NoChatsInfo: React.FC<NoChatsInfoProps> = ({
   return (
     <div className={styles.container}>
       <div className={styles.main}>
-        <h1>{"You currently don't have any chats 😳"}</h1>
+        <h1>{"You currently don't have any chats 🧐"}</h1>
         <BigButton onClick={() => setShowAddChatModal(true)}>
           Start a new Chat
         </BigButton>
