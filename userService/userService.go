@@ -259,5 +259,7 @@ func CheckPW(user User, email string, password string) bool {
 	hashedPW := hashPW(password, user.Salt, pepper)
 	fmt.Println("REQ HASH: " + hashedPW)
 	fmt.Println("DB HASH: " + user.Password)
+	fmt.Println("DB SALT: " + user.Salt)
+	fmt.Println("PEPPER: " + pepper)
 	return hashedPW == user.Password
 }
