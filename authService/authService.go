@@ -17,6 +17,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -217,10 +218,11 @@ func Authenticate(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "WRONG CREDENTIALS")
 	}
 	if err != nil {
-		c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
+		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
 	session, err := startSession(user.Uuid)
 	if err != nil {
+		log.Error(err)
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE AUTHENTICATING")
 	}
 	return c.JSON(http.StatusOK, session)
