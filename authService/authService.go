@@ -9,7 +9,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -216,8 +215,6 @@ func Authenticate(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	fmt.Println("DB PASS: " + user.Password)
-	fmt.Println("REQ PASS: " + credentials.Password)
 	pwCorrect := userService.CheckPW(user, lowerCaseEmail, credentials.Password)
 	if !pwCorrect {
 		return c.String(http.StatusUnauthorized, "WRONG CREDENTIALS")

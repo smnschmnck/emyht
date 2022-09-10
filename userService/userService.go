@@ -257,5 +257,7 @@ func RenewEmailToken(email string) (string, error) {
 func CheckPW(user User, email string, password string) bool {
 	pepper := getPepper()
 	hashedPW := hashPW(password, user.Salt, pepper)
+	fmt.Println("REQ HASH: " + hashedPW)
+	fmt.Println("DB HASH: " + user.Password)
 	return hashedPW == user.Password
 }
