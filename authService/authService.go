@@ -83,6 +83,7 @@ func makeToken() (string, error) {
 func startSession(uuid string) (Session, error) {
 	token, err := makeToken()
 	if err != nil {
+		log.Error(err)
 		return Session{}, err
 	}
 
@@ -91,6 +92,7 @@ func startSession(uuid string) (Session, error) {
 	err = rdb.Set(ctx, token, uuid, 24*time.Hour).Err()
 
 	if err != nil {
+		log.Error(err)
 		return Session{}, err
 	}
 	tmpSession := Session{token, uuid}
@@ -222,7 +224,6 @@ func Authenticate(c echo.Context) error {
 	}
 	session, err := startSession(user.Uuid)
 	if err != nil {
-		log.Error(err)
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE AUTHENTICATING")
 	}
 	return c.JSON(http.StatusOK, session)
