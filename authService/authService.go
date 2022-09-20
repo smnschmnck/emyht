@@ -17,7 +17,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/log"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -83,7 +82,6 @@ func makeToken() (string, error) {
 func startSession(uuid string) (Session, error) {
 	token, err := makeToken()
 	if err != nil {
-		log.Error(err)
 		return Session{}, err
 	}
 
@@ -92,7 +90,6 @@ func startSession(uuid string) (Session, error) {
 	err = rdb.Set(ctx, token, uuid, 24*time.Hour).Err()
 
 	if err != nil {
-		log.Error(err)
 		return Session{}, err
 	}
 	tmpSession := Session{token, uuid}
