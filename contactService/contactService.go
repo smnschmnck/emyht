@@ -43,7 +43,9 @@ func SendContactRequest(c echo.Context) error {
 		return c.String(respErr.StatusCode, respErr.Msg)
 	}
 
-	if user.Email == contactReq.ContactEmail {
+	trimmedEmail := strings.TrimSpace(contactReq.ContactEmail)
+	lowerCaseEmail := strings.ToLower(trimmedEmail)
+	if user.Email == lowerCaseEmail {
 		return c.String(http.StatusInternalServerError, "YOU CAN'T SEND A CONTACT REQUEST TO YOURSELF")
 	}
 
@@ -59,20 +61,20 @@ func SendContactRequest(c echo.Context) error {
 		"FROM friends " +
 		"WHERE reciever = $1 AND sender = (SELECT uuid FROM users WHERE email=$2) " +
 		") "
-	checkDuplicateRows := conn.QueryRow(ctx, checkDuplicateQuery, user.Uuid, contactReq.ContactEmail)
+	checkDuplicateRows := conn.QueryRow(ctx, checkDuplicateQuery, user.Uuid, lowerCaseEmail)
 	var duplicateExists bool
 	err = checkDuplicateRows.Scan(&duplicateExists)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 	if duplicateExists {
-		return c.String(http.StatusConflict, contactReq.ContactEmail+" ALREADY SENT A FRIEND REQUEST TO YOU")
+		return c.String(http.StatusConflict, lowerCaseEmail+" ALREADY SENT A FRIEND REQUEST TO YOU")
 	}
 
 	contactReqQuery := "INSERT INTO friends(sender, reciever, status) " +
 		"VALUES ($1, (SELECT uuid FROM users WHERE email=$2), 'pending') " +
 		"RETURNING status"
-	contactReqRows := conn.QueryRow(ctx, contactReqQuery, user.Uuid, contactReq.ContactEmail)
+	contactReqRows := conn.QueryRow(ctx, contactReqQuery, user.Uuid, lowerCaseEmail)
 	var status string
 	err = contactReqRows.Scan(&status)
 	if err != nil {
@@ -85,7 +87,7 @@ func SendContactRequest(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	sendNewContactReqNotification(contactReq.ContactEmail)
+	sendNewContactReqNotification(lowerCaseEmail)
 
 	return c.String(http.StatusOK, "SUCCESS")
 }

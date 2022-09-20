@@ -110,7 +110,8 @@ func Register(c echo.Context) error {
 		return c.String(http.StatusForbidden, "PASSWORD TOO SHORT")
 	}
 
-	lowerCaseEmail := strings.ToLower(reqUser.Email)
+	trimmedEmail := strings.TrimSpace(reqUser.Email)
+	lowerCaseEmail := strings.ToLower(trimmedEmail)
 	user, err := userService.AddUser(lowerCaseEmail, reqUser.Username, reqUser.Password)
 
 	if err != nil {
@@ -207,7 +208,8 @@ func Authenticate(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
-	lowerCaseEmail := strings.ToLower(credentials.Email)
+	trimmedEmail := strings.TrimSpace(credentials.Email)
+	lowerCaseEmail := strings.ToLower(trimmedEmail)
 	user, err := userService.GetUserByEmail(lowerCaseEmail)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
@@ -257,11 +259,13 @@ func ChangeEmail(c echo.Context) error {
 	}
 	defer conn.Close(ctx)
 
+	trimmedEmail := strings.TrimSpace(changeReq.NewEmail)
+	lowerCaseEmail := strings.ToLower(trimmedEmail)
 	var emailExists bool
 	checkQuery := "SELECT count(1) > 0 " +
 		"FROM users " +
 		"WHERE email=$1"
-	rows := conn.QueryRow(ctx, checkQuery, changeReq.NewEmail)
+	rows := conn.QueryRow(ctx, checkQuery, lowerCaseEmail)
 	err = rows.Scan(&emailExists)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -275,7 +279,7 @@ func ChangeEmail(c echo.Context) error {
 		"ON CONFLICT(uuid) DO UPDATE SET new_email=$2, confirmation_token=$3 " +
 		"RETURNING confirmation_token, new_email"
 	confirmationToken := uuid.New().String()
-	insertedRows := conn.QueryRow(ctx, insertQuery, user.Uuid, changeReq.NewEmail, confirmationToken)
+	insertedRows := conn.QueryRow(ctx, insertQuery, user.Uuid, lowerCaseEmail, confirmationToken)
 	var dbConfirmationToken string
 	var dbNewEmail string
 	err = insertedRows.Scan(&dbConfirmationToken, &dbNewEmail)
