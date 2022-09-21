@@ -1,3 +1,4 @@
+import { useMutation } from '@tanstack/react-query';
 import { useFormik } from 'formik';
 import { useState } from 'react';
 import styles from '../styles/LoginRegisterComponent.module.css';
@@ -15,40 +16,49 @@ interface RegisterProps {
 }
 
 const Register: React.FC<RegisterProps> = (props) => {
-  const [loginError, setLoginError] = useState('');
   const [passwordRepeat, setPasswordReapeat] = useState('');
+
+  interface IRegistrationData {
+    email: string;
+    username: string;
+    password: string;
+  }
+
+  const sendRegistration = useMutation(
+    async (registrationData: IRegistrationData) => {
+      if (registrationData.password !== passwordRepeat) {
+        throw 'Passwords do not match';
+      }
+      if (registrationData.password.length < 8) {
+        throw 'Password must be longer than 8 characters';
+      }
+      const res = await fetch('/api/register', {
+        method: 'post',
+        body: JSON.stringify(registrationData),
+      });
+      if (!res.ok) {
+        throw await res.text();
+      }
+    },
+    {
+      onSuccess: props.newLogin,
+      retry: 3,
+    }
+  );
+
   const formik = useFormik({
     initialValues: {
       email: '',
       username: '',
       password: '',
     },
-    onSubmit: async (values) => {
-      if (values.password !== passwordRepeat) {
-        setLoginError('Passwords do not match');
-        return;
-      }
-      if (values.password.length < 8) {
-        setLoginError('Password must be longer than 8 characters');
-        return;
-      }
-      const res = await fetch('/api/register', {
-        method: 'post',
-        body: JSON.stringify(values),
-      });
-      if (!res.ok) {
-        setLoginError(await res.text());
-        return;
-      }
-      props.newLogin();
-    },
+    onSubmit: (values) => sendRegistration.mutate(values),
   });
 
   return (
     <div className={styles.content}>
       <h1 className={styles.heading}>Register</h1>
       <form
-        onChange={() => setLoginError('')}
         onSubmit={formik.handleSubmit}
         className={styles.form}
         autoComplete="off"
@@ -85,7 +95,9 @@ const Register: React.FC<RegisterProps> = (props) => {
         />
         <BigButton type="submit">Register</BigButton>
       </form>
-      {loginError && <Error errorMessage={loginError} />}
+      {sendRegistration.isError && (
+        <Error errorMessage={String(sendRegistration.error)} />
+      )}
       <SmallButton onClick={props.toggleLoginRegister}>Log In</SmallButton>
     </div>
   );

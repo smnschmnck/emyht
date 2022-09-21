@@ -1,9 +1,9 @@
 import { useFormik } from 'formik';
-import { useState } from 'react';
 import { Input, PasswordInput } from './atomic/Input';
 import styles from '../styles/LoginRegisterComponent.module.css';
 import { BigButton, SmallButton } from './atomic/Button';
 import { Error } from './atomic/Error';
+import { useMutation } from '@tanstack/react-query';
 
 interface LoginProps {
   showLogin: boolean;
@@ -15,33 +15,42 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = (props) => {
-  const [loginError, setLoginError] = useState('');
+  interface ILoginData {
+    email: string;
+    password: string;
+  }
+
+  const sendLogin = useMutation(
+    async (loginData: ILoginData) => {
+      const res = await fetch('/api/login', {
+        method: 'post',
+        body: JSON.stringify(loginData),
+      });
+      if (!res.ok) {
+        throw await res.text();
+      }
+    },
+    {
+      onSuccess: props.newLogin,
+    }
+  );
+
   const formik = useFormik({
     initialValues: {
       email: '',
       password: '',
     },
-    onSubmit: async (values) => {
-      const res = await fetch('/api/login', {
-        method: 'post',
-        body: JSON.stringify(values),
-      });
-      if (!res.ok) {
-        setLoginError(await res.text());
-        return;
-      }
-      props.newLogin();
-    },
+    onSubmit: (values) => sendLogin.mutate(values),
   });
 
   return (
     <div className={styles.content}>
       <h1 className={styles.heading}>Login</h1>
       <form
-        onChange={() => setLoginError('')}
         onSubmit={formik.handleSubmit}
         autoComplete="off"
         className={styles.form}
+        onChange={() => (sendLogin.isError = false)}
       >
         <Input
           type={'email'}
@@ -60,9 +69,11 @@ const Login: React.FC<LoginProps> = (props) => {
           required={true}
           autoFocus={false}
         />
-        <BigButton type="submit">Log In</BigButton>
+        <BigButton type="submit" loading={sendLogin.isLoading}>
+          Log In
+        </BigButton>
       </form>
-      {loginError && <Error errorMessage={loginError} />}
+      {sendLogin.isError && <Error errorMessage={String(sendLogin.error)} />}
       <SmallButton onClick={props.toggleLoginRegister}>Sign Up</SmallButton>
     </div>
   );

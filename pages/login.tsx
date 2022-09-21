@@ -11,6 +11,7 @@ import Register from '../components/Register';
 import { getLoginData } from '../helpers/loginHelpers';
 import styles from '../styles/LoginPage.module.css';
 import DefaultLayout from '../components/DefaultLayout';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
@@ -31,6 +32,8 @@ export const getServerSideProps: GetServerSideProps = async (
   }
 };
 
+const queryClient = new QueryClient();
+
 const LoginPage: NextPage = () => {
   const [showLogin, setShowLogin] = useState(true);
   const [showRegister, setShowRegister] = useState(false);
@@ -45,7 +48,7 @@ const LoginPage: NextPage = () => {
   };
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <Head>
         <title>Login</title>
         {showRegister && <title>Register</title>}
@@ -77,7 +80,7 @@ const LoginPage: NextPage = () => {
           </div>
         </div>
       </DefaultLayout>
-    </>
+    </QueryClientProvider>
   );
 };
 
