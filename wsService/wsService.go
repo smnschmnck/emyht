@@ -59,7 +59,9 @@ func deleteWsIdFromUuidToWsId(websocketID string) {
 	} else {
 		for i, wId := range websocketIDArray {
 			if wId == websocketID {
+				//Replace with last element
 				websocketIDArray[i] = websocketIDArray[len(websocketIDArray)-1]
+				//Delete last element which is now a duplicate of websocketIDArray[i]
 				uuidToWebsocketID[uuid] = websocketIDArray[:len(websocketIDArray)-1]
 				return
 			}
