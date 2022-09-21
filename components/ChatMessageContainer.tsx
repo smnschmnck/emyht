@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import { UserCtx } from './Main';
+import { UserCtx } from './ChatSPA';
 import styles from '../styles/ChatMessagesContainerComponent.module.css';
 import { ISingleMessage } from './MainChat';
 import { OwnMessage, ParticipantMessage } from './SingleChatMessage';

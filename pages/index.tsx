@@ -11,7 +11,7 @@ import { BACKEND_HOST } from '../helpers/serverGlobals';
 import { NextApiRequestCookies } from 'next/dist/server/api-utils';
 
 import IUser from '../interfaces/IUser';
-import { Main } from '../components/Main';
+import { ChatSPA } from '../components/ChatSPA';
 
 interface IndexPageProps {
   user: IUser;
@@ -108,7 +108,7 @@ const HomePage: NextPage<IndexPageProps> = ({
   contactRequests,
 }) => {
   return (
-    <Main
+    <ChatSPA
       user={user}
       chats={chats}
       contactRequests={contactRequests}

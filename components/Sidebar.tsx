@@ -6,7 +6,7 @@ import ISingleChat from '../interfaces/ISingleChat';
 import UserInfoAndSettings from './UserInfoAndSettings';
 import { ContactRequests } from './ContactRequests';
 import { useContext } from 'react';
-import { UserCtx } from './Main';
+import { UserCtx } from './ChatSPA';
 
 interface SidebarProps {
   chatOpened: boolean;

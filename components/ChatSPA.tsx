@@ -4,12 +4,12 @@ import ISingleChat from '../interfaces/ISingleChat';
 import { ContactRequest } from './Chats';
 import Head from 'next/head';
 import styles from '../styles/IndexPage.module.css';
-import MainChat, { ISingleMessage } from '../components/MainChat';
-import { AddChatModal } from '../components/AddChatModal';
-import { ContactRequestModal } from '../components/ContactRequestModal';
-import { Sidebar } from '../components/Sidebar';
-import { ContactRequestDialog } from '../components/ContactRequestDialog';
-import { NoChatsInfo } from '../components/NoChatsInfo';
+import MainChat, { ISingleMessage } from './MainChat';
+import { AddChatModal } from './AddChatModal';
+import { ContactRequestModal } from './ContactRequestModal';
+import { Sidebar } from './Sidebar';
+import { ContactRequestDialog } from './ContactRequestDialog';
+import { NoChatsInfo } from './NoChatsInfo';
 import IUser from '../interfaces/IUser';
 
 export const UserCtx = createContext<IUser | null>(null);
@@ -31,7 +31,7 @@ interface MainProps {
   contactRequests: ContactRequest[];
 }
 
-export const Main: React.FC<MainProps> = ({
+export const ChatSPA: React.FC<MainProps> = ({
   user,
   chats,
   firstChatID,
