@@ -1,5 +1,5 @@
 import { FormEvent, useContext, useState } from 'react';
-import { UserCtx } from '../pages';
+import { UserCtx } from './Main';
 import { InputWithButton } from './atomic/InputWithButton';
 import { ISingleMessage } from './MainChat';
 

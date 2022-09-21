@@ -3,7 +3,7 @@ import styles from '../styles/SingleChatComponent.module.css';
 import ISingleChat from '../interfaces/ISingleChat';
 import { formatTimestamp, formatPicURL } from '../helpers/stringFormatters';
 import { useContext } from 'react';
-import { UserCtx } from '../pages';
+import { UserCtx } from './Main';
 
 interface SingleChatProps extends ISingleChat {
   openChat: (chatID: string) => void;
