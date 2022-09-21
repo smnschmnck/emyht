@@ -56,50 +56,57 @@ const Register: React.FC<RegisterProps> = (props) => {
   });
 
   return (
-    <div className={styles.content}>
-      <h1 className={styles.heading}>Register</h1>
-      <form
-        onSubmit={formik.handleSubmit}
-        className={styles.form}
-        autoComplete="off"
-      >
-        <Input
-          type={'email'}
-          placeholder={'E-Mail'}
-          name={'email'}
-          value={formik.values.email}
-          onChange={formik.handleChange}
-          required={true}
-          autoFocus={true}
-        />
-        <Input
-          type={'text'}
-          placeholder={'Username'}
-          name={'username'}
-          value={formik.values.username}
-          onChange={formik.handleChange}
-          required={true}
-        />
-        <PasswordInput
-          placeholder={'Password'}
-          name={'password'}
-          value={formik.values.password}
-          onChange={formik.handleChange}
-          required={true}
-        />
-        <PasswordInput
-          placeholder={'Repeat Password'}
-          value={passwordRepeat}
-          onChange={(e) => setPasswordReapeat(e.target.value)}
-          required={true}
-        />
-        <BigButton type="submit">Register</BigButton>
-      </form>
-      {sendRegistration.isError && (
-        <Error errorMessage={String(sendRegistration.error)} />
+    <>
+      {sendRegistration.isSuccess && <h1>Account created 🥳</h1>}
+      {!sendRegistration.isSuccess && (
+        <div className={styles.content}>
+          <h1 className={styles.heading}>Register</h1>
+          <form
+            onSubmit={formik.handleSubmit}
+            className={styles.form}
+            autoComplete="off"
+          >
+            <Input
+              type={'email'}
+              placeholder={'E-Mail'}
+              name={'email'}
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              required={true}
+              autoFocus={true}
+            />
+            <Input
+              type={'text'}
+              placeholder={'Username'}
+              name={'username'}
+              value={formik.values.username}
+              onChange={formik.handleChange}
+              required={true}
+            />
+            <PasswordInput
+              placeholder={'Password'}
+              name={'password'}
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              required={true}
+            />
+            <PasswordInput
+              placeholder={'Repeat Password'}
+              value={passwordRepeat}
+              onChange={(e) => setPasswordReapeat(e.target.value)}
+              required={true}
+            />
+            <BigButton type="submit" loading={sendRegistration.isLoading}>
+              Register
+            </BigButton>
+          </form>
+          {sendRegistration.isError && (
+            <Error errorMessage={String(sendRegistration.error)} />
+          )}
+          <SmallButton onClick={props.toggleLoginRegister}>Log In</SmallButton>
+        </div>
       )}
-      <SmallButton onClick={props.toggleLoginRegister}>Log In</SmallButton>
-    </div>
+    </>
   );
 };
 
