@@ -1,51 +1,21 @@
-import type {
-  GetServerSideProps,
-  GetServerSidePropsContext,
-  NextPage,
-} from 'next';
-import { ContactRequest } from '../components/Chats';
+import type { GetServerSidePropsContext, NextPage } from 'next';
+import { ChatSPA } from '../components/ChatSPA';
+import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { getLoginData } from '../helpers/loginHelpers';
-import { ServerResponse } from 'http';
-import ISingleChat from '../interfaces/ISingleChat';
 import { BACKEND_HOST } from '../helpers/serverGlobals';
 import { NextApiRequestCookies } from 'next/dist/server/api-utils';
+import ISingleChat from '../interfaces/ISingleChat';
 
-import IUser from '../interfaces/IUser';
-import { ChatSPA } from '../components/ChatSPA';
-
-interface IndexPageProps {
-  user: IUser;
-  isAdmin: boolean;
-  chats: ISingleChat[];
-  firstChatID?: string;
-  contactRequests: ContactRequest[];
-}
-
-const redirectOnUnverifiedEmail = (res: ServerResponse) => {
+const redirectToNoEmail = (context: GetServerSidePropsContext) => {
+  const res = context.res;
   res.writeHead(302, { Location: '/noEmail' });
   res.end();
 };
 
-const redirectOnLoggedOut = (res: ServerResponse) => {
+const redirectToLogin = (context: GetServerSidePropsContext) => {
+  const res = context.res;
   res.writeHead(302, { Location: '/login' });
   res.end();
-};
-
-const getContactRequests = async (cookies: NextApiRequestCookies) => {
-  try {
-    const res = await fetch(BACKEND_HOST + '/pendingContactRequests', {
-      headers: {
-        authorization: `Bearer ${cookies.SESSIONID}`,
-      },
-    });
-    if (!res.ok) {
-      return [];
-    }
-    const json = await res.json();
-    return json;
-  } catch (err) {
-    return [];
-  }
 };
 
 const getChats = async (cookies: NextApiRequestCookies) => {
@@ -65,56 +35,68 @@ const getChats = async (cookies: NextApiRequestCookies) => {
   }
 };
 
-const emptyProps = {
-  props: {},
+const getQueryProps = (queryClient: QueryClient) => {
+  return {
+    props: {
+      dehydratedState: dehydrate(queryClient),
+    },
+  };
 };
 
-export const getServerSideProps: GetServerSideProps<
-  IndexPageProps | {}
-> = async (context: GetServerSidePropsContext) => {
-  const cookies = context.req.cookies;
+const getContactRequests = async (cookies: NextApiRequestCookies) => {
   try {
-    getContactRequests(cookies);
-    const getUserResponse = await getLoginData(cookies);
-    const user: IUser = {
-      uuid: getUserResponse.uuid,
-      username: getUserResponse.username,
-      email: getUserResponse.email,
-    };
-    if (!getUserResponse.emailActive) {
-      redirectOnUnverifiedEmail(context.res);
-      return emptyProps;
-    }
-    const chats = await getChats(cookies);
-    const firstChatID = chats[0]?.chatID ?? null;
-    return {
-      props: {
-        user: user,
-        chats: chats,
-        firstChatID: firstChatID,
-        contactRequests: await getContactRequests(cookies),
+    const res = await fetch(BACKEND_HOST + '/pendingContactRequests', {
+      headers: {
+        authorization: `Bearer ${cookies.SESSIONID}`,
       },
-    };
-  } catch {
-    redirectOnLoggedOut(context.res);
-    return emptyProps;
+    });
+    if (!res.ok) {
+      return [];
+    }
+    const json = await res.json();
+    return json;
+  } catch (err) {
+    return [];
   }
 };
 
-const HomePage: NextPage<IndexPageProps> = ({
-  user,
-  chats,
-  firstChatID,
-  contactRequests,
-}) => {
-  return (
-    <ChatSPA
-      user={user}
-      chats={chats}
-      contactRequests={contactRequests}
-      firstChatID={firstChatID}
-    />
-  );
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const queryClient = new QueryClient();
+
+  const cookies = context.req.cookies;
+  if (!cookies.SESSIONID) {
+    redirectToLogin(context);
+    return getQueryProps(queryClient);
+  }
+
+  const userData = await queryClient.fetchQuery(['user'], async () => {
+    try {
+      return await getLoginData(context.req.cookies);
+    } catch (err) {
+      redirectToLogin(context);
+      return;
+    }
+  });
+  if (!userData?.emailActive) {
+    redirectToNoEmail(context);
+    return getQueryProps(queryClient);
+  }
+
+  await queryClient.prefetchQuery(['chats'], async () => {
+    return await getChats(context.req.cookies);
+  });
+
+  await queryClient.prefetchQuery(['contactRequests'], async () => {
+    return await getContactRequests(context.req.cookies);
+  });
+
+  return getQueryProps(queryClient);
+};
+
+const HomePage: NextPage = () => {
+  return <ChatSPA />;
 };
 
 export default HomePage;

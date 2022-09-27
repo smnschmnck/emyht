@@ -3,7 +3,6 @@ import { NextApiRequestCookies } from 'next/dist/server/api-utils';
 import IUser from '../interfaces/IUser';
 
 export interface GetUserResponse extends IUser {
-  sessionID: string;
   isAdmin: boolean;
   emailActive: boolean;
 }

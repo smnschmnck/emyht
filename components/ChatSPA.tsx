@@ -11,6 +11,8 @@ import { Sidebar } from './Sidebar';
 import { ContactRequestDialog } from './ContactRequestDialog';
 import { NoChatsInfo } from './NoChatsInfo';
 import IUser from '../interfaces/IUser';
+import { QueryClient, useQuery } from '@tanstack/react-query';
+import { ContactRequests } from './ContactRequests';
 
 export const UserCtx = createContext<IUser | null>(null);
 
@@ -24,22 +26,30 @@ interface IMessagePayload {
   messages: ISingleMessage[];
 }
 
-interface MainProps {
-  user: IUser;
-  chats: ISingleChat[];
-  firstChatID?: string;
-  contactRequests: ContactRequest[];
-}
-
-export const ChatSPA: React.FC<MainProps> = ({
-  user,
-  chats,
-  firstChatID,
-  contactRequests,
-}) => {
-  const [allChats, setAllChats] = useState(chats);
+export const ChatSPA: React.FC = () => {
+  const { data: chats } = useQuery<ISingleChat[]>(['chats'], async () => {
+    const res = await fetch('/api/getChats');
+    return (await res.json()) as ISingleChat[];
+  });
+  const [allChats, setAllChats] = useState(chats ?? []);
   const [messages, setMessages] = useState<ISingleMessage[]>([]);
-  const [allContactRequests, setAllContactRequests] = useState(contactRequests);
+  const { data: contactRequests } = useQuery(['contactRequests'], async () => {
+    const res = await fetch('/api/getPendingContactRequests');
+    return (await res.json()) as ContactRequest[];
+  });
+  const [allContactRequests, setAllContactRequests] = useState(
+    contactRequests ?? []
+  );
+  const loadUser = useQuery<IUser>(['user'], async () => {
+    const res = await fetch('/api/user');
+    return (await res.json()) as IUser;
+  });
+  const user = loadUser.data ?? {
+    username: 'error',
+    uuid: 'error',
+    email: 'error',
+  };
+  const firstChatID = allChats[0].chatID;
   const [curChatID, setCurChatID] = useState(firstChatID ?? '');
   const [curContactRequestID, setCurContactRequestID] = useState(
     allContactRequests[0]?.senderID ?? ''
