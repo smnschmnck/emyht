@@ -37,7 +37,6 @@ func handleRequest() {
 	e.POST("/startGroupChat", chatService.StartGroupChat)
 	e.GET("/chats", chatService.GetChats)
 	e.POST("/message", chatService.SendMessage)
-	e.POST("/confirmReadChat", chatService.ConfirmReadChat)
 	e.GET("/chatMessages/:chatID", chatService.GetMessages)
 	//user relationships
 	e.POST("/contactRequest", contactService.SendContactRequest)

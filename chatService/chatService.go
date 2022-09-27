@@ -128,7 +128,8 @@ func StartOneOnOneChat(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	sendUpdatedChats(req.ParticipantUUID)
+	wsService.WriteEventToSingleUUID(req.ParticipantUUID, "chat")
+
 	chats, err := getChatsByUUID(reqUUID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -235,9 +236,7 @@ func StartGroupChat(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	for _, p := range req.ParticipantUUIDs {
-		sendUpdatedChats(p)
-	}
+	wsService.WriteEventToMultipleUUIDs(req.ParticipantUUIDs, "chat")
 
 	return c.JSON(http.StatusOK, chats)
 }
@@ -542,43 +541,6 @@ func GetMessages(c echo.Context) error {
 	return c.JSON(http.StatusOK, messages)
 }
 
-func ConfirmReadChat(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
-	if err != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	type reqBody struct {
-		ChatID string `json:"chatID" validate:"required"`
-	}
-
-	req := new(reqBody)
-	err = c.Bind(&req)
-	if err != nil {
-		return c.String(http.StatusBadRequest, "BAD REQUEST")
-	}
-	err = validate.Struct(req)
-	if err != nil {
-		return c.String(http.StatusBadRequest, "BAD REQUEST")
-	}
-
-	err = markChatAsRead(reqUUID, req.ChatID)
-	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
-	}
-
-	chats, err := getChatsByUUID(reqUUID)
-	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
-	}
-	return c.JSON(http.StatusOK, chats)
-}
-
 func markChatAsRead(uuid string, chatID string) error {
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
@@ -627,27 +589,14 @@ func sendNewMessageNotification(chatId string, messages []singleMessage) error {
 	}
 
 	type newMessageNotification struct {
-		ChatID   string          `json:"chatID"`
-		Messages []singleMessage `json:"messages"`
+		ChatID string `json:"chatID"`
 	}
 
 	body := newMessageNotification{
-		ChatID:   chatId,
-		Messages: messages,
+		ChatID: chatId,
 	}
 
 	err = wsService.WriteStructToMultipleUUIDs(chatmembers, "message", body)
 
-	for _, uuid := range chatmembers {
-		err = sendUpdatedChats(uuid)
-	}
 	return err
-}
-
-func sendUpdatedChats(uuid string) error {
-	chats, err := getChatsByUUID(uuid)
-	if err != nil {
-		return err
-	}
-	return wsService.WriteStructToSingleUUID(uuid, "chat", chats)
 }

@@ -41,6 +41,10 @@ type wsData struct {
 	Payload any    `json:"payload"`
 }
 
+type wsEvent struct {
+	Event string `json:"event"`
+}
+
 func recieveIncomingWebsocketMessages(ws *websocket.Conn) error {
 	for {
 		_, _, err := ws.ReadMessage()
@@ -174,6 +178,35 @@ func WriteStructToMultipleUUIDs(uuids []string, event string, payload any) error
 		sockets := GetSocketsByUUID(uuid)
 		for _, socket := range sockets {
 			err = WriteStruct(socket, event, payload)
+		}
+	}
+	return err
+}
+
+func WriteEvent(ws *websocket.Conn, event string) error {
+	out, err := json.Marshal(wsEvent{Event: event})
+	if err != nil {
+		return err
+	}
+	err = ws.WriteMessage(websocket.TextMessage, out)
+	return err
+}
+
+func WriteEventToSingleUUID(uuid string, event string) error {
+	sockets := GetSocketsByUUID(uuid)
+	var err error
+	for _, socket := range sockets {
+		err = WriteEvent(socket, event)
+	}
+	return err
+}
+
+func WriteEventToMultipleUUIDs(uuids []string, event string) error {
+	var err error
+	for _, uuid := range uuids {
+		sockets := GetSocketsByUUID(uuid)
+		for _, socket := range sockets {
+			err = WriteEvent(socket, event)
 		}
 	}
 	return err
