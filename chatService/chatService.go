@@ -243,6 +243,7 @@ func StartGroupChat(c echo.Context) error {
 
 type singleChat struct {
 	ChatID            string  `json:"chatID"`
+	ChatType          string  `json:"chatType"`
 	CreationTimestamp int     `json:"creationTimestamp"`
 	Name              string  `json:"chatName"`
 	PictureUrl        string  `json:"pictureUrl"`
@@ -252,6 +253,7 @@ type singleChat struct {
 	Timestamp         *int    `json:"timestamp"`
 	DeliveryStatus    *string `json:"deliveryStatus"`
 	SenderID          *string `json:"senderID"`
+	SenderUsername    *string `json:"senderUsername"`
 }
 
 //TODO send chat type and sender username for last message
@@ -263,32 +265,36 @@ func getChatsByUUID(uuid string) ([]singleChat, error) {
 	}
 	defer conn.Close()
 
-	getChatsQuery := "SELECT c.chat_id, c.creation_timestamp, ( " +
-		"CASE c.chat_type WHEN 'one_on_one' THEN ( " +
-		"SELECT users.username AS name " +
+	getChatsQuery := "SELECT c.chat_id, " +
+		"c.creation_timestamp, " +
+		"(CASE c.chat_type " +
+		"WHEN 'one_on_one' THEN (SELECT users.username AS name " +
 		"FROM users " +
 		"JOIN user_chat uc on users.uuid = uc.uuid " +
-		"WHERE c.chat_id=uc.chat_id AND uc.uuid!=$1 " +
-		") ELSE c.name END " +
+		"WHERE c.chat_id = uc.chat_id " +
+		"AND uc.uuid != $1) " +
+		"ELSE c.name END " +
 		"), " +
 		"( " +
-		"CASE c.chat_type WHEN 'one_on_one' THEN ( " +
-		"SELECT users.picture_url AS picture_url " +
+		"CASE c.chat_type " +
+		"WHEN 'one_on_one' THEN (SELECT users.picture_url AS picture_url " +
 		"FROM users " +
 		"JOIN user_chat uc on users.uuid = uc.uuid " +
-		"WHERE c.chat_id=uc.chat_id AND uc.uuid!=$1 " +
-		") ELSE c.picture_url END " +
+		"WHERE c.chat_id = uc.chat_id " +
+		"AND uc.uuid != $1) " +
+		"ELSE c.picture_url END " +
 		"), " +
 		"u.unread_messages, " +
 		"m.message_type, " +
 		"m.text_content, " +
 		"m.timestamp, " +
 		"m.delivery_status, " +
-		"m.sender_id " +
+		"m.sender_id, " +
+		"(SELECT username AS sender_username FROM users WHERE users.uuid = m.sender_id) " +
 		"FROM user_chat u " +
 		"JOIN chats c ON u.chat_id = c.chat_id " +
 		"LEFT JOIN chatmessages m ON m.message_id = c.last_message_id " +
-		"WHERE u.uuid=$1"
+		"WHERE u.uuid = $1"
 	var chats []singleChat
 	err = pgxscan.Select(ctx, conn, &chats, getChatsQuery, uuid)
 	if err != nil {
