@@ -50,8 +50,9 @@ const handleNewChat = (
   queryClient.invalidateQueries(['chats']).then(async () => {
     if (curChatID === '') {
       const chats = queryClient.getQueryData<ISingleChat[]>(['chats']);
-      if (chats) {
-        setCurChatID(chats[0]?.chatID);
+      //This does not work in dev/strict mode
+      if (chats && chats[0]) {
+        setCurChatID(chats[0].chatID);
       }
     }
   });
