@@ -76,10 +76,15 @@ export const getServerSideProps = async (
       return await getLoginData(context.req.cookies);
     } catch (err) {
       redirectToLogin(context);
-      return;
+      return null;
     }
   });
-  if (!userData?.emailActive) {
+
+  if (!userData) {
+    return getQueryProps(queryClient);
+  }
+
+  if (!userData.emailActive) {
     redirectToNoEmail(context);
     return getQueryProps(queryClient);
   }
