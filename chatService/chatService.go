@@ -266,6 +266,7 @@ func getChatsByUUID(uuid string) ([]singleChat, error) {
 	defer conn.Close()
 
 	getChatsQuery := "SELECT c.chat_id, " +
+		"c.chat_type, " +
 		"c.creation_timestamp, " +
 		"(CASE c.chat_type " +
 		"WHEN 'one_on_one' THEN (SELECT users.username AS name " +
