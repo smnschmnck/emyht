@@ -256,7 +256,6 @@ type singleChat struct {
 	SenderUsername    *string `json:"senderUsername"`
 }
 
-//TODO send chat type and sender username for last message
 func getChatsByUUID(uuid string) ([]singleChat, error) {
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
@@ -606,4 +605,70 @@ func sendNewMessageNotification(chatId string, messages []singleMessage) error {
 	err = wsService.WriteStructToMultipleUUIDs(chatmembers, "message", body)
 
 	return err
+}
+
+func GetChatInfo(c echo.Context) error {
+	type chatInfoRes struct {
+		Info string `json:"info"`
+	}
+
+	sessionID, responseErr := authService.GetBearer(c)
+	if responseErr != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+	chatID := c.Param("chatID")
+	if len(chatID) <= 0 {
+		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
+	}
+	userInChat, err := isUserInChat(reqUUID, chatID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+	if !userInChat {
+		return c.String(http.StatusUnauthorized, "USER NOT IN CHAT")
+	}
+
+	ctx := context.Background()
+	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	defer conn.Close()
+
+	var isGroupChat bool
+	isGroupChatQuery := "SELECT chat_type = 'group' " +
+		"FROM chats " +
+		"WHERE chat_id=$1"
+	rows := conn.QueryRow(ctx, isGroupChatQuery, chatID)
+	err = rows.Scan(&isGroupChat)
+	if err != nil {
+		fmt.Println(err.Error())
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
+	if isGroupChat {
+		var groupChatUsers int
+		groupChatUsersQuery := "SELECT count(uuid) " +
+			"FROM user_chat " +
+			"WHERE chat_id = $1 " +
+			"GROUP BY chat_id"
+		rows := conn.QueryRow(ctx, groupChatUsersQuery, chatID)
+		err := rows.Scan(&groupChatUsers)
+		if err != nil {
+			fmt.Println(err.Error())
+			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+		}
+		out := fmt.Sprint(groupChatUsers) + " Member"
+		if groupChatUsers > 1 {
+			out += "s"
+		}
+		return c.JSON(http.StatusOK, chatInfoRes{Info: out})
+	}
+
+	//TODO: Actually fetch last online
+	return c.JSON(http.StatusOK, chatInfoRes{Info: "14:21"})
 }
