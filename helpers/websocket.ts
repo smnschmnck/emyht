@@ -45,8 +45,10 @@ export const handleWebsocketMessage = (
       break;
     case 'chat':
       queryClient.invalidateQueries(['chats']);
+      break;
     case 'contactRequest':
       queryClient.invalidateQueries(['contactRequests']);
+      break;
     case 'auth':
       const authPayload: { id: string } = payload;
       sendSocketAuthRequest(authPayload.id);
