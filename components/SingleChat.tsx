@@ -2,9 +2,9 @@ import Image from 'next/image';
 import styles from '../styles/SingleChatComponent.module.css';
 import ISingleChat from '../interfaces/ISingleChat';
 import { formatTimestamp, formatPicURL } from '../helpers/stringFormatters';
-import { useContext } from 'react';
 import IUser from '../interfaces/IUser';
 import { useQuery } from '@tanstack/react-query';
+import { MessageTypeIcon } from './MessageTypeIcon';
 
 interface SingleChatProps extends ISingleChat {
   openChat: (chatID: string) => void;
@@ -14,14 +14,15 @@ interface SingleChatProps extends ISingleChat {
 const SingleChat: React.FC<SingleChatProps> = ({
   chatID,
   chatName,
+  chatType,
   timestamp,
   textContent,
   unreadMessages,
   senderID,
-  deliveryStatus,
   pictureUrl,
   openChat,
   messageType,
+  senderUsername,
 }) => {
   const userQuery = useQuery<IUser>(['user'], async () => {
     const res = await fetch('/api/user');
@@ -29,6 +30,19 @@ const SingleChat: React.FC<SingleChatProps> = ({
   });
   const user = userQuery.data;
   const ownMessage = user?.uuid === senderID;
+
+  const formatTextContent = (textContent?: string) => {
+    if (!textContent) {
+      return `Send a message to ${chatName}`;
+    }
+    if (chatType === 'group') {
+      if (senderID !== user?.uuid) {
+        return `${senderUsername}: ${textContent}`;
+      }
+    }
+    return textContent;
+  };
+
   return (
     <div className={styles.wrapper}>
       <button
@@ -63,10 +77,14 @@ const SingleChat: React.FC<SingleChatProps> = ({
                 {formatTimestamp(Number(timestamp))}
               </h3>
             </div>
-            <p className={styles.chatText}>
-              {/* TODO show message type */}
-              {textContent ?? `Send a message to ${chatName}`}
-            </p>
+            <span className={styles.chatPreview}>
+              {messageType && messageType !== 'plaintext' && (
+                <MessageTypeIcon messageType={messageType ?? ''} />
+              )}
+              <p className={styles.chatText}>
+                {formatTextContent(textContent)}
+              </p>
+            </span>
           </div>
         </div>
       </button>

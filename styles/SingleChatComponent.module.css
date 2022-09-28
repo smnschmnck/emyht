@@ -111,6 +111,11 @@
   color: var(--grey);
 }
 
+.chatPreview {
+  display: flex;
+  position: relative;
+}
+
 .chatText {
   white-space: nowrap;
   overflow: hidden;

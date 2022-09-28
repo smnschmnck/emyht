@@ -106,6 +106,8 @@ const Chats: React.FC<ChatsProps> = ({
             senderID={chat.senderID}
             pictureUrl={chat.pictureUrl}
             openChat={openChat}
+            senderUsername={chat.senderUsername}
+            messageType={chat.messageType}
           />
         ))}
         {chats.length > 0 && getFilteredChats().length <= 0 && (
