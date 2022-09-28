@@ -2,38 +2,8 @@ import type { GetServerSidePropsContext, NextPage } from 'next';
 import { ChatSPA } from '../components/ChatSPA';
 import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { getLoginData } from '../helpers/loginHelpers';
-import { BACKEND_HOST } from '../helpers/serverGlobals';
-import { NextApiRequestCookies } from 'next/dist/server/api-utils';
-import ISingleChat from '../interfaces/ISingleChat';
-
-const redirectToNoEmail = (context: GetServerSidePropsContext) => {
-  const res = context.res;
-  res.writeHead(302, { Location: '/noEmail' });
-  res.end();
-};
-
-const redirectToLogin = (context: GetServerSidePropsContext) => {
-  const res = context.res;
-  res.writeHead(302, { Location: '/login' });
-  res.end();
-};
-
-const getChats = async (cookies: NextApiRequestCookies) => {
-  try {
-    const res = await fetch(BACKEND_HOST + '/chats', {
-      headers: {
-        authorization: `Bearer ${cookies.SESSIONID}`,
-      },
-    });
-    if (!res.ok) {
-      return [];
-    }
-    const json = (await res.json()) as ISingleChat[];
-    return json;
-  } catch (err) {
-    return [];
-  }
-};
+import { redirectToLogin, redirectToNoEmail } from '../helpers/redirects';
+import { getChats, getContactRequests } from '../helpers/initialChatProps';
 
 const getQueryProps = (queryClient: QueryClient) => {
   return {
@@ -41,23 +11,6 @@ const getQueryProps = (queryClient: QueryClient) => {
       dehydratedState: dehydrate(queryClient),
     },
   };
-};
-
-const getContactRequests = async (cookies: NextApiRequestCookies) => {
-  try {
-    const res = await fetch(BACKEND_HOST + '/pendingContactRequests', {
-      headers: {
-        authorization: `Bearer ${cookies.SESSIONID}`,
-      },
-    });
-    if (!res.ok) {
-      return [];
-    }
-    const json = await res.json();
-    return json;
-  } catch (err) {
-    return [];
-  }
 };
 
 export const getServerSideProps = async (
@@ -75,12 +28,12 @@ export const getServerSideProps = async (
     try {
       return await getLoginData(context.req.cookies);
     } catch (err) {
-      redirectToLogin(context);
       return null;
     }
   });
 
   if (!userData) {
+    redirectToLogin(context);
     return getQueryProps(queryClient);
   }
 
