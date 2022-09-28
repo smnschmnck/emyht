@@ -1,16 +1,19 @@
-import styles from '../styles/MainChatComponent.module.css';
-import { ChatInfoHeader } from './ChatInfoHeader';
-import { ChatMessageContainer } from './ChatMessageContainer';
-import { SendMessageForm } from './SendMessageForm';
+import ISingleChat from '../interfaces/ISingleChat';
+import { ContactRequest } from './Chats';
+import { ChatView } from './ChatView';
+import { ContactRequestDialog } from './ContactRequestDialog';
+import { NoChatsInfo } from './NoChatsInfo';
 
 interface MainChatProps {
   chatID: string;
-  profilePictureUrl?: string;
-  chatName: string;
-  messages: ISingleMessage[];
-  setMessages: (messages: ISingleMessage[]) => void;
+  contactRequestID: string;
   closeChat: () => void;
-  fetchMessages: (chatID: string) => void;
+  chatOpened: boolean;
+  contactRequestOpened: boolean;
+  chats: ISingleChat[];
+  setShowAddChatModal: (show: boolean) => void;
+  contactRequests: ContactRequest[];
+  closeContactRequest: () => void;
 }
 
 export interface ISingleMessage {
@@ -26,37 +29,53 @@ export interface ISingleMessage {
 
 const MainChat: React.FC<MainChatProps> = ({
   chatID,
-  profilePictureUrl,
-  chatName,
-  messages,
-  setMessages,
   closeChat,
-  fetchMessages,
+  chatOpened,
+  chats,
+  setShowAddChatModal,
+  contactRequestID,
+  contactRequestOpened,
+  contactRequests,
+  closeContactRequest,
 }) => {
+  const getContactRequestByID = (id: string) => {
+    return contactRequests.find((c) => c.senderID === id);
+  };
+
+  const isShowContactRequestDialog = () => {
+    const open = contactRequests.length > 0 && !chatOpened;
+    const noChats = chats.length <= 0 && contactRequests.length >= 0;
+    return open || noChats;
+  };
+
   return (
-    <div className={styles.mainChat}>
-      <ChatInfoHeader
-        profilePictureUrl={profilePictureUrl}
-        chatID={chatID}
-        chatName={chatName}
-        closeChat={closeChat}
-      />
-      <div className={styles.chatContainer}>
-        <div className={styles.messageContainer}>
-          <ChatMessageContainer messages={messages} />
-        </div>
-        <div className={styles.bottomControls}>
-          <div className={styles.wrapper}>
-            <SendMessageForm
-              fetchMessages={fetchMessages}
-              chatID={chatID}
-              messages={messages}
-              setMessages={setMessages}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
+    <>
+      {chats.length > 0 && !contactRequestOpened && (
+        <ChatView
+          chatID={chatID}
+          closeChat={closeChat}
+          chatOpened={chatOpened}
+          chats={chats}
+        />
+      )}
+      {chats.length <= 0 && contactRequests.length <= 0 && (
+        <NoChatsInfo setShowAddChatModal={setShowAddChatModal} />
+      )}
+      {isShowContactRequestDialog() && (
+        <ContactRequestDialog
+          key={getContactRequestByID(contactRequestID)?.senderUsername ?? ''}
+          senderID={contactRequestID}
+          senderUsername={
+            getContactRequestByID(contactRequestID)?.senderUsername ?? ''
+          }
+          closeChat={closeChat}
+          senderProfilePicture={
+            getContactRequestByID(contactRequestID)?.senderProfilePicture
+          }
+          closeHandler={closeContactRequest}
+        />
+      )}
+    </>
   );
 };
 

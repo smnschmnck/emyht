@@ -2,26 +2,21 @@ import { ChatInfoHeader } from './ChatInfoHeader';
 import styles from '../styles/ContactRequestDialogComponent.module.css';
 import { BigButton, BigButtonGreyHover, SmallButton } from './atomic/Button';
 import { useState } from 'react';
-import { formatPicURL } from '../helpers/stringFormatters';
 
 interface ContactRequestDialogProps {
   senderID: string;
   senderProfilePicture?: string;
   senderUsername: string;
-  handledContactReqs: string[];
-  setHandledContactReqs: (handledContactReqs: string[]) => void;
   closeChat: () => void;
-  refreshContactRequests: () => void;
+  closeHandler: () => void;
 }
 
 export const ContactRequestDialog: React.FC<ContactRequestDialogProps> = ({
   senderID,
-  senderProfilePicture,
   senderUsername,
   closeChat,
-  handledContactReqs,
-  setHandledContactReqs,
-  refreshContactRequests,
+  senderProfilePicture,
+  closeHandler,
 }) => {
   const [successMessage, setSuccessMessage] = useState('');
   const [handledSuccessfully, sethandledSuccessfully] = useState(false);
@@ -42,7 +37,6 @@ export const ContactRequestDialog: React.FC<ContactRequestDialogProps> = ({
     }
 
     sethandledSuccessfully(true);
-    setHandledContactReqs([...handledContactReqs, senderID]);
     switch (action) {
       case 'accept':
         setSuccessMessage(
@@ -64,18 +58,13 @@ export const ContactRequestDialog: React.FC<ContactRequestDialogProps> = ({
     }
   };
 
-  const closeAndRefresh = () => {
-    closeChat();
-    refreshContactRequests();
-  };
-
   return (
     <div className={styles.container}>
       <ChatInfoHeader
-        profilePictureUrl={formatPicURL(senderProfilePicture)}
-        chatID={senderID}
-        chatName={senderUsername}
-        closeChat={closeAndRefresh}
+        name={senderUsername}
+        close={closeChat}
+        picUrl={senderProfilePicture}
+        info="12:21"
       />
       <div className={styles.main}>
         {!handledSuccessfully && (
@@ -114,7 +103,7 @@ export const ContactRequestDialog: React.FC<ContactRequestDialogProps> = ({
           <div className={styles.successContainer}>
             <h2>{successMessage}</h2>
             <div className={styles.closeButton}>
-              <BigButton onClick={closeAndRefresh}>Close</BigButton>
+              <BigButton onClick={closeHandler}>Close</BigButton>
             </div>
           </div>
         )}

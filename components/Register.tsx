@@ -1,9 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
 import { useFormik } from 'formik';
 import { useState } from 'react';
+import { formatError } from '../helpers/stringFormatters';
 import styles from '../styles/LoginRegisterComponent.module.css';
 import { BigButton, SmallButton } from './atomic/Button';
-import { Error } from './atomic/Error';
+import { ErrorMessage } from './atomic/ErrorMessage';
 import { Input, PasswordInput } from './atomic/Input';
 
 interface RegisterProps {
@@ -37,7 +38,7 @@ const Register: React.FC<RegisterProps> = (props) => {
         body: JSON.stringify(registrationData),
       });
       if (!res.ok) {
-        throw await res.text();
+        throw new Error(await res.text());
       }
     },
     {
@@ -101,7 +102,7 @@ const Register: React.FC<RegisterProps> = (props) => {
             </BigButton>
           </form>
           {sendRegistration.isError && (
-            <Error errorMessage={String(sendRegistration.error)} />
+            <ErrorMessage errorMessage={formatError(sendRegistration.error)} />
           )}
           <SmallButton onClick={props.toggleLoginRegister}>Log In</SmallButton>
         </div>

@@ -9,6 +9,7 @@ import ISingleChat from '../interfaces/ISingleChat';
 import { useState } from 'react';
 import { PopupButton } from './atomic/PopupButton';
 import { BigButton } from './atomic/Button';
+import { useQuery } from '@tanstack/react-query';
 
 export interface ContactRequest {
   senderID: string;
@@ -17,7 +18,6 @@ export interface ContactRequest {
 }
 
 interface ChatsProps {
-  chats: ISingleChat[];
   openChat: (chatID: string) => void;
   addChatButtonClickHandler: () => void;
   sendFriendRequestButtonClickHandler: () => void;
@@ -25,13 +25,17 @@ interface ChatsProps {
 }
 
 const Chats: React.FC<ChatsProps> = ({
-  chats,
   openChat,
   addChatButtonClickHandler,
   sendFriendRequestButtonClickHandler,
   setShowAddChatModal,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const { data } = useQuery<ISingleChat[]>(['chats'], async () => {
+    const res = await fetch('/api/getChats');
+    return (await res.json()) as ISingleChat[];
+  });
+  const chats = data ?? [];
 
   const getFilteredChats = () => {
     return chats.filter((chat) => {

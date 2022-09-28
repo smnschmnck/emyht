@@ -4,41 +4,32 @@ import chat from '../assets/images/chat.svg';
 import { BigButton, SmallButton } from './atomic/Button';
 import { Modal } from './atomic/Modal';
 import { Tab, Tabs } from './atomic/Tabs';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Contact } from './SingleContact';
-import ISingleChat from '../interfaces/ISingleChat';
 import { ChatCreator } from './ChatCreator';
 import { GroupChatCreator } from './GroupChatCreator';
+import { useQuery } from '@tanstack/react-query';
 
 interface AddChatModalProps {
   closeHandler: () => void;
-  setChats: (chats: ISingleChat[]) => void;
   showContactReqModal: () => void;
 }
 
 export const AddChatModal: React.FC<AddChatModalProps> = ({
   closeHandler,
-  setChats,
   showContactReqModal,
 }) => {
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [success, setSuccess] = useState(false);
 
-  const fetchContacts = async () => {
+  const fetchContacts = useQuery(['contacts'], async () => {
     const res = await fetch('/api/getContacts');
     if (!res.ok) {
-      alert(await res.text());
-      return;
+      throw new Error(await res.text());
     }
-    const json = await res.json();
-    setContacts(json);
-    setIsLoading(false);
-  };
+    return (await res.json()) as Contact[];
+  });
 
-  useEffect(() => {
-    fetchContacts();
-  }, []);
+  const contacts = fetchContacts.data ?? [];
 
   return (
     <Modal backgroundClickHandler={closeHandler} mobileFullscreen={true}>
@@ -47,31 +38,29 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({
           <div className={styles.header}>
             <h2 className={styles.heading}>New chat</h2>
           </div>
-          {(contacts.length > 0 || isLoading) && (
+          {(contacts.length > 0 || fetchContacts.isLoading) && (
             <div className={styles.interface}>
               <Tabs>
                 <Tab label="Chat" picture={chat}>
                   <ChatCreator
                     contacts={contacts}
                     closeHandler={closeHandler}
-                    setChats={setChats}
                     setSuccess={setSuccess}
-                    isLoading={isLoading}
+                    isLoading={fetchContacts.isLoading}
                   />
                 </Tab>
                 <Tab label="Group" picture={group}>
                   <GroupChatCreator
                     contacts={contacts}
                     closeHandler={closeHandler}
-                    setChats={setChats}
                     setSuccess={setSuccess}
-                    isLoading={isLoading}
+                    isLoading={fetchContacts.isLoading}
                   />
                 </Tab>
               </Tabs>
             </div>
           )}
-          {contacts.length <= 0 && !isLoading && (
+          {contacts.length <= 0 && !fetchContacts.isLoading && (
             <div className={styles.noContacts}>
               <h2>No contacts</h2>
               <BigButton onClick={showContactReqModal}>

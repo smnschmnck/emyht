@@ -2,8 +2,9 @@ import { useFormik } from 'formik';
 import { Input, PasswordInput } from './atomic/Input';
 import styles from '../styles/LoginRegisterComponent.module.css';
 import { BigButton, SmallButton } from './atomic/Button';
-import { Error } from './atomic/Error';
+import { ErrorMessage } from './atomic/ErrorMessage';
 import { useMutation } from '@tanstack/react-query';
+import { formatError } from '../helpers/stringFormatters';
 
 interface LoginProps {
   showLogin: boolean;
@@ -27,7 +28,7 @@ const Login: React.FC<LoginProps> = (props) => {
         body: JSON.stringify(loginData),
       });
       if (!res.ok) {
-        throw await res.text();
+        throw new Error(await res.text());
       }
     },
     {
@@ -77,7 +78,7 @@ const Login: React.FC<LoginProps> = (props) => {
             </BigButton>
           </form>
           {sendLogin.isError && (
-            <Error errorMessage={String(sendLogin.error)} />
+            <ErrorMessage errorMessage={formatError(sendLogin.error)} />
           )}
           <SmallButton onClick={props.toggleLoginRegister}>Sign Up</SmallButton>
         </div>

@@ -60,3 +60,13 @@ export const formatTimestamp = (timestamp: number) => {
     year: 'numeric',
   }).format(millisecondTimestamp);
 };
+
+export const formatError = (error: unknown) => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (!error) return '';
+
+  return 'Unknown error';
+};

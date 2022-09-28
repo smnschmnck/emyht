@@ -3,7 +3,8 @@ import styles from '../styles/SingleChatComponent.module.css';
 import ISingleChat from '../interfaces/ISingleChat';
 import { formatTimestamp, formatPicURL } from '../helpers/stringFormatters';
 import { useContext } from 'react';
-import { UserCtx } from './ChatSPA';
+import IUser from '../interfaces/IUser';
+import { useQuery } from '@tanstack/react-query';
 
 interface SingleChatProps extends ISingleChat {
   openChat: (chatID: string) => void;
@@ -21,7 +22,11 @@ const SingleChat: React.FC<SingleChatProps> = ({
   pictureUrl,
   openChat,
 }) => {
-  const user = useContext(UserCtx);
+  const userQuery = useQuery<IUser>(['user'], async () => {
+    const res = await fetch('/api/user');
+    return (await res.json()) as IUser;
+  });
+  const user = userQuery.data;
   const ownMessage = user?.uuid === senderID;
   return (
     <div className={styles.wrapper}>

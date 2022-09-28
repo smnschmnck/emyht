@@ -2,17 +2,12 @@ import Image from 'next/image';
 import styles from '../styles/SidebarComponent.module.css';
 import logo from '../assets/images/emyht-logo.svg';
 import Chats, { ContactRequest } from './Chats';
-import ISingleChat from '../interfaces/ISingleChat';
 import UserInfoAndSettings from './UserInfoAndSettings';
 import { ContactRequests } from './ContactRequests';
-import { useContext } from 'react';
-import { UserCtx } from './ChatSPA';
+import { useQuery } from '@tanstack/react-query';
 
 interface SidebarProps {
   chatOpened: boolean;
-  allChats: ISingleChat[];
-  contactRequests: ContactRequest[];
-  handledContactReqs: string[];
   openChat: (chatID: string) => void;
   openContactRequest: (contactRequestID: string) => void;
   setShowAddChatModal: (show: boolean) => void;
@@ -21,36 +16,34 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({
   chatOpened,
-  allChats,
-  contactRequests,
-  handledContactReqs,
   openChat,
   setShowAddChatModal,
   setShowContactRequestModal,
   openContactRequest,
 }) => {
-  const user = useContext(UserCtx);
+  const contactRequestsQuery = useQuery(['contactRequests'], async () => {
+    const res = await fetch('/api/getPendingContactRequests');
+    return (await res.json()) as ContactRequest[];
+  });
+  const contactRequests = contactRequestsQuery.data ?? [];
   return (
     <div className={styles.sidebar} id={chatOpened ? styles.closed : undefined}>
       <div className={styles.innerSidebar}>
         <div className={styles.logoContainer}>
           <Image src={logo} alt="emyht-logo" />
         </div>
-        {contactRequests.length > 0 &&
-          !(contactRequests.length === handledContactReqs.length) && (
-            <>
-              <div className={styles.contactRequestsWrapper}>
-                <ContactRequests
-                  openContactRequest={openContactRequest}
-                  contactRequests={contactRequests}
-                  handledContactReqs={handledContactReqs}
-                />
-              </div>
-              <hr />
-            </>
-          )}
+        {contactRequests.length > 0 && (
+          <>
+            <div className={styles.contactRequestsWrapper}>
+              <ContactRequests
+                openContactRequest={openContactRequest}
+                contactRequests={contactRequests}
+              />
+            </div>
+            <hr />
+          </>
+        )}
         <Chats
-          chats={allChats}
           openChat={openChat}
           addChatButtonClickHandler={() => setShowAddChatModal(true)}
           sendFriendRequestButtonClickHandler={() =>
@@ -59,10 +52,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           setShowAddChatModal={setShowAddChatModal}
         />
       </div>
-      <UserInfoAndSettings
-        username={user?.username ?? 'error'}
-        email={user?.email ?? 'error'}
-      />
+      <UserInfoAndSettings />
     </div>
   );
 };

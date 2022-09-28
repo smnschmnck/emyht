@@ -9,20 +9,17 @@ import { GroupChatCreationSettings } from './GroupchatCreationSettings';
 interface GroupChatCreaterProps {
   contacts: Contact[];
   closeHandler: () => void;
-  setChats: (chats: ISingleChat[]) => void;
   setSuccess: (success: boolean) => void;
   isLoading: boolean;
 }
 
 export const GroupChatCreator: React.FC<GroupChatCreaterProps> = ({
   closeHandler,
-  setChats,
   setSuccess,
   contacts,
   isLoading,
 }) => {
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
-  const [errorMessage, setErrorMessage] = useState('');
   const [showChatSettings, setShowChatSettings] = useState(false);
 
   const resetSelectedContacts = () => {
@@ -31,7 +28,6 @@ export const GroupChatCreator: React.FC<GroupChatCreaterProps> = ({
 
   const setSelectedContactsWrapper = (selectedContactsList: string[]) => {
     setSelectedContacts(selectedContactsList);
-    setErrorMessage('');
   };
 
   return (
@@ -58,11 +54,8 @@ export const GroupChatCreator: React.FC<GroupChatCreaterProps> = ({
       )}
       {showChatSettings && (
         <GroupChatCreationSettings
-          errorMessage={errorMessage}
           setSuccess={setSuccess}
           selectedContacts={selectedContacts}
-          setErrorMessage={setErrorMessage}
-          setChats={setChats}
           resetSelectedContacts={resetSelectedContacts}
         />
       )}

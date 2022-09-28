@@ -1,13 +1,12 @@
-import { FormEvent, useContext, useState } from 'react';
-import { UserCtx } from './ChatSPA';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { type } from 'os';
+import { FormEvent, useState } from 'react';
+import IUser from '../interfaces/IUser';
 import { InputWithButton } from './atomic/InputWithButton';
 import { ISingleMessage } from './MainChat';
 
 interface SendMessageFormProps {
   chatID: string;
-  messages: ISingleMessage[];
-  setMessages: (messages: ISingleMessage[]) => void;
-  fetchMessages: (chatID: string) => void;
 }
 
 interface INewMessage {
@@ -18,15 +17,15 @@ interface INewMessage {
   mediaUrl: string;
 }
 
-export const SendMessageForm: React.FC<SendMessageFormProps> = ({
-  chatID,
-  messages,
-  setMessages,
-  fetchMessages,
-}) => {
+export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
+  const queryClient = useQueryClient();
+  const userQuery = useQuery<IUser>(['user'], async () => {
+    const res = await fetch('/api/user');
+    return (await res.json()) as IUser;
+  });
+  const user = userQuery.data;
   const [messageInputValue, setMessageInputValue] = useState('');
   const [error, setError] = useState('');
-  const user = useContext(UserCtx);
   const MAX_MESSAGE_LENGTH = 4096;
 
   const createMessagePreview = (newMessage: INewMessage) => {
@@ -41,15 +40,60 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({
       timestamp: timeStamp,
       deliveryStatus: 'pending',
     };
-    setMessages([...messages, message]);
+    return message;
   };
+
+  const sendRequest = useMutation(
+    ['messages', chatID],
+    async (newMessage: INewMessage) => {
+      if (newMessage.textContent.length > MAX_MESSAGE_LENGTH) {
+        setError('Your message is too long');
+      }
+      const res = await fetch('/api/sendMessage', {
+        method: 'post',
+        body: JSON.stringify(newMessage),
+      });
+      if (!res.ok) {
+        setError('FAILED TO SEND MESSAGE');
+      }
+      const json: ISingleMessage[] = await res.json();
+      return json;
+    },
+    {
+      onMutate: async (newMessage) => {
+        setMessageInputValue('');
+        await queryClient.cancelQueries(['messages', chatID]);
+        const previousMessages = queryClient.getQueryData<ISingleMessage[]>([
+          'messages',
+          chatID,
+        ]);
+        const preview = createMessagePreview(newMessage);
+        queryClient.setQueryData<ISingleMessage[]>(
+          ['messages', chatID],
+          (oldMessages) => [...(oldMessages ?? []), preview]
+        );
+        return { previousMessages };
+      },
+      onError: (err, newMessages, context) => {
+        class ctx {
+          previousMessages: ISingleMessage[] | undefined;
+        }
+        if (context instanceof ctx) {
+          queryClient.setQueryData(
+            ['messages', chatID],
+            context?.previousMessages ?? []
+          );
+        }
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(['messages', chatID]);
+        queryClient.invalidateQueries(['chats']);
+      },
+    }
+  );
 
   const sendMessage = async (event: FormEvent) => {
     event.preventDefault();
-    if (messageInputValue.length > MAX_MESSAGE_LENGTH) {
-      setError('Your message is too long');
-      return;
-    }
     const body = {
       chatID: chatID,
       textContent: messageInputValue,
@@ -57,19 +101,7 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({
       messageType: 'plaintext',
       mediaUrl: '',
     };
-    setMessageInputValue('');
-    createMessagePreview(body);
-    const res = await fetch('/api/sendMessage', {
-      method: 'post',
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      setError('FAILED TO SEND MESSAGE');
-      fetchMessages(chatID);
-      return;
-    }
-    const json: ISingleMessage[] = await res.json();
-    setMessages(json);
+    sendRequest.mutate(body);
   };
 
   const setValueWithLengthCheck = (val: string) => {

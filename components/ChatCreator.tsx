@@ -4,52 +4,55 @@ import { ContactList } from './ContactList';
 import styles from '../styles/ChatCreator.module.css';
 import ISingleChat from '../interfaces/ISingleChat';
 import { Contact } from './SingleContact';
-import { Error } from './atomic/Error';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { formatError } from '../helpers/stringFormatters';
+import { ErrorMessage } from './atomic/ErrorMessage';
 
 interface ChatCreaterProps {
   contacts: Contact[];
   closeHandler: () => void;
-  setChats: (chats: ISingleChat[]) => void;
   setSuccess: (success: boolean) => void;
   isLoading: boolean;
 }
 
 export const ChatCreator: React.FC<ChatCreaterProps> = ({
   closeHandler,
-  setChats,
   setSuccess,
   contacts,
   isLoading,
 }) => {
   const [selectedContact, setSelectedContact] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const queryClient = useQueryClient();
 
-  const createChat = async () => {
-    const body = {
-      participantUUID: selectedContact,
-    };
-    const res = await fetch('/api/startOneOnOneChat', {
-      method: 'post',
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      setErrorMessage(await res.text());
-      resetSelectedContacts();
-      return;
+  const sendRequest = useMutation(
+    ['chats'],
+    async () => {
+      const body = {
+        participantUUID: selectedContact,
+      };
+      const res = await fetch('/api/startOneOnOneChat', {
+        method: 'post',
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+      const json: ISingleChat[] = await res.json();
+      return json;
+    },
+    {
+      onSuccess: () => {
+        setSuccess(true);
+        setSelectedContact('');
+        queryClient.invalidateQueries(['chats']);
+      },
     }
-    const json: ISingleChat[] = await res.json();
-    setChats(json);
-    setSuccess(true);
-  };
-
-  const resetSelectedContacts = () => {
-    setSelectedContact('');
-  };
+  );
 
   const setSelectedContactsWrapper = (selectedContactsList: string[]) => {
     setSelectedContact(selectedContactsList[0]);
-    setErrorMessage('');
   };
+
   return (
     <>
       <ContactList
@@ -59,10 +62,15 @@ export const ChatCreator: React.FC<ChatCreaterProps> = ({
         contacts={contacts}
       />
       <div className={styles.buttons}>
-        <BigButton onClick={() => createChat()} disabled={!selectedContact}>
+        <BigButton
+          onClick={() => sendRequest.mutate()}
+          disabled={!selectedContact}
+        >
           Start chat
         </BigButton>
-        {errorMessage && <Error errorMessage={errorMessage} />}
+        {sendRequest.isError && (
+          <ErrorMessage errorMessage={formatError(sendRequest.error)} />
+        )}
         <SmallButton onClick={closeHandler}>Cancel</SmallButton>
       </div>
     </>
