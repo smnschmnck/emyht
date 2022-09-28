@@ -8,16 +8,19 @@ import { useState } from 'react';
 import { Contact } from './SingleContact';
 import { ChatCreator } from './ChatCreator';
 import { GroupChatCreator } from './GroupChatCreator';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import ISingleChat from '../interfaces/ISingleChat';
 
 interface AddChatModalProps {
   closeHandler: () => void;
   showContactReqModal: () => void;
+  setCurChatID: (id: string) => void;
 }
 
 export const AddChatModal: React.FC<AddChatModalProps> = ({
   closeHandler,
   showContactReqModal,
+  setCurChatID,
 }) => {
   const [success, setSuccess] = useState(false);
 
@@ -30,6 +33,11 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({
   });
 
   const contacts = fetchContacts.data ?? [];
+
+  const successHandler = async (success: boolean, chats: ISingleChat[]) => {
+    setSuccess(success);
+    setCurChatID(chats[0].chatID);
+  };
 
   return (
     <Modal backgroundClickHandler={closeHandler} mobileFullscreen={true}>
@@ -45,7 +53,7 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({
                   <ChatCreator
                     contacts={contacts}
                     closeHandler={closeHandler}
-                    setSuccess={setSuccess}
+                    setSuccess={successHandler}
                     isLoading={fetchContacts.isLoading}
                   />
                 </Tab>
@@ -53,7 +61,7 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({
                   <GroupChatCreator
                     contacts={contacts}
                     closeHandler={closeHandler}
-                    setSuccess={setSuccess}
+                    setSuccess={successHandler}
                     isLoading={fetchContacts.isLoading}
                   />
                 </Tab>

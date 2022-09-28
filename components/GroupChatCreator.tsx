@@ -9,7 +9,7 @@ import { GroupChatCreationSettings } from './GroupchatCreationSettings';
 interface GroupChatCreaterProps {
   contacts: Contact[];
   closeHandler: () => void;
-  setSuccess: (success: boolean) => void;
+  setSuccess: (success: boolean, chats: ISingleChat[]) => void;
   isLoading: boolean;
 }
 

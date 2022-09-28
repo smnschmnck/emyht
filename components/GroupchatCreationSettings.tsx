@@ -10,7 +10,7 @@ import { Input } from './atomic/Input';
 interface GroupChatCreationSettingsProps {
   selectedContacts: string[];
   resetSelectedContacts: () => void;
-  setSuccess: (success: boolean) => void;
+  setSuccess: (success: boolean, chats: ISingleChat[]) => void;
 }
 
 export const GroupChatCreationSettings: React.FC<
@@ -42,8 +42,8 @@ export const GroupChatCreationSettings: React.FC<
       return json;
     },
     {
-      onSuccess: () => {
-        setSuccess(true);
+      onSuccess: (chats) => {
+        setSuccess(true, chats);
         queryClient.invalidateQueries(['chats']);
       },
     }

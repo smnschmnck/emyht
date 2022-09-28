@@ -11,7 +11,7 @@ import { ErrorMessage } from './atomic/ErrorMessage';
 interface ChatCreaterProps {
   contacts: Contact[];
   closeHandler: () => void;
-  setSuccess: (success: boolean) => void;
+  setSuccess: (success: boolean, chats: ISingleChat[]) => void;
   isLoading: boolean;
 }
 
@@ -41,10 +41,10 @@ export const ChatCreator: React.FC<ChatCreaterProps> = ({
       return json;
     },
     {
-      onSuccess: () => {
-        setSuccess(true);
+      onSuccess: (chats) => {
+        setSuccess(true, chats);
         setSelectedContact('');
-        queryClient.invalidateQueries(['chats']);
+        queryClient.invalidateQueries<ISingleChat[]>(['chats']);
       },
     }
   );

@@ -42,9 +42,24 @@ export const ChatSPA: React.FC = () => {
   useEffect(() => {
     if (!webSocket.current) return;
     webSocket.current.onmessage = (msg) => {
-      handleWebsocketMessage(msg, queryClient, curChatID, chatOpened);
+      handleWebsocketMessage(
+        msg,
+        queryClient,
+        curChatID,
+        chatOpened,
+        curContactRequestID,
+        setCurChatID,
+        setCurContactRequestID
+      );
     };
-  }, [chatOpened, chatsQuery, contactRequestsQuery, curChatID, queryClient]);
+  }, [
+    chatOpened,
+    chatsQuery,
+    contactRequestsQuery,
+    curChatID,
+    curContactRequestID,
+    queryClient,
+  ]);
 
   const switchToContactReqModal = () => {
     setShowAddChatModal(false);
@@ -90,6 +105,7 @@ export const ChatSPA: React.FC = () => {
         <AddChatModal
           showContactReqModal={switchToContactReqModal}
           closeHandler={() => setShowAddChatModal(false)}
+          setCurChatID={setCurChatID}
         />
       )}
       {showContactRequestModal && (

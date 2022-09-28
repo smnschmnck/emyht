@@ -1,7 +1,9 @@
 //ALL OF THIS CODE SHOULD BE RUN CLIENT SIDE ONLY!
 
 import { QueryClient } from '@tanstack/react-query';
+import { ContactRequest } from '../components/Chats';
 import { WIDTH_BREAKPOINT } from '../helpers/clientGlobals';
+import ISingleChat from '../interfaces/ISingleChat';
 
 export const sendSocketAuthRequest = async (id: string) => {
   const body = {
@@ -23,11 +25,46 @@ interface WebSocketData {
   payload?: any;
 }
 
-export const handleWebsocketMessage = (
+const handleNewContactRequest = (
+  queryClient: QueryClient,
+  curContactRequestID: string,
+  setCurContactRequestID: (id: string) => void
+) => {
+  queryClient.invalidateQueries(['contactRequests']).then(async () => {
+    if (curContactRequestID === '') {
+      const contactRequests = queryClient.getQueryData<ContactRequest[]>([
+        'contactRequests',
+      ]);
+      if (contactRequests) {
+        setCurContactRequestID(contactRequests[0]?.senderID);
+      }
+    }
+  });
+};
+
+const handleNewChat = (
+  queryClient: QueryClient,
+  curChatID: string,
+  setCurChatID: (id: string) => void
+) => {
+  queryClient.invalidateQueries(['chats']).then(async () => {
+    if (curChatID === '') {
+      const chats = queryClient.getQueryData<ISingleChat[]>(['chats']);
+      if (chats) {
+        setCurChatID(chats[0]?.chatID);
+      }
+    }
+  });
+};
+
+export const handleWebsocketMessage = async (
   msg: MessageEvent<any>,
   queryClient: QueryClient,
   curChatID: string,
-  chatOpened: boolean
+  chatOpened: boolean,
+  curContactRequestID: string,
+  setCurChatID: (id: string) => void,
+  setCurContactRequestID: (id: string) => void
 ) => {
   const json: WebSocketData = JSON.parse(msg.data);
   const event = json.event;
@@ -44,10 +81,14 @@ export const handleWebsocketMessage = (
       }
       break;
     case 'chat':
-      queryClient.invalidateQueries(['chats']);
+      handleNewChat(queryClient, curChatID, setCurChatID);
       break;
     case 'contactRequest':
-      queryClient.invalidateQueries(['contactRequests']);
+      handleNewContactRequest(
+        queryClient,
+        curContactRequestID,
+        setCurContactRequestID
+      );
       break;
     case 'auth':
       const authPayload: { id: string } = payload;
