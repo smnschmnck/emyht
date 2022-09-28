@@ -97,6 +97,7 @@ const Chats: React.FC<ChatsProps> = ({
             key={chat.chatID}
             creationTimestamp={chat.creationTimestamp}
             chatID={chat.chatID}
+            chatType={chat.chatType}
             chatName={chat.chatName}
             timestamp={chat.timestamp}
             textContent={chat.textContent}

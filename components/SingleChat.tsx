@@ -21,6 +21,7 @@ const SingleChat: React.FC<SingleChatProps> = ({
   deliveryStatus,
   pictureUrl,
   openChat,
+  messageType,
 }) => {
   const userQuery = useQuery<IUser>(['user'], async () => {
     const res = await fetch('/api/user');
