@@ -43,7 +43,6 @@ const Register: React.FC<RegisterProps> = (props) => {
     },
     {
       onSuccess: props.newLogin,
-      retry: 3,
     }
   );
 
