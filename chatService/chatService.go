@@ -662,7 +662,7 @@ func GetChatInfo(c echo.Context) error {
 			fmt.Println(err.Error())
 			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 		}
-		out := fmt.Sprint(groupChatUsers) + " Member"
+		out := fmt.Sprint(groupChatUsers) + " member"
 		if groupChatUsers > 1 {
 			out += "s"
 		}
