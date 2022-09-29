@@ -27,14 +27,14 @@ export const ChatSPA: React.FC = () => {
 
   //Get first items
   const getFirstContactReqID = () => {
-    if (contactRequests && contactRequests[0].senderID) {
+    if (contactRequests && contactRequests[0] && contactRequests[0].senderID) {
       return contactRequests[0].senderID;
     }
     return '';
   };
 
   const getFirstChatID = () => {
-    if (chats && chats[0].chatID) {
+    if (chats && chats[0] && chats[0].chatID) {
       return chats[0].chatID;
     }
     return '';
