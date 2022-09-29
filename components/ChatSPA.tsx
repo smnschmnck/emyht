@@ -108,6 +108,13 @@ export const ChatSPA: React.FC = () => {
   };
 
   useEffect(() => {
+    if (router.asPath === '/') {
+      setContactRequestOpened(false);
+      setChatOpened(false);
+    }
+  }, [router.asPath]);
+
+  useEffect(() => {
     if (!router.query.chatID) return;
     const routeChatID = router.query.chatID.toString();
     setContactRequestOpened(false);
