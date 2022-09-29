@@ -43,7 +43,8 @@ const MainChat: React.FC<MainChatProps> = ({
   };
 
   const isShowContactRequestDialog = () => {
-    const open = contactRequests.length > 0 && !chatOpened;
+    const open =
+      contactRequests.length > 0 && !chatOpened && contactRequestOpened;
     const noChats = chats.length <= 0 && contactRequests.length >= 0;
     return open || noChats;
   };
