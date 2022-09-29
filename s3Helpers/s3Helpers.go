@@ -95,16 +95,17 @@ func PresignS3Object(objectUrl string, action string) (string, error) {
 	}
 
 	client := s3.NewFromConfig(cfg)
-
-	presignClient := s3.NewPresignClient(client)
+	presignClient := s3.NewPresignClient(client, func(options *s3.PresignOptions) {
+		options.Expires = presignedURLExpiration
+	})
 
 	var presignResult *v4.PresignedHTTPRequest
-
 	switch strings.ToUpper(action) {
 	case "GET":
 		presignResult, err = presignClient.PresignGetObject(context.TODO(), &s3.GetObjectInput{
-			Bucket: aws.String(bucketName),
-			Key:    aws.String(objectUrl),
+			Bucket:          aws.String(bucketName),
+			Key:             aws.String(objectUrl),
+			ResponseExpires: aws.Time(time.Time{}),
 		})
 		if err != nil {
 			return "", err
