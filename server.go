@@ -71,6 +71,7 @@ func initGlobals() {
 	loadDotEnv()
 	postgresHelper.LoadEnv()
 	redisHelper.LoadUserSessionsRedisEnv()
+	redisHelper.LoadPresignedURLsRedisEnv()
 	setPort(3001)
 }
 
