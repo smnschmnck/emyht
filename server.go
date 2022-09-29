@@ -12,6 +12,7 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/joho/godotenv"
 )
@@ -20,6 +21,8 @@ var PORT string
 
 func handleRequest() {
 	e := echo.New()
+	//TODO: Use Redis for distributed rate limiting
+	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
 	//Websocket
 	e.Any("/ws", wsService.InitializeNewSocketConnection)
 	e.POST("/authenticateSocketConnection", wsService.AuthenticateSocketConnection)
