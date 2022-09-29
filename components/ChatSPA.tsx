@@ -76,9 +76,9 @@ export const ChatSPA: React.FC = () => {
   };
 
   const openChat = (chatID: string) => {
-    shallowPush(router, `/?chatID=${chatID}`);
     chatsQuery.refetch();
     closeContactRequest();
+    shallowPush(router, `/?chatID=${chatID}`);
     setChatOpened(true);
     setCurChatID(chatID);
   };
@@ -93,9 +93,9 @@ export const ChatSPA: React.FC = () => {
   };
 
   const openContactRequest = (contactRequestID: string) => {
-    shallowPush(router, `/?contactRequestID=${contactRequestID}`);
     contactRequestsQuery.refetch();
     closeChat();
+    shallowPush(router, `/?contactRequestID=${contactRequestID}`);
     setContactRequestOpened(true);
     setCurContactRequestID(contactRequestID);
   };
@@ -130,8 +130,8 @@ export const ChatSPA: React.FC = () => {
   useEffect(() => {
     if (!router.query.contactRequestID) return;
     const routeContactRequestID = router.query.contactRequestID.toString();
-    setContactRequestOpened(false);
-    setChatOpened(true);
+    setContactRequestOpened(true);
+    setChatOpened(false);
     setCurContactRequestID(routeContactRequestID);
   }, [router.query.contactRequestID]);
 
