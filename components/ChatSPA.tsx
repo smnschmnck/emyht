@@ -21,17 +21,31 @@ export const ChatSPA: React.FC = () => {
   //Query server side data
   const queryClient = useQueryClient();
   const chatsQuery = useQuery<ISingleChat[]>(['chats']);
-  const chats = chatsQuery.data ?? [];
+  const chats = chatsQuery.data;
   const contactRequestsQuery = useQuery<ContactRequest[]>(['contactRequests']);
-  const contactRequests = contactRequestsQuery.data ?? [];
+  const contactRequests = contactRequestsQuery.data;
+
+  //Get first items
+  const getFirstContactReqID = () => {
+    if (contactRequests && contactRequests[0].senderID) {
+      return contactRequests[0].senderID;
+    }
+    return '';
+  };
+
+  const getFirstChatID = () => {
+    if (chats && chats[0].chatID) {
+      return chats[0].chatID;
+    }
+    return '';
+  };
 
   //State
   const [showAddChatModal, setShowAddChatModal] = useState(false);
   const [showContactRequestModal, setShowContactRequestModal] = useState(false);
-  const [curChatID, setCurChatID] = useState(chats[0]?.chatID ?? '');
-  const [curContactRequestID, setCurContactRequestID] = useState(
-    contactRequests[0]?.senderID ?? ''
-  );
+  const [curChatID, setCurChatID] = useState(getFirstChatID());
+  const [curContactRequestID, setCurContactRequestID] =
+    useState(getFirstContactReqID);
   const [contactRequestOpened, setContactRequestOpened] = useState(false);
   const [chatOpened, setChatOpened] = useState(false);
   const webSocket = useRef<WebSocket | null>(null);
@@ -86,6 +100,7 @@ export const ChatSPA: React.FC = () => {
     shallowPush(router, '/');
     setChatOpened(false);
     contactRequestsQuery.refetch();
+    if (!contactRequests) return;
     if (contactRequests.length > 0) {
       setContactRequestOpened(true);
     }
@@ -103,6 +118,7 @@ export const ChatSPA: React.FC = () => {
     shallowPush(router, '/');
     setContactRequestOpened(false);
     contactRequestsQuery.refetch();
+    if (!chats) return;
     if (chats.length > 0) {
       setChatOpened(true);
     }
@@ -120,8 +136,13 @@ export const ChatSPA: React.FC = () => {
   useEffect(() => {
     if (!router.query.chatID) return;
     const routeChatID = router.query.chatID.toString();
+    if (!chats) {
+      router.push('/404');
+      return;
+    }
     if (!chats.find((c) => c.chatID === routeChatID)) {
       router.push('/404');
+      return;
     }
     setContactRequestOpened(false);
     setChatOpened(true);
@@ -132,8 +153,13 @@ export const ChatSPA: React.FC = () => {
   useEffect(() => {
     if (!router.query.contactRequestID) return;
     const routeContactRequestID = router.query.contactRequestID.toString();
+    if (!contactRequests) {
+      router.push('/404');
+      return;
+    }
     if (!contactRequests.find((c) => c.senderID === routeContactRequestID)) {
       router.push('/404');
+      return;
     }
     setContactRequestOpened(true);
     setChatOpened(false);
@@ -170,8 +196,8 @@ export const ChatSPA: React.FC = () => {
           id={chatOpened ? undefined : styles.closed}
         >
           <MainChat
-            chats={chats}
-            contactRequests={contactRequests}
+            chats={chats ?? []}
+            contactRequests={contactRequests ?? []}
             chatOpened={chatOpened}
             contactRequestID={curContactRequestID}
             contactRequestOpened={contactRequestOpened}
