@@ -74,7 +74,6 @@ export const ChatSPA: React.FC = () => {
     setShowAddChatModal(false);
     setShowContactRequestModal(true);
   };
-
   const openChat = (chatID: string) => {
     chatsQuery.refetch();
     closeContactRequest();
@@ -121,19 +120,25 @@ export const ChatSPA: React.FC = () => {
   useEffect(() => {
     if (!router.query.chatID) return;
     const routeChatID = router.query.chatID.toString();
+    if (!chats.find((c) => c.chatID === routeChatID)) {
+      router.push('/404');
+    }
     setContactRequestOpened(false);
     setChatOpened(true);
     setCurChatID(routeChatID);
-  }, [router.query.chatID]);
+  }, [chats, router, router.query.chatID]);
 
   //Running if contactRequestID query is in URL
   useEffect(() => {
     if (!router.query.contactRequestID) return;
     const routeContactRequestID = router.query.contactRequestID.toString();
+    if (!contactRequests.find((c) => c.senderID === routeContactRequestID)) {
+      router.push('/404');
+    }
     setContactRequestOpened(true);
     setChatOpened(false);
     setCurContactRequestID(routeContactRequestID);
-  }, [router.query.contactRequestID]);
+  }, [contactRequests, router, router.query.contactRequestID]);
 
   return (
     <>
