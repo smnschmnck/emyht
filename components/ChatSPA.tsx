@@ -9,6 +9,13 @@ import ISingleChat from '../interfaces/ISingleChat';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ContactRequest } from './Chats';
 import { handleWebsocketMessage } from '../helpers/websocket';
+import { NextRouter, useRouter } from 'next/router';
+
+const shallowPush = (router: NextRouter, route: string) => {
+  router.push(route, undefined, {
+    shallow: true,
+  });
+};
 
 export const ChatSPA: React.FC = () => {
   //Query server side data
@@ -28,6 +35,8 @@ export const ChatSPA: React.FC = () => {
   const [contactRequestOpened, setContactRequestOpened] = useState(false);
   const [chatOpened, setChatOpened] = useState(false);
   const webSocket = useRef<WebSocket | null>(null);
+
+  const router = useRouter();
 
   //Handling Websocket connection
   useEffect(() => {
@@ -67,6 +76,7 @@ export const ChatSPA: React.FC = () => {
   };
 
   const openChat = (chatID: string) => {
+    shallowPush(router, `/?chatID=${chatID}`);
     chatsQuery.refetch();
     closeContactRequest();
     setChatOpened(true);
@@ -82,6 +92,7 @@ export const ChatSPA: React.FC = () => {
   };
 
   const openContactRequest = (contactRequestID: string) => {
+    shallowPush(router, `/?contactRequestID=${contactRequestID}`);
     contactRequestsQuery.refetch();
     closeChat();
     setContactRequestOpened(true);
@@ -95,6 +106,22 @@ export const ChatSPA: React.FC = () => {
       setChatOpened(true);
     }
   };
+
+  useEffect(() => {
+    if (!router.query.chatID) return;
+    const routeChatID = router.query.chatID.toString();
+    setContactRequestOpened(false);
+    setChatOpened(true);
+    setCurChatID(routeChatID);
+  }, [router.query.chatID]);
+
+  useEffect(() => {
+    if (!router.query.contactRequestID) return;
+    const routeContactRequestID = router.query.contactRequestID.toString();
+    setContactRequestOpened(false);
+    setChatOpened(true);
+    setCurContactRequestID(routeContactRequestID);
+  }, [router.query.contactRequestID]);
 
   return (
     <>
