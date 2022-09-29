@@ -84,6 +84,7 @@ export const ChatSPA: React.FC = () => {
   };
 
   const closeChat = () => {
+    shallowPush(router, '/');
     setChatOpened(false);
     contactRequestsQuery.refetch();
     if (contactRequests.length > 0) {
@@ -100,6 +101,7 @@ export const ChatSPA: React.FC = () => {
   };
 
   const closeContactRequest = () => {
+    shallowPush(router, '/');
     setContactRequestOpened(false);
     contactRequestsQuery.refetch();
     if (chats.length > 0) {
@@ -107,6 +109,7 @@ export const ChatSPA: React.FC = () => {
     }
   };
 
+  //Close all windows on base path
   useEffect(() => {
     if (router.asPath === '/') {
       setContactRequestOpened(false);
@@ -114,6 +117,7 @@ export const ChatSPA: React.FC = () => {
     }
   }, [router.asPath]);
 
+  //Running if chatID query is in URL
   useEffect(() => {
     if (!router.query.chatID) return;
     const routeChatID = router.query.chatID.toString();
@@ -122,6 +126,7 @@ export const ChatSPA: React.FC = () => {
     setCurChatID(routeChatID);
   }, [router.query.chatID]);
 
+  //Running if contactRequestID query is in URL
   useEffect(() => {
     if (!router.query.contactRequestID) return;
     const routeContactRequestID = router.query.contactRequestID.toString();
