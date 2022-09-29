@@ -85,7 +85,7 @@ func startSession(uuid string) (Session, error) {
 		return Session{}, err
 	}
 
-	rdb := redis.NewClient(&redisHelper.RedisConfig)
+	rdb := redis.NewClient(&redisHelper.UserSessionsRedisConfig)
 	ctx := context.Background()
 	err = rdb.Set(ctx, token, uuid, 24*time.Hour).Err()
 
@@ -347,7 +347,7 @@ func Logout(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
-	rdb := redis.NewClient(&redisHelper.RedisConfig)
+	rdb := redis.NewClient(&redisHelper.UserSessionsRedisConfig)
 	ctx := context.Background()
 	_, err = rdb.Del(ctx, sessionID).Result()
 	if err != nil {

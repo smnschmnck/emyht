@@ -70,7 +70,7 @@ func loadDotEnv() {
 func initGlobals() {
 	loadDotEnv()
 	postgresHelper.LoadEnv()
-	redisHelper.LoadEnv()
+	redisHelper.LoadUserSessionsRedisEnv()
 	setPort(3001)
 }
 

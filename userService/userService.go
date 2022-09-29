@@ -133,7 +133,7 @@ type ResponseError struct {
 
 func GetUUIDBySessionID(sessionID string) (string, error) {
 	ctx := context.Background()
-	rdb := redis.NewClient(&redisHelper.RedisConfig)
+	rdb := redis.NewClient(&redisHelper.UserSessionsRedisConfig)
 	uuid, err := rdb.Get(ctx, sessionID).Result()
 	if err != nil {
 		return "", err

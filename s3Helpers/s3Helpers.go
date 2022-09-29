@@ -13,7 +13,6 @@ import (
 )
 
 func PresignS3GetObject(objectUrl string) string {
-
 	var bucketName = os.Getenv("S3_BUCKET_NAME")
 	var accountId = os.Getenv("S3_ACCOUNT_ID")
 	var accessKeyId = os.Getenv("S3_ACCESS_KEY")
