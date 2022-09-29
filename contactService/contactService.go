@@ -3,6 +3,7 @@ package contactService
 import (
 	"chat/authService"
 	"chat/dbHelpers/postgresHelper"
+	"chat/s3Helpers"
 	"chat/userService"
 	"chat/wsService"
 	"context"
@@ -147,6 +148,14 @@ func GetContacts(c echo.Context) error {
 
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	for i, contact := range contacts {
+		picUrl := contact.PictureUrl
+		if strings.HasPrefix(picUrl, "storage.emyht.com/") {
+			trimmedPicUrl := strings.Replace(picUrl, "storage.emyht.com/", "", -1)
+			contacts[i].PictureUrl = s3Helpers.PresignS3GetObject(trimmedPicUrl)
+		}
 	}
 
 	return c.JSON(http.StatusOK, contacts)
