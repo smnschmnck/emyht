@@ -12,6 +12,7 @@ interface SidebarProps {
   openContactRequest: (contactRequestID: string) => void;
   setShowAddChatModal: (show: boolean) => void;
   setShowContactRequestModal: (show: boolean) => void;
+  openSettings: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -20,6 +21,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setShowAddChatModal,
   setShowContactRequestModal,
   openContactRequest,
+  openSettings,
 }) => {
   const contactRequestsQuery = useQuery(['contactRequests'], async () => {
     const res = await fetch('/api/getPendingContactRequests');
@@ -52,7 +54,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           setShowAddChatModal={setShowAddChatModal}
         />
       </div>
-      <UserInfoAndSettings />
+      <UserInfoAndSettings openSettings={openSettings} />
     </div>
   );
 };

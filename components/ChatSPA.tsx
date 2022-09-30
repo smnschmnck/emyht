@@ -10,6 +10,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ContactRequest } from './Chats';
 import { handleWebsocketMessage } from '../helpers/websocket';
 import { NextRouter, useRouter } from 'next/router';
+import { SettingsModal } from './SettingsModal';
 
 const shallowPush = (router: NextRouter, route: string) => {
   router.push(route, undefined, {
@@ -43,6 +44,7 @@ export const ChatSPA: React.FC = () => {
   //State
   const [showAddChatModal, setShowAddChatModal] = useState(false);
   const [showContactRequestModal, setShowContactRequestModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [curChatID, setCurChatID] = useState(getFirstChatID());
   const [curContactRequestID, setCurContactRequestID] =
     useState(getFirstContactReqID);
@@ -94,6 +96,10 @@ export const ChatSPA: React.FC = () => {
     shallowPush(router, `/?chatID=${chatID}`);
     setChatOpened(true);
     setCurChatID(chatID);
+  };
+
+  const openSettings = () => {
+    setShowSettingsModal(true);
   };
 
   const closeChat = () => {
@@ -171,6 +177,9 @@ export const ChatSPA: React.FC = () => {
       <Head>
         <title>emyht</title>
       </Head>
+      {showSettingsModal && (
+        <SettingsModal closeHandler={() => setShowSettingsModal(false)} />
+      )}
       {showAddChatModal && (
         <AddChatModal
           showContactReqModal={switchToContactReqModal}
@@ -190,6 +199,7 @@ export const ChatSPA: React.FC = () => {
           openContactRequest={openContactRequest}
           setShowAddChatModal={setShowAddChatModal}
           setShowContactRequestModal={setShowContactRequestModal}
+          openSettings={openSettings}
         />
         <div
           className={styles.chatContainer}

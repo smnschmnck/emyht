@@ -6,7 +6,13 @@ import Logout from './Logout';
 import { useQuery } from '@tanstack/react-query';
 import IUser from '../interfaces/IUser';
 
-const UserInfoAndSettings: React.FC = ({}) => {
+interface UserInfoAndSettingsProps {
+  openSettings: () => void;
+}
+
+const UserInfoAndSettings: React.FC<UserInfoAndSettingsProps> = ({
+  openSettings,
+}) => {
   const userQuery = useQuery<IUser>(['user'], async () => {
     const res = await fetch('/api/user');
     return (await res.json()) as IUser;
@@ -18,7 +24,11 @@ const UserInfoAndSettings: React.FC = ({}) => {
         <h3 className={styles.usernameH3}>{user?.username ?? 'Error'}</h3>
         <p className={styles.emailP}>{user?.email ?? 'Error'}</p>
       </div>
-      <button className={styles.actionButton} title="Settings">
+      <button
+        className={styles.actionButton}
+        onClick={openSettings}
+        title="Settings"
+      >
         <Image src={more} alt="settings" />
       </button>
       <Logout className={styles.actionButton}>
