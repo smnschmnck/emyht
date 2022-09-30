@@ -347,14 +347,7 @@ func GetChats(c echo.Context) error {
 	}
 
 	for i, chat := range chats {
-		picUrl := chat.PictureUrl
-		if strings.HasPrefix(picUrl, "storage.emyht.com/") {
-			trimmedPicUrl := strings.Replace(picUrl, "storage.emyht.com/", "", -1)
-			presignedUrl, err := s3Helpers.PresignGetObject(trimmedPicUrl, 5*time.Hour)
-			if err == nil {
-				chats[i].PictureUrl = presignedUrl
-			}
-		}
+		chats[i].PictureUrl = s3Helpers.FormatPictureUrl(chat.PictureUrl)
 	}
 
 	return c.JSON(http.StatusOK, chats)
