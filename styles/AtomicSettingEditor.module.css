@@ -5,8 +5,7 @@
   width: 100%;
   height: fit-content;
   min-height: 20px;
-  border-radius: 7px;
-  background-color: var(--lightestGrey);
+  border-bottom: 1px solid var(--lightGrey);
 }
 
 .settingInfo {
@@ -36,4 +35,13 @@
   justify-content: center;
   align-items: center;
   width: 6rem;
+}
+
+.editor {
+  width: 100%;
+}
+
+.editModeControls {
+  display: flex;
+  flex-direction: row;
 }
