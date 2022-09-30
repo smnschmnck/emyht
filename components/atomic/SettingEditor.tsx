@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 import styles from '../../styles/AtomicSettingEditor.module.css';
 import { SmallButton } from './Button';
 import { Input } from './Input';
@@ -17,7 +17,8 @@ export const SettingEditor: React.FC<SettingEditorProps> = ({
   const [editMode, setEditMode] = useState(false);
   const [editVal, setEditVal] = useState(settingValue);
 
-  const saveChange = () => {
+  const saveChange = (e: FormEvent) => {
+    e.preventDefault();
     if (editVal === settingValue) {
       closeEditMode();
       return;
@@ -37,17 +38,19 @@ export const SettingEditor: React.FC<SettingEditorProps> = ({
         <h4 className={styles.settingName}>{settingName}</h4>
         {!editMode && <p className={styles.settingValue}>{settingValue}</p>}
         {editMode && (
-          <div className={styles.editor}>
+          <form className={styles.editor} onSubmit={saveChange}>
             <Input
               value={editVal}
               onChange={(e) => setEditVal(e.target.value)}
               autoFocus
             />
             <div className={styles.editModeControls}>
-              <SmallButton onClick={closeEditMode}>Cancel</SmallButton>
-              <SmallButton onClick={saveChange}>Save</SmallButton>
+              <SmallButton type="button" onClick={closeEditMode}>
+                Cancel
+              </SmallButton>
+              <SmallButton type="submit">Save</SmallButton>
             </div>
-          </div>
+          </form>
         )}
       </div>
       {!editMode && (
