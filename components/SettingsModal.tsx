@@ -42,10 +42,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <SettingEditor
               settingName={'Username'}
               settingValue={user?.username ?? ''}
+              changeHandler={(newVal) => alert('CHANGED TO: ' + newVal)}
             />
             <SettingEditor
               settingName={'E-Mail'}
               settingValue={user?.email ?? ''}
+              changeHandler={(newVal) => alert('CHANGED TO: ' + newVal)}
             />
           </div>
         </div>

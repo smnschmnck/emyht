@@ -6,14 +6,30 @@ import { Input } from './Input';
 interface SettingEditorProps {
   settingName: string;
   settingValue: string;
+  changeHandler: (newVal: string) => void;
 }
 
 export const SettingEditor: React.FC<SettingEditorProps> = ({
   settingName,
   settingValue,
+  changeHandler,
 }) => {
   const [editMode, setEditMode] = useState(false);
   const [editVal, setEditVal] = useState(settingValue);
+
+  const saveChange = () => {
+    if (editVal === settingValue) {
+      closeEditMode();
+      return;
+    }
+    changeHandler(editVal);
+    closeEditMode();
+  };
+
+  const closeEditMode = () => {
+    setEditMode(false);
+  };
+
   return (
     <div className={styles.settingContainer}>
       <div className={styles.settingInfo}>
@@ -27,10 +43,8 @@ export const SettingEditor: React.FC<SettingEditorProps> = ({
               autoFocus
             />
             <div className={styles.editModeControls}>
-              <SmallButton>Save</SmallButton>
-              <SmallButton onClick={() => setEditMode(false)}>
-                Cancel
-              </SmallButton>
+              <SmallButton onClick={saveChange}>Save</SmallButton>
+              <SmallButton onClick={closeEditMode}>Cancel</SmallButton>
             </div>
           </div>
         )}
