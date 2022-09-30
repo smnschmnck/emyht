@@ -91,6 +91,8 @@
   background-color: transparent;
   cursor: pointer;
   color: var(--accent);
+  padding: 0;
+  margin: 0;
 }
 
 .smallButton:hover {
