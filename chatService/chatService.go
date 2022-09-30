@@ -350,7 +350,7 @@ func GetChats(c echo.Context) error {
 		picUrl := chat.PictureUrl
 		if strings.HasPrefix(picUrl, "storage.emyht.com/") {
 			trimmedPicUrl := strings.Replace(picUrl, "storage.emyht.com/", "", -1)
-			presignedUrl, err := s3Helpers.PresignS3Object(trimmedPicUrl, "GET")
+			presignedUrl, err := s3Helpers.PresignGetObject(trimmedPicUrl)
 			if err == nil {
 				chats[i].PictureUrl = presignedUrl
 			}
