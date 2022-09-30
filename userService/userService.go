@@ -26,14 +26,15 @@ type ReqUser struct {
 }
 
 type User struct {
-	Uuid        string `json:"uuid"`
-	Email       string `json:"email"`
-	Username    string `json:"username"`
-	Password    string `json:"password"`
-	Salt        string `json:"salt"`
-	IsAdmin     bool   `json:"isAdmin"`
-	EmailActive bool   `json:"emailActive"`
-	EmailToken  string `json:"emailToken"`
+	Uuid              string `json:"uuid"`
+	Email             string `json:"email"`
+	Username          string `json:"username"`
+	Password          string `json:"password"`
+	Salt              string `json:"salt"`
+	IsAdmin           bool   `json:"isAdmin"`
+	EmailActive       bool   `json:"emailActive"`
+	EmailToken        string `json:"emailToken"`
+	ProfilePictureUrl string `json:"profilePictureUrl"`
 }
 
 func getPepper() string {
@@ -59,8 +60,9 @@ func GetUserByUUID(uuid string) (User, error) {
 	var dbUserSalt string
 	var dbUserIsAdmin bool
 	var dbUserEmailActive bool
+	var dbProfilePictureUrl string
 
-	q := "select uuid, email, username, password, salt, is_admin, email_active from users where uuid=$1"
+	q := "select uuid, email, username, password, salt, is_admin, email_active, picture_url from users where uuid=$1"
 	rows := conn.QueryRow(ctx, q, uuid)
 	err = rows.Scan(
 		&dbUUID,
@@ -69,19 +71,21 @@ func GetUserByUUID(uuid string) (User, error) {
 		&dbUserPassword,
 		&dbUserSalt,
 		&dbUserIsAdmin,
-		&dbUserEmailActive)
+		&dbUserEmailActive,
+		&dbProfilePictureUrl)
 	if err != nil {
 		return User{}, errors.New("USER NOT FOUND")
 	}
 
 	return User{
-		Uuid:        dbUUID,
-		Email:       dbEmail,
-		Username:    dbUsername,
-		Password:    dbUserPassword,
-		Salt:        dbUserSalt,
-		IsAdmin:     dbUserIsAdmin,
-		EmailActive: dbUserEmailActive,
+		Uuid:              dbUUID,
+		Email:             dbEmail,
+		Username:          dbUsername,
+		Password:          dbUserPassword,
+		Salt:              dbUserSalt,
+		IsAdmin:           dbUserIsAdmin,
+		EmailActive:       dbUserEmailActive,
+		ProfilePictureUrl: dbProfilePictureUrl,
 	}, nil
 }
 

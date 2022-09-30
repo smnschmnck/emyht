@@ -4,6 +4,7 @@ import (
 	"chat/dbHelpers/postgresHelper"
 	"chat/dbHelpers/redisHelper"
 	"chat/emailService"
+	"chat/s3Helpers"
 	"chat/userService"
 	"context"
 	"crypto/rand"
@@ -40,11 +41,12 @@ func GetBearer(c echo.Context) (string, error) {
 }
 
 type UserRes struct {
-	UUID        string `json:"uuid"`
-	Email       string `json:"email"`
-	Username    string `json:"username"`
-	IsAdmin     bool   `json:"isAdmin"`
-	EmailActive bool   `json:"emailActive"`
+	UUID              string `json:"uuid"`
+	Email             string `json:"email"`
+	Username          string `json:"username"`
+	IsAdmin           bool   `json:"isAdmin"`
+	EmailActive       bool   `json:"emailActive"`
+	ProfilePictureUrl string `json:"profilePictureUrl"`
 }
 
 func GetUserBySession(c echo.Context) error {
@@ -57,12 +59,17 @@ func GetUserBySession(c echo.Context) error {
 	if respErr.StatusCode >= 300 {
 		return c.String(respErr.StatusCode, respErr.Msg)
 	}
+
+	formattedProfilePic := s3Helpers.FormatPictureUrl(user.ProfilePictureUrl)
+
 	res := UserRes{
-		UUID:        user.Uuid,
-		Email:       user.Email,
-		Username:    user.Username,
-		IsAdmin:     user.IsAdmin,
-		EmailActive: user.EmailActive}
+		UUID:              user.Uuid,
+		Email:             user.Email,
+		Username:          user.Username,
+		IsAdmin:           user.IsAdmin,
+		EmailActive:       user.EmailActive,
+		ProfilePictureUrl: formattedProfilePic,
+	}
 	return c.JSON(http.StatusOK, res)
 }
 

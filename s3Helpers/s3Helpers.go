@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -92,4 +93,17 @@ func PresignGetObject(objectUrl string, expiration time.Duration) (string, error
 	cachePresignedGetURL(objectUrl, presignResult.URL, expiration)
 
 	return presignResult.URL, nil
+}
+
+//Presigns URL if picture is saved in cloud bucket
+func FormatPictureUrl(url string) string {
+	if !strings.HasPrefix(url, "storage.emyht.com/") {
+		return url
+	}
+	trimmedPicUrl := strings.Replace(url, "storage.emyht.com/", "", -1)
+	presignedUrl, err := PresignGetObject(trimmedPicUrl, 5*time.Hour)
+	if err != nil {
+		return ""
+	}
+	return presignedUrl
 }
