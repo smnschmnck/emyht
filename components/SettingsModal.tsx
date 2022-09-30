@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { formatPicURL } from '../helpers/stringFormatters';
 import IUser from '../interfaces/IUser';
 import styles from '../styles/SettingsModal.module.css';
-import { BigButton, SmallButton } from './atomic/Button';
+import { SmallButton } from './atomic/Button';
 import { Modal } from './atomic/Modal';
 import { SettingEditor } from './atomic/SettingEditor';
 import Image from 'next/image';
