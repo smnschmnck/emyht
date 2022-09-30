@@ -83,11 +83,9 @@
   justify-content: center;
   align-items: center;
   height: 40px;
-  width: 90%;
 }
 
 .smallButton {
-  width: 50%;
   height: 100%;
   border: none;
   background-color: transparent;
