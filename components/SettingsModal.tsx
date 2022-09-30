@@ -6,6 +6,7 @@ import { BigButton, SmallButton } from './atomic/Button';
 import { Modal } from './atomic/Modal';
 import { SettingEditor } from './atomic/SettingEditor';
 import Image from 'next/image';
+import { FilePicker } from './atomic/FilePicker';
 
 interface SettingsModalProps {
   closeHandler: () => void;
@@ -37,7 +38,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   layout="fill"
                 />
               </div>
-              <BigButton>Change Profile Picture</BigButton>
+              <FilePicker buttonText="Change Profile Picture" />
             </div>
             <SettingEditor
               settingName={'Username'}
