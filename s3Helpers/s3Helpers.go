@@ -14,8 +14,6 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-var presignedURLExpiration = 24 * time.Hour
-
 func getCachedPresignedGetURL(objectUrl string) (string, error) {
 	ctx := context.Background()
 	rdb := redis.NewClient(&redisHelper.PresignedURLsRedisConfig)
@@ -26,10 +24,10 @@ func getCachedPresignedGetURL(objectUrl string) (string, error) {
 	return presignedURL, nil
 }
 
-func cachePresignedGetURL(objectUrl string, presignedUrl string) error {
+func cachePresignedGetURL(objectUrl string, presignedUrl string, expiration time.Duration) error {
 	ctx := context.Background()
 	rdb := redis.NewClient(&redisHelper.PresignedURLsRedisConfig)
-	_, err := rdb.Set(ctx, objectUrl, presignedUrl, presignedURLExpiration).Result()
+	_, err := rdb.Set(ctx, objectUrl, presignedUrl, expiration).Result()
 	if err != nil {
 		return err
 	}
@@ -72,13 +70,13 @@ func getPresignClient(context context.Context, expiration time.Duration) (*s3.Pr
 	return presignClient, nil
 }
 
-func PresignGetObject(objectUrl string) (string, error) {
+func PresignGetObject(objectUrl string, expiration time.Duration) (string, error) {
 	url, err := getCachedPresignedGetURL(objectUrl)
 	if err == nil {
 		return url, nil
 	}
 
-	presignClient, err := getPresignClient(context.TODO(), presignedURLExpiration)
+	presignClient, err := getPresignClient(context.TODO(), expiration)
 	if err != nil {
 		return "", err
 	}
@@ -91,7 +89,7 @@ func PresignGetObject(objectUrl string) (string, error) {
 		return "", err
 	}
 
-	cachePresignedGetURL(objectUrl, presignResult.URL)
+	cachePresignedGetURL(objectUrl, presignResult.URL, expiration)
 
 	return presignResult.URL, nil
 }

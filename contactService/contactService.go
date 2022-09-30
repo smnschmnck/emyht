@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/go-playground/validator/v10"
@@ -154,7 +155,7 @@ func GetContacts(c echo.Context) error {
 		picUrl := contact.PictureUrl
 		if strings.HasPrefix(picUrl, "storage.emyht.com/") {
 			trimmedPicUrl := strings.Replace(picUrl, "storage.emyht.com/", "", -1)
-			presignedUrl, err := s3Helpers.PresignGetObject(trimmedPicUrl)
+			presignedUrl, err := s3Helpers.PresignGetObject(trimmedPicUrl, 5*time.Hour)
 			if err == nil {
 				contacts[i].PictureUrl = presignedUrl
 			}
