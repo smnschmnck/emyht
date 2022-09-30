@@ -27,6 +27,7 @@ export const SettingEditor: React.FC<SettingEditorProps> = ({
   };
 
   const closeEditMode = () => {
+    setEditVal(settingValue);
     setEditMode(false);
   };
 
