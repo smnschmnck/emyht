@@ -57,7 +57,7 @@
   min-width: 4rem;
   min-height: 4rem;
   border-radius: 50%;
-  background-color: grey;
+  background-color: transparent;
   overflow: hidden;
 }
 
