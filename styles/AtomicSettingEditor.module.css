@@ -13,7 +13,7 @@
   flex-direction: column;
   gap: 5px;
   padding: 10px;
-  width: max-content;
+  width: 100%;
 }
 
 .settingName {
@@ -38,6 +38,8 @@
 }
 
 .editor {
+  display: flex;
+  flex-direction: column;
   width: 100%;
 }
 
@@ -45,4 +47,5 @@
   display: flex;
   gap: 1rem;
   flex-direction: row;
+  justify-content: space-between;
 }

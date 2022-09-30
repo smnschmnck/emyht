@@ -44,17 +44,17 @@ export const SettingEditor: React.FC<SettingEditorProps> = ({
               autoFocus
             />
             <div className={styles.editModeControls}>
-              <SmallButton onClick={saveChange}>Save</SmallButton>
               <SmallButton onClick={closeEditMode}>Cancel</SmallButton>
+              <SmallButton onClick={saveChange}>Save</SmallButton>
             </div>
           </div>
         )}
       </div>
-      <div className={styles.changeButton}>
-        {!editMode && (
+      {!editMode && (
+        <div className={styles.changeButton}>
           <SmallButton onClick={() => setEditMode(true)}>Change</SmallButton>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
