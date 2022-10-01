@@ -3,7 +3,6 @@ package s3Helpers
 import (
 	"chat/dbHelpers/redisHelper"
 	"context"
-	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -36,14 +35,13 @@ func cachePresignedGetURL(objectUrl string, presignedUrl string, expiration time
 }
 
 func getClient(context context.Context) (*s3.Client, error) {
-	accountId := os.Getenv("S3_ACCOUNT_ID")
 	accessKeyId := os.Getenv("S3_ACCESS_KEY")
 	accessKeySecret := os.Getenv("S3_SECRET_ACCESS_KEY")
+	endpointUrl := os.Getenv("S3_ENDPOINT_URL")
 
 	r2Resolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 		return aws.Endpoint{
-			//TODO change to storage.emyht.com
-			URL: fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountId),
+			URL: endpointUrl,
 		}, nil
 	})
 
