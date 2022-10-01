@@ -6,6 +6,7 @@ import (
 	"chat/contactService"
 	"chat/dbHelpers/postgresHelper"
 	"chat/dbHelpers/redisHelper"
+	"chat/userSettingsService"
 	"chat/wsService"
 	"fmt"
 	"os"
@@ -47,6 +48,8 @@ func handleRequest() {
 	e.POST("/handleContactRequest", contactService.HandleContactRequest)
 	e.GET("/pendingContactRequests", contactService.GetPendingContactRequests)
 	e.GET("/contacts", contactService.GetContacts)
+	//user settings
+	e.GET("/changeProfilePicturePutURL", userSettingsService.GetChangeProfilePicturePutURL)
 	e.Logger.Fatal(e.Start(PORT))
 }
 

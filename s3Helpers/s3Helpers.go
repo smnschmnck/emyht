@@ -82,9 +82,8 @@ func PresignGetObject(objectUrl string, expiration time.Duration) (string, error
 		return "", err
 	}
 	presignResult, err := presignClient.PresignGetObject(context.TODO(), &s3.GetObjectInput{
-		Bucket:          aws.String(os.Getenv("S3_BUCKET_NAME")),
-		Key:             aws.String(objectUrl),
-		ResponseExpires: aws.Time(time.Time{}),
+		Bucket: aws.String(os.Getenv("S3_BUCKET_NAME")),
+		Key:    aws.String(objectUrl),
 	})
 	if err != nil {
 		return "", err
@@ -92,6 +91,21 @@ func PresignGetObject(objectUrl string, expiration time.Duration) (string, error
 
 	cachePresignedGetURL(objectUrl, presignResult.URL, expiration)
 
+	return presignResult.URL, nil
+}
+
+func PresignPutObject(objectName string, expiration time.Duration, size int64) (string, error) {
+	presignClient, err := getPresignClient(context.TODO(), expiration)
+	if err != nil {
+		return "", err
+	}
+	presignResult, err := presignClient.PresignPutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket: aws.String(os.Getenv("S3_BUCKET_NAME")),
+		Key:    aws.String(objectName),
+	})
+	if err != nil {
+		return "", err
+	}
 	return presignResult.URL, nil
 }
 
