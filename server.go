@@ -49,7 +49,7 @@ func handleRequest() {
 	e.GET("/pendingContactRequests", contactService.GetPendingContactRequests)
 	e.GET("/contacts", contactService.GetContacts)
 	//user settings
-	e.GET("/changeProfilePicturePutURL", userSettingsService.GetChangeProfilePicturePutURL)
+	e.POST("/changeProfilePicturePutURL", userSettingsService.GetChangeProfilePicturePutURL)
 	e.Logger.Fatal(e.Start(PORT))
 }
 

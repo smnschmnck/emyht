@@ -92,14 +92,15 @@ func PresignGetObject(objectUrl string, expiration time.Duration) (string, error
 	return presignResult.URL, nil
 }
 
-func PresignPutObject(objectName string, expiration time.Duration, size int64) (string, error) {
+func PresignPutObject(objectName string, expiration time.Duration, maxSize int64) (string, error) {
 	presignClient, err := getPresignClient(context.TODO(), expiration)
 	if err != nil {
 		return "", err
 	}
 	presignResult, err := presignClient.PresignPutObject(context.TODO(), &s3.PutObjectInput{
-		Bucket: aws.String(os.Getenv("S3_BUCKET_NAME")),
-		Key:    aws.String(objectName),
+		Bucket:        aws.String(os.Getenv("S3_BUCKET_NAME")),
+		Key:           aws.String(objectName),
+		ContentLength: *aws.Int64(maxSize),
 	})
 	if err != nil {
 		return "", err
