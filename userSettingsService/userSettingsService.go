@@ -45,7 +45,7 @@ func GetChangeProfilePicturePutURL(c echo.Context) error {
 	//TODO: expect different file types
 	picName := uuid + "/profilePicture.png"
 
-	presignedPutUrl, err := s3Helpers.PresignPutObject(picName, time.Hour, req.ContentLength+345)
+	presignedPutUrl, err := s3Helpers.PresignPutObject(picName, time.Hour, req.ContentLength)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
