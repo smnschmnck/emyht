@@ -1,12 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { formatPicURL } from '../helpers/stringFormatters';
 import IUser from '../interfaces/IUser';
 import styles from '../styles/SettingsModal.module.css';
 import { SmallButton } from './atomic/Button';
 import { Modal } from './atomic/Modal';
 import { SettingEditor } from './atomic/SettingEditor';
-import Image from 'next/image';
-import { FilePicker } from './atomic/FilePicker';
+import { ProfilePicChanger } from './ProfilePicChanger';
 
 interface SettingsModalProps {
   closeHandler: () => void;
@@ -20,6 +18,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     return (await res.json()) as IUser;
   });
   const user = userQuery.data;
+  const profilePicUrl = user?.profilePictureUrl;
 
   return (
     <Modal backgroundClickHandler={closeHandler} mobileFullscreen>
@@ -30,16 +29,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className={styles.allSettings}>
           <div className={styles.userSettings}>
             <h3 className={styles.settingHeading}>User Settings</h3>
-            <div className={styles.changePicContainer}>
-              <div className={styles.profilePicContainer}>
-                <Image
-                  src={formatPicURL(user?.profilePictureUrl)}
-                  alt="Profile picture"
-                  layout="fill"
-                />
-              </div>
-              <FilePicker buttonText="Change Profile Picture" />
-            </div>
+            <ProfilePicChanger profilePicUrl={profilePicUrl} />
             <SettingEditor
               settingName={'Username'}
               settingValue={user?.username ?? ''}

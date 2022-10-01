@@ -2,7 +2,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: var(--lightGrey);
+  background-color: var(--lightestGrey);
   color: var(--accent);
   margin: 0;
   border-radius: 0;
@@ -16,7 +16,7 @@
 }
 
 .pseudoButton:hover {
-  background-color: var(--lighterGrey);
+  background-color: var(--lightGrey);
 }
 
 .hidden {

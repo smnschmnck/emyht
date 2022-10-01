@@ -1,0 +1,14 @@
+.changePicContainer {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.profilePicContainer {
+  position: relative;
+  min-width: 4rem;
+  min-height: 4rem;
+  border-radius: 50%;
+  background-color: transparent;
+  overflow: hidden;
+}

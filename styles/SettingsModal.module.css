@@ -48,21 +48,6 @@
   gap: 1rem;
 }
 
-.changePicContainer {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-}
-
-.profilePicContainer {
-  position: relative;
-  min-width: 4rem;
-  min-height: 4rem;
-  border-radius: 50%;
-  background-color: transparent;
-  overflow: hidden;
-}
-
 @media only screen and (max-width: 600px) {
   .main {
     width: 100%;
