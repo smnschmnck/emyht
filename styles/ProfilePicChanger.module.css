@@ -12,3 +12,13 @@
   background-color: transparent;
   overflow: hidden;
 }
+
+.acceptPrompt {
+  display: flex;
+  width: 100%;
+  gap: 2rem;
+}
+
+.saveButton {
+  width: 50%;
+}
