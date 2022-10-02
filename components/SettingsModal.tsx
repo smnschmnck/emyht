@@ -29,7 +29,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className={styles.allSettings}>
           <div className={styles.userSettings}>
             <h3 className={styles.settingHeading}>User Settings</h3>
-            <ProfilePicChanger profilePicUrl={profilePicUrl} />
+            <ProfilePicChanger
+              profilePicUrl={profilePicUrl}
+              refetchUser={userQuery.refetch}
+            />
             <SettingEditor
               settingName={'Username'}
               settingValue={user?.username ?? ''}

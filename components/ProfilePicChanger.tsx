@@ -4,15 +4,18 @@ import { formatError, formatPicURL } from '../helpers/stringFormatters';
 import styles from '../styles/ProfilePicChanger.module.css';
 import { useRef, useState } from 'react';
 import { BigButton, SmallButton } from './atomic/Button';
-import { useMutation } from '@tanstack/react-query';
+import { QueryObserverResult, useMutation } from '@tanstack/react-query';
 import { ErrorMessage } from './atomic/ErrorMessage';
+import IUser from '../interfaces/IUser';
 
 interface ProfilePicChangerProps {
   profilePicUrl?: string;
+  refetchUser: () => Promise<QueryObserverResult<IUser, unknown>>;
 }
 
 export const ProfilePicChanger: React.FC<ProfilePicChangerProps> = ({
   profilePicUrl,
+  refetchUser,
 }) => {
   const [curProfilePicURL, setCurProfilePicURL] = useState(profilePicUrl);
   const [showAcceptPrompt, setShowAcceptPrompt] = useState(false);
@@ -40,7 +43,7 @@ export const ProfilePicChanger: React.FC<ProfilePicChangerProps> = ({
     picFile.current = null;
   };
 
-  const getPresignedURL = async (fileSize: number) => {
+  const getPresignedURLAndImageID = async (fileSize: number) => {
     const body = {
       contentLength: fileSize,
     };
@@ -51,12 +54,24 @@ export const ProfilePicChanger: React.FC<ProfilePicChangerProps> = ({
     if (!res.ok) {
       throw new Error(await res.text());
     }
-    const json: { presignedPutURL: string } = await res.json();
-    return json.presignedPutURL;
+    const json: { presignedPutURL: string; imageID: string } = await res.json();
+    return json;
+  };
+
+  const confirmUpload = async (imageID: string) => {
+    const body = {
+      imageID: imageID,
+    };
+    const res = await fetch('/api/confirmChangedProfilePic', {
+      method: 'post',
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(await res.text());
   };
 
   const uploadProfilePicToS3 = async (file: File) => {
-    const presignedUrl = await getPresignedURL(file.size);
+    const urlAndImageID = await getPresignedURLAndImageID(file.size);
+    const presignedUrl = urlAndImageID.presignedPutURL;
     const headers = {
       'Content-Type': 'multipart/form-data',
     };
@@ -70,6 +85,7 @@ export const ProfilePicChanger: React.FC<ProfilePicChangerProps> = ({
       if (!res.ok) {
         throw new Error('Failed to upload');
       }
+      await confirmUpload(urlAndImageID.imageID);
       return res;
     } catch {
       throw new Error('Failed to upload');
@@ -78,6 +94,11 @@ export const ProfilePicChanger: React.FC<ProfilePicChangerProps> = ({
 
   const uploadMutation = useMutation((f: File) => uploadProfilePicToS3(f), {
     onSuccess: () => {
+      refetchUser().then((user) => {
+        if (user.data) {
+          setCurProfilePicURL(user.data.profilePictureUrl);
+        }
+      });
       setShowAcceptPrompt(false);
     },
     onError: () => {
