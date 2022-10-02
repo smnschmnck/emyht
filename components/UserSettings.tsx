@@ -1,6 +1,6 @@
 import { SettingEditor } from './atomic/SettingEditor';
 import { ProfilePicChanger } from './ProfilePicChanger';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import IUser from '../interfaces/IUser';
 import { SettingSection } from './SettingSection';
 
@@ -11,6 +11,25 @@ export const UserSettings = () => {
   });
   const user = userQuery.data;
   const profilePicUrl = user?.profilePictureUrl;
+
+  const changeUsernameMutation = useMutation(
+    async (newUsername: string) => {
+      const body = {
+        newUsername: newUsername,
+      };
+      const res = await fetch('/api/changeUsername', {
+        method: 'post',
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error(await res.text());
+    },
+    {
+      onSuccess: () => {
+        userQuery.refetch();
+      },
+    }
+  );
+
   return (
     <SettingSection sectionName={'User Settings'}>
       <ProfilePicChanger
@@ -18,9 +37,10 @@ export const UserSettings = () => {
         refetchUser={userQuery.refetch}
       />
       <SettingEditor
+        key={user?.username}
         settingName={'Username'}
         settingValue={user?.username ?? ''}
-        changeHandler={(newVal) => alert('CHANGED TO: ' + newVal)}
+        changeHandler={changeUsernameMutation.mutate}
       />
       <SettingEditor
         settingName={'E-Mail'}
