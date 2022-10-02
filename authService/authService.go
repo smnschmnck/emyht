@@ -349,6 +349,50 @@ func ConfirmChangedEmail(c echo.Context) error {
 	return c.String(http.StatusOK, "SUCCESS")
 }
 
+func ChangeUsername(c echo.Context) error {
+	sessionID, responseErr := GetBearer(c)
+	if responseErr != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	type ChangeReq struct {
+		NewUsername string `json:"newUsername" validate:"required"`
+	}
+	changeReq := new(ChangeReq)
+	err = c.Bind(&changeReq)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	err = validate.Struct(changeReq)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+	defer conn.Close(ctx)
+	query := "UPDATE users " +
+		"SET username=$1 " +
+		"WHERE uuid=$2 " +
+		"RETURNING username"
+	var newUsername string
+	rows := conn.QueryRow(ctx, query, changeReq.NewUsername, reqUUID)
+	err = rows.Scan(&newUsername)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "COULD NOT CHANGE USERNAME")
+	}
+
+	return c.String(http.StatusOK, "SUCCESS")
+}
+
 func Logout(c echo.Context) error {
 	sessionID, err := GetBearer(c)
 	if err != nil {

@@ -34,6 +34,7 @@ func handleRequest() {
 	e.GET("/resendVerificationEmail", authService.ResendVerificationEmail)
 	e.POST("/changeEmail", authService.ChangeEmail)
 	e.POST("/confirmChangedEmail", authService.ConfirmChangedEmail)
+	e.POST("/changeUsername", authService.ChangeUsername)
 	e.POST("/login", authService.Authenticate)
 	e.GET("/logout", authService.Logout)
 	//chats
