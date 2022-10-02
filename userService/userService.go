@@ -263,3 +263,21 @@ func CheckPW(user User, email string, password string) bool {
 	hashedPW := hashPW(password, user.Salt, pepper)
 	return hashedPW == user.Password
 }
+
+func ChangeProfilePicture(uuid string, newPicture string) error {
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		return err
+	}
+	defer conn.Close(ctx)
+	q := "UPDATE users SET picture_url=$1 WHERE uuid=$2 RETURNING picture_url"
+	rows := conn.QueryRow(ctx, q, newPicture, uuid)
+	var newPictureUrl string
+	err = rows.Scan(&newPictureUrl)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

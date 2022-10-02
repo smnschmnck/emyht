@@ -3,11 +3,15 @@ package s3Helpers
 import (
 	"chat/dbHelpers/redisHelper"
 	"context"
+	"errors"
+	"fmt"
+	"net/http"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	awshttp "github.com/aws/aws-sdk-go-v2/aws/transport/http"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -119,4 +123,41 @@ func FormatPictureUrl(url string) string {
 		return ""
 	}
 	return presignedUrl
+}
+
+func DeleteFile(key string) error {
+	ctx := context.TODO()
+	client, err := getClient(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = client.DeleteObject(ctx, &s3.DeleteObjectInput{
+		Bucket: aws.String(os.Getenv("S3_BUCKET_NAME")),
+		Key:    &key,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func CheckFileExists(key string) (bool, error) {
+	fmt.Println("KEY: " + key)
+	ctx := context.TODO()
+	client, err := getClient(ctx)
+	if err != nil {
+		return false, err
+	}
+	_, err = client.HeadObject(ctx, &s3.HeadObjectInput{
+		Bucket: aws.String(os.Getenv("S3_BUCKET_NAME")),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		var responseError *awshttp.ResponseError
+		if errors.As(err, &responseError) && responseError.ResponseError.HTTPStatusCode() == http.StatusNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }

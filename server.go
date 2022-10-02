@@ -50,6 +50,7 @@ func handleRequest() {
 	e.GET("/contacts", contactService.GetContacts)
 	//user settings
 	e.POST("/changeProfilePicturePutURL", userSettingsService.GetChangeProfilePicturePutURL)
+	e.POST("/confirmChangedProfilePic", userSettingsService.ConfirmChangedProfilePic)
 	e.Logger.Fatal(e.Start(PORT))
 }
 
