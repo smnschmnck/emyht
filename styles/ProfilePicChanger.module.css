@@ -1,3 +1,14 @@
+.main {
+  border-bottom: 1px solid var(--lightGrey);
+  padding: 1rem 0;
+  padding-top: 0;
+}
+
+.heading {
+  margin: 0;
+  padding: 0;
+}
+
 .changePicContainer {
   display: flex;
   align-items: center;
@@ -21,4 +32,12 @@
 
 .saveButton {
   width: 50%;
+}
+
+.changeButtons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
 }

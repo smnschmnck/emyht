@@ -102,10 +102,12 @@ export const ProfilePicChanger: React.FC<ProfilePicChangerProps> = ({
           />
         </div>
         {!showAcceptPrompt && (
-          <FilePicker
-            buttonText="Change Profile Picture"
-            handleFileChange={profilePicChangeHandler}
-          />
+          <div className={styles.changeButtons}>
+            <FilePicker
+              buttonText="Change Profile Picture"
+              handleFileChange={profilePicChangeHandler}
+            />
+          </div>
         )}
         {showAcceptPrompt && (
           <div className={styles.acceptPrompt}>
