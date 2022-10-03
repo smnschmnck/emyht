@@ -4,7 +4,6 @@ import (
 	"chat/dbHelpers/redisHelper"
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -142,7 +141,6 @@ func DeleteFile(key string) error {
 }
 
 func CheckFileExists(key string) (bool, error) {
-	fmt.Println("KEY: " + key)
 	ctx := context.TODO()
 	client, err := getClient(ctx)
 	if err != nil {
