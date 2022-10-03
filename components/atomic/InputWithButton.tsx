@@ -28,6 +28,7 @@ export const InputWithButton: React.FC<InputWithButtonProps> = ({
       <p className={styles.error}>{error}</p>
       <form className={styles.form} onSubmit={submitHandler}>
         <div className={styles.inputWrapper} id={error ? styles.isError : ''}>
+          {children}
           <input
             type="text"
             placeholder={inputPlaceHolder}
@@ -36,14 +37,15 @@ export const InputWithButton: React.FC<InputWithButtonProps> = ({
             autoFocus={autofocus}
             className={styles.input}
           />
-          {children}
         </div>
         <button
           type="submit"
           className={styles.button}
           id={buttonDisabled || error ? styles.buttonDisabled : ''}
           disabled={buttonDisabled || !!error}
-        ></button>
+        >
+          {buttonText}
+        </button>
       </form>
     </div>
   );

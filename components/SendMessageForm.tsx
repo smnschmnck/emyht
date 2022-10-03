@@ -1,9 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { type } from 'os';
 import { FormEvent, useState } from 'react';
 import IUser from '../interfaces/IUser';
 import { InputWithButton } from './atomic/InputWithButton';
 import { ISingleMessage } from './MainChat';
+import Image from 'next/image';
+import Paperclip from '../assets/images/paperclip.svg';
+import styles from '../styles/SendMessageForm.module.css';
 
 interface SendMessageFormProps {
   chatID: string;
@@ -124,7 +126,17 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
       buttonDisabled={messageInputValue.length <= 0}
       error={error}
     >
-      <p>hi</p>
+      <div className={styles.buttonWrapper}>
+        <button className={styles.attachmentButton} type="button">
+          <Image
+            className={styles.symbol}
+            src={Paperclip}
+            alt="Add attachment"
+            layout="fill"
+            objectFit="contain"
+          />
+        </button>
+      </div>
     </InputWithButton>
   );
 };
