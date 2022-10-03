@@ -1,6 +1,5 @@
 import styles from '../styles/SettingsModal.module.css';
 import { SmallButton } from './atomic/Button';
-import { InfoMessage } from './atomic/InfoMessage';
 import { Modal } from './atomic/Modal';
 import { UserSettings } from './UserSettings';
 
