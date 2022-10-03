@@ -1,0 +1,26 @@
+.infoContainer {
+  background-color: var(--accentHover);
+  border: 1px solid var(--accent);
+  padding: 1rem;
+  margin: 0.5rem;
+}
+
+.infoP {
+  text-transform: lowercase;
+  text-align: left;
+  color: var(--accent);
+  width: fit-content;
+  margin: 0;
+  max-width: 200px;
+  font-weight: bold;
+}
+
+.infoP::first-letter {
+  text-transform: capitalize;
+}
+
+.infoContent {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
