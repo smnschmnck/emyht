@@ -6,6 +6,7 @@ import { ISingleMessage } from './MainChat';
 import Image from 'next/image';
 import Paperclip from '../assets/images/paperclip.svg';
 import styles from '../styles/SendMessageForm.module.css';
+import { FilePicker } from './atomic/FilePicker';
 
 interface SendMessageFormProps {
   chatID: string;
@@ -126,17 +127,19 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
       buttonDisabled={messageInputValue.length <= 0}
       error={error}
     >
-      <div className={styles.buttonWrapper}>
-        <button className={styles.attachmentButton} type="button">
-          <Image
-            className={styles.symbol}
-            src={Paperclip}
-            alt="Add attachment"
-            layout="fill"
-            objectFit="contain"
-          />
-        </button>
-      </div>
+      <FilePicker>
+        <div className={styles.buttonWrapper}>
+          <span className={styles.attachmentButton}>
+            <Image
+              className={styles.symbol}
+              src={Paperclip}
+              alt="Add attachment"
+              layout="fill"
+              objectFit="contain"
+            />
+          </span>
+        </div>
+      </FilePicker>
     </InputWithButton>
   );
 };
