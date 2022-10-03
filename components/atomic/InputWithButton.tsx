@@ -9,6 +9,7 @@ interface InputWithButtonProps {
   buttonDisabled?: boolean;
   autofocus?: boolean;
   error?: string;
+  inputExtension?: React.ReactNode;
 }
 
 export const InputWithButton: React.FC<InputWithButtonProps> = ({
@@ -20,28 +21,29 @@ export const InputWithButton: React.FC<InputWithButtonProps> = ({
   buttonDisabled,
   autofocus,
   error,
+  inputExtension,
 }) => {
   return (
     <div className={styles.wrapper}>
       <p className={styles.error}>{error}</p>
       <form className={styles.form} onSubmit={submitHandler}>
-        <input
-          type="text"
-          placeholder={inputPlaceHolder}
-          className={styles.input}
-          id={error ? styles.isError : ''}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          autoFocus={autofocus}
-        />
+        <div className={styles.inputWrapper} id={error ? styles.isError : ''}>
+          <input
+            type="text"
+            placeholder={inputPlaceHolder}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            autoFocus={autofocus}
+            className={styles.input}
+          />
+          {inputExtension}
+        </div>
         <button
           type="submit"
           className={styles.button}
           id={buttonDisabled || error ? styles.buttonDisabled : ''}
           disabled={buttonDisabled || !!error}
-        >
-          {buttonText}
-        </button>
+        ></button>
       </form>
     </div>
   );
