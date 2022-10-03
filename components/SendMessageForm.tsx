@@ -117,6 +117,8 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
     setMessageInputValue(val);
   };
 
+  const fileChangeHandler = (file: File) => {};
+
   return (
     <InputWithButton
       buttonText={'Send'}
@@ -127,7 +129,7 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
       buttonDisabled={messageInputValue.length <= 0}
       error={error}
     >
-      <FilePicker>
+      <FilePicker handleFileChange={fileChangeHandler}>
         <div className={styles.buttonWrapper}>
           <span className={styles.attachmentButton}>
             <Image

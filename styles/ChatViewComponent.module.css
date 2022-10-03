@@ -25,13 +25,12 @@
   position: absolute;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  bottom: 0;
+  bottom: 1rem;
   width: 100%;
-  height: 75px;
 }
 
-.wrapper{
-  width: 50%;
+.wrapper {
+  width: 85%;
+  max-width: 800px;
   min-width: 200px;
 }
