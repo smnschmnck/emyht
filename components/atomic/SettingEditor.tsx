@@ -7,12 +7,14 @@ interface SettingEditorProps {
   settingName: string;
   settingValue: string;
   changeHandler: (newVal: string) => void;
+  children?: React.ReactNode;
 }
 
 export const SettingEditor: React.FC<SettingEditorProps> = ({
   settingName,
   settingValue,
   changeHandler,
+  children,
 }) => {
   const [editMode, setEditMode] = useState(false);
   const [editVal, setEditVal] = useState(settingValue);
@@ -33,31 +35,34 @@ export const SettingEditor: React.FC<SettingEditorProps> = ({
   };
 
   return (
-    <div className={styles.settingContainer}>
-      <div className={styles.settingInfo}>
-        <h4 className={styles.settingName}>{settingName}</h4>
-        {!editMode && <p className={styles.settingValue}>{settingValue}</p>}
-        {editMode && (
-          <form className={styles.editor} onSubmit={saveChange}>
-            <Input
-              value={editVal}
-              onChange={(e) => setEditVal(e.target.value)}
-              autoFocus
-            />
-            <div className={styles.editModeControls}>
-              <SmallButton type="button" onClick={closeEditMode}>
-                Cancel
-              </SmallButton>
-              <SmallButton type="submit">Save</SmallButton>
-            </div>
-          </form>
+    <div className={styles.container}>
+      <div className={styles.settingContainer}>
+        <div className={styles.settingInfo}>
+          <h4 className={styles.settingName}>{settingName}</h4>
+          {!editMode && <p className={styles.settingValue}>{settingValue}</p>}
+          {editMode && (
+            <form className={styles.editor} onSubmit={saveChange}>
+              <Input
+                value={editVal}
+                onChange={(e) => setEditVal(e.target.value)}
+                autoFocus
+              />
+              <div className={styles.editModeControls}>
+                <SmallButton type="button" onClick={closeEditMode}>
+                  Cancel
+                </SmallButton>
+                <SmallButton type="submit">Save</SmallButton>
+              </div>
+            </form>
+          )}
+        </div>
+        {!editMode && (
+          <div className={styles.changeButton}>
+            <SmallButton onClick={() => setEditMode(true)}>Change</SmallButton>
+          </div>
         )}
       </div>
-      {!editMode && (
-        <div className={styles.changeButton}>
-          <SmallButton onClick={() => setEditMode(true)}>Change</SmallButton>
-        </div>
-      )}
+      {children}
     </div>
   );
 };
