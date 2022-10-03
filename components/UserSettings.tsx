@@ -3,6 +3,10 @@ import { ProfilePicChanger } from './ProfilePicChanger';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import IUser from '../interfaces/IUser';
 import { SettingSection } from './SettingSection';
+import { InfoMessage } from './atomic/InfoMessage';
+import { useState } from 'react';
+import { ErrorMessage } from './atomic/ErrorMessage';
+import { formatError } from '../helpers/stringFormatters';
 
 export const UserSettings = () => {
   const userQuery = useQuery<IUser>(['user'], async () => {
@@ -11,6 +15,7 @@ export const UserSettings = () => {
   });
   const user = userQuery.data;
   const profilePicUrl = user?.profilePictureUrl;
+  const [newEmail, setNewEmail] = useState(user?.email ?? '');
 
   const changeUsernameMutation = useMutation(
     async (newUsername: string) => {
@@ -22,6 +27,25 @@ export const UserSettings = () => {
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error(await res.text());
+    },
+    {
+      onSuccess: () => {
+        userQuery.refetch();
+      },
+    }
+  );
+
+  const changeEmailMutation = useMutation(
+    async (newEmail: string) => {
+      const body = {
+        newEmail: newEmail,
+      };
+      const res = await fetch('/api/changeEmail', {
+        method: 'post',
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      setNewEmail(newEmail);
     },
     {
       onSuccess: () => {
@@ -45,8 +69,17 @@ export const UserSettings = () => {
       <SettingEditor
         settingName={'E-Mail'}
         settingValue={user?.email ?? ''}
-        changeHandler={(newVal) => alert('CHANGED TO: ' + newVal)}
-      />
+        changeHandler={changeEmailMutation.mutate}
+      >
+        {changeEmailMutation.isSuccess && (
+          <InfoMessage
+            infoMessage={`Confirmation email has been sent to: ${newEmail}`}
+          />
+        )}
+        {changeEmailMutation.isError && (
+          <ErrorMessage errorMessage={formatError(changeEmailMutation.error)} />
+        )}
+      </SettingEditor>
     </SettingSection>
   );
 };
