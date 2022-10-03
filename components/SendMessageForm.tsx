@@ -123,6 +123,8 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
       submitHandler={sendMessage}
       buttonDisabled={messageInputValue.length <= 0}
       error={error}
-    />
+    >
+      <p>hi</p>
+    </InputWithButton>
   );
 };

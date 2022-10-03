@@ -9,7 +9,7 @@ interface InputWithButtonProps {
   buttonDisabled?: boolean;
   autofocus?: boolean;
   error?: string;
-  inputExtension?: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export const InputWithButton: React.FC<InputWithButtonProps> = ({
@@ -21,7 +21,7 @@ export const InputWithButton: React.FC<InputWithButtonProps> = ({
   buttonDisabled,
   autofocus,
   error,
-  inputExtension,
+  children,
 }) => {
   return (
     <div className={styles.wrapper}>
@@ -36,7 +36,7 @@ export const InputWithButton: React.FC<InputWithButtonProps> = ({
             autoFocus={autofocus}
             className={styles.input}
           />
-          {inputExtension}
+          {children}
         </div>
         <button
           type="submit"
