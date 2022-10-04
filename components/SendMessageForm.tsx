@@ -140,7 +140,7 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
         value={messageInputValue}
         setValue={setValueWithLengthCheck}
         submitHandler={sendMessage}
-        buttonDisabled={messageInputValue.length <= 0}
+        buttonDisabled={messageInputValue.length <= 0 && files.length <= 0}
         error={error}
       >
         <FilePicker handleFileChange={fileChangeHandler} multiple>

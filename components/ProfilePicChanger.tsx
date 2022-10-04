@@ -22,11 +22,13 @@ export const ProfilePicChanger: React.FC<ProfilePicChangerProps> = ({
   const [showTooBigError, setShowTooBigError] = useState(false);
   const picFile = useRef<File | null>(null);
 
-  const profilePicChangeHandler = (file: File) => {
+  const profilePicChangeHandler = (files: FileList) => {
     setShowTooBigError(false);
     const MEGABYTE = 1000000;
     const MAX_FILE_SIZE = 5 * MEGABYTE;
     uploadMutation.reset();
+    const file = files.item(0);
+    if (!file) return;
     if (file.size > MAX_FILE_SIZE) {
       setShowTooBigError(true);
       cancelChange();
