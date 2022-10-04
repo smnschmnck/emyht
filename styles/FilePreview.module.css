@@ -1,12 +1,14 @@
 .mediaPreviews {
-  padding: 10px;
   display: flex;
   gap: 1rem;
   width: 100%;
   height: 100px;
   overflow-x: scroll;
   overflow-y: hidden;
-  border-radius: 10px;
+  border-radius: 7px;
+  background-color: white;
+  border: 10px solid white;
+  outline: 1px solid var(--lightGrey);
 }
 
 .singlePreview {
@@ -14,14 +16,14 @@
   min-height: 100%;
   min-width: 120px;
   padding: 0;
+  overflow: hidden;
   margin: 0;
-  -webkit-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.25);
-  box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.25);
 }
 
 .singlePreview:hover .deleteButtonWrapper {
   opacity: 1;
 }
+
 .deleteButtonWrapper {
   display: flex;
   justify-content: center;
@@ -44,12 +46,11 @@
   width: 40px;
   border-radius: 50%;
   transition: 0.2s;
-  border: 1px solid rgba(255, 255, 255, 0);
+  border: none;
 }
 
 .delButton:hover {
-  background-color: black;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background-color: rgba(0, 0, 0, 1);
 }
 
 .addButtonContainer {
@@ -70,5 +71,21 @@
 }
 
 .addButtonWrapper:hover {
+  background-color: var(--accentHover);
+}
+
+.removeAllButton {
+  border: none;
+  background-color: var(--accent);
+  color: white;
+  font-weight: bold;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  transition: 0.2s;
+  cursor: pointer;
+}
+
+.removeAllButton:hover {
   background-color: var(--accentHover);
 }

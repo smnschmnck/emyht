@@ -3,7 +3,6 @@ import Plus from '../assets/images/plus.svg';
 import Image from 'next/image';
 import styles from '../styles/FilePreview.module.css';
 import { FilePicker } from './atomic/FilePicker';
-import { Field } from 'formik';
 
 interface FilePreviewProps {
   files: File[];
