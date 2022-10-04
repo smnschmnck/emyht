@@ -3,26 +3,28 @@ import styles from '../../styles/AtomicFilePicker.module.css';
 
 interface FilePickerProps {
   buttonText?: string;
-  handleFileChange?: (file: File) => void;
+  handleFileChange?: (file: FileList) => void;
   children?: React.ReactNode;
+  multiple?: boolean;
 }
 
 export const FilePicker: React.FC<FilePickerProps> = ({
   buttonText,
   handleFileChange: handleFile,
   children,
+  multiple,
 }) => {
-  const getFileFromEvent = (e: ChangeEvent) => {
+  const getFilesFromEvent = (e: ChangeEvent) => {
     const target = e.target as HTMLInputElement;
     if (target.files) {
-      return target.files[0];
+      return target.files;
     }
   };
 
   const handleChange = (e: ChangeEvent) => {
-    const file = getFileFromEvent(e);
-    if (file && handleFile) {
-      handleFile(file);
+    const fileList = getFilesFromEvent(e);
+    if (fileList && handleFile) {
+      handleFile(fileList);
     }
   };
 
@@ -43,6 +45,7 @@ export const FilePicker: React.FC<FilePickerProps> = ({
         type="file"
         className={styles.hidden}
         onChange={handleChange}
+        multiple={multiple}
       />
     </>
   );
