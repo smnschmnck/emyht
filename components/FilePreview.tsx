@@ -35,32 +35,34 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
   };
 
   return (
-    <div className={styles.mediaPreviews}>
-      {files.map((file) => (
-        <div key={getFileUrl(file)} className={styles.singlePreview}>
-          <span className={styles.deleteButtonWrapper}>
-            <button
-              className={styles.delButton}
-              onClick={() => deleteFile(file)}
-            >
-              <Image src={GarbageCan} alt="Delete" />
-            </button>
-          </span>
-          <Image
-            src={getFileUrl(file)}
-            alt="Preview"
-            layout="fill"
-            objectFit="cover"
-          />
-        </div>
-      ))}
-      <span className={styles.addButtonContainer}>
-        <FilePicker handleFileChange={addFiles} multiple>
-          <span className={styles.addButtonWrapper}>
-            <Image src={Plus} alt="Add File" />
-          </span>
-        </FilePicker>
-      </span>
+    <div className={styles.mediaPreviewsContainer}>
+      <div className={styles.mediaPreviews}>
+        {files.map((file) => (
+          <div key={getFileUrl(file)} className={styles.singlePreview}>
+            <span className={styles.deleteButtonWrapper}>
+              <button
+                className={styles.delButton}
+                onClick={() => deleteFile(file)}
+              >
+                <Image src={GarbageCan} alt="Delete" />
+              </button>
+            </span>
+            <Image
+              src={getFileUrl(file)}
+              alt="Preview"
+              layout="fill"
+              objectFit="cover"
+            />
+          </div>
+        ))}
+        <span className={styles.addButtonContainer}>
+          <FilePicker handleFileChange={addFiles} multiple>
+            <span className={styles.addButtonWrapper}>
+              <Image src={Plus} alt="Add File" />
+            </span>
+          </FilePicker>
+        </span>
+      </div>
     </div>
   );
 };

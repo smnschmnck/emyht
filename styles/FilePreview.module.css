@@ -1,14 +1,22 @@
-.mediaPreviews {
+.mediaPreviewsContainer {
   display: flex;
-  gap: 1rem;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   height: 100px;
-  overflow-x: scroll;
-  overflow-y: hidden;
   border-radius: 7px;
   background-color: white;
-  border: 10px solid white;
-  outline: 1px solid var(--lightGrey);
+  border: 1px solid var(--lightGrey);
+}
+
+.mediaPreviews {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  gap: 1rem;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  padding: 0.5rem;
 }
 
 .singlePreview {
