@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Paperclip from '../assets/images/paperclip.svg';
 import styles from '../styles/SendMessageForm.module.css';
 import { FilePicker } from './atomic/FilePicker';
+import { FilePreview } from './FilePreview';
 
 interface SendMessageFormProps {
   chatID: string;
@@ -28,6 +29,7 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
   });
   const user = userQuery.data;
   const [messageInputValue, setMessageInputValue] = useState('');
+  const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState('');
   const MAX_MESSAGE_LENGTH = 4096;
 
@@ -117,31 +119,44 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
     setMessageInputValue(val);
   };
 
-  const fileChangeHandler = (file: File) => {};
+  const fileChangeHandler = (files: FileList) => {
+    const fileArr: File[] = [];
+    const n = files.length;
+    for (let i = 0; i < n; i++) {
+      const f = files.item(i);
+      if (f) {
+        fileArr.push(f);
+      }
+    }
+    setFiles(fileArr);
+  };
 
   return (
-    <InputWithButton
-      buttonText={'Send'}
-      inputPlaceHolder={'Type Message'}
-      value={messageInputValue}
-      setValue={setValueWithLengthCheck}
-      submitHandler={sendMessage}
-      buttonDisabled={messageInputValue.length <= 0}
-      error={error}
-    >
-      <FilePicker handleFileChange={fileChangeHandler}>
-        <div className={styles.buttonWrapper}>
-          <span className={styles.attachmentButton}>
-            <Image
-              className={styles.symbol}
-              src={Paperclip}
-              alt="Add attachment"
-              layout="fill"
-              objectFit="contain"
-            />
-          </span>
-        </div>
-      </FilePicker>
-    </InputWithButton>
+    <div>
+      {files.length > 0 && <FilePreview files={files} setFiles={setFiles} />}
+      <InputWithButton
+        buttonText={'Send'}
+        inputPlaceHolder={'Type Message'}
+        value={messageInputValue}
+        setValue={setValueWithLengthCheck}
+        submitHandler={sendMessage}
+        buttonDisabled={messageInputValue.length <= 0}
+        error={error}
+      >
+        <FilePicker handleFileChange={fileChangeHandler} multiple>
+          <div className={styles.buttonWrapper}>
+            <span className={styles.attachmentButton}>
+              <Image
+                className={styles.symbol}
+                src={Paperclip}
+                alt="Add attachment"
+                layout="fill"
+                objectFit="contain"
+              />
+            </span>
+          </div>
+        </FilePicker>
+      </InputWithButton>
+    </div>
   );
 };

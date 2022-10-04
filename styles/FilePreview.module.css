@@ -1,0 +1,74 @@
+.mediaPreviews {
+  padding: 10px;
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  height: 100px;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  border-radius: 10px;
+}
+
+.singlePreview {
+  position: relative;
+  min-height: 100%;
+  min-width: 120px;
+  padding: 0;
+  margin: 0;
+  -webkit-box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.25);
+  box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.25);
+}
+
+.singlePreview:hover .deleteButtonWrapper {
+  opacity: 1;
+}
+.deleteButtonWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  opacity: 0;
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.5);
+  transition: 0.2s;
+}
+
+.delButton {
+  background-color: transparent;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.5);
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  transition: 0.2s;
+  border: 1px solid rgba(255, 255, 255, 0);
+}
+
+.delButton:hover {
+  background-color: black;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.addButtonContainer {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.addButtonWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.addButtonWrapper:hover {
+  background-color: var(--accentHover);
+}
