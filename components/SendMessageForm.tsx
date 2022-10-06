@@ -97,16 +97,89 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
     }
   );
 
-  const sendMessage = async (event: FormEvent) => {
+  const sendHandler = (event: FormEvent) => {
     event.preventDefault();
+    if (files.length > 0) {
+      sendMessageWithFiles();
+    } else {
+      sendMessage();
+    }
+  };
+
+  const sendMessage = async () => {
     const body = {
       chatID: chatID,
       textContent: messageInputValue,
-      //TODO extend to be able to send media
       messageType: 'plaintext',
       mediaUrl: '',
     };
     sendRequest.mutate(body);
+  };
+
+  const createMessageBodyWithFile = (
+    text: string,
+    fileType: string,
+    fileID: string
+  ) => {
+    let mediaType: string;
+    if (fileType.startsWith('image')) {
+      mediaType = 'image';
+    } else if (fileType.startsWith('video')) {
+      mediaType = 'video';
+    } else if (fileType.startsWith('audio')) {
+      mediaType = 'audio';
+    } else {
+      mediaType = 'data';
+    }
+    const body = {
+      chatID: chatID,
+      textContent: text,
+      messageType: mediaType,
+      mediaUrl: fileID,
+    };
+    return body;
+  };
+
+  const getFileUploadURLAndID = (
+    contentLength: number,
+    fileExtension: string
+  ) => {
+    return {
+      url: 'TODO',
+      id: 'TODO',
+    };
+  };
+
+  const uploadFile = (file: File) => {
+    const fileSize = file.size;
+    const splittedFileName = file.name.split('.');
+    const extension = splittedFileName[splittedFileName.length - 1];
+    const urlAndID = getFileUploadURLAndID(fileSize, extension);
+    const url = urlAndID.url;
+    return urlAndID.id;
+  };
+
+  const fileMessageSender = (file: File, text: string) => {
+    const fileType = file.type;
+    const id = uploadFile(file);
+    const body = createMessageBodyWithFile(text, fileType, id);
+    sendRequest.mutate(body);
+  };
+
+  const sendMessageWithFiles = async () => {
+    if (messageInputValue.length > 0 && files.length === 1) {
+      const file = files[0];
+      fileMessageSender(file, messageInputValue);
+      return;
+    }
+    if (files.length >= 1) {
+      files.forEach((file) => {
+        fileMessageSender(file, 'TODO');
+      });
+      if (messageInputValue.length >= 1) {
+        sendMessage();
+      }
+    }
   };
 
   const setValueWithLengthCheck = (val: string) => {
@@ -139,7 +212,7 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
         inputPlaceHolder={'Type Message'}
         value={messageInputValue}
         setValue={setValueWithLengthCheck}
-        submitHandler={sendMessage}
+        submitHandler={sendHandler}
         buttonDisabled={messageInputValue.length <= 0 && files.length <= 0}
         error={error}
       >
