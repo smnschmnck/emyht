@@ -44,6 +44,7 @@ func handleRequest() {
 	e.POST("/message", chatService.SendMessage)
 	e.GET("/chatMessages/:chatID", chatService.GetMessages)
 	e.GET("/chatInfo/:chatID", chatService.GetChatInfo)
+	e.POST("/messageMediaPutURL", chatService.GetMediaPutURL)
 	//user relationships
 	e.POST("/contactRequest", contactService.SendContactRequest)
 	e.POST("/handleContactRequest", contactService.HandleContactRequest)

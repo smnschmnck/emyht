@@ -677,3 +677,49 @@ func GetChatInfo(c echo.Context) error {
 	//TODO: Actually fetch last online
 	return c.JSON(http.StatusOK, chatInfoRes{Info: "14:21"})
 }
+
+func GetMediaPutURL(c echo.Context) error {
+	sessionID, responseErr := authService.GetBearer(c)
+	if responseErr != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	const MEGABYTE int64 = 1000000
+	const MAX_SIZE = 64 * MEGABYTE
+	type reqBody struct {
+		ContentLength int64  `json:"contentLength" validate:"required"`
+		FileExtension string `json:"fileExtension" validate:"required"`
+	}
+	req := new(reqBody)
+	err = c.Bind(req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	err = validate.Struct(req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	if req.ContentLength > MAX_SIZE {
+		return c.String(http.StatusBadRequest, "FILE TOO BIG")
+	}
+
+	fileID := uuid.New().String()
+	fileName := reqUUID + "/userData/" + fileID + req.FileExtension
+
+	presignedPutUrl, err := s3Helpers.PresignPutObject(fileName, time.Hour, req.ContentLength)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
+	type res struct {
+		FileID          string `json:"fileID"`
+		PresignedPutUrl string `json:"presignedPutURL"`
+	}
+
+	return c.JSON(http.StatusOK, res{PresignedPutUrl: presignedPutUrl, FileID: fileID})
+}
