@@ -1,0 +1,43 @@
+.main {
+  border-bottom: 1px solid var(--lightGrey);
+  padding: 1rem 0;
+  padding-top: 0;
+}
+
+.heading {
+  margin: 0;
+  padding: 0;
+}
+
+.changePicContainer {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.profilePicContainer {
+  position: relative;
+  min-width: 4rem;
+  min-height: 4rem;
+  border-radius: 50%;
+  background-color: transparent;
+  overflow: hidden;
+}
+
+.acceptPrompt {
+  display: flex;
+  width: 100%;
+  gap: 2rem;
+}
+
+.saveButton {
+  width: 50%;
+}
+
+.changeButtons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+}

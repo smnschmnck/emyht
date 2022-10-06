@@ -1,0 +1,36 @@
+.mainChat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.chatContainer {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-grow: 1;
+  height: 50%;
+  width: 100%;
+}
+
+.messageContainer {
+  display: flex;
+  height: 100%;
+  width: 90%;
+}
+
+.bottomControls {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  bottom: 1rem;
+  width: 100%;
+}
+
+.wrapper {
+  width: 85%;
+  max-width: 800px;
+  min-width: 200px;
+}

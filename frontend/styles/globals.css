@@ -1,0 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --accent: #05f;
+  --accent-lighter: #07f;
+  --accentHover: #e7eeff;
+  --grey: #9f9f9f;
+  --lighterGrey: #cdcdcd;
+  --lightGrey: #e2e2e2;
+  --lightestGrey: rgb(245, 245, 245);
+  --lightRed: rgb(255, 225, 225);
+  --inter: 'Inter', sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+h1 {
+  font-size: 52px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+
+h2 {
+  font-size: 26px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+
+h4 {
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+}
+
+button {
+  font-size: 13px;
+  -webkit-tap-highlight-color: transparent;
+  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+}
+
+input {
+  font-size: 13px;
+  -webkit-tap-highlight-color: transparent;
+  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+}
+
+a {
+  font-size: 13px;
+  font-weight: 400;
+  -webkit-tap-highlight-color: transparent;
+  font-family: 'Inter', sans-serif;
+}
+
+p {
+  font-size: 13px;
+  max-width: 50ch;
+  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+}
+
+label {
+  font-size: 13px;
+  max-width: 50ch;
+  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+}
+
+#__next {
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+hr {
+  width: 100px;
+  background-color: white;
+  border: 1px solid var(--lightGrey);
+  border-radius: 2px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--lightGrey);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--grey);
+}

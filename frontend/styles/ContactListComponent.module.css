@@ -1,0 +1,20 @@
+.contacts {
+  height: 10%;
+  width: 100%;
+  flex-grow: 1;
+  overflow-y: scroll;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 10%;
+  width: 100%;
+  flex-grow: 1;
+}
+
+.spinnerWrapper {
+  width: 5rem;
+}

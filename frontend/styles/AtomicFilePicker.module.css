@@ -1,0 +1,28 @@
+.pseudoButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--lightestGrey);
+  color: var(--accent);
+  margin: 0;
+  border-radius: 0;
+  height: 40px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+  border-radius: 5px;
+  width: 100%;
+  transition: 0.2s;
+}
+
+.pseudoButton:hover {
+  background-color: var(--lightGrey);
+}
+
+.hidden {
+  display: none;
+}
+
+.customButton {
+  all: unset;
+}

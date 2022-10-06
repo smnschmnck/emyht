@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "prefer-const": [
+      "error",
+      {
+        "destructuring": "any",
+        "ignoreReadBeforeAssign": false
+      }
+    ]
+  },
+  "extends": "next/core-web-vitals"
+}
