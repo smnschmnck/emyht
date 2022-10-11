@@ -31,8 +31,13 @@ const SingleChat: React.FC<SingleChatProps> = ({
   const user = userQuery.data;
   const ownMessage = user?.uuid === senderID;
 
-  const formatTextContent = (textContent?: string) => {
+  const formatTextContent = (messageType: string, textContent?: string) => {
     if (!textContent) {
+      if (messageType !== 'plaintext') {
+        const firstCharUpperCase = messageType.charAt(0).toUpperCase();
+        const stringAfterFirstChar = messageType.slice(1);
+        return firstCharUpperCase + stringAfterFirstChar;
+      }
       return `Send a message to ${chatName}`;
     }
     if (chatType === 'group') {
@@ -82,7 +87,7 @@ const SingleChat: React.FC<SingleChatProps> = ({
                 <MessageTypeIcon messageType={messageType ?? ''} />
               )}
               <p className={styles.chatText}>
-                {formatTextContent(textContent)}
+                {formatTextContent(messageType, textContent)}
               </p>
             </span>
           </div>
