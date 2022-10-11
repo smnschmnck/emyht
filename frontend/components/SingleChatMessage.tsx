@@ -35,9 +35,9 @@ export const SingleChatMessage: React.FC<SingleChatMessageProps> = ({
       )}
       <div
         className={
-          byCurUser
-            ? styles.ownTextContentWrapper
-            : styles.participantTextContentWrapper
+          styles.contentWrapper +
+          ' ' +
+          (byCurUser ? styles.userContent : styles.participantContent)
         }
       >
         {messageType === 'image' && (

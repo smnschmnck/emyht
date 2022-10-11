@@ -20,21 +20,22 @@
   padding: 1rem;
 }
 
-.participantTextContentWrapper {
+.contentWrapper {
   display: flex;
   align-items: center;
+  flex-direction: column;
+  text-align: left;
   min-height: 2rem;
   padding: 0.5rem 1rem;
   border-radius: 1rem;
+}
+
+.participantContent {
   color: white;
   background-color: var(--accent);
 }
 
-.ownTextContentWrapper {
-  display: flex;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  border-radius: 1rem;
+.userContent {
   color: black;
   background-color: var(--lightestGrey);
 }
@@ -48,6 +49,7 @@
 .textContent {
   padding: 0;
   margin: 0;
+  width: 100%;
 }
 
 .username {
@@ -70,6 +72,7 @@
 }
 
 .imageWrapper {
+  margin: 0.5rem 0;
   position: relative;
   width: 160px;
   height: 90px;

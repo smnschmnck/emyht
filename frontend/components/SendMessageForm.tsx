@@ -104,6 +104,7 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
     } else {
       sendMessage();
     }
+    setFiles([]);
   };
 
   const sendMessage = async () => {
@@ -119,7 +120,8 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
   const createMessageBodyWithFile = (
     text: string,
     fileType: string,
-    fileID: string
+    fileID: string,
+    previewUrl: string
   ): INewMessage => {
     let mediaType: 'audio' | 'data' | 'video' | 'image' | 'plaintext';
     if (fileType.startsWith('image')) {
@@ -136,7 +138,7 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
       textContent: text,
       messageType: mediaType,
       fileID: fileID,
-      mediaUrl: '',
+      mediaUrl: previewUrl,
     };
     return body;
   };
@@ -197,8 +199,9 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
 
   const fileMessageSender = async (file: File, text: string) => {
     const fileType = file.type;
+    const preview = URL.createObjectURL(file);
     const id = await uploadFile(file);
-    const body = createMessageBodyWithFile(text, fileType, id);
+    const body = createMessageBodyWithFile(text, fileType, id, preview);
     sendRequest.mutate(body);
   };
 
