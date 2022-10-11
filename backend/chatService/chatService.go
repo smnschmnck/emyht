@@ -14,7 +14,6 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/georgysavva/scany/pgxscan"
@@ -381,7 +380,7 @@ func SendMessage(c echo.Context) error {
 		ChatID      string `json:"chatID" validate:"required"`
 		TextContent string `json:"textContent"`
 		MessageType string `json:"messageType" validate:"required"`
-		MediaUrl    string `json:"mediaUrl"`
+		FileID      string `json:"fileID"`
 	}
 
 	req := new(reqBody)
@@ -400,15 +399,13 @@ func SendMessage(c echo.Context) error {
 	}
 
 	//make sure platform only media URLs are being sent. TLDR: More comprehensive validation
-	mediaUrlExists := len(req.MediaUrl) > 0
-	if mediaUrlExists {
+	fileExists := len(req.FileID) > 0
+	formattedFileID := ""
+	if fileExists {
 		if req.MessageType == "plaintext" {
-			return c.String(http.StatusBadRequest, "MEDIA URL NOT ALLOWED FOR TYPE PLAINTEXT")
+			return c.String(http.StatusBadRequest, "FILES NOT ALLOWED FOR TYPE PLAINTEXT")
 		}
-		hasWrongDomain := !strings.HasPrefix(req.MediaUrl, "storage.emyht.com/")
-		if hasWrongDomain {
-			return c.String(http.StatusBadRequest, "BAD MEDIA URL DOMAIN")
-		}
+		formattedFileID = "storage.emyht.com/" + reqUUID + "/userData/" + req.FileID
 	}
 
 	if req.MessageType == "plaintext" && len(req.TextContent) < 1 {
@@ -434,7 +431,7 @@ func SendMessage(c echo.Context) error {
 		"VALUES ($1, $2, $3, $4, $5, $6, $7, 'sent') " +
 		"RETURNING message_id"
 
-	rows := conn.QueryRow(ctx, messageQuery, uuid.New(), req.ChatID, reqUUID, req.TextContent, req.MessageType, req.MediaUrl, time.Now().Unix())
+	rows := conn.QueryRow(ctx, messageQuery, uuid.New(), req.ChatID, reqUUID, req.TextContent, req.MessageType, formattedFileID, time.Now().Unix())
 	var messageID string
 	err = rows.Scan(&messageID)
 	if err != nil {
