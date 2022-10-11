@@ -140,29 +140,66 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
     return body;
   };
 
-  const getFileUploadURLAndID = (
+  const getFileUploadURLAndID = async (
     contentLength: number,
     fileExtension: string
   ) => {
-    return {
-      url: 'TODO',
-      id: 'TODO',
+    alert('HERE');
+    const body = {
+      contentLength: contentLength,
+      fileExtension: fileExtension,
     };
+
+    const res = await fetch('/api/getMessageMediaPutURL', {
+      method: 'post',
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to upload');
+    }
+
+    const json: {
+      presignedPutURL: string;
+      fileID: string;
+    } = await res.json();
+
+    console.log(json);
+
+    return json;
   };
 
-  const uploadFile = (file: File) => {
+  const uploadFile = async (file: File) => {
     const fileSize = file.size;
     const splittedFileName = file.name.split('.');
     const extension = splittedFileName[splittedFileName.length - 1];
-    const urlAndID = getFileUploadURLAndID(fileSize, extension);
-    const url = urlAndID.url;
-    return urlAndID.id;
+    const urlAndID = await getFileUploadURLAndID(fileSize, extension);
+    const url = urlAndID.presignedPutURL;
+
+    const headers = {
+      'Content-Type': 'multipart/form-data',
+    };
+    try {
+      const res = await fetch(url, {
+        method: 'PUT',
+        headers: headers,
+        body: file,
+        mode: 'cors',
+      });
+      if (!res.ok) {
+        throw new Error('Failed to upload');
+      }
+      return urlAndID.fileID;
+    } catch {
+      throw new Error('Failed to upload');
+    }
   };
 
-  const fileMessageSender = (file: File, text: string) => {
+  const fileMessageSender = async (file: File, text: string) => {
     const fileType = file.type;
-    const id = uploadFile(file);
+    const id = await uploadFile(file);
     const body = createMessageBodyWithFile(text, fileType, id);
+    console.log(body);
     sendRequest.mutate(body);
   };
 
@@ -174,7 +211,7 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
     }
     if (files.length >= 1) {
       files.forEach((file) => {
-        fileMessageSender(file, 'TODO');
+        fileMessageSender(file, '');
       });
       if (messageInputValue.length >= 1) {
         sendMessage();
