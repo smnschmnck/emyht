@@ -21,7 +21,7 @@
 .singlePreview {
   position: relative;
   min-height: 100%;
-  min-width: 120px;
+  max-width: 120px;
   padding: 0;
   overflow: hidden;
   margin: 0;
@@ -29,6 +29,11 @@
 
 .singlePreview:hover .deleteButtonWrapper {
   opacity: 1;
+}
+
+.videoPreview {
+  width: 100%;
+  height: 100%;
 }
 
 .deleteButtonWrapper {

@@ -47,12 +47,17 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
                 <Image src={GarbageCan} alt="Delete" />
               </button>
             </span>
-            <Image
-              src={getFileUrl(file)}
-              alt="Preview"
-              layout="fill"
-              objectFit="cover"
-            />
+            {file.type.includes('image') && (
+              <Image
+                src={getFileUrl(file)}
+                alt="Preview"
+                layout="fill"
+                objectFit="cover"
+              />
+            )}
+            {file.type.includes('video') && (
+              <video src={getFileUrl(file)} className={styles.videoPreview} />
+            )}
           </div>
         ))}
         <span className={styles.addButtonContainer}>
