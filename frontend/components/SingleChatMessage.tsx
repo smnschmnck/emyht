@@ -47,7 +47,7 @@ export const SingleChatMessage: React.FC<SingleChatMessageProps> = ({
         )}
         {messageType === 'video' && (
           <div className={styles.imageWrapper}>
-            <video className={styles.videoPlayer} controls src={mediaUrl} />
+            <video className={styles.videoPlayer} src={mediaUrl} />
           </div>
         )}
         {textContent && (
