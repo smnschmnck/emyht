@@ -21,7 +21,7 @@
 .singlePreview {
   position: relative;
   min-height: 100%;
-  max-width: 120px;
+  width: 120px;
   padding: 0;
   overflow: hidden;
   margin: 0;
