@@ -26,8 +26,9 @@
   flex-direction: column;
   text-align: left;
   min-height: 2rem;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem;
   border-radius: 1rem;
+  gap: 0.25rem;
 }
 
 .participantContent {
@@ -47,7 +48,7 @@
 }
 
 .textContent {
-  padding: 0;
+  padding: 0 0.5rem;
   margin: 0;
   width: 100%;
 }
@@ -72,8 +73,13 @@
 }
 
 .imageWrapper {
-  margin: 0.5rem 0;
   position: relative;
   width: 160px;
   height: 90px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.videoPlayer {
+  width: 100%;
 }

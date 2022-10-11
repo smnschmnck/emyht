@@ -45,9 +45,19 @@ export const SingleChatMessage: React.FC<SingleChatMessageProps> = ({
             <Image src={mediaUrl} alt="image" layout="fill" objectFit="cover" />
           </div>
         )}
-        <p className={styles.textContent} id={isPreview ? styles.preview : ''}>
-          {textContent}
-        </p>
+        {messageType === 'video' && (
+          <div className={styles.imageWrapper}>
+            <video className={styles.videoPlayer} controls src={mediaUrl} />
+          </div>
+        )}
+        {textContent && (
+          <p
+            className={styles.textContent}
+            id={isPreview ? styles.preview : ''}
+          >
+            {textContent}
+          </p>
+        )}
       </div>
       <p className={styles.timestamp}>{formatTimestamp(timestamp)}</p>
     </div>
