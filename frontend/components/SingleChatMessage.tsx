@@ -1,5 +1,6 @@
 import { formatTimestamp } from '../helpers/stringFormatters';
 import styles from '../styles/SingleChatMessageComponent.module.css';
+import playIcon from '../assets/images/playButton.svg';
 import Image from 'next/image';
 
 interface SingleChatMessageProps {
@@ -46,9 +47,21 @@ export const SingleChatMessage: React.FC<SingleChatMessageProps> = ({
           </div>
         )}
         {messageType === 'video' && (
-          <div className={styles.imageWrapper}>
-            <video className={styles.videoPlayer} src={mediaUrl} />
+          <div className={styles.videoWrapper}>
+            <button className={styles.playButton}>
+              <span className={styles.playImageWrapper}>
+                <Image src={playIcon} alt="Play" layout="fill"></Image>
+              </span>
+            </button>
+            <video
+              className={styles.videoPlayer}
+              src={mediaUrl + '#t=0.001'}
+              playsInline
+            />
           </div>
+        )}
+        {messageType === 'audio' && (
+          <audio src={mediaUrl} className={styles.audioPlayer} controls></audio>
         )}
         {textContent && (
           <p
