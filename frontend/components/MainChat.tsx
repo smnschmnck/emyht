@@ -21,8 +21,8 @@ export interface ISingleMessage {
   senderID: string;
   senderUsername: string;
   textContent: string;
-  messageType: string;
-  medieUrl: string;
+  messageType: 'plaintext' | 'image' | 'video' | 'audio' | 'data';
+  mediaUrl: string;
   timestamp: number;
   deliveryStatus: string;
 }

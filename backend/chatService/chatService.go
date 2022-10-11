@@ -480,7 +480,7 @@ type singleMessage struct {
 	SenderUsername string `json:"senderUsername" validate:"required"`
 	TextContent    string `json:"textContent" validate:"required"`
 	MessageType    string `json:"messageType" validate:"required"`
-	MediaUrl       string `json:"medieUrl" validate:"required"`
+	MediaUrl       string `json:"mediaUrl" validate:"required"`
 	Timestamp      int    `json:"timestamp" validate:"required"`
 	DeliveryStatus string `json:"deliveryStatus" validate:"required"`
 }
@@ -514,6 +514,10 @@ func getMessagesByChatID(chatID string, uuid string) ([]singleMessage, error) {
 
 	if messages == nil {
 		return make([]singleMessage, 0), nil
+	}
+
+	for i, message := range messages {
+		messages[i].MediaUrl = s3Helpers.FormatPictureUrl(message.MediaUrl)
 	}
 
 	return messages, nil
@@ -705,8 +709,8 @@ func GetMediaPutURL(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "FILE TOO BIG")
 	}
 
-	fileID := uuid.New().String()
-	fileName := reqUUID + "/userData/" + fileID + req.FileExtension
+	fileID := uuid.New().String() + "." + req.FileExtension
+	fileName := reqUUID + "/userData/" + fileID
 
 	presignedPutUrl, err := s3Helpers.PresignPutObject(fileName, time.Hour, req.ContentLength)
 	if err != nil {

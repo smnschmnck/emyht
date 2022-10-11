@@ -4,7 +4,7 @@ import { WIDTH_BREAKPOINT } from '../helpers/clientGlobals';
 import IUser from '../interfaces/IUser';
 import styles from '../styles/ChatMessagesContainerComponent.module.css';
 import { ISingleMessage } from './MainChat';
-import { OwnMessage, ParticipantMessage } from './SingleChatMessage';
+import { SingleChatMessage } from './SingleChatMessage';
 
 interface ChatMessageContainerProps {
   chatID: string;
@@ -77,20 +77,15 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
     <div className={styles.messages}>
       {messages.map((message) => (
         <span key={message.messageID}>
-          {message.senderID === user?.uuid && (
-            <OwnMessage
-              isPreview={message.messageID === 'preview'}
-              timestamp={message.timestamp}
-              textContent={message.textContent}
-            />
-          )}
-          {message.senderID !== user?.uuid && (
-            <ParticipantMessage
-              username={message.senderUsername}
-              timestamp={message.timestamp}
-              textContent={message.textContent}
-            />
-          )}
+          <SingleChatMessage
+            isPreview={message.messageID === 'preview'}
+            timestamp={message.timestamp}
+            textContent={message.textContent}
+            senderUsername={message.senderUsername}
+            byCurUser={message.senderID === user?.uuid}
+            messageType={message.messageType}
+            mediaUrl={message.mediaUrl}
+          />
         </span>
       ))}
       <div ref={messageBottom} />

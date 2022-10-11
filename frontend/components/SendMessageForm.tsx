@@ -17,7 +17,7 @@ interface INewMessage {
   chatID: string;
   textContent: string;
   //TODO extend to be able to send media
-  messageType: string;
+  messageType: 'plaintext' | 'image' | 'video' | 'audio' | 'data';
   mediaUrl: string;
 }
 
@@ -41,7 +41,7 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
       senderUsername: user?.username ?? '',
       textContent: newMessage.textContent,
       messageType: newMessage.messageType,
-      medieUrl: newMessage.mediaUrl,
+      mediaUrl: newMessage.mediaUrl,
       timestamp: timeStamp,
       deliveryStatus: 'pending',
     };
@@ -107,7 +107,7 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
   };
 
   const sendMessage = async () => {
-    const body = {
+    const body: INewMessage = {
       chatID: chatID,
       textContent: messageInputValue,
       messageType: 'plaintext',
@@ -120,8 +120,8 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
     text: string,
     fileType: string,
     fileID: string
-  ) => {
-    let mediaType: string;
+  ): INewMessage => {
+    let mediaType: 'audio' | 'data' | 'video' | 'image' | 'plaintext';
     if (fileType.startsWith('image')) {
       mediaType = 'image';
     } else if (fileType.startsWith('video')) {
@@ -135,7 +135,8 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
       chatID: chatID,
       textContent: text,
       messageType: mediaType,
-      mediaUrl: fileID,
+      fileID: fileID,
+      mediaUrl: '',
     };
     return body;
   };
@@ -144,7 +145,6 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
     contentLength: number,
     fileExtension: string
   ) => {
-    alert('HERE');
     const body = {
       contentLength: contentLength,
       fileExtension: fileExtension,
@@ -199,7 +199,6 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
     const fileType = file.type;
     const id = await uploadFile(file);
     const body = createMessageBodyWithFile(text, fileType, id);
-    console.log(body);
     sendRequest.mutate(body);
   };
 
