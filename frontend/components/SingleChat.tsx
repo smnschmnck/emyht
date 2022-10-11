@@ -10,7 +10,6 @@ interface SingleChatProps extends ISingleChat {
   openChat: (chatID: string) => void;
 }
 
-//TODO For groupchat show sender username of last message
 const SingleChat: React.FC<SingleChatProps> = ({
   chatID,
   chatName,
@@ -31,9 +30,9 @@ const SingleChat: React.FC<SingleChatProps> = ({
   const user = userQuery.data;
   const ownMessage = user?.uuid === senderID;
 
-  const formatTextContent = (messageType: string, textContent?: string) => {
+  const formatTextContent = (messageType?: string, textContent?: string) => {
     if (!textContent) {
-      if (messageType !== 'plaintext') {
+      if (messageType && messageType !== 'plaintext') {
         const firstCharUpperCase = messageType.charAt(0).toUpperCase();
         const stringAfterFirstChar = messageType.slice(1);
         return firstCharUpperCase + stringAfterFirstChar;
