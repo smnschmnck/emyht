@@ -6,8 +6,6 @@ emyht is a chat app that lets you stay in touch with your friends, family and ev
 
 [Try it out!](https://emyht.com)
 
----
-
 ## Tech used:
 
 - Frontend
@@ -24,8 +22,6 @@ emyht is a chat app that lets you stay in touch with your friends, family and ev
   - [Redis](https://github.com/redis/redis)
   - [S3](https://aws.amazon.com/de/s3/)
   - [AWS SES](https://aws.amazon.com/de/ses/)
-
----
 
 ## Screenshots
 
