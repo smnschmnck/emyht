@@ -2,9 +2,9 @@
 
 ---
 
-### emyht is a chat app which lets you stay in touch with your friends, family and everyone thats important to you
+emyht is a chat app that lets you stay in touch with your friends, family and everyone thats important to you
 
-### [Try it out!](https://emyht.com)
+[Try it out!](https://emyht.com)
 
 ---
 
