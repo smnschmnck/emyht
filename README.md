@@ -25,4 +25,12 @@ emyht is a chat app that lets you stay in touch with your friends, family and ev
 
 ## Screenshots
 
-(Coming soon)
+### Desktop
+
+![Desktop Chat View](screenshots/chat_view_desktop.png)
+
+### Mobile
+
+|                      Overview                       |                      Chat View                       |
+| :-------------------------------------------------: | :--------------------------------------------------: |
+| ![Mobile Overview](screenshots/overview_mobile.png) | ![Mobile Overview](screenshots/chat_view_mobile.png) |
