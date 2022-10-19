@@ -77,6 +77,11 @@ export const SingleChatMessage: React.FC<SingleChatMessageProps> = ({
         {messageType === 'audio' && (
           <audio src={mediaUrl} className={styles.audioPlayer} controls></audio>
         )}
+        {messageType === 'data' && (
+          <a href={mediaUrl} download>
+            Download
+          </a>
+        )}
         {textContent && (
           <p
             className={styles.textContent}
