@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { WIDTH_BREAKPOINT } from '../helpers/clientGlobals';
 import IUser from '../interfaces/IUser';
 import styles from '../styles/ChatMessagesContainerComponent.module.css';
