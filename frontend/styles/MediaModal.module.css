@@ -1,5 +1,7 @@
 .mediaWrapper {
+  position: relative;
   width: 600px;
+  height: 50vh;
 }
 
 .videoPlayer {

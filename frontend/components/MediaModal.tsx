@@ -16,7 +16,14 @@ export const MediaModal: React.FC<MediaModalProps> = ({
   return (
     <Modal backgroundClickHandler={closeHandler} mobileFullscreen={false}>
       <div className={styles.mediaWrapper}>
-        {mediaType === 'image' && <Image src={mediaSource} alt="image"></Image>}
+        {mediaType === 'image' && (
+          <Image
+            src={mediaSource}
+            alt="image"
+            layout="fill"
+            objectFit="contain"
+          />
+        )}
         {mediaType === 'video' && (
           <video
             className={styles.videoPlayer}

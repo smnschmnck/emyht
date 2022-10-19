@@ -45,6 +45,14 @@ export const SingleChatMessage: React.FC<SingleChatMessageProps> = ({
       >
         {messageType === 'image' && (
           <div className={styles.imageWrapper}>
+            <button
+              className={styles.playButton}
+              onClick={() => openMediaModal('image', mediaUrl)}
+            >
+              <span className={styles.playImageWrapper}>
+                <Image src={playIcon} alt="Play" layout="fill"></Image>
+              </span>
+            </button>
             <Image src={mediaUrl} alt="image" layout="fill" objectFit="cover" />
           </div>
         )}
