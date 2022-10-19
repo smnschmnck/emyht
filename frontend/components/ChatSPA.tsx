@@ -11,6 +11,7 @@ import { ContactRequest } from './Chats';
 import { handleWebsocketMessage } from '../helpers/websocket';
 import { NextRouter, useRouter } from 'next/router';
 import { SettingsModal } from './SettingsModal';
+import { MediaModal } from './MediaModal';
 
 const shallowPush = (router: NextRouter, route: string) => {
   router.push(route, undefined, {
@@ -51,6 +52,11 @@ export const ChatSPA: React.FC = () => {
   const [contactRequestOpened, setContactRequestOpened] = useState(false);
   const [chatOpened, setChatOpened] = useState(false);
   const webSocket = useRef<WebSocket | null>(null);
+  const [showMediaModal, setShowMediaModal] = useState(false);
+  const [mediaModalType, setMediaModalType] = useState<'image' | 'video'>(
+    'video'
+  );
+  const [mediaModalSource, setMediaModalSource] = useState('');
 
   const router = useRouter();
 
@@ -90,6 +96,7 @@ export const ChatSPA: React.FC = () => {
     setShowAddChatModal(false);
     setShowContactRequestModal(true);
   };
+
   const openChat = (chatID: string) => {
     chatsQuery.refetch();
     closeContactRequest();
@@ -98,11 +105,21 @@ export const ChatSPA: React.FC = () => {
     setCurChatID(chatID);
   };
 
+  const openMediaModal = (
+    mediaType: 'image' | 'video',
+    mediaSource: string
+  ) => {
+    setShowMediaModal(true);
+    setMediaModalSource(mediaSource);
+    setMediaModalType(mediaType);
+  };
+
   const openSettings = () => {
     setShowSettingsModal(true);
   };
 
   const closeChat = () => {
+    setShowMediaModal(false);
     shallowPush(router, '/');
     setChatOpened(false);
     contactRequestsQuery.refetch();
@@ -135,6 +152,7 @@ export const ChatSPA: React.FC = () => {
     if (router.asPath === '/') {
       setContactRequestOpened(false);
       setChatOpened(false);
+      setShowMediaModal(false);
     }
   }, [router.asPath]);
 
@@ -187,6 +205,13 @@ export const ChatSPA: React.FC = () => {
           setCurChatID={setCurChatID}
         />
       )}
+      {showMediaModal && (
+        <MediaModal
+          closeHandler={() => setShowMediaModal(false)}
+          mediaType={mediaModalType}
+          mediaSource={mediaModalSource}
+        />
+      )}
       {showContactRequestModal && (
         <ContactRequestModal
           closeHandler={() => setShowContactRequestModal(false)}
@@ -216,6 +241,7 @@ export const ChatSPA: React.FC = () => {
             closeChat={closeChat}
             setShowAddChatModal={setShowAddChatModal}
             closeContactRequest={closeContactRequest}
+            openMediaModal={openMediaModal}
           />
         </div>
       </div>

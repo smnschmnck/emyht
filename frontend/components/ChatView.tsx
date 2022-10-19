@@ -10,6 +10,7 @@ interface ChatViewProps {
   closeChat: () => void;
   chatOpened: boolean;
   chats: ISingleChat[];
+  openMediaModal: (mediaType: 'image' | 'video', mediaSource: string) => void;
 }
 
 interface ChatInfo {
@@ -21,6 +22,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
   closeChat,
   chatOpened,
   chats,
+  openMediaModal,
 }) => {
   const chatInfoQuery = useQuery(['chatInfo', chatID], async () => {
     const res = await fetch(`/api/getChatInfo/${chatID}`);
@@ -42,7 +44,11 @@ export const ChatView: React.FC<ChatViewProps> = ({
       />
       <div className={styles.chatContainer}>
         <div className={styles.messageContainer}>
-          <ChatMessageContainer chatID={chatID} chatOpened={chatOpened} />
+          <ChatMessageContainer
+            openMediaModal={openMediaModal}
+            chatID={chatID}
+            chatOpened={chatOpened}
+          />
         </div>
         <div className={styles.bottomControls}>
           <div className={styles.wrapper}>

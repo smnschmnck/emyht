@@ -11,6 +11,7 @@ interface SingleChatMessageProps {
   byCurUser: boolean;
   messageType: 'plaintext' | 'image' | 'video' | 'audio' | 'data';
   mediaUrl: string;
+  openMediaModal: (mediaType: 'image' | 'video', mediaSource: string) => void;
 }
 
 export const SingleChatMessage: React.FC<SingleChatMessageProps> = ({
@@ -21,6 +22,7 @@ export const SingleChatMessage: React.FC<SingleChatMessageProps> = ({
   byCurUser,
   messageType,
   mediaUrl,
+  openMediaModal,
 }) => {
   return (
     <div
@@ -48,7 +50,10 @@ export const SingleChatMessage: React.FC<SingleChatMessageProps> = ({
         )}
         {messageType === 'video' && (
           <div className={styles.videoWrapper}>
-            <button className={styles.playButton}>
+            <button
+              className={styles.playButton}
+              onClick={() => openMediaModal('video', mediaUrl)}
+            >
               <span className={styles.playImageWrapper}>
                 <Image src={playIcon} alt="Play" layout="fill"></Image>
               </span>

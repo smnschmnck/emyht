@@ -9,11 +9,13 @@ import { SingleChatMessage } from './SingleChatMessage';
 interface ChatMessageContainerProps {
   chatID: string;
   chatOpened: boolean;
+  openMediaModal: (mediaType: 'image' | 'video', mediaSource: string) => void;
 }
 
 export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
   chatID,
   chatOpened,
+  openMediaModal,
 }) => {
   const queryClient = useQueryClient();
   const [isSmallScreen, setIsSmallScreen] = useState(false);
@@ -85,6 +87,7 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
             byCurUser={message.senderID === user?.uuid}
             messageType={message.messageType}
             mediaUrl={message.mediaUrl}
+            openMediaModal={openMediaModal}
           />
         </span>
       ))}

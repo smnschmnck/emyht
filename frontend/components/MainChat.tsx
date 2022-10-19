@@ -14,6 +14,7 @@ interface MainChatProps {
   setShowAddChatModal: (show: boolean) => void;
   contactRequests: ContactRequest[];
   closeContactRequest: () => void;
+  openMediaModal: (mediaType: 'image' | 'video', mediaSource: string) => void;
 }
 
 export interface ISingleMessage {
@@ -37,6 +38,7 @@ const MainChat: React.FC<MainChatProps> = ({
   contactRequestOpened,
   contactRequests,
   closeContactRequest,
+  openMediaModal,
 }) => {
   const getContactRequestByID = (id: string) => {
     return contactRequests.find((c) => c.senderID === id);
@@ -57,6 +59,7 @@ const MainChat: React.FC<MainChatProps> = ({
           closeChat={closeChat}
           chatOpened={chatOpened}
           chats={chats}
+          openMediaModal={openMediaModal}
         />
       )}
       {chats.length <= 0 && contactRequests.length <= 0 && (
