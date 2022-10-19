@@ -1,6 +1,7 @@
 import { formatTimestamp } from '../helpers/stringFormatters';
 import styles from '../styles/SingleChatMessageComponent.module.css';
 import playIcon from '../assets/images/playButton.svg';
+import expandIcon from '../assets/images/expand.svg';
 import Image from 'next/image';
 
 interface SingleChatMessageProps {
@@ -46,11 +47,11 @@ export const SingleChatMessage: React.FC<SingleChatMessageProps> = ({
         {messageType === 'image' && (
           <div className={styles.imageWrapper}>
             <button
-              className={styles.playButton}
+              className={styles.viewMediaButton}
               onClick={() => openMediaModal('image', mediaUrl)}
             >
-              <span className={styles.playImageWrapper}>
-                <Image src={playIcon} alt="Play" layout="fill"></Image>
+              <span className={styles.viewMediaImageWrapper}>
+                <Image src={expandIcon} alt="View" layout="fill"></Image>
               </span>
             </button>
             <Image src={mediaUrl} alt="image" layout="fill" objectFit="cover" />
@@ -59,10 +60,10 @@ export const SingleChatMessage: React.FC<SingleChatMessageProps> = ({
         {messageType === 'video' && (
           <div className={styles.videoWrapper}>
             <button
-              className={styles.playButton}
+              className={styles.viewMediaButton}
               onClick={() => openMediaModal('video', mediaUrl)}
             >
-              <span className={styles.playImageWrapper}>
+              <span className={styles.viewMediaImageWrapper}>
                 <Image src={playIcon} alt="Play" layout="fill"></Image>
               </span>
             </button>

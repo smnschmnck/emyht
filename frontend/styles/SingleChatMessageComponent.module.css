@@ -89,7 +89,7 @@
   margin: 0;
 }
 
-.playButton {
+.viewMediaButton {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -106,11 +106,11 @@
   cursor: pointer;
 }
 
-.playButton:hover {
+.viewMediaButton:hover {
   opacity: 1;
 }
 
-.playImageWrapper {
+.viewMediaImageWrapper {
   position: relative;
   width: 50%;
   height: 50%;
