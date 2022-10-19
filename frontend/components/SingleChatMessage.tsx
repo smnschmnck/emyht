@@ -2,6 +2,8 @@ import { formatTimestamp } from '../helpers/stringFormatters';
 import styles from '../styles/SingleChatMessageComponent.module.css';
 import playIcon from '../assets/images/playButton.svg';
 import expandIcon from '../assets/images/expand.svg';
+import downloadIconWhite from '../assets/images/download_white.svg';
+import downloadIconBlack from '../assets/images/download_black.svg';
 import Image from 'next/image';
 
 interface SingleChatMessageProps {
@@ -79,7 +81,14 @@ export const SingleChatMessage: React.FC<SingleChatMessageProps> = ({
         )}
         {messageType === 'data' && (
           <a href={mediaUrl} download>
-            Download
+            <div className={styles.downloadImageWrapper}>
+              <Image
+                src={byCurUser ? downloadIconBlack : downloadIconWhite}
+                alt="Download"
+                layout="fill"
+                objectFit="contain"
+              />
+            </div>
           </a>
         )}
         {textContent && (
