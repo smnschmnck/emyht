@@ -127,8 +127,19 @@
   padding: 0.5rem;
 }
 
+.downloadButton {
+  display: flex;
+  align-items: center;
+}
+
+.fileName {
+  margin: 10px;
+}
+
 .downloadImageWrapper {
   position: relative;
+  display: flex;
+  align-items: center;
   min-width: 50px;
   min-height: 60px;
   padding: 10px;

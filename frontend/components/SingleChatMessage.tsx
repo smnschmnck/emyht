@@ -80,7 +80,9 @@ export const SingleChatMessage: React.FC<SingleChatMessageProps> = ({
           <audio src={mediaUrl} className={styles.audioPlayer} controls></audio>
         )}
         {messageType === 'data' && (
-          <a href={mediaUrl} download>
+          <a href={mediaUrl} download className={styles.downloadButton}>
+            {/* TODO: Show real filename */}
+            <h3 className={styles.fileName}>{'User File'}</h3>
             <div className={styles.downloadImageWrapper}>
               <Image
                 src={byCurUser ? downloadIconBlack : downloadIconWhite}
