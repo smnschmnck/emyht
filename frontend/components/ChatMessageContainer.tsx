@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { WIDTH_BREAKPOINT } from '../helpers/clientGlobals';
 import IUser from '../interfaces/IUser';
 import styles from '../styles/ChatMessagesContainerComponent.module.css';
@@ -19,6 +19,8 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
 }) => {
   const queryClient = useQueryClient();
   const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [suspendAutoScroll, setSuspendAutoScroll] = useState(false);
+  const scrollContainer = useRef<HTMLDivElement | null>(null);
   const userQuery = useQuery<IUser>(['user'], async () => {
     const res = await fetch('/api/user');
     return (await res.json()) as IUser;
@@ -40,7 +42,9 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
     },
     {
       onSuccess: () => {
-        scrollMessagesToBottom();
+        if (!suspendAutoScroll) {
+          scrollMessagesToBottom();
+        }
         queryClient.invalidateQueries(['chats']);
       },
     }
@@ -53,8 +57,26 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
   };
 
   useEffect(() => {
-    scrollMessagesToBottom();
-  }, [fetchMessages.data]);
+    if (!suspendAutoScroll) {
+      scrollMessagesToBottom();
+    }
+  }, [fetchMessages.data, suspendAutoScroll]);
+
+  if (scrollContainer.current) {
+    scrollContainer.current.onscroll = () => {
+      if (scrollContainer.current) {
+        if (
+          scrollContainer.current.scrollTop ===
+          scrollContainer.current.scrollHeight -
+            scrollContainer.current.offsetHeight
+        ) {
+          setSuspendAutoScroll(false);
+        } else {
+          setSuspendAutoScroll(true);
+        }
+      }
+    };
+  }
 
   useEffect(() => {
     if (chatOpened) {
@@ -76,7 +98,7 @@ export const ChatMessageContainer: React.FC<ChatMessageContainerProps> = ({
   }, [fetchMessages, isSmallScreen]);
 
   return (
-    <div className={styles.messages}>
+    <div className={styles.messages} ref={scrollContainer}>
       {messages.map((message) => (
         <span key={message.messageID}>
           <SingleChatMessage
