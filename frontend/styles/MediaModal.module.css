@@ -1,7 +1,18 @@
 .mediaWrapper {
+  position: block;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 30vw;
+  min-width: 350px;
+}
+
+.imageWrapper {
   position: relative;
-  width: 600px;
-  height: 50vh;
+  display: block;
+  width: 100%;
+  height: min-content;
 }
 
 .videoPlayer {
@@ -10,6 +21,7 @@
 
 @media only screen and (max-width: 600px) {
   .mediaWrapper {
-    width: 100%;
+    width: 70vw;
+    min-width: 200px;
   }
 }
