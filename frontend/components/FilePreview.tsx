@@ -4,6 +4,8 @@ import Image from 'next/image';
 import styles from '../styles/FilePreview.module.css';
 import { FilePicker } from './atomic/FilePicker';
 import { memo } from 'react';
+import dataIcon from '../assets/images/dataIcon.svg';
+import audioIcon from '../assets/images/audioIcon.svg';
 
 interface FilePreviewProps {
   files: File[];
@@ -31,6 +33,19 @@ const FilePreview: React.FC<FilePreviewProps> = ({ files, setFiles }) => {
     setFiles([...files, ...newFilesArr]);
   };
 
+  const getFileType = (f: File) => {
+    if (f.type.includes('image')) {
+      return 'image';
+    }
+    if (f.type.includes('video')) {
+      return 'video';
+    }
+    if (f.type.includes('audio')) {
+      return 'audio';
+    }
+    return 'data';
+  };
+
   return (
     <div className={styles.mediaPreviewsContainer}>
       <div className={styles.mediaPreviews}>
@@ -44,7 +59,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({ files, setFiles }) => {
                 <Image src={GarbageCan} alt="Delete" />
               </button>
             </span>
-            {file.type.includes('image') && (
+            {getFileType(file) === 'image' && (
               <Image
                 src={getFileUrl(file)}
                 alt="Preview"
@@ -52,8 +67,28 @@ const FilePreview: React.FC<FilePreviewProps> = ({ files, setFiles }) => {
                 objectFit="cover"
               />
             )}
-            {file.type.includes('video') && (
+            {getFileType(file) === 'video' && (
               <video src={getFileUrl(file)} className={styles.videoPreview} />
+            )}
+            {getFileType(file) === 'audio' && (
+              <div className={styles.fileInfo}>
+                <Image
+                  src={audioIcon}
+                  alt="Preview"
+                  layout="fill"
+                  objectFit="contain"
+                />
+              </div>
+            )}
+            {getFileType(file) === 'data' && (
+              <div className={styles.fileInfo}>
+                <Image
+                  src={dataIcon}
+                  alt="Preview"
+                  layout="fill"
+                  objectFit="contain"
+                />
+              </div>
             )}
           </div>
         ))}
