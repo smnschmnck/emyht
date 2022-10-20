@@ -7,7 +7,7 @@ import Image from 'next/image';
 import Paperclip from '../assets/images/paperclip.svg';
 import styles from '../styles/SendMessageForm.module.css';
 import { FilePicker } from './atomic/FilePicker';
-import { FilePreview } from './FilePreview';
+import FilePreview from './FilePreview';
 
 interface SendMessageFormProps {
   chatID: string;

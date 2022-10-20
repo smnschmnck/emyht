@@ -3,16 +3,13 @@ import Plus from '../assets/images/plus.svg';
 import Image from 'next/image';
 import styles from '../styles/FilePreview.module.css';
 import { FilePicker } from './atomic/FilePicker';
+import { memo } from 'react';
 
 interface FilePreviewProps {
   files: File[];
   setFiles: (files: File[]) => void;
 }
-
-export const FilePreview: React.FC<FilePreviewProps> = ({
-  files,
-  setFiles,
-}) => {
+const FilePreview: React.FC<FilePreviewProps> = ({ files, setFiles }) => {
   const getFileUrl = (file: File) => {
     console.log(file.name);
     return URL.createObjectURL(file);
@@ -71,3 +68,5 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
     </div>
   );
 };
+
+export default memo(FilePreview);
