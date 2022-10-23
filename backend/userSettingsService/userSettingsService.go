@@ -27,7 +27,7 @@ func GetChangeProfilePicturePutURL(c echo.Context) error {
 	}
 
 	const MEGABYTE int64 = 1000000
-	const MAX_SIZE = 5 * MEGABYTE
+	const MAX_SIZE = 1 * MEGABYTE
 	type reqBody struct {
 		ContentLength int64 `json:"contentLength" validate:"required"`
 	}
@@ -44,7 +44,6 @@ func GetChangeProfilePicturePutURL(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "FILE TOO BIG")
 	}
 
-	//TODO: expect different file types
 	imageID := uuid.New().String()
 	picName := reqUUID + "/accountData/" + imageID + ".png"
 
