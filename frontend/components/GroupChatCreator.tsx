@@ -57,6 +57,7 @@ export const GroupChatCreator: React.FC<GroupChatCreaterProps> = ({
           setSuccess={setSuccess}
           selectedContacts={selectedContacts}
           resetSelectedContacts={resetSelectedContacts}
+          closeHandler={closeHandler}
         />
       )}
     </>
