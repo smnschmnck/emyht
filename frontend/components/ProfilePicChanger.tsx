@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { FilePicker } from './atomic/FilePicker';
 import { formatError, formatPicURL } from '../helpers/stringFormatters';
 import styles from '../styles/ProfilePicChanger.module.css';
@@ -7,6 +6,7 @@ import { BigButton, SmallButton } from './atomic/Button';
 import { QueryObserverResult, useMutation } from '@tanstack/react-query';
 import { ErrorMessage } from './atomic/ErrorMessage';
 import IUser from '../interfaces/IUser';
+import { Avatar } from './atomic/Avatar';
 
 interface ProfilePicChangerProps {
   profilePicUrl?: string;
@@ -117,13 +117,7 @@ export const ProfilePicChanger: React.FC<ProfilePicChangerProps> = ({
   return (
     <div className={styles.main}>
       <div className={styles.changePicContainer}>
-        <div className={styles.profilePicContainer}>
-          <Image
-            src={formatPicURL(curProfilePicURL)}
-            alt="Profile picture"
-            layout="fill"
-          />
-        </div>
+        <Avatar url={formatPicURL(curProfilePicURL)} size={'80px'} />
         {!showAcceptPrompt && (
           <div className={styles.changeButtons}>
             <FilePicker
