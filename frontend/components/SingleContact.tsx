@@ -1,6 +1,6 @@
 import styles from '../styles/SingleContactComponent.module.css';
-import Image from 'next/image';
 import { formatPicURL } from '../helpers/stringFormatters';
+import { Avatar } from './atomic/Avatar';
 
 export interface Contact {
   id: string;
@@ -28,16 +28,7 @@ export const SingleContact: React.FC<SingleContactProps> = ({
         onClick={() => selectContact(id)}
       >
         <div className={styles.contactInfo}>
-          <div className={styles.profilePicContainer}>
-            <div className={styles.profilePic}>
-              <Image
-                src={formatPicURL(profilePictureUrl)}
-                alt="Profile picture"
-                layout="fill"
-                objectFit="cover"
-              ></Image>
-            </div>
-          </div>
+          <Avatar url={formatPicURL(profilePictureUrl)} size={'40px'} />
           <p className={styles.contactName}>{name}</p>
         </div>
       </button>

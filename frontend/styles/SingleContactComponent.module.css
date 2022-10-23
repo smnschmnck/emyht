@@ -36,23 +36,7 @@
   position: relative;
   width: fit-content;
   height: 80%;
-}
-
-.profilePicContainer {
-  display: flex;
-  justify-content: center;
-  height: 100%;
-  width: 60px;
-}
-
-.profilePic {
-  position: relative;
-  display: inline;
-  height: 100%;
-  aspect-ratio: 1/1;
-  border-radius: 50%;
-  overflow: hidden;
-  background-color: green;
+  gap: 10px;
 }
 
 .contactName {

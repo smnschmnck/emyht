@@ -1,10 +1,10 @@
-import Image from 'next/image';
 import styles from '../styles/SingleChatComponent.module.css';
 import ISingleChat from '../interfaces/ISingleChat';
 import { formatTimestamp, formatPicURL } from '../helpers/stringFormatters';
 import IUser from '../interfaces/IUser';
 import { useQuery } from '@tanstack/react-query';
 import { MessageTypeIcon } from './MessageTypeIcon';
+import { Avatar } from './atomic/Avatar';
 
 interface SingleChatProps extends ISingleChat {
   openChat: (chatID: string) => void;
@@ -60,16 +60,7 @@ const SingleChat: React.FC<SingleChatProps> = ({
                 {unreadMessages < 9 ? unreadMessages : '9+'}
               </span>
             )}
-            <div className={styles.profilePicture}>
-              <div className={styles.image}>
-                <Image
-                  src={formatPicURL(pictureUrl)}
-                  objectFit="cover"
-                  alt="pp"
-                  layout="fill"
-                />
-              </div>
-            </div>
+            <Avatar url={formatPicURL(pictureUrl)} size={'40px'} />
           </div>
           <div className={styles.chatContent}>
             <div className={styles.chatNameTime}>

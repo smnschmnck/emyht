@@ -1,6 +1,7 @@
 import styles from '../styles/ChatInfoHeaderComponent.module.css';
 import Image from 'next/image';
 import { formatPicURL } from '../helpers/stringFormatters';
+import { Avatar } from './atomic/Avatar';
 
 interface ChatInfoHeaderProps {
   picUrl?: string;
@@ -20,14 +21,7 @@ export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
       <div className={styles.innerChatHeader}>
         <button className={styles.closeButton} onClick={() => close()} />
         <div className={styles.chatInfo}>
-          <div className={styles.profilePicture}>
-            <Image
-              src={formatPicURL(picUrl)}
-              alt="profile-picture"
-              layout="fill"
-              objectFit="cover"
-            />
-          </div>
+          <Avatar url={formatPicURL(picUrl)} size={'40px'} />
           <div className={styles.nameAndLastOnline}>
             <h3 className={styles.chatName}>{name}</h3>
             <p className={styles.lastOnline}>{info}</p>
