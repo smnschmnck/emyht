@@ -21,15 +21,25 @@ export const GroupChatCreationSettings: React.FC<
 > = ({ selectedContacts, resetSelectedContacts, setSuccess, closeHandler }) => {
   const [chatName, setChatName] = useState('');
   const [curPicture, setCurPicture] = useState('');
+  const [currentFile, setCurrentFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
 
   const sendRequest = useMutation(
     ['chats'],
     async () => {
+      let fileID = '';
+
+      if (currentFile) {
+        const fileSize = currentFile.size;
+        const fileIDandURL = await getPresignedUrlAndID(fileSize);
+        await uploadPicture(currentFile, fileIDandURL.presignedPutURL);
+        fileID = fileIDandURL.fileID;
+      }
+
       const body = {
         chatName: chatName,
         //TODO add functionality to add picture
-        chatPicture: '',
+        chatPictureID: fileID,
         participantUUIDs: selectedContacts,
       };
 
@@ -53,6 +63,29 @@ export const GroupChatCreationSettings: React.FC<
     }
   );
 
+  const getPresignedUrlAndID = async (contentLength: number) => {
+    const res = await fetch('/api/getGroupChatPicturePutURL', {
+      method: 'POST',
+      body: JSON.stringify({ contentLength: contentLength }),
+    });
+    const json: { fileID: string; presignedPutURL: string } = await res.json();
+    return json;
+  };
+
+  const uploadPicture = async (file: File, putURL: string) => {
+    const headers = {
+      'Content-Type': 'multipart/form-data',
+    };
+    const res = await fetch(putURL, {
+      method: 'PUT',
+      headers: headers,
+      body: file,
+      mode: 'cors',
+    });
+
+    if (!res.ok) throw new Error('Failed to upload');
+  };
+
   const createGroupChat = async (e: FormEvent) => {
     e.preventDefault();
     sendRequest.mutate();
@@ -61,6 +94,7 @@ export const GroupChatCreationSettings: React.FC<
   const handleFileChange = (files: FileList) => {
     const firstFile = files[0];
     setCurPicture(URL.createObjectURL(firstFile));
+    setCurrentFile(firstFile);
   };
 
   return (

@@ -151,7 +151,7 @@ func StartGroupChat(c echo.Context) error {
 
 	type startReq struct {
 		ChatName         string   `json:"chatName" validate:"required"`
-		ChatPicture      string   `json:"chatPicture"`
+		ChatPictureID    string   `json:"chatPictureID"`
 		ParticipantUUIDs []string `json:"participantUUIDs" validate:"required"`
 	}
 	req := new(startReq)
@@ -194,8 +194,16 @@ func StartGroupChat(c echo.Context) error {
 	defer conn.Close()
 
 	var chatPicture string
-	if req.ChatPicture != "" {
-		chatPicture = req.ChatPicture
+	if req.ChatPictureID != "" {
+		imageKey := reqUUID + "/gcPictures/" + req.ChatPictureID + ".png"
+		imageExists, err := s3Helpers.CheckFileExists(imageKey)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+		}
+		if !imageExists {
+			return c.String(http.StatusNotFound, "IMAGEID NOT FOUND")
+		}
+		chatPicture = "storage.emyht.com/" + imageKey
 	} else {
 		randPictureInt := rand.Intn(10)
 		defaultPicture := "default_group_" + strconv.Itoa(randPictureInt)
@@ -754,8 +762,8 @@ func GetGroupPicturePutURL(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "FILE TOO BIG")
 	}
 
-	fileID := uuid.New().String() + ".png"
-	fileName := reqUUID + "/gcPictures/" + fileID
+	fileID := uuid.New().String()
+	fileName := reqUUID + "/gcPictures/" + fileID + ".png"
 
 	presignedPutUrl, err := s3Helpers.PresignPutObject(fileName, time.Hour, req.ContentLength)
 	if err != nil {
