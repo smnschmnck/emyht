@@ -10,7 +10,7 @@
 .contactWrapper {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   height: 80%;
   width: 99%;
   border-radius: 7px;
@@ -31,11 +31,12 @@
 
 .contactInfo {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   position: relative;
-  width: fit-content;
   height: 80%;
+  width: 100%;
+  margin: 0 5px;
   gap: 10px;
 }
 
