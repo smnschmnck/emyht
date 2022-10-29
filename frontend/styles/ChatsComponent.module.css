@@ -38,40 +38,6 @@
   background-color: var(--accentHover);
 }
 
-.popupContent {
-  display: flex;
-  flex-direction: column;
-  width: 175px;
-  padding: 10px;
-}
-
-.popupOption {
-  display: flex;
-  align-items: center;
-  height: 32px;
-  width: 100%;
-  border: none;
-  cursor: pointer;
-  background-color: white;
-  color: black;
-  border-radius: 5px;
-  transition: 0.2s;
-}
-
-.popupOption:hover {
-  background-color: var(--accentHover);
-}
-
-.popupOptionText {
-  font-weight: 500;
-}
-
-.popupOptionContent {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
 .chats {
   height: 50%;
   flex-grow: 1;

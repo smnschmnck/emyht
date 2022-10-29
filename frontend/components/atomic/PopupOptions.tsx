@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import styles from '../../styles/ChatsComponent.module.css';
+import styles from '../../styles/AtomicPopupOptions.module.css';
 
 interface PopupOptionsProps {
   children: React.ReactNode;
