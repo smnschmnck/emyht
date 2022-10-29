@@ -1,13 +1,15 @@
 import styles from '../styles/ChatInfoHeaderComponent.module.css';
-import Image from 'next/image';
 import { formatPicURL } from '../helpers/stringFormatters';
 import { Avatar } from './atomic/Avatar';
+import { PopupButton } from './atomic/PopupButton';
+import moreIcon from '../assets/images/more-grey.svg';
 
 interface ChatInfoHeaderProps {
   picUrl?: string;
   name: string;
   close: () => void;
   info?: string;
+  chatType: string;
 }
 
 export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
@@ -15,6 +17,7 @@ export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
   name,
   close,
   info,
+  chatType,
 }) => {
   return (
     <div className={styles.chatHeader}>
@@ -27,7 +30,9 @@ export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
             <p className={styles.lastOnline}>{info}</p>
           </div>
         </div>
-        <button className={styles.moreButton} />
+        <PopupButton icon={moreIcon} buttonClassName={styles.moreButton}>
+          {chatType === 'group' && <button>Leave Groupchat</button>}
+        </PopupButton>
       </div>
     </div>
   );

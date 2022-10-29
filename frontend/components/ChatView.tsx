@@ -41,6 +41,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
         picUrl={curChat?.pictureUrl}
         close={closeChat}
         info={chatInfoString}
+        chatType={curChat?.chatType ?? ''}
       />
       <div className={styles.chatContainer}>
         <div className={styles.messageContainer}>

@@ -61,15 +61,23 @@
 
 .moreButton {
   position: relative;
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
+  height: 30px;
+  width: 30px;
   margin: 0;
-  background-image: url(../assets/images/more-grey.svg);
-  background-size: cover;
+  padding: 0;
   background-color: transparent;
   border: none;
   cursor: pointer;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.moreButton:hover {
+  background-color: var(--accentHover);
+}
+
+.moreButton:focus {
+  background-color: var(--accentHover);
 }
 
 @media only screen and (max-width: 600px) {

@@ -3,13 +3,13 @@ import plus from '../assets/images/plus.svg';
 import chat from '../assets/images/chat.svg';
 import addUser from '../assets/images/addUser.svg';
 import { Input } from './atomic/Input';
-import Image from 'next/image';
 import SingleChat from './SingleChat';
 import ISingleChat from '../interfaces/ISingleChat';
 import { useState } from 'react';
 import { PopupButton } from './atomic/PopupButton';
 import { BigButton } from './atomic/Button';
 import { useQuery } from '@tanstack/react-query';
+import { PopupOption, PopupOptions } from './atomic/PopupOptions';
 
 export interface ContactRequest {
   senderID: string;
@@ -52,28 +52,18 @@ const Chats: React.FC<ChatsProps> = ({
           <div className={styles.chatsHeader}>
             <h2 className={styles.chatsHeading}>Chats</h2>
             <PopupButton buttonClassName={styles.addChatButton} icon={plus}>
-              <div className={styles.popupContent}>
-                <button
-                  className={styles.popupOption}
-                  onClick={() => {
-                    addChatButtonClickHandler();
-                  }}
-                >
-                  <div className={styles.popupOptionContent}>
-                    <Image src={chat} alt=""></Image>
-                    <span className={styles.popupOptionText}>Add chat</span>
-                  </div>
-                </button>
-                <button
-                  className={styles.popupOption}
-                  onClick={() => sendFriendRequestButtonClickHandler()}
-                >
-                  <div className={styles.popupOptionContent}>
-                    <Image src={addUser} alt=""></Image>
-                    <span className={styles.popupOptionText}>Add contact</span>
-                  </div>
-                </button>
-              </div>
+              <PopupOptions>
+                <PopupOption
+                  icon={chat}
+                  text="Add chat"
+                  clickHandler={addChatButtonClickHandler}
+                />
+                <PopupOption
+                  icon={addUser}
+                  text="Add contact"
+                  clickHandler={sendFriendRequestButtonClickHandler}
+                />
+              </PopupOptions>
             </PopupButton>
           </div>
           <Input
