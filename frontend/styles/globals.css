@@ -8,6 +8,13 @@
 @font-face {
   font-family: 'Inter';
   font-style: normal;
+  font-weight: 500;
+  src: url('/fonts/Inter/Inter-Medium.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
   font-weight: 600;
   src: url('/fonts/Inter/Inter-SemiBold.woff') format('woff');
 }
@@ -17,6 +24,13 @@
   font-style: normal;
   font-weight: 400;
   src: url('/fonts/Inter/Inter-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  src: url('/fonts/Inter/Inter-Medium.woff2') format('woff2');
 }
 
 @font-face {
