@@ -31,7 +31,11 @@ export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
             <p className={styles.lastOnline}>{info}</p>
           </div>
         </div>
-        <PopupButton icon={moreIcon} buttonClassName={styles.moreButton}>
+        <PopupButton
+          icon={moreIcon}
+          buttonClassName={styles.moreButton}
+          alignRight
+        >
           {chatType === 'group' && (
             <PopupOptions>
               <PopupOption

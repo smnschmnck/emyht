@@ -9,6 +9,7 @@ interface PopupButtonProps {
   label?: string;
   children: React.ReactNode;
   showPopUp?: boolean;
+  alignRight?: boolean;
 }
 
 export const PopupButton: React.FC<PopupButtonProps> = ({
@@ -18,6 +19,7 @@ export const PopupButton: React.FC<PopupButtonProps> = ({
   iconAlt,
   label,
   showPopUp,
+  alignRight,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -55,7 +57,11 @@ export const PopupButton: React.FC<PopupButtonProps> = ({
           </div>
         </button>
         {elShowPopup && (
-          <div className={styles.popup} onClick={() => setElShowPopup(false)}>
+          <div
+            className={styles.popup}
+            style={alignRight ? { right: 0, marginRight: '10px' } : {}}
+            onClick={() => setElShowPopup(false)}
+          >
             {children}
           </div>
         )}
