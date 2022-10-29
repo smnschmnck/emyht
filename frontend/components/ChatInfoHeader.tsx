@@ -41,6 +41,7 @@ export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
               <PopupOption
                 text="Leave Groupchat"
                 clickHandler={() => alert('TODO')}
+                textColor="red"
               />
             </PopupOptions>
           )}
