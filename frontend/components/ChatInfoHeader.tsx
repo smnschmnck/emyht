@@ -3,6 +3,7 @@ import { formatPicURL } from '../helpers/stringFormatters';
 import { Avatar } from './atomic/Avatar';
 import { PopupButton } from './atomic/PopupButton';
 import moreIcon from '../assets/images/more-grey.svg';
+import { PopupOption, PopupOptions } from './atomic/PopupOptions';
 
 interface ChatInfoHeaderProps {
   picUrl?: string;
@@ -31,7 +32,14 @@ export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
           </div>
         </div>
         <PopupButton icon={moreIcon} buttonClassName={styles.moreButton}>
-          {chatType === 'group' && <button>Leave Groupchat</button>}
+          {chatType === 'group' && (
+            <PopupOptions>
+              <PopupOption
+                text="Leave Groupchat"
+                clickHandler={() => alert('TODO')}
+              />
+            </PopupOptions>
+          )}
         </PopupButton>
       </div>
     </div>
