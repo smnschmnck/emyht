@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"sort"
@@ -804,6 +805,7 @@ func LeaveGroupChat(c echo.Context) error {
 
 	inChat, err := isUserInChat(reqUUID, req.ChatID)
 	if err != nil {
+		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
@@ -814,6 +816,7 @@ func LeaveGroupChat(c echo.Context) error {
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
+		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 	defer conn.Close()
@@ -823,6 +826,7 @@ func LeaveGroupChat(c echo.Context) error {
 	rows := conn.QueryRow(ctx, query, req.ChatID)
 	err = rows.Scan(&chatType)
 	if err != nil {
+		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
@@ -830,16 +834,17 @@ func LeaveGroupChat(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "NOT A GROUP CHAT")
 	}
 
-	var chatID string
 	leaveQuery := "DELETE FROM user_chat WHERE chat_id=$1 AND uuid=$2"
-	leaveRows := conn.QueryRow(ctx, leaveQuery, req.ChatID, reqUUID)
-	err = leaveRows.Scan(&chatID)
+	r, err := conn.Query(ctx, leaveQuery, req.ChatID, reqUUID)
+	r.Close()
 	if err != nil {
+		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	chats, err := getChatsByUUID(reqUUID)
 	if err != nil {
+		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
