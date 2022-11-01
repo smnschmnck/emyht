@@ -777,3 +777,71 @@ func GetGroupPicturePutURL(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, res{PresignedPutUrl: presignedPutUrl, FileID: fileID})
 }
+
+func LeaveGroupChat(c echo.Context) error {
+	sessionID, responseErr := authService.GetBearer(c)
+	if responseErr != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	type leaveReq struct {
+		ChatID string `json:"chatID" validate:"required"`
+	}
+	req := new(leaveReq)
+	err = c.Bind(&req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	err = validate.Struct(req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	inChat, err := isUserInChat(reqUUID, req.ChatID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
+	if !inChat {
+		return c.String(http.StatusUnauthorized, "NOT IN CHAT")
+	}
+
+	ctx := context.Background()
+	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+	defer conn.Close()
+
+	chatType := "false"
+	query := "SELECT chat_type FROM chats WHERE chat_id=$1"
+	rows := conn.QueryRow(ctx, query, req.ChatID)
+	err = rows.Scan(&chatType)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
+	if chatType != "group" {
+		return c.String(http.StatusBadRequest, "NOT A GROUP CHAT")
+	}
+
+	var chatID string
+	leaveQuery := "DELETE FROM user_chat WHERE chat_id=$1 AND uuid=$2"
+	leaveRows := conn.QueryRow(ctx, leaveQuery, req.ChatID, reqUUID)
+	err = leaveRows.Scan(&chatID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
+	chats, err := getChatsByUUID(reqUUID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
+	return c.JSON(http.StatusOK, chats)
+}
