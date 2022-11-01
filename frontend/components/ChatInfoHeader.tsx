@@ -1,16 +1,14 @@
 import styles from '../styles/ChatInfoHeaderComponent.module.css';
 import { formatPicURL } from '../helpers/stringFormatters';
 import { Avatar } from './atomic/Avatar';
-import { PopupButton } from './atomic/PopupButton';
-import moreIcon from '../assets/images/more-grey.svg';
-import { PopupOption, PopupOptions } from './atomic/PopupOptions';
+import { ChatHeaderOptions } from './ChatHeaderOptions';
 
 interface ChatInfoHeaderProps {
   picUrl?: string;
   name: string;
   close: () => void;
   info?: string;
-  chatType: string;
+  chatType: 'group' | 'oneOnOne' | 'contactRequest' | 'other';
 }
 
 export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
@@ -31,21 +29,7 @@ export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
             <p className={styles.lastOnline}>{info}</p>
           </div>
         </div>
-        <PopupButton
-          icon={moreIcon}
-          buttonClassName={styles.moreButton}
-          alignRight
-        >
-          {chatType === 'group' && (
-            <PopupOptions>
-              <PopupOption
-                text="Leave Groupchat"
-                clickHandler={() => alert('TODO')}
-                textColor="red"
-              />
-            </PopupOptions>
-          )}
-        </PopupButton>
+        <ChatHeaderOptions chatType={chatType} />
       </div>
     </div>
   );
