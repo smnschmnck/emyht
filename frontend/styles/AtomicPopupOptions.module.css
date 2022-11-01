@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   width: 175px;
-  padding: 10px;
+  padding: 5px;
 }
 
 .popupOption {
@@ -29,6 +29,6 @@
 .popupOptionContent {
   display: flex;
   align-items: center;
-  padding: 5px;
+  padding: 2px;
   gap: 5px;
 }
