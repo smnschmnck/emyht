@@ -34,10 +34,13 @@ export const ChatHeaderOptions: React.FC<ChatHeaderOptionsProps> = ({
     },
     {
       onSuccess: (data) => {
-        router.push('/', undefined, {
-          shallow: true,
-        });
-        queryClient.setQueriesData(['chats'], data);
+        router
+          .push('/', undefined, {
+            shallow: true,
+          })
+          .then(() => {
+            queryClient.setQueriesData(['chats'], data);
+          });
       },
     }
   );
