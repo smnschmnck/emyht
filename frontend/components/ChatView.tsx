@@ -42,6 +42,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
         close={closeChat}
         info={chatInfoString}
         chatType={curChat?.chatType ?? 'other'}
+        chatID={chatID}
       />
       <div className={styles.chatContainer}>
         <div className={styles.messageContainer}>

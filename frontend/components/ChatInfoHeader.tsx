@@ -9,6 +9,7 @@ interface ChatInfoHeaderProps {
   close: () => void;
   info?: string;
   chatType: 'group' | 'oneOnOne' | 'contactRequest' | 'other';
+  chatID: string;
 }
 
 export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
@@ -17,6 +18,7 @@ export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
   close,
   info,
   chatType,
+  chatID,
 }) => {
   return (
     <div className={styles.chatHeader}>
@@ -29,7 +31,7 @@ export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
             <p className={styles.lastOnline}>{info}</p>
           </div>
         </div>
-        <ChatHeaderOptions chatType={chatType} />
+        <ChatHeaderOptions chatType={chatType} chatID={chatID} />
       </div>
     </div>
   );

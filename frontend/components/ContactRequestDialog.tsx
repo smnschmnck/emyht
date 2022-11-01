@@ -66,6 +66,7 @@ export const ContactRequestDialog: React.FC<ContactRequestDialogProps> = ({
         picUrl={senderProfilePicture}
         info="12:21"
         chatType="contactRequest"
+        chatID={senderID}
       />
       <div className={styles.main}>
         {!handledSuccessfully && (
