@@ -8,7 +8,7 @@ interface ChatInfoHeaderProps {
   name: string;
   close: () => void;
   info?: string;
-  chatType: 'group' | 'oneOnOne' | 'contactRequest' | 'other';
+  chatType: 'group' | 'one_on_one' | 'contactRequest' | 'other';
   chatID: string;
 }
 

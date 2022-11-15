@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import router from 'next/router';
 
 interface ChatHeaderOptionsProps {
-  chatType: 'group' | 'oneOnOne' | 'contactRequest' | 'other';
+  chatType: 'group' | 'one_on_one' | 'contactRequest' | 'other';
   chatID: string;
 }
 
@@ -48,6 +48,15 @@ export const ChatHeaderOptions: React.FC<ChatHeaderOptionsProps> = ({
   return (
     <PopupButton icon={moreIcon} buttonClassName={styles.moreButton} alignRight>
       {chatType === 'group' && (
+        <PopupOptions>
+          <PopupOption
+            text="Leave Groupchat"
+            clickHandler={leaveGroupChat.mutate}
+            textColor="red"
+          />
+        </PopupOptions>
+      )}
+      {chatType === 'one_on_one' && (
         <PopupOptions>
           <PopupOption
             text="Leave Groupchat"
