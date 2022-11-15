@@ -49,6 +49,12 @@ export const ChatHeaderOptions: React.FC<ChatHeaderOptionsProps> = ({
     <PopupButton icon={moreIcon} buttonClassName={styles.moreButton} alignRight>
       {chatType === 'group' && (
         <PopupOptions>
+          <PopupOption text="Add user" clickHandler={() => alert('//TODO')} />
+          <PopupOption
+            text="Remove user"
+            clickHandler={() => alert('//TODO')}
+            textColor="red"
+          />
           <PopupOption
             text="Leave Groupchat"
             clickHandler={leaveGroupChat.mutate}
@@ -59,8 +65,12 @@ export const ChatHeaderOptions: React.FC<ChatHeaderOptionsProps> = ({
       {chatType === 'one_on_one' && (
         <PopupOptions>
           <PopupOption
-            text="Leave Groupchat"
-            clickHandler={leaveGroupChat.mutate}
+            text="Add to chat"
+            clickHandler={() => alert('//TODO')}
+          />
+          <PopupOption
+            text="Block user"
+            clickHandler={() => alert('//TODO')}
             textColor="red"
           />
         </PopupOptions>
