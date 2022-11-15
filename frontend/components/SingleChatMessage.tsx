@@ -102,7 +102,9 @@ export const SingleChatMessage: React.FC<SingleChatMessageProps> = ({
           </p>
         )}
       </div>
-      <p className={styles.timestamp}>{formatTimestamp(timestamp)}</p>
+      {byCurUser && (
+        <p className={styles.timestamp}>{formatTimestamp(timestamp)}</p>
+      )}
     </div>
   );
 };
