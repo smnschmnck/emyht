@@ -240,85 +240,57 @@ func StartGroupChat(c echo.Context) error {
 	return c.JSON(http.StatusOK, chats)
 }
 
-func AddUsersToGroupChat(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTH")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) ([]singleChat, error) {
+	isInContacts, err := contactService.AreUsersInContacts(participantUUIDs, uuid)
 	if err != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTH")
-	}
-
-	type addUsersReq struct {
-		ChatID           string   `json:"chatID" validate:"required"`
-		ParticipantUUIDs []string `json:"participantUUIDs" validate:"required"`
-	}
-
-	req := new(addUsersReq)
-	err = c.Bind(&req)
-	if err != nil {
-		fmt.Println(err)
-		return c.String(http.StatusBadRequest, "BAD REQUEST")
-	}
-
-	err = validate.Struct(req)
-	if err != nil {
-		fmt.Println(err)
-		return c.String(http.StatusBadRequest, "BAD REQUEST")
-	}
-
-	isInContacts, err := contactService.AreUsersInContacts(req.ParticipantUUIDs, reqUUID)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+		return make([]singleChat, 0), errors.New("INTERNAL ERROR")
 	}
 
 	if !isInContacts {
-		return c.String(http.StatusUnauthorized, "NOT ALL USERS IN CONTACTS")
+		return make([]singleChat, 0), errors.New("NOT ALL USERS IN CONTACTS")
 	}
 
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+		return make([]singleChat, 0), errors.New("INTERNAL ERROR")
 	}
 	defer conn.Close()
 
 	//CHECK IF CHAT EXISTS
 	var chatID string
 	checkChatQuery := "SELECT chat_id FROM chats WHERE chat_id = $1"
-	err = conn.QueryRow(ctx, checkChatQuery, req.ChatID).Scan(&chatID)
+	err = conn.QueryRow(ctx, checkChatQuery, chatID).Scan(&chatID)
 	if err != nil {
-		return c.String(http.StatusNotFound, "CHAT NOT FOUND")
+		return make([]singleChat, 0), errors.New("CHAT NOT FOUND")
 	}
 
 	//CHECK IF CHAT IS GROUP CHAT
 	var chatType string
 	checkChatTypeQuery := "SELECT chat_type FROM chats WHERE chat_id = $1"
-	err = conn.QueryRow(ctx, checkChatTypeQuery, req.ChatID).Scan(&chatType)
+	err = conn.QueryRow(ctx, checkChatTypeQuery, chatID).Scan(&chatType)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+		return make([]singleChat, 0), errors.New("INTERNAL ERROR")
 	}
 
 	if chatType != "group" {
-		return c.String(http.StatusUnauthorized, "CHAT IS NOT GROUP CHAT")
+		return make([]singleChat, 0), errors.New("CHAT IS NOT GROUP CHAT")
 	}
 
 	//CHECK IF USER IS IN CHAT
-	userInChat, err := isUserInChat(reqUUID, req.ChatID)
+	userInChat, err := isUserInChat(uuid, chatID)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+		return make([]singleChat, 0), errors.New("INTERNAL ERROR")
 	}
 
 	if !userInChat {
-		return c.String(http.StatusUnauthorized, "NO AUTH")
+		return make([]singleChat, 0), errors.New("NO AUTH")
 	}
 
 	//INSERT ALL PARTICIPANTS INTO CHAT
 	rows := [][]any{}
-	for _, p := range req.ParticipantUUIDs {
-		rows = append(rows, []any{p, req.ChatID, 0})
+	for _, p := range participantUUIDs {
+		rows = append(rows, []any{p, chatID, 0})
 	}
 
 	copyCount, err := conn.CopyFrom(
@@ -328,16 +300,50 @@ func AddUsersToGroupChat(c echo.Context) error {
 		pgx.CopyFromRows(rows),
 	)
 
-	if err != nil || int(copyCount) != len(req.ParticipantUUIDs) {
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	if err != nil || int(copyCount) != len(participantUUIDs) {
+		return make([]singleChat, 0), errors.New("INTERNAL ERROR")
 	}
 
-	chats, err := getChatsByUUID(reqUUID)
+	chats, err := getChatsByUUID(uuid)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+		return make([]singleChat, 0), errors.New("INTERNAL ERROR")
 	}
 
-	wsService.WriteEventToMultipleUUIDs(req.ParticipantUUIDs, "chat")
+	wsService.WriteEventToMultipleUUIDs(participantUUIDs, "chat")
+
+	return chats, nil
+}
+
+func AddUsersToGroupChat(c echo.Context) error {
+	sessionID, responseErr := authService.GetBearer(c)
+	if responseErr != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	type request struct {
+		ParticipantUUIDs []string `json:"participantUUIDs"`
+		ChatID           string   `json:"chatID"`
+	}
+
+	req := new(request)
+	if err := c.Bind(req); err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	err = validate.Struct(req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	chats, err := addUsersToGroupChat(req.ParticipantUUIDs, reqUUID, req.ChatID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
 
 	return c.JSON(http.StatusOK, chats)
 }
