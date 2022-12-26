@@ -37,9 +37,10 @@ func handleRequest() {
 	e.POST("/changeUsername", authService.ChangeUsername)
 	e.POST("/login", authService.Authenticate)
 	e.GET("/logout", authService.Logout)
-	//chats
+	//chatss
 	e.POST("/startOneOnOneChat", chatService.StartOneOnOneChat)
 	e.POST("/startGroupChat", chatService.StartGroupChat)
+	e.POST("/addUserToGroupChat", chatService.AddUsersToGroupChat)
 	e.GET("/chats", chatService.GetChats)
 	e.POST("/message", chatService.SendMessage)
 	e.GET("/chatMessages/:chatID", chatService.GetMessages)

@@ -134,6 +134,24 @@ func GetUserContactsbyUUID(uuid string) ([]contact, error) {
 	return contacts, nil
 }
 
+func AreUsersInContacts(usersUUIDs []string, uuid string) (bool, error) {
+	contacts, err := GetUserContactsbyUUID(uuid)
+	if err != nil {
+		return false, err
+	}
+
+	isInContacts := false
+	for _, contact := range contacts {
+		for _, userUUID := range usersUUIDs {
+			if contact.Uuid == userUUID {
+				isInContacts = true
+			}
+		}
+	}
+
+	return isInContacts, nil
+}
+
 func GetContacts(c echo.Context) error {
 	token, err := authService.GetBearer(c)
 	if err != nil {
