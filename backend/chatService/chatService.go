@@ -348,6 +348,58 @@ func AddUsersToGroupChat(c echo.Context) error {
 	return c.JSON(http.StatusOK, chats)
 }
 
+func GetChatParticipantsExceptUser(c echo.Context) error {
+	sessionID, responseErr := authService.GetBearer(c)
+	if responseErr != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	type request struct {
+		ChatID string `json:"chatID"`
+	}
+
+	req := new(request)
+	if err := c.Bind(req); err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	err = validate.Struct(req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	chatParticipants, err := getChatMembers(req.ChatID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
+	inChat := false
+	for _, p := range chatParticipants {
+		if p != reqUUID {
+			inChat = true
+			break
+		}
+	}
+
+	if !inChat {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	var participantsExceptUser []string
+	for _, p := range chatParticipants {
+		if p != reqUUID {
+			participantsExceptUser = append(participantsExceptUser, p)
+		}
+	}
+
+	return c.JSON(http.StatusOK, participantsExceptUser)
+}
+
 type singleChat struct {
 	ChatID            string  `json:"chatID"`
 	ChatType          string  `json:"chatType"`
