@@ -45,6 +45,30 @@ export const ChatHeaderOptions: React.FC<ChatHeaderOptionsProps> = ({
     }
   );
 
+  const addToGroupChat = useMutation(
+    async () => {
+      const body = {
+        chatID: chatID,
+      };
+
+      const res = await fetch('/api/addToGroupChat', {
+        method: 'post',
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+
+      return await res.json();
+    },
+    {
+      onSuccess: (data) => {
+        queryClient.setQueriesData(['chats'], data);
+      },
+    }
+  );
+
   return (
     <PopupButton icon={moreIcon} buttonClassName={styles.moreButton} alignRight>
       {chatType === 'group' && (
@@ -66,7 +90,7 @@ export const ChatHeaderOptions: React.FC<ChatHeaderOptionsProps> = ({
         <PopupOptions>
           <PopupOption
             text="Add to chat"
-            clickHandler={() => alert('//TODO')}
+            clickHandler={addToGroupChat.mutate}
           />
           <PopupOption
             text="Block user"

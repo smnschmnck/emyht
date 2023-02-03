@@ -1,4 +1,6 @@
+import { createPortal } from 'react-dom';
 import styles from '../../styles/AtomicModal.module.css';
+import { useEffect, useRef } from 'react';
 
 interface ModalProps {
   children?: React.ReactNode;
@@ -12,11 +14,20 @@ export const Modal: React.FC<ModalProps> = ({
   mobileFullscreen,
 }) => {
   const isMobileFullscreen = mobileFullscreen ?? false;
-  return (
+
+  const modalContentRef = useRef<HTMLSpanElement | null>(null);
+  useEffect(() => {
+    if (modalContentRef.current) {
+      modalContentRef.current.focus();
+    }
+  }, []);
+
+  return createPortal(
     <span className={styles.modal}>
       <span
         className={styles.foreground}
         id={isMobileFullscreen ? styles.mobileFullscreen : ''}
+        ref={modalContentRef}
       >
         {children}
       </span>
@@ -24,6 +35,7 @@ export const Modal: React.FC<ModalProps> = ({
         className={styles.background}
         onClick={backgroundClickHandler}
       ></span>
-    </span>
+    </span>,
+    document.body
   );
 };
