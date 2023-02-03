@@ -7,6 +7,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query';
+import { Fonts } from '../components/helpers/Fonts';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const queryClient = useRef(new QueryClient());
@@ -19,6 +20,7 @@ function MyApp({ Component, pageProps }: AppProps) {
             name="viewport"
             content="width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=0"
           />
+          <Fonts />
         </Head>
         <Component {...pageProps} />
         <div id="portal" />
