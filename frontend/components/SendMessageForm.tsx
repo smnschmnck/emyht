@@ -255,7 +255,11 @@ export const SendMessageForm: React.FC<SendMessageFormProps> = ({ chatID }) => {
         buttonDisabled={messageInputValue.length <= 0 && files.length <= 0}
         error={error}
       >
-        <FilePicker handleFileChange={fileChangeHandler} multiple>
+        <FilePicker
+          id="mediaPicker"
+          handleFileChange={fileChangeHandler}
+          multiple
+        >
           <div className={styles.buttonWrapper}>
             <span className={styles.attachmentButton}>
               <Image

@@ -2,6 +2,7 @@ import { ChangeEvent } from 'react';
 import styles from '../../styles/AtomicFilePicker.module.css';
 
 interface FilePickerProps {
+  id: string;
   buttonText?: string;
   handleFileChange?: (file: FileList) => void;
   children?: React.ReactNode;
@@ -9,6 +10,7 @@ interface FilePickerProps {
 }
 
 export const FilePicker: React.FC<FilePickerProps> = ({
+  id,
   buttonText,
   handleFileChange: handleFile,
   children,
@@ -31,17 +33,17 @@ export const FilePicker: React.FC<FilePickerProps> = ({
   return (
     <>
       {!children && (
-        <label htmlFor="filePicker" className={styles.pseudoButton}>
+        <label htmlFor={id} className={styles.pseudoButton}>
           {buttonText ?? 'Pick a file'}
         </label>
       )}
       {children && (
-        <label htmlFor="filePicker" className={styles.customButton}>
+        <label htmlFor={id} className={styles.customButton}>
           {children}
         </label>
       )}
       <input
-        id="filePicker"
+        id={id}
         type="file"
         className={styles.hidden}
         onChange={handleChange}
