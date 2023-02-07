@@ -93,7 +93,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({ files, setFiles }) => {
           </div>
         ))}
         <span className={styles.addButtonContainer}>
-          <FilePicker handleFileChange={addFiles} multiple>
+          <FilePicker id="addMedia" handleFileChange={addFiles} multiple>
             <span className={styles.addButtonWrapper}>
               <Image src={Plus} alt="Add File" />
             </span>

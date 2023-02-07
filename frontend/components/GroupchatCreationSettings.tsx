@@ -105,6 +105,7 @@ export const GroupChatCreationSettings: React.FC<
           <div className={styles.picChanger}>
             <Avatar url={formatPicURL(curPicture)} size={'80px'} />
             <FilePicker
+              id="groupchatPicturePicker"
               handleFileChange={handleFileChange}
               buttonText="Select a picture"
             />
