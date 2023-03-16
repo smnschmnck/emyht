@@ -12,6 +12,7 @@
 .foreground {
   position: absolute;
   z-index: 1;
+  animation: openModal 0.1s ease-out;
 }
 
 .background {
@@ -21,11 +22,32 @@
   height: 100%;
   background-color: black;
   opacity: 0.5;
+  animation: darkenBackground 0.1s ease-out;
 }
 
 @media only screen and (max-width: 600px) {
   #mobileFullscreen.foreground {
     width: 100%;
     height: 100%;
+  }
+}
+
+@keyframes darkenBackground {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.5;
+  }
+}
+
+@keyframes openModal {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
 }
