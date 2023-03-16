@@ -8,6 +8,7 @@
   box-shadow: 1px 3px 15px 3px rgba(0, 0, 0, 0.1);
   z-index: 1;
   float: left;
+  animation: openPopup 0.2s ease-out;
 }
 
 .button {
@@ -50,5 +51,16 @@
   .popup {
     right: 0;
     margin-right: 10px;
+  }
+}
+
+@keyframes openPopup {
+  from {
+    transform: translateY(-5px);
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0px);
   }
 }
