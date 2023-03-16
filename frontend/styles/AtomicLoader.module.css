@@ -2,7 +2,7 @@
   width: 100%;
   aspect-ratio: 1/1;
   display: inline-block;
-  border: 10px solid var(--accentHover);
+  border: 8px solid transparent;
   border-radius: 50%;
   border-top-color: var(--accent);
   animation: 1s spin infinite linear;
