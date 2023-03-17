@@ -5,7 +5,7 @@ import { BigButton, SmallButton } from './atomic/Button';
 import { Modal } from './atomic/Modal';
 import { Tab, Tabs } from './atomic/Tabs';
 import { useState } from 'react';
-import { Contact } from './SingleContact';
+import { ContactOrChat } from './SingleContactOrChat';
 import { ChatCreator } from './ChatCreator';
 import { GroupChatCreator } from './GroupChatCreator';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -29,7 +29,7 @@ export const AddChatModal: React.FC<AddChatModalProps> = ({
     if (!res.ok) {
       throw new Error(await res.text());
     }
-    return (await res.json()) as Contact[];
+    return (await res.json()) as ContactOrChat[];
   });
 
   const contacts = fetchContacts.data ?? [];

@@ -2,22 +2,22 @@ import styles from '../styles/SingleContactComponent.module.css';
 import { formatPicURL } from '../helpers/stringFormatters';
 import { Avatar } from './atomic/Avatar';
 
-export interface Contact {
+export interface ContactOrChat {
   id: string;
   name: string;
   profilePictureUrl?: string;
 }
 
-interface SingleContactProps extends Contact {
-  selectContact: (id: string) => void;
+interface SingleContactProps extends ContactOrChat {
+  select: (id: string) => void;
   selected: boolean;
 }
 
-export const SingleContact: React.FC<SingleContactProps> = ({
+export const SingleContactOrChat: React.FC<SingleContactProps> = ({
   id,
   name,
   profilePictureUrl,
-  selectContact,
+  select: selectContact,
   selected,
 }) => {
   return (

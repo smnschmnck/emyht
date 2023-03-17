@@ -3,11 +3,11 @@ import { BigButton, SmallButton } from './atomic/Button';
 import { ContactList } from './ContactList';
 import styles from '../styles/GroupchatCreator.module.css';
 import ISingleChat from '../interfaces/ISingleChat';
-import { Contact } from './SingleContact';
+import { ContactOrChat } from './SingleContactOrChat';
 import { GroupChatCreationSettings } from './GroupchatCreationSettings';
 
 interface GroupChatCreaterProps {
-  contacts: Contact[];
+  contacts: ContactOrChat[];
   closeHandler: () => void;
   setSuccess: (success: boolean, chats: ISingleChat[]) => void;
   isLoading: boolean;

@@ -1,13 +1,13 @@
 import { Input } from './atomic/Input';
 import styles from '../styles/ContactListComponent.module.css';
-import { SingleContact, Contact } from './SingleContact';
+import { SingleContactOrChat, ContactOrChat } from './SingleContactOrChat';
 import { useState } from 'react';
 import { Loader } from './atomic/Loader';
 
 interface ContactListProps {
   selectedContacts: string[];
   setSelectedContacts: (selectedContacts: string[]) => void;
-  contacts: Contact[];
+  contacts: ContactOrChat[];
   multiselect?: boolean;
   isLoading?: boolean;
 }
@@ -50,12 +50,12 @@ export const ContactList: React.FC<ContactListProps> = ({
               return lowerCaseContact.includes(lowerCaseQuery);
             })
             .map((contact) => (
-              <SingleContact
+              <SingleContactOrChat
                 key={contact.id}
                 id={contact.id}
                 name={contact.name}
                 profilePictureUrl={contact.profilePictureUrl}
-                selectContact={selectContact}
+                select={selectContact}
                 selected={selectedContacts.includes(contact.id)}
               />
             ))}

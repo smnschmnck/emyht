@@ -31,7 +31,7 @@ export const ChatInfoHeader: React.FC<ChatInfoHeaderProps> = ({
             <p className={styles.lastOnline}>{info}</p>
           </div>
         </div>
-        <ChatHeaderOptions chatType={chatType} chatID={chatID} />
+        <ChatHeaderOptions chatType={chatType} chatID={chatID} name={name} />
       </div>
     </div>
   );
