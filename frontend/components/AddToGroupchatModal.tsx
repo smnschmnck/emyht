@@ -9,11 +9,13 @@ import { SingleContactOrChat } from './SingleContactOrChat';
 import { Input } from './atomic/Input';
 
 interface AddToGroupchatModalProps {
+  userID: string;
   username: string;
   closeHandler: () => void;
 }
 
-export const AddToGroupChatModal: React.FC<AddToGroupchatModalProps> = ({
+export const AddToGroupchatsModal: React.FC<AddToGroupchatModalProps> = ({
+  userID,
   username,
   closeHandler,
 }) => {
@@ -46,18 +48,23 @@ export const AddToGroupChatModal: React.FC<AddToGroupchatModalProps> = ({
       );
   };
 
+  const addToGroup = () => {
+    setSuccess(true);
+  };
+
   return (
     <Modal backgroundClickHandler={closeHandler} mobileFullscreen={true}>
       {!success && (
         <div className={styles.main}>
           <div className={styles.header}>
-            <h2 className={styles.heading}>Add to Groupchat</h2>
+            <h2 className={styles.heading}>Add to Groupchats</h2>
           </div>
           {isLoading && <Loader />}
+          {chats.length <= 0 && <h1>{`You don't have any groupchats`}</h1>}
           {chats.length > 0 && (
             <div className={styles.interface}>
               <Input
-                placeholder="Search chats"
+                placeholder="Search Chats"
                 onChange={(t) => setSearchQuery(t.target.value)}
                 value={searchQuery}
               />
@@ -75,7 +82,7 @@ export const AddToGroupChatModal: React.FC<AddToGroupchatModalProps> = ({
                 ))}
               </div>
               <div className={styles.buttons}>
-                <BigButton>Add to chat</BigButton>
+                <BigButton onClick={addToGroup}>Add to chat</BigButton>
                 <SmallButton onClick={closeHandler}>Cancel</SmallButton>
               </div>
             </div>

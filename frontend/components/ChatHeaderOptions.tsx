@@ -8,43 +8,19 @@ import ISingleChat from '../interfaces/ISingleChat';
 import { Modal } from './atomic/Modal';
 import { useState } from 'react';
 import { AddChatModal } from './AddChatModal';
-import { AddToGroupChatModal } from './AddToGroupchatModal';
+import { AddToGroupchatsModal } from './AddToGroupchatModal';
 
 const OneOnOneChatHeaderOptions: React.FC<{
-  chatID: string;
+  userID: string;
   name: string;
-}> = ({ name, chatID }) => {
-  const queryClient = useQueryClient();
+}> = ({ name, userID }) => {
   const [showGroupChatsModal, setShowGroupChatsModal] = useState(false);
-
-  const addToGroupChatMutation = useMutation(
-    async () => {
-      const body = {
-        chatID: chatID,
-      };
-
-      const res = await fetch('/api/addToGroupChat', {
-        method: 'post',
-        body: JSON.stringify(body),
-      });
-
-      if (!res.ok) {
-        throw new Error(await res.text());
-      }
-
-      return await res.json();
-    },
-    {
-      onSuccess: (data) => {
-        queryClient.setQueriesData(['chats'], data);
-      },
-    }
-  );
 
   return (
     <>
       {showGroupChatsModal && (
-        <AddToGroupChatModal
+        <AddToGroupchatsModal
+          userID={userID}
           username={name}
           closeHandler={() => setShowGroupChatsModal(false)}
         />
@@ -136,7 +112,7 @@ export const ChatHeaderOptions: React.FC<ChatHeaderOptionsProps> = ({
     <>
       {chatType === 'group' && <GroupchatHeaderOptions chatID={chatID} />}
       {chatType === 'one_on_one' && (
-        <OneOnOneChatHeaderOptions chatID={chatID} name={name} />
+        <OneOnOneChatHeaderOptions userID={chatID} name={name} />
       )}
     </>
   );
