@@ -1000,3 +1000,114 @@ func LeaveGroupChat(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, chats)
 }
+
+type simpleChat struct {
+	ChatID   string
+	ChatName string
+}
+
+func getGroupchatsNewUserIsNotPartOf(uuid string, newUserUUID string) ([]simpleChat, error) {
+	ctx := context.Background()
+	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	defer conn.Close()
+
+	query := `SELECT c.chat_id, c.name FROM user_chat uc
+	JOIN chats c ON c.chat_id = uc.chat_id
+	WHERE uuid = $1
+	EXCEPT
+	SELECT c.chat_id, c.name FROM user_chat uc
+	JOIN chats c ON c.chat_id = uc.chat_id
+	WHERE uuid = $2`
+	var chats []simpleChat
+	err = pgxscan.Select(ctx, conn, &chats, query, uuid, newUserUUID)
+	if err != nil {
+		return nil, errors.New("INTERNAL ERROR")
+	}
+
+	return chats, nil
+}
+
+func AddSingleUserToGroupChats(c echo.Context) error {
+	sessionID, responseErr := authService.GetBearer(c)
+	if responseErr != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	type addReq struct {
+		ChatIDs         []string `json:"chatIDs" validate:"required"`
+		ParticipantUUID string   `json:"participantUUID" validate:"required"`
+	}
+	req := new(addReq)
+	err = c.Bind(&req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	err = validate.Struct(req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	participantUUIDAsSlice := []string{req.ParticipantUUID}
+	userInContacts, err := contactService.AreUsersInContacts(participantUUIDAsSlice, reqUUID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	if !userInContacts {
+		return c.String(http.StatusUnauthorized, "USER NOT IN CONTACTS")
+	}
+
+	potentialChats, err := getGroupchatsNewUserIsNotPartOf(reqUUID, req.ParticipantUUID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	for _, chatID := range req.ChatIDs {
+		canAdd := false
+		for _, potentialChat := range potentialChats {
+			if chatID == potentialChat.ChatID {
+				canAdd = true
+				break
+			}
+		}
+		if !canAdd {
+			return c.String(http.StatusUnauthorized, "YOU ARE NOT ALLOWED TO ADD A USER TO ALL OF THESE CHATS")
+		}
+	}
+
+	ctx := context.Background()
+	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		log.Println(err)
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+	defer conn.Close()
+
+	rows := [][]any{}
+	for _, chatID := range req.ChatIDs {
+		rows = append(rows, []any{req.ParticipantUUID, chatID, 0})
+	}
+
+	copyCount, err := conn.CopyFrom(
+		ctx,
+		pgx.Identifier{"user_chat"},
+		[]string{"uuid", "chat_id", "unread_messages"},
+		pgx.CopyFromRows(rows),
+	)
+
+	if err != nil || int(copyCount) != len(req.ChatIDs) {
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
+	wsService.WriteEventToSingleUUID(req.ParticipantUUID, "chat")
+
+	return c.String(http.StatusOK, "SUCCESS")
+}
