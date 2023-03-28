@@ -114,7 +114,14 @@ export const AddToGroupchatsModal: React.FC<AddToGroupchatModalProps> = ({
           )}
           {chats.length <= 0 && !isLoadingChats && (
             <div className={styles.noChatInfo}>
-              <h2>{`You don't have any groupchats the new user is not part of`}</h2>
+              <div></div>
+              <div>
+                <span className={styles.emoji}>🤷</span>
+                <h2
+                  className={styles.noChatText}
+                >{`You don't have any groupchats the new user is not part of`}</h2>
+              </div>
+              <BigButton onClick={closeHandler}>Close</BigButton>
             </div>
           )}
           {chats.length > 0 && (
