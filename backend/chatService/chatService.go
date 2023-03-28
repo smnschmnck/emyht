@@ -1002,8 +1002,9 @@ func LeaveGroupChat(c echo.Context) error {
 }
 
 type simpleChat struct {
-	ChatID   string
-	ChatName string
+	ChatID     string `json:"chatID"`
+	ChatName   string `json:"chatName"`
+	PictureUrl string `json:"pictureUrl"`
 }
 
 func getGroupchatsNewUserIsNotPartOf(uuid string, newUserUUID string) ([]simpleChat, error) {
@@ -1015,13 +1016,13 @@ func getGroupchatsNewUserIsNotPartOf(uuid string, newUserUUID string) ([]simpleC
 	}
 	defer conn.Close()
 
-	query := `SELECT c.chat_id, c.name FROM user_chat uc
+	query := `SELECT c.chat_id, c.name AS chat_name, c.picture_url FROM user_chat uc
 	JOIN chats c ON c.chat_id = uc.chat_id
-	WHERE uuid = $1
+	WHERE uuid = $1 AND c.chat_type != 'one_on_one'
 	EXCEPT
-	SELECT c.chat_id, c.name FROM user_chat uc
+	SELECT c.chat_id, c.name AS chat_name, c.picture_url FROM user_chat uc
 	JOIN chats c ON c.chat_id = uc.chat_id
-	WHERE uuid = $2`
+	WHERE uuid = $2 AND c.chat_type != 'one_on_one'`
 	var chats []simpleChat
 	err = pgxscan.Select(ctx, conn, &chats, query, uuid, newUserUUID)
 	if err != nil {
@@ -1029,6 +1030,42 @@ func getGroupchatsNewUserIsNotPartOf(uuid string, newUserUUID string) ([]simpleC
 	}
 
 	return chats, nil
+}
+
+func GetGroupchatsNewUserIsNotPartOf(c echo.Context) error {
+	sessionID, responseErr := authService.GetBearer(c)
+	if responseErr != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	type userReq struct {
+		NewUserID string `json:"newUserID" validate:"required"`
+	}
+	req := new(userReq)
+	err = c.Bind(&req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	err = validate.Struct(req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	groupChats, err := getGroupchatsNewUserIsNotPartOf(reqUUID, req.NewUserID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	for i, chat := range groupChats {
+		groupChats[i].PictureUrl = s3Helpers.FormatPictureUrl(chat.PictureUrl)
+	}
+
+	return c.JSON(http.StatusOK, groupChats)
 }
 
 func AddSingleUserToGroupChats(c echo.Context) error {
@@ -1110,4 +1147,50 @@ func AddSingleUserToGroupChats(c echo.Context) error {
 	wsService.WriteEventToSingleUUID(req.ParticipantUUID, "chat")
 
 	return c.String(http.StatusOK, "SUCCESS")
+}
+
+func GetOneOnOneChatParticipant(c echo.Context) error {
+	sessionID, responseErr := authService.GetBearer(c)
+	if responseErr != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	chatID := c.Param("chatID")
+	if len(chatID) <= 0 {
+		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
+	}
+
+	userInChat, err := isUserInChat(reqUUID, chatID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	if !userInChat {
+		c.String(http.StatusUnauthorized, "YOU ARE NOT A PARTICIPANT OF THIS CHAT")
+	}
+
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		return errors.New("INTERNAL ERROR")
+	}
+	defer conn.Close(ctx)
+
+	var participantUUID string
+	query := `SELECT uuid FROM user_chat WHERE chat_id = $1 AND uuid != $2;`
+	rows := conn.QueryRow(ctx, query, chatID, reqUUID)
+	err = rows.Scan(&participantUUID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
+	type res struct {
+		ParticipantUUID string `json:"participantUUID"`
+	}
+
+	return c.JSON(http.StatusOK, res{ParticipantUUID: participantUUID})
 }

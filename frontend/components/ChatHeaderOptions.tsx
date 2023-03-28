@@ -11,16 +11,16 @@ import { AddChatModal } from './AddChatModal';
 import { AddToGroupchatsModal } from './AddToGroupchatModal';
 
 const OneOnOneChatHeaderOptions: React.FC<{
-  userID: string;
+  chatID: string;
   name: string;
-}> = ({ name, userID }) => {
+}> = ({ name, chatID }) => {
   const [showGroupChatsModal, setShowGroupChatsModal] = useState(false);
 
   return (
     <>
       {showGroupChatsModal && (
         <AddToGroupchatsModal
-          userID={userID}
+          chatID={chatID}
           username={name}
           closeHandler={() => setShowGroupChatsModal(false)}
         />
@@ -112,7 +112,7 @@ export const ChatHeaderOptions: React.FC<ChatHeaderOptionsProps> = ({
     <>
       {chatType === 'group' && <GroupchatHeaderOptions chatID={chatID} />}
       {chatType === 'one_on_one' && (
-        <OneOnOneChatHeaderOptions userID={chatID} name={name} />
+        <OneOnOneChatHeaderOptions chatID={chatID} name={name} />
       )}
     </>
   );

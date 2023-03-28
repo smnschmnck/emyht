@@ -2,20 +2,27 @@ import styles from '../styles/AddToGroupchatModal.module.css';
 import { BigButton, SmallButton } from './atomic/Button';
 import { Modal } from './atomic/Modal';
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import ISingleChat from '../interfaces/ISingleChat';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Loader } from './atomic/Loader';
 import { SingleContactOrChat } from './SingleContactOrChat';
 import { Input } from './atomic/Input';
+import { ErrorMessage } from './atomic/ErrorMessage';
+import { formatError } from '../helpers/stringFormatters';
 
 interface AddToGroupchatModalProps {
-  userID: string;
+  chatID: string;
   username: string;
   closeHandler: () => void;
 }
 
+interface SimpleChat {
+  chatID: string;
+  chatName: string;
+  pictureUrl: string;
+}
+
 export const AddToGroupchatsModal: React.FC<AddToGroupchatModalProps> = ({
-  userID,
+  chatID,
   username,
   closeHandler,
 }) => {
@@ -23,11 +30,56 @@ export const AddToGroupchatsModal: React.FC<AddToGroupchatModalProps> = ({
   const [selectedChats, setSelectedChats] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data, isLoading } = useQuery<ISingleChat[]>(['chats'], async () => {
-    const res = await fetch('/api/getChats');
-    return (await res.json()) as ISingleChat[];
-  });
-  const chats = data ?? [];
+  type participantData = { participantUUID: string };
+  const { data: participantQueryData, isLoading: isLoadingParticipantUUID } =
+    useQuery<participantData>(
+      [`oneOnOneChatParticipantUUID/${chatID}`],
+      async () => {
+        const res = await fetch(`/api/getOneOnOneChatParticipant/${chatID}`);
+        return (await res.json()) as participantData;
+      }
+    );
+
+  const { data: chatQueryData, isLoading: isLoadingChats } = useQuery<
+    SimpleChat[]
+  >(
+    [`chatsNewUserIsNotPartOf/${participantQueryData?.participantUUID}`],
+    async () => {
+      const body = { newUserID: participantQueryData?.participantUUID };
+
+      const res = await fetch('/api/getGroupchatsNewUserIsNotPartOf', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      });
+      return (await res.json()) as SimpleChat[];
+    },
+    { enabled: !!participantQueryData?.participantUUID }
+  );
+  const chats = chatQueryData ?? [];
+
+  const addUserMutation = useMutation(
+    async () => {
+      const body = {
+        chatIDs: selectedChats,
+        participantUUID: participantQueryData?.participantUUID,
+      };
+
+      const res = await fetch('/api/addSingleUserToGroupChats', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(err);
+      }
+    },
+    {
+      onSuccess: () => {
+        setSuccess(true);
+      },
+    }
+  );
 
   const selectChat = (id: string) => {
     if (selectedChats.includes(id)) {
@@ -39,17 +91,11 @@ export const AddToGroupchatsModal: React.FC<AddToGroupchatModalProps> = ({
   };
 
   const getFilteredChats = () => {
-    return chats
-      .filter((chat) => chat.chatType === 'group')
-      .filter(
-        (chat) =>
-          chat.chatName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          selectedChats.includes(chat.chatID)
-      );
-  };
-
-  const addToGroup = () => {
-    setSuccess(true);
+    return chats.filter(
+      (chat) =>
+        chat.chatName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        selectedChats.includes(chat.chatID)
+    );
   };
 
   return (
@@ -59,8 +105,16 @@ export const AddToGroupchatsModal: React.FC<AddToGroupchatModalProps> = ({
           <div className={styles.header}>
             <h2 className={styles.heading}>Add to Groupchats</h2>
           </div>
-          {isLoading && <Loader />}
-          {chats.length <= 0 && <h1>{`You don't have any groupchats`}</h1>}
+          {isLoadingChats && (
+            <div>
+              <Loader />
+            </div>
+          )}
+          {chats.length <= 0 && (
+            <div className={styles.noChatInfo}>
+              <h2>{`You don't have any groupchats the new user is not part of`}</h2>
+            </div>
+          )}
           {chats.length > 0 && (
             <div className={styles.interface}>
               <Input
@@ -81,8 +135,17 @@ export const AddToGroupchatsModal: React.FC<AddToGroupchatModalProps> = ({
                   </div>
                 ))}
               </div>
+              <>
+                {addUserMutation.error && (
+                  <ErrorMessage
+                    errorMessage={formatError(addUserMutation.error)}
+                  />
+                )}
+              </>
               <div className={styles.buttons}>
-                <BigButton onClick={addToGroup}>Add to chat</BigButton>
+                <BigButton onClick={addUserMutation.mutate}>
+                  Add to chat
+                </BigButton>
                 <SmallButton onClick={closeHandler}>Cancel</SmallButton>
               </div>
             </div>

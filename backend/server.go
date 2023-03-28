@@ -37,7 +37,7 @@ func handleRequest() {
 	e.POST("/changeUsername", authService.ChangeUsername)
 	e.POST("/login", authService.Authenticate)
 	e.GET("/logout", authService.Logout)
-	//chatss
+	//chats
 	e.POST("/startOneOnOneChat", chatService.StartOneOnOneChat)
 	e.POST("/startGroupChat", chatService.StartGroupChat)
 	e.POST("/addUsersToGroupChat", chatService.AddUsersToGroupChat)
@@ -49,6 +49,8 @@ func handleRequest() {
 	e.POST("/messageMediaPutURL", chatService.GetMediaPutURL)
 	e.POST("/groupChatPicturePutURL", chatService.GetGroupPicturePutURL)
 	e.POST("/leaveGroupChat", chatService.LeaveGroupChat)
+	e.GET("/oneOnOneChatParticipant/:chatID", chatService.GetOneOnOneChatParticipant)
+	e.POST("/getGroupchatsNewUserIsNotPartOf", chatService.GetGroupchatsNewUserIsNotPartOf)
 	//user relationships
 	e.POST("/contactRequest", contactService.SendContactRequest)
 	e.POST("/handleContactRequest", contactService.HandleContactRequest)

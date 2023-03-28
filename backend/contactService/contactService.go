@@ -140,16 +140,20 @@ func AreUsersInContacts(usersUUIDs []string, uuid string) (bool, error) {
 		return false, err
 	}
 
-	isInContacts := false
-	for _, contact := range contacts {
-		for _, userUUID := range usersUUIDs {
+	for _, userUUID := range usersUUIDs {
+		inContacts := false
+		for _, contact := range contacts {
 			if contact.Uuid == userUUID {
-				isInContacts = true
+				inContacts = true
+				break
 			}
+		}
+		if !inContacts {
+			return false, nil
 		}
 	}
 
-	return isInContacts, nil
+	return true, nil
 }
 
 func GetContacts(c echo.Context) error {
