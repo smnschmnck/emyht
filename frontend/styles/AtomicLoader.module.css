@@ -2,10 +2,10 @@
   width: 100%;
   aspect-ratio: 1/1;
   display: inline-block;
-  border: 8px solid transparent;
+  border: 8px solid var(--accent);
   border-radius: 50%;
-  border-top-color: var(--accent);
-  animation: 1s spin infinite linear;
+  border-bottom-color: transparent;
+  animation: 0.5s spin infinite linear;
   margin: 0;
 }
 
