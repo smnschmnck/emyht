@@ -103,17 +103,17 @@ func sendNewContactReqNotification(email string) error {
 	return wsService.WriteEventToSingleUUID(uuid, "contactRequest")
 }
 
-type contact struct {
+type Contact struct {
 	Username   string `json:"name"`
 	Uuid       string `json:"id"`
 	PictureUrl string `json:"profilePictureUrl"`
 }
 
-func GetUserContactsbyUUID(uuid string) ([]contact, error) {
+func GetUserContactsbyUUID(uuid string) ([]Contact, error) {
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return []contact{}, errors.New("INTERNAL ERROR")
+		return []Contact{}, errors.New("INTERNAL ERROR")
 	}
 	defer conn.Close(ctx)
 
@@ -121,15 +121,15 @@ func GetUserContactsbyUUID(uuid string) ([]contact, error) {
 		"FROM friends " +
 		"JOIN users u ON u.uuid = friends.sender OR friends.reciever = u.uuid " +
 		"WHERE (reciever=$1 OR sender=$1) AND status='accepted' AND u.uuid != $1"
-	var contacts []contact
+	var contacts []Contact
 	err = pgxscan.Select(ctx, conn, &contacts, query, uuid)
 	if err != nil {
 		fmt.Println(err)
-		return []contact{}, errors.New("INTERNAL ERROR")
+		return []Contact{}, errors.New("INTERNAL ERROR")
 	}
 
 	if contacts == nil {
-		return make([]contact, 0), nil
+		return make([]Contact, 0), nil
 	}
 	return contacts, nil
 }

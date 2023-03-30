@@ -1194,3 +1194,54 @@ func GetOneOnOneChatParticipant(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, res{ParticipantUUID: participantUUID})
 }
+
+func GetContactsNotInChat(c echo.Context) error {
+	sessionID, responseErr := authService.GetBearer(c)
+	if responseErr != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	chatID := c.Param("chatID")
+	if len(chatID) <= 0 {
+		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
+	}
+
+	chatMembers, err := getChatMembers(chatID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	contacts, err := contactService.GetUserContactsbyUUID(reqUUID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	contactsAsMap := make(map[string]contactService.Contact)
+
+	for _, contact := range contacts {
+		contactsAsMap[contact.Uuid] = contact
+	}
+
+	for _, chatMember := range chatMembers {
+		delete(contactsAsMap, chatMember)
+	}
+
+	usersNotInChat := make([]contactService.Contact, len(contactsAsMap))
+
+	i := 0
+	for _, user := range contactsAsMap {
+		usersNotInChat[i] = user
+		i++
+	}
+
+	for i, contact := range usersNotInChat {
+		contacts[i].PictureUrl = s3Helpers.FormatPictureUrl(contact.PictureUrl)
+	}
+
+	return c.JSON(http.StatusOK, usersNotInChat)
+}

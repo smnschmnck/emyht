@@ -8,7 +8,7 @@ import ISingleChat from '../interfaces/ISingleChat';
 import { Modal } from './atomic/Modal';
 import { useState } from 'react';
 import { AddChatModal } from './AddChatModal';
-import { AddToGroupchatsModal } from './AddToGroupchatModal';
+import { AddToGroupchatsModal } from './AddUserToGroupchatModal';
 
 const OneOnOneChatHeaderOptions: React.FC<{
   chatID: string;
