@@ -9,6 +9,7 @@ import { Modal } from './atomic/Modal';
 import { useState } from 'react';
 import { AddChatModal } from './AddChatModal';
 import { AddToGroupchatsModal } from './AddUserToGroupchatModal';
+import { AddUserInsideGroupchatModal } from './AddUserInsideGroupchatModal';
 
 const OneOnOneChatHeaderOptions: React.FC<{
   chatID: string;
@@ -46,8 +47,12 @@ const OneOnOneChatHeaderOptions: React.FC<{
   );
 };
 
-const GroupchatHeaderOptions: React.FC<{ chatID: string }> = ({ chatID }) => {
+const GroupchatHeaderOptions: React.FC<{
+  chatID: string;
+  chatName: string;
+}> = ({ chatID, chatName }) => {
   const queryClient = useQueryClient();
+  const [showUserModal, setShowUserModal] = useState(false);
 
   const leaveGroupChat = useMutation(
     async () => {
@@ -79,21 +84,37 @@ const GroupchatHeaderOptions: React.FC<{ chatID: string }> = ({ chatID }) => {
   );
 
   return (
-    <PopupButton icon={moreIcon} buttonClassName={styles.moreButton} alignRight>
-      <PopupOptions>
-        <PopupOption text="Add user" clickHandler={() => alert('//TODO')} />
-        <PopupOption
-          text="Remove user"
-          clickHandler={() => alert('//TODO')}
-          textColor="red"
+    <>
+      {showUserModal && (
+        <AddUserInsideGroupchatModal
+          chatID={chatID}
+          chatName={chatName}
+          closeHandler={() => setShowUserModal(false)}
         />
-        <PopupOption
-          text="Leave Groupchat"
-          clickHandler={leaveGroupChat.mutate}
-          textColor="red"
-        />
-      </PopupOptions>
-    </PopupButton>
+      )}
+      <PopupButton
+        icon={moreIcon}
+        buttonClassName={styles.moreButton}
+        alignRight
+      >
+        <PopupOptions>
+          <PopupOption
+            text="Add user"
+            clickHandler={() => setShowUserModal(true)}
+          />
+          <PopupOption
+            text="Remove user"
+            clickHandler={() => alert('//TODO')}
+            textColor="red"
+          />
+          <PopupOption
+            text="Leave Groupchat"
+            clickHandler={leaveGroupChat.mutate}
+            textColor="red"
+          />
+        </PopupOptions>
+      </PopupButton>
+    </>
   );
 };
 
@@ -110,7 +131,9 @@ export const ChatHeaderOptions: React.FC<ChatHeaderOptionsProps> = ({
 }) => {
   return (
     <>
-      {chatType === 'group' && <GroupchatHeaderOptions chatID={chatID} />}
+      {chatType === 'group' && (
+        <GroupchatHeaderOptions chatID={chatID} chatName={name} />
+      )}
       {chatType === 'one_on_one' && (
         <OneOnOneChatHeaderOptions chatID={chatID} name={name} />
       )}
