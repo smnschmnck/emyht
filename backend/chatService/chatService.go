@@ -258,9 +258,9 @@ func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) 
 	defer conn.Close()
 
 	//CHECK IF CHAT EXISTS
-	var chatID string
+	var dbChatID string
 	checkChatQuery := "SELECT chat_id FROM chats WHERE chat_id = $1"
-	err = conn.QueryRow(ctx, checkChatQuery, chatID).Scan(&chatID)
+	err = conn.QueryRow(ctx, checkChatQuery, chatId).Scan(&dbChatID)
 	if err != nil {
 		return make([]singleChat, 0), errors.New("CHAT NOT FOUND")
 	}
@@ -268,7 +268,7 @@ func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) 
 	//CHECK IF CHAT IS GROUP CHAT
 	var chatType string
 	checkChatTypeQuery := "SELECT chat_type FROM chats WHERE chat_id = $1"
-	err = conn.QueryRow(ctx, checkChatTypeQuery, chatID).Scan(&chatType)
+	err = conn.QueryRow(ctx, checkChatTypeQuery, dbChatID).Scan(&chatType)
 	if err != nil {
 		return make([]singleChat, 0), errors.New("INTERNAL ERROR")
 	}
@@ -278,7 +278,7 @@ func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) 
 	}
 
 	//CHECK IF USER IS IN CHAT
-	userInChat, err := isUserInChat(uuid, chatID)
+	userInChat, err := isUserInChat(uuid, dbChatID)
 	if err != nil {
 		return make([]singleChat, 0), errors.New("INTERNAL ERROR")
 	}
@@ -290,7 +290,7 @@ func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) 
 	//INSERT ALL PARTICIPANTS INTO CHAT
 	rows := [][]any{}
 	for _, p := range participantUUIDs {
-		rows = append(rows, []any{p, chatID, 0})
+		rows = append(rows, []any{p, dbChatID, 0})
 	}
 
 	copyCount, err := conn.CopyFrom(

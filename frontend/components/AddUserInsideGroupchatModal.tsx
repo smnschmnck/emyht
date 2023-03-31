@@ -1,5 +1,5 @@
 import styles from '../styles/AddToGroupchatModal.module.css';
-import { SmallButton } from './atomic/Button';
+import { BigButton, SmallButton } from './atomic/Button';
 import { Modal } from './atomic/Modal';
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -28,11 +28,14 @@ export const AddUserInsideGroupchatModal: React.FC<
     return (await res.json()) as ContactOrChat[];
   });
 
-  const addUserMutation = useMutation(
+  const addUsersMutation = useMutation(
     async () => {
-      const body = {};
+      const body = {
+        participantUUIDs: selectedContacts,
+        chatID: chatID,
+      };
 
-      const res = await fetch('/api/addSingleUserToGroupChats', {
+      const res = await fetch('/api/addUsersToGroupchat', {
         method: 'POST',
         body: JSON.stringify(body),
       });
@@ -56,13 +59,21 @@ export const AddUserInsideGroupchatModal: React.FC<
           <div className={styles.header}>
             <h2 className={styles.heading}>Add to Groupchats</h2>
           </div>
-          <ContactList
-            selectedContacts={selectedContacts}
-            setSelectedContacts={setSelectedContacts}
-            contacts={contactsNotInChat ?? []}
-            multiselect
-            isLoading={isLoadingContacts}
-          />
+          <div className={styles.interface}>
+            <ContactList
+              selectedContacts={selectedContacts}
+              setSelectedContacts={setSelectedContacts}
+              contacts={contactsNotInChat ?? []}
+              multiselect
+              isLoading={isLoadingContacts}
+            />
+            <div className={styles.buttons}>
+              <BigButton onClick={addUsersMutation.mutate}>
+                Add to chat
+              </BigButton>
+              <SmallButton onClick={closeHandler}>Close</SmallButton>
+            </div>
+          </div>
         </div>
       )}
       {success && (
