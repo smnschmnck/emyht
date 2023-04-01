@@ -13,6 +13,7 @@ interface AddToGroupchatModalProps {
   chatID: string;
   username: string;
   closeHandler: () => void;
+  participantUUID?: string;
 }
 
 interface SimpleChat {
@@ -21,31 +22,19 @@ interface SimpleChat {
   pictureUrl: string;
 }
 
-export const AddToGroupchatsModal: React.FC<AddToGroupchatModalProps> = ({
-  chatID,
-  username,
-  closeHandler,
-}) => {
+export const AddFromChatToGroupchatModal: React.FC<
+  AddToGroupchatModalProps
+> = ({ chatID, username, closeHandler, participantUUID }) => {
   const [success, setSuccess] = useState(false);
   const [selectedChats, setSelectedChats] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  type participantData = { participantUUID: string };
-  const { data: participantQueryData, isLoading: isLoadingParticipantUUID } =
-    useQuery<participantData>(
-      [`oneOnOneChatParticipantUUID/${chatID}`],
-      async () => {
-        const res = await fetch(`/api/getOneOnOneChatParticipant/${chatID}`);
-        return (await res.json()) as participantData;
-      }
-    );
-
   const { data: chatQueryData, isLoading: isLoadingChats } = useQuery<
     SimpleChat[]
   >(
-    [`chatsNewUserIsNotPartOf/${participantQueryData?.participantUUID}`],
+    [`chatsNewUserIsNotPartOf/${participantUUID}`],
     async () => {
-      const body = { newUserID: participantQueryData?.participantUUID };
+      const body = { newUserID: participantUUID };
 
       const res = await fetch('/api/getGroupchatsNewUserIsNotPartOf', {
         method: 'POST',
@@ -53,15 +42,17 @@ export const AddToGroupchatsModal: React.FC<AddToGroupchatModalProps> = ({
       });
       return (await res.json()) as SimpleChat[];
     },
-    { enabled: !!participantQueryData?.participantUUID }
+    { enabled: !!participantUUID }
   );
   const chats = chatQueryData ?? [];
 
   const addUserMutation = useMutation(
     async () => {
+      if (!participantUUID) throw new Error('Could not get participant');
+
       const body = {
         chatIDs: selectedChats,
-        participantUUID: participantQueryData?.participantUUID,
+        participantUUID: participantUUID,
       };
 
       const res = await fetch('/api/addSingleUserToGroupChats', {

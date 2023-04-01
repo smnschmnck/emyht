@@ -2,14 +2,14 @@ import { PopupButton } from './atomic/PopupButton';
 import moreIcon from '../assets/images/more-grey.svg';
 import { PopupOption, PopupOptions } from './atomic/PopupOptions';
 import styles from '../styles/ChatInfoHeaderComponent.module.css';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import router from 'next/router';
 import ISingleChat from '../interfaces/ISingleChat';
 import { Modal } from './atomic/Modal';
 import { useState } from 'react';
 import { AddChatModal } from './AddChatModal';
-import { AddToGroupchatsModal } from './AddUserToGroupchatModal';
 import { AddUserInsideGroupchatModal } from './AddUserInsideGroupchatModal';
+import { AddFromChatToGroupchatModal } from './AddFromChatToGroupchatModal';
 
 const OneOnOneChatHeaderOptions: React.FC<{
   chatID: string;
@@ -17,13 +17,27 @@ const OneOnOneChatHeaderOptions: React.FC<{
 }> = ({ name, chatID }) => {
   const [showGroupChatsModal, setShowGroupChatsModal] = useState(false);
 
+  type participantData = { participantUUID: string };
+  const { data: participantQueryData } = useQuery<participantData>(
+    [`oneOnOneChatParticipantUUID/${chatID}`],
+    async () => {
+      const res = await fetch(`/api/getOneOnOneChatParticipant/${chatID}`);
+      return (await res.json()) as participantData;
+    }
+  );
+
+  const blockUserMutation = useMutation(['contacts'], async () => {
+    alert('TODO');
+  });
+
   return (
     <>
       {showGroupChatsModal && (
-        <AddToGroupchatsModal
+        <AddFromChatToGroupchatModal
           chatID={chatID}
           username={name}
           closeHandler={() => setShowGroupChatsModal(false)}
+          participantUUID={participantQueryData?.participantUUID}
         />
       )}
       <PopupButton
@@ -38,7 +52,7 @@ const OneOnOneChatHeaderOptions: React.FC<{
           />
           <PopupOption
             text="Block user"
-            clickHandler={() => alert('//TODO')}
+            clickHandler={blockUserMutation.mutate}
             textColor="red"
           />
         </PopupOptions>
