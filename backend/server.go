@@ -58,6 +58,7 @@ func handleRequest() {
 	e.POST("/handleContactRequest", contactService.HandleContactRequest)
 	e.GET("/pendingContactRequests", contactService.GetPendingContactRequests)
 	e.GET("/contacts", contactService.GetContacts)
+	e.POST("/blockUser", contactService.BlockUser)
 	//user settings
 	e.POST("/changeProfilePicturePutURL", userSettingsService.GetChangeProfilePicturePutURL)
 	e.POST("/confirmChangedProfilePic", userSettingsService.ConfirmChangedProfilePic)

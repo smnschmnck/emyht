@@ -279,3 +279,80 @@ func HandleContactRequest(c echo.Context) error {
 	}
 	return c.String(http.StatusOK, "SUCCESS")
 }
+
+func blockUser(uuidToBeBlocked string, uuid string, chatID string) error {
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		return errors.New("INTERNAL ERROR")
+	}
+	defer conn.Close(ctx)
+
+	//check if user is in contacts
+	uuidToBeBlockedAsArray := []string{uuidToBeBlocked}
+	inContacts, err := AreUsersInContacts(uuidToBeBlockedAsArray, uuid)
+	if err != nil {
+		return errors.New("INTERNAL ERROR")
+	}
+	if !inContacts {
+		return errors.New("USER NOT IN CONTACTS")
+	}
+
+	var dbStatus string
+	query := "UPDATE friends " +
+		"SET status = 'blocked' " +
+		"WHERE sender = $1 AND  reciever = $2 " +
+		"RETURNING status"
+	err = conn.QueryRow(ctx, query, uuidToBeBlocked, uuid).Scan(&dbStatus)
+	if err != nil {
+		fmt.Println(err)
+		return errors.New("INTERNAL ERROR")
+	}
+
+	var chatStatus bool
+	query = "UPDATE chats " +
+		"SET blocked = true " +
+		"WHERE chat_id = $1 " +
+		"RETURNING blocked"
+	err = conn.QueryRow(ctx, query, chatID).Scan(&chatStatus)
+	if err != nil {
+		fmt.Println(err)
+		return errors.New("INTERNAL ERROR")
+	}
+
+	wsService.WriteEventToSingleUUID(uuidToBeBlocked, "chat")
+
+	return nil
+}
+
+func BlockUser(c echo.Context) error {
+	token, err := authService.GetBearer(c)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NO AUTH")
+	}
+	uuid, err := userService.GetUUIDBySessionID(token)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NO AUTH")
+	}
+
+	type blockUserRequest struct {
+		UserID string `json:"userID" validate:"required"`
+		ChatID string `json:"chatID" validate:"required"`
+	}
+	blockUserReq := new(blockUserRequest)
+	err = c.Bind(blockUserReq)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	err = validate.Struct(blockUserReq)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	err = blockUser(blockUserReq.UserID, uuid, blockUserReq.ChatID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.String(http.StatusOK, "SUCCESS")
+}

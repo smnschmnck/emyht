@@ -10,12 +10,15 @@ import { useState } from 'react';
 import { AddChatModal } from './AddChatModal';
 import { AddUserInsideGroupchatModal } from './AddUserInsideGroupchatModal';
 import { AddFromChatToGroupchatModal } from './AddFromChatToGroupchatModal';
+import { ConfirmBlockUserModal } from './ConfirmBlockUserModal';
 
 const OneOnOneChatHeaderOptions: React.FC<{
   chatID: string;
   name: string;
 }> = ({ name, chatID }) => {
   const [showGroupChatsModal, setShowGroupChatsModal] = useState(false);
+  const [showConfirmBlockUserModal, setShowConfirmBlockUserModal] =
+    useState(false);
 
   type participantData = { participantUUID: string };
   const { data: participantQueryData } = useQuery<participantData>(
@@ -26,12 +29,16 @@ const OneOnOneChatHeaderOptions: React.FC<{
     }
   );
 
-  const blockUserMutation = useMutation(['contacts'], async () => {
-    alert('TODO');
-  });
-
   return (
     <>
+      {showConfirmBlockUserModal && (
+        <ConfirmBlockUserModal
+          participantUUID={participantQueryData?.participantUUID}
+          onClose={() => setShowConfirmBlockUserModal(false)}
+          name={name}
+          chatID={chatID}
+        />
+      )}
       {showGroupChatsModal && (
         <AddFromChatToGroupchatModal
           chatID={chatID}
@@ -52,7 +59,7 @@ const OneOnOneChatHeaderOptions: React.FC<{
           />
           <PopupOption
             text="Block user"
-            clickHandler={blockUserMutation.mutate}
+            clickHandler={() => setShowConfirmBlockUserModal(true)}
             textColor="red"
           />
         </PopupOptions>

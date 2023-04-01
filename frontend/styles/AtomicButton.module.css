@@ -11,6 +11,23 @@
   width: 100%;
 }
 
+.destructiveButton {
+  margin: 0;
+  border-radius: 0;
+  background-color: red;
+  height: 40px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+  border-radius: 5px;
+  width: 100%;
+}
+
+#enabled.destructiveButton:hover {
+  background-color: rgb(255, 101, 101);
+}
+
 #enabled.submitButton:hover {
   background-color: var(--accent-lighter);
 }

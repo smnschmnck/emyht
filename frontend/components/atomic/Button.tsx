@@ -7,6 +7,7 @@ interface ButtonProps {
   color?: string;
   children?: React.ReactNode;
   loading?: boolean;
+  variant?: 'destructive' | 'confirm';
 }
 
 export const BigButton: React.FC<ButtonProps> = ({
@@ -16,12 +17,17 @@ export const BigButton: React.FC<ButtonProps> = ({
   disabled,
   color,
   loading,
+  variant,
 }) => {
   return (
     <button
       style={{ color: color }}
       type={type}
-      className={styles.submitButton}
+      className={
+        variant == 'destructive'
+          ? styles.destructiveButton
+          : styles.submitButton
+      }
       id={disabled || loading ? styles.disabled : styles.enabled}
       disabled={disabled || loading}
       onClick={onClick}
