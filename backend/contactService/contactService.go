@@ -301,7 +301,7 @@ func blockUser(uuidToBeBlocked string, uuid string, chatID string) error {
 	var dbStatus string
 	query := "UPDATE friends " +
 		"SET status = 'blocked' " +
-		"WHERE sender = $1 AND  reciever = $2 " +
+		"WHERE (sender = $1 AND reciever = $2) OR (sender = $2 AND reciever = $1) " +
 		"RETURNING status"
 	err = conn.QueryRow(ctx, query, uuidToBeBlocked, uuid).Scan(&dbStatus)
 	if err != nil {
