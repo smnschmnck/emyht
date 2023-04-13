@@ -5,6 +5,7 @@ import { useMutation } from '@tanstack/react-query';
 import { ErrorMessage } from './atomic/ErrorMessage';
 import { formatError } from '../helpers/stringFormatters';
 import { Loader } from './atomic/Loader';
+import { useState } from 'react';
 
 interface ConfirmBlockUserModalProps {
   onClose: () => void;
@@ -19,55 +20,70 @@ export const ConfirmBlockUserModal: React.FC<ConfirmBlockUserModalProps> = ({
   participantUUID,
   name,
 }) => {
-  const blockUserMutation = useMutation(async () => {
-    if (!participantUUID) throw new Error('Could not get participant');
+  const [success, setSuccess] = useState(false);
 
-    const body = {
-      userID: participantUUID,
-      chatID: chatID,
-    };
+  const blockUserMutation = useMutation(
+    async () => {
+      if (!participantUUID) throw new Error('Could not get participant');
 
-    const res = await fetch('/api/blockUser', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
+      const body = {
+        userID: participantUUID,
+        chatID: chatID,
+      };
 
-    if (!res.ok) {
-      throw new Error(await res.text());
+      const res = await fetch('/api/blockUser', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+    },
+    {
+      onSuccess: () => setSuccess(true),
     }
-  });
+  );
 
   return (
     <Modal backgroundClickHandler={onClose}>
       <div className={styles.container}>
-        <div className={styles.content}>
-          <h2 className={styles.heading}>
-            Do you really want to block {name}?
-          </h2>
-          {blockUserMutation.isLoading && (
-            <div className={styles.loaderContainer}>
-              <div className={styles.loader}>
-                <Loader />
+        {!success && (
+          <div className={styles.content}>
+            <h2 className={styles.heading}>
+              Do you really want to block {name}?
+            </h2>
+            {blockUserMutation.isLoading && (
+              <div className={styles.loaderContainer}>
+                <div className={styles.loader}>
+                  <Loader />
+                </div>
               </div>
-            </div>
-          )}
-          {!blockUserMutation.isLoading && (
-            <div className={styles.interactiveContent}>
-              {blockUserMutation.isError && (
-                <ErrorMessage
-                  errorMessage={formatError(blockUserMutation.error)}
-                />
-              )}
-              <BigButton
-                variant="destructive"
-                onClick={blockUserMutation.mutate}
-              >
-                Block
-              </BigButton>
-              <SmallButton onClick={onClose}>Cancel</SmallButton>
-            </div>
-          )}
-        </div>
+            )}
+            {!blockUserMutation.isLoading && (
+              <div className={styles.interactiveContent}>
+                {blockUserMutation.isError && (
+                  <ErrorMessage
+                    errorMessage={formatError(blockUserMutation.error)}
+                  />
+                )}
+                <BigButton
+                  variant="destructive"
+                  onClick={blockUserMutation.mutate}
+                >
+                  Block
+                </BigButton>
+                <SmallButton onClick={onClose}>Cancel</SmallButton>
+              </div>
+            )}
+          </div>
+        )}
+        {success && (
+          <div className={styles.content}>
+            <h2 className={styles.heading}>Successfully blocked {name}</h2>
+            <BigButton onClick={onClose}>Close</BigButton>
+          </div>
+        )}
       </div>
     </Modal>
   );

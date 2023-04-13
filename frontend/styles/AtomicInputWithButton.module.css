@@ -33,6 +33,7 @@
   margin: 0;
   outline: none;
   background-color: white;
+  transition: border 0.2s;
 }
 
 #isError {
