@@ -46,7 +46,7 @@ export const ConfirmBlockUserModal: React.FC<ConfirmBlockUserModalProps> = ({
   );
 
   return (
-    <Modal backgroundClickHandler={onClose}>
+    <Modal backgroundClickHandler={onClose} mobileFullscreen>
       <div className={styles.container}>
         {!success && (
           <div className={styles.content}>
