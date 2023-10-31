@@ -5,5 +5,5 @@ import { LoginPage } from "./LoginPage";
 export const loginRoute = new Route({
   getParentRoute: () => rootRoute,
   path: "/login",
-  component: () => <LoginPage />,
+  component: LoginPage,
 });

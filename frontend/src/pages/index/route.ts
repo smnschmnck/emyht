@@ -5,5 +5,5 @@ import { IndexPage } from "./IndexPage";
 export const indexRoute = new Route({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: () => IndexPage,
+  component: IndexPage,
 });
