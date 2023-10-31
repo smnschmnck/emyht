@@ -1,22 +1,13 @@
-import { Outlet, RootRoute, Route, Router } from "@tanstack/react-router";
+import { Outlet, RootRoute, Router } from "@tanstack/react-router";
+import { loginRoute } from "../pages/login/route";
+import { signUpRoute } from "../pages/signUp/route";
+import { indexRoute } from "../pages/index/route";
 
-const rootRoute = new RootRoute({
+export const rootRoute = new RootRoute({
   component: () => <Outlet />,
 });
 
-const indexRoute = new Route({
-  getParentRoute: () => rootRoute,
-  path: "/",
-  component: () => <h1>Hello there :D</h1>,
-});
-
-const loginRoute = new Route({
-  getParentRoute: () => rootRoute,
-  path: "/login",
-  component: () => <h1>Login pls</h1>,
-});
-
-const routeTree = rootRoute.addChildren([indexRoute, loginRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, loginRoute, signUpRoute]);
 
 export const router = new Router({ routeTree });
 
