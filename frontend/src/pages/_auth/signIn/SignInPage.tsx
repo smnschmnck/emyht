@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { ShowPasswordButton } from "@/components/ui/ShowPasswordButton";
 import { Link } from "@tanstack/react-router";
-import { FC } from "react";
+import { FC, useState } from "react";
 
 export const SignInPage: FC = () => {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <div className="flex gap-6 flex-col w-80">
       <div>
@@ -15,7 +18,16 @@ export const SignInPage: FC = () => {
       <div className="flex gap-2 flex-col items-center">
         <form className="flex gap-2 flex-col w-full">
           <Input placeholder="E-Mail" />
-          <Input placeholder="Password" />
+          <Input
+            placeholder="Password"
+            type={showPassword ? "text" : "password"}
+            endAdornment={
+              <ShowPasswordButton
+                showPassword={showPassword}
+                setShowPassword={setShowPassword}
+              />
+            }
+          />
           <Button>Sign in</Button>
         </form>
         <div className="flex gap-2">
