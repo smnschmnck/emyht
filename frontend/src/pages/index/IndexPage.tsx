@@ -5,7 +5,7 @@ export const IndexPage: FC = () => {
   return (
     <div>
       <h1>Hello there :D</h1>
-      <Link to="/login">Log in</Link>
+      <Link to="/sign-in">Log in</Link>
     </div>
   );
 };
