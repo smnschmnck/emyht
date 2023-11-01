@@ -12,7 +12,7 @@ export const HideOrShowButton: FC<HideOrShowButtonProps> = ({
   setShowPassword: setShow,
 }) => (
   <button
-    className="text-zinc-500 w-6 h-6 hover:text-black transition"
+    className="text-zinc-400 w-6 h-6 hover:text-black transition"
     type="button"
     onClick={() => setShow(!show)}
   >
