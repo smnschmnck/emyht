@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/Button";
+import { HideOrShowButton } from "@/components/ui/HideOrShowButton";
 import { Input } from "@/components/ui/Input";
-import { ShowPasswordButton } from "@/components/ui/ShowPasswordButton";
 import { Link } from "@tanstack/react-router";
 import { FC, useState } from "react";
 
@@ -22,8 +22,8 @@ export const SignInPage: FC = () => {
             placeholder="Password"
             type={showPassword ? "text" : "password"}
             endAdornment={
-              <ShowPasswordButton
-                showPassword={showPassword}
+              <HideOrShowButton
+                show={showPassword}
                 setShowPassword={setShowPassword}
               />
             }
@@ -33,7 +33,7 @@ export const SignInPage: FC = () => {
         <div className="flex gap-2">
           <p className="text-sm text-zinc-500">No account?</p>
           <Link className="text-sm text-blue-600 hover:underline" to="/sign-up">
-            Sign Up
+            Sign up
           </Link>
         </div>
       </div>
