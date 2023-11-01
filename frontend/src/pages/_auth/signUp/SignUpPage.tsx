@@ -1,12 +1,10 @@
 import { Button } from "@/components/ui/Button";
-import { HideOrShowButton } from "@/components/ui/HideOrShowButton";
 import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Link } from "@tanstack/react-router";
-import { FC, useState } from "react";
+import { FC } from "react";
 
 export const SignUpPage: FC = () => {
-  const [showPassword, setShowPassword] = useState(false);
-
   return (
     <div className="flex gap-6 flex-col w-80">
       <div>
@@ -17,26 +15,8 @@ export const SignUpPage: FC = () => {
         <form className="flex gap-2 flex-col w-full">
           <Input placeholder="Username" />
           <Input placeholder="E-Mail" />
-          <Input
-            placeholder="Password"
-            type={showPassword ? "text" : "password"}
-            endAdornment={
-              <HideOrShowButton
-                show={showPassword}
-                setShowPassword={setShowPassword}
-              />
-            }
-          />
-          <Input
-            placeholder="Repeat password"
-            type={showPassword ? "text" : "password"}
-            endAdornment={
-              <HideOrShowButton
-                show={showPassword}
-                setShowPassword={setShowPassword}
-              />
-            }
-          />
+          <PasswordInput placeholder="Password" />
+          <PasswordInput placeholder="Repeat password" />
           <Button>Sign up</Button>
         </form>
         <div className="flex gap-2">
