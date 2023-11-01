@@ -22,6 +22,8 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+const SESSION_DURATION = 24 * time.Hour
+
 var validate = validator.New()
 
 type Session struct {
@@ -29,7 +31,7 @@ type Session struct {
 	UserID    string `json:"userID"`
 }
 
-func GetBearer(c echo.Context) (string, error) {
+func getBearer(c echo.Context) (string, error) {
 	bearerArr := strings.Split(c.Request().Header.Get("authorization"), "Bearer ")
 
 	if len(bearerArr) <= 1 {
@@ -38,6 +40,25 @@ func GetBearer(c echo.Context) (string, error) {
 
 	sessionID := bearerArr[1]
 	return sessionID, nil
+}
+
+func getSessionCookieToken(c echo.Context) (string, error) {
+	cookie, err := c.Cookie("SESSION")
+
+	if err != nil {
+		return "", err
+	}
+
+	return cookie.Value, nil
+}
+
+func GetSessionToken(c echo.Context) (string, error) {
+	cookieToken, err := getSessionCookieToken(c)
+	if err != nil {
+		return getBearer(c)
+	}
+
+	return cookieToken, nil
 }
 
 type UserRes struct {
@@ -50,7 +71,7 @@ type UserRes struct {
 }
 
 func GetUserBySession(c echo.Context) error {
-	sessionID, responseErr := GetBearer(c)
+	sessionID, responseErr := GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -73,11 +94,6 @@ func GetUserBySession(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-type Credentials struct {
-	Email    string `json:"email" validate:"required"`
-	Password string `json:"password" validate:"required"`
-}
-
 func makeToken() (string, error) {
 	bytes := make([]byte, 32)
 	if _, err := rand.Read(bytes); err != nil {
@@ -94,7 +110,7 @@ func startSession(uuid string) (Session, error) {
 
 	rdb := redis.NewClient(&redisHelper.UserSessionsRedisConfig)
 	ctx := context.Background()
-	err = rdb.Set(ctx, token, uuid, 24*time.Hour).Err()
+	err = rdb.Set(ctx, token, uuid, SESSION_DURATION).Err()
 
 	if err != nil {
 		return Session{}, err
@@ -144,7 +160,7 @@ func Register(c echo.Context) error {
 }
 
 func ResendVerificationEmail(c echo.Context) error {
-	sessionID, responseErr := GetBearer(c)
+	sessionID, responseErr := GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -205,7 +221,26 @@ func VerifyEmail(c echo.Context) error {
 	return c.String(http.StatusOK, "EMAIL VERIFIED SUCCESSFULLY")
 }
 
+func createSessionCookie(value string) *http.Cookie {
+	cookie := new(http.Cookie)
+	cookie.Path = "/"
+	cookie.Name = "SESSION"
+	cookie.Value = value
+	cookie.Expires = time.Now().Add(SESSION_DURATION)
+	cookie.SameSite = http.SameSiteLaxMode
+	cookie.HttpOnly = true
+	cookie.Secure = true
+
+	return cookie
+}
+
 func Authenticate(c echo.Context) error {
+	type Credentials struct {
+		Email      string `json:"email" validate:"required"`
+		Password   string `json:"password" validate:"required"`
+		AuthMethod string `json:"authMethod"`
+	}
+
 	credentials := new(Credentials)
 	err := c.Bind(&credentials)
 	if err != nil {
@@ -232,6 +267,13 @@ func Authenticate(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE AUTHENTICATING")
 	}
+
+	if credentials.AuthMethod == "cookie" {
+		cookie := createSessionCookie(session.SessionID)
+		c.SetCookie(cookie)
+		return c.String(http.StatusOK, "SUCCESS")
+	}
+
 	return c.JSON(http.StatusOK, session)
 }
 
@@ -249,7 +291,7 @@ func ChangeEmail(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	sessionID, responseErr := GetBearer(c)
+	sessionID, responseErr := GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -350,7 +392,7 @@ func ConfirmChangedEmail(c echo.Context) error {
 }
 
 func ChangeUsername(c echo.Context) error {
-	sessionID, responseErr := GetBearer(c)
+	sessionID, responseErr := GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -394,7 +436,7 @@ func ChangeUsername(c echo.Context) error {
 }
 
 func Logout(c echo.Context) error {
-	sessionID, err := GetBearer(c)
+	sessionID, err := GetSessionToken(c)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}

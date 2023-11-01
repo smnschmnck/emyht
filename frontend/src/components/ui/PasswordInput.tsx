@@ -1,13 +1,14 @@
-import { FC, useState } from "react";
+import { FC, InputHTMLAttributes, useState } from "react";
 import { Input } from "./Input";
 import { HideOrShowButton } from "./HideOrShowButton";
 
-export const PasswordInput: FC<{ placeholder: string }> = ({ placeholder }) => {
+type PasswordInputProps = InputHTMLAttributes<HTMLInputElement>;
+
+export const PasswordInput: FC<PasswordInputProps> = (props) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <Input
-      placeholder={placeholder}
       type={showPassword ? "text" : "password"}
       endAdornment={
         <HideOrShowButton
@@ -15,6 +16,7 @@ export const PasswordInput: FC<{ placeholder: string }> = ({ placeholder }) => {
           setShowPassword={setShowPassword}
         />
       }
+      {...props}
     />
   );
 };

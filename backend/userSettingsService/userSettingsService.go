@@ -16,7 +16,7 @@ import (
 var validate = validator.New()
 
 func GetChangeProfilePicturePutURL(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -61,7 +61,7 @@ func GetChangeProfilePicturePutURL(c echo.Context) error {
 }
 
 func ConfirmChangedProfilePic(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}

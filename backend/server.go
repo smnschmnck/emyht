@@ -24,6 +24,11 @@ func handleRequest() {
 	e := echo.New()
 	//TODO: Use Redis for distributed rate limiting
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
+	//CORS
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowCredentials: true,
+	}))
 	//Websocket
 	e.Any("/ws", wsService.InitializeNewSocketConnection)
 	e.POST("/authenticateSocketConnection", wsService.AuthenticateSocketConnection)

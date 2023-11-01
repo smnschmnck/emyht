@@ -22,7 +22,7 @@ import (
 var validate = validator.New()
 
 func SendContactRequest(c echo.Context) error {
-	token, err := authService.GetBearer(c)
+	token, err := authService.GetSessionToken(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
@@ -157,7 +157,7 @@ func AreUsersInContacts(usersUUIDs []string, uuid string) (bool, error) {
 }
 
 func GetContacts(c echo.Context) error {
-	token, err := authService.GetBearer(c)
+	token, err := authService.GetSessionToken(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
@@ -210,7 +210,7 @@ func GetPendingContactRequestsByUUID(uuid string) ([]singleContactRequest, error
 }
 
 func GetPendingContactRequests(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -228,7 +228,7 @@ func GetPendingContactRequests(c echo.Context) error {
 }
 
 func HandleContactRequest(c echo.Context) error {
-	token, err := authService.GetBearer(c)
+	token, err := authService.GetSessionToken(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
@@ -326,7 +326,7 @@ func blockUser(uuidToBeBlocked string, uuid string, chatID string) error {
 }
 
 func BlockUser(c echo.Context) error {
-	token, err := authService.GetBearer(c)
+	token, err := authService.GetSessionToken(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
