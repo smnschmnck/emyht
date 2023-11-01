@@ -1,19 +1,11 @@
-import { authLayoutRoute } from "@/pages/_auth/_layout/route";
-import { loginRoute } from "@/pages/_auth/login/route";
-import { signUpRoute } from "@/pages/_auth/signUp/route";
-import { indexRoute } from "@/pages/index/route";
+import { routes } from "@/pages/allRoutes";
 import { Outlet, RootRoute, Router } from "@tanstack/react-router";
 
 export const rootRoute = new RootRoute({
   component: () => <Outlet />,
 });
 
-const routeTree = rootRoute.addChildren([
-  authLayoutRoute,
-  indexRoute,
-  loginRoute,
-  signUpRoute,
-]);
+const routeTree = rootRoute.addChildren(routes);
 
 export const router = new Router({ routeTree });
 

@@ -3,9 +3,9 @@ import { FC } from "react";
 
 export const SignUpPage: FC = () => {
   return (
-    <div>
-      <h1>Sign up pls</h1>
-      <Link to="/login">Log in</Link>
+    <div className="flex flex-col justify-center items-center">
+      <h1 className="text-5xl font-medium">Sign up</h1>
+      <Link to="/sign-in">Sign in</Link>
     </div>
   );
 };

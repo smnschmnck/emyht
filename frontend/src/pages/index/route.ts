@@ -10,7 +10,7 @@ export const indexRoute = new Route({
     const isAuthed = false;
     if (!isAuthed) {
       throw redirect({
-        to: "/login",
+        to: "/sign-in",
       });
     }
   },
