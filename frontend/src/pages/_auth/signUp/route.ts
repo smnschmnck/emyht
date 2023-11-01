@@ -1,9 +1,9 @@
 import { Route } from "@tanstack/react-router";
 import { SignUpPage } from "./SignUpPage";
-import { rootRoute } from "@/router/config";
+import { authLayoutRoute } from "../_layout/route";
 
 export const signUpRoute = new Route({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => authLayoutRoute,
   path: "/sign-up",
   component: SignUpPage,
 });
