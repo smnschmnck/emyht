@@ -2,15 +2,17 @@ import { getUserData } from "@/api/userApi";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
+import { queryKeys } from "@/configs/queryKeys";
 import { env } from "@/env";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { FC, FormEvent, useState } from "react";
 
 export const SignInPage: FC = () => {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
 
   const login = async (event: FormEvent) => {
     event.preventDefault();
@@ -36,6 +38,7 @@ export const SignInPage: FC = () => {
   };
 
   const loginMutation = useMutation({
+    mutationKey: queryKeys.users.details.queryKey,
     mutationFn: login,
     onSuccess: ({ emailActive }) => {
       if (emailActive) {

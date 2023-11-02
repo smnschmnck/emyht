@@ -1,11 +1,11 @@
 import { queryKeys } from "@/configs/queryKeys";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, useEffect } from "react";
 
 export const IndexPage: FC = () => {
   const navigate = useNavigate();
-  const { isLoading, error: userDataError } = useQuery({
+  const { data: userData, error: userDataError } = useQuery({
     ...queryKeys.users.details,
     retry: false,
   });
@@ -16,14 +16,14 @@ export const IndexPage: FC = () => {
     }
   }, [userDataError, navigate]);
 
-  if (isLoading) {
-    return <></>;
+  if (!userData) {
+    return null;
   }
 
   return (
     <div>
-      <h1>Hello there :D</h1>
-      <Link to="/sign-in">Log in</Link>
+      <h1>Hello {userData.username}</h1>
+      <h1>Email Active: {String(userData.emailActive)}</h1>
     </div>
   );
 };

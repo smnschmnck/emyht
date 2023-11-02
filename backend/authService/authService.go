@@ -120,7 +120,14 @@ func startSession(uuid string) (Session, error) {
 }
 
 func Register(c echo.Context) error {
-	reqUser := new(userService.ReqUser)
+	type ReqUser struct {
+		Email      string `json:"email" validate:"required"`
+		Username   string `json:"username" validate:"required"`
+		Password   string `json:"password" validate:"required"`
+		AuthMethod string `json:"authMethod"`
+	}
+
+	reqUser := new(ReqUser)
 	err := c.Bind(reqUser)
 	if err != nil {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
@@ -154,6 +161,12 @@ func Register(c echo.Context) error {
 
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
+	}
+
+	if reqUser.AuthMethod == "cookie" {
+		cookie := createSessionCookie(session.SessionID)
+		c.SetCookie(cookie)
+		return c.String(http.StatusOK, "SUCCESS")
 	}
 
 	return c.JSON(http.StatusOK, session)
