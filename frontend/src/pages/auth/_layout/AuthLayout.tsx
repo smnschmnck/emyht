@@ -15,9 +15,11 @@ export const AuthLayout = () => {
     if (userData) {
       if (userData.emailActive) {
         navigate({ to: "/" });
+        return;
       }
       if (!userData.emailActive) {
         navigate({ to: "/no-email" });
+        return;
       }
     }
   }, [userData, navigate]);
