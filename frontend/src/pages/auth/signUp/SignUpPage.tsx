@@ -1,11 +1,12 @@
 import { getUserData } from "@/api/userApi";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Link } from "@/components/ui/Link";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { queryKeys } from "@/configs/queryKeys";
 import { env } from "@/env";
 import { useMutation } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, FormEvent, useState } from "react";
 
 export const SignUpPage: FC = () => {
@@ -45,7 +46,7 @@ export const SignUpPage: FC = () => {
     mutationFn: signUp,
     onSuccess: () => {
       navigate({
-        to: "/",
+        to: "/no-email",
       });
     },
   });
@@ -85,9 +86,7 @@ export const SignUpPage: FC = () => {
         </form>
         <div className="flex gap-2">
           <p className="text-sm text-zinc-500">Already got an account?</p>
-          <Link className="text-sm text-blue-600 hover:underline" to="/sign-in">
-            Sign in
-          </Link>
+          <Link to="/sign-in">Sign in</Link>
         </div>
       </div>
     </div>

@@ -1,11 +1,12 @@
 import { getUserData } from "@/api/userApi";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Link } from "@/components/ui/Link";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { queryKeys } from "@/configs/queryKeys";
 import { env } from "@/env";
 import { useMutation } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { FC, FormEvent, useState } from "react";
 
 export const SignInPage: FC = () => {
@@ -76,9 +77,7 @@ export const SignInPage: FC = () => {
         </form>
         <div className="flex gap-2">
           <p className="text-sm text-zinc-500">No account?</p>
-          <Link className="text-sm text-blue-600 hover:underline" to="/sign-up">
-            Sign up
-          </Link>
+          <Link to="/sign-up">Sign up</Link>
         </div>
       </div>
     </div>

@@ -14,10 +14,15 @@ export const IndexPage: FC = () => {
     if (userDataError) {
       navigate({ to: "/sign-in" });
     }
-  }, [userDataError, navigate]);
+    if (userData) {
+      if (!userData.emailActive) {
+        navigate({ to: "/no-email" });
+      }
+    }
+  }, [userData, userDataError, navigate]);
 
   if (!userData) {
-    return null;
+    return <></>;
   }
 
   return (

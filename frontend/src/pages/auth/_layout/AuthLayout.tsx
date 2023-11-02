@@ -17,8 +17,7 @@ export const AuthLayout = () => {
         navigate({ to: "/" });
       }
       if (!userData.emailActive) {
-        //TODO navigate to verify email page
-        navigate({ to: "/" });
+        navigate({ to: "/no-email" });
       }
     }
   }, [userData, navigate]);
