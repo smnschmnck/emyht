@@ -69,6 +69,7 @@ export const SignUpPage: FC = () => {
           />
           <Input
             placeholder="E-Mail"
+            autoComplete="username"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
