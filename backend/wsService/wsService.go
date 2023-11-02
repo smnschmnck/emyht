@@ -3,11 +3,12 @@ package wsService
 import (
 	"chat/authService"
 	"chat/userService"
+	"chat/utils"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
+	"slices"
 	"sync"
 
 	"github.com/go-playground/validator/v10"
@@ -28,11 +29,13 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
 		origin := r.Header.Get("Origin")
-		corsOrigins := os.Getenv("CORS_ORIGINS")
-		if corsOrigins == "*" {
+		corsOrigins := utils.GetAllowedCorsOrigins()
+
+		if slices.Contains(corsOrigins, "*") {
 			return true
 		}
-		return origin == corsOrigins
+
+		return slices.Contains(corsOrigins, origin)
 	},
 }
 

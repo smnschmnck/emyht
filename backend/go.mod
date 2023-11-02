@@ -1,6 +1,6 @@
 module chat
 
-go 1.18
+go 1.21
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.17.7

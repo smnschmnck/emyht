@@ -7,6 +7,7 @@ import (
 	"chat/dbHelpers/postgresHelper"
 	"chat/dbHelpers/redisHelper"
 	"chat/userSettingsService"
+	"chat/utils"
 	"chat/wsService"
 	"fmt"
 	"os"
@@ -26,7 +27,7 @@ func handleRequest() {
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
 	//CORS
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     utils.GetAllowedCorsOrigins(),
 		AllowCredentials: true,
 	}))
 	//Websocket
