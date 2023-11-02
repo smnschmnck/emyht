@@ -2,12 +2,14 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { env } from "@/env";
-import { Link } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { FC, FormEvent, useState } from "react";
 
 export const SignInPage: FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const login = async (event: FormEvent) => {
     event.preventDefault();
@@ -25,13 +27,19 @@ export const SignInPage: FC = () => {
       credentials: "include",
     });
 
-    if (res.ok) {
-      const res1 = await fetch(`${env.VITE_BACKEND_HOST}/user`, {
-        credentials: "include",
-      });
-      alert(await res1.text());
+    if (!res.ok) {
+      throw new Error(await res.text());
     }
   };
+
+  const loginMutation = useMutation({
+    mutationFn: login,
+    onSuccess: () => {
+      navigate({
+        to: "/",
+      });
+    },
+  });
 
   return (
     <div className="flex gap-6 flex-col w-80">
@@ -42,7 +50,10 @@ export const SignInPage: FC = () => {
         </p>
       </div>
       <div className="flex gap-2 flex-col items-center">
-        <form className="flex gap-2 flex-col w-full" onSubmit={login}>
+        <form
+          className="flex gap-2 flex-col w-full"
+          onSubmit={loginMutation.mutate}
+        >
           <Input
             placeholder="E-Mail"
             value={email}

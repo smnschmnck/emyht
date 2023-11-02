@@ -7,7 +7,7 @@ export const indexRoute = new Route({
   path: "/",
   component: IndexPage,
   beforeLoad: async () => {
-    const isAuthed = false;
+    const isAuthed = true;
     if (!isAuthed) {
       throw redirect({
         to: "/sign-in",

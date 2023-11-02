@@ -3,6 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@fontsource-variable/plus-jakarta-sans': ^5.0.18
   '@t3-oss/env-core': ^0.7.1
+  '@tanstack/react-query': ^5.4.3
   '@tanstack/react-router': 0.0.1-beta.199
   '@types/node': ^20.8.10
   '@types/react': ^18.2.15
@@ -25,6 +26,7 @@ specifiers:
 dependencies:
   '@fontsource-variable/plus-jakarta-sans': 5.0.18
   '@t3-oss/env-core': 0.7.1_5t6euwxcdh5fbfdut3slz5dieu
+  '@tanstack/react-query': 5.4.3_biqbaboplfbrettd7655fr4n2y
   '@tanstack/react-router': 0.0.1-beta.199_biqbaboplfbrettd7655fr4n2y
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
@@ -522,6 +524,27 @@ packages:
   /@tanstack/history/0.0.1-beta.199:
     resolution: {integrity: sha512-lxmc181BhRBo0gbyaMXH0vZYsF1n3/3bGzKuvYG57XhqdOEG9dx/pzRb6sApIH2l3ORMUbfXgc8UwncicGA79w==}
     engines: {node: '>=12'}
+    dev: false
+
+  /@tanstack/query-core/5.4.3:
+    resolution: {integrity: sha512-fnI9ORjcuLGm1sNrKatKIosRQUpuqcD4SV7RqRSVmj8JSicX2aoMyKryHEBpVQvf6N4PaBVgBxQomjsbsGPssQ==}
+    dev: false
+
+  /@tanstack/react-query/5.4.3_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-4aSOrRNa6yEmf7mws5QPTVMn8Lp7L38tFoTZ0c1ZmhIvbr8GIA0WT7X5N3yz/nuK8hUtjw9cAzBr4BPDZZ+tzA==}
+    peerDependencies:
+      react: ^18.0.0
+      react-dom: ^18.0.0
+      react-native: '*'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
+    dependencies:
+      '@tanstack/query-core': 5.4.3
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
     dev: false
 
   /@tanstack/react-router/0.0.1-beta.199_biqbaboplfbrettd7655fr4n2y:

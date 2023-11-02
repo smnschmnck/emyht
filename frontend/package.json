@@ -12,6 +12,7 @@
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.0.18",
     "@t3-oss/env-core": "^0.7.1",
+    "@tanstack/react-query": "^5.4.3",
     "@tanstack/react-router": "0.0.1-beta.199",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
