@@ -51,7 +51,7 @@ export const SignUpPage: FC = () => {
   });
 
   return (
-    <div className="flex gap-6 flex-col w-80">
+    <div className="flex gap-6 flex-col w-full max-w-sm">
       <div>
         <h1 className="text-3xl font-medium">Create account</h1>
         <p className="text-sm text-zinc-500">Please enter your details</p>
