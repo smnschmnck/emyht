@@ -1,3 +1,4 @@
+import { getUserData } from "@/api/userApi";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
@@ -30,14 +31,18 @@ export const SignInPage: FC = () => {
     if (!res.ok) {
       throw new Error(await res.text());
     }
+
+    return await getUserData();
   };
 
   const loginMutation = useMutation({
     mutationFn: login,
-    onSuccess: () => {
-      navigate({
-        to: "/",
-      });
+    onSuccess: ({ emailActive }) => {
+      if (emailActive) {
+        navigate({
+          to: "/",
+        });
+      }
     },
   });
 
