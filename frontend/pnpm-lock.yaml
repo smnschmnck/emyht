@@ -3,7 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@fontsource-variable/plus-jakarta-sans': ^5.0.18
   '@t3-oss/env-core': ^0.7.1
-  '@tanstack/react-router': 0.0.1-beta.198
+  '@tanstack/react-router': 0.0.1-beta.199
   '@types/node': ^20.8.10
   '@types/react': ^18.2.15
   '@types/react-dom': ^18.2.7
@@ -25,7 +25,7 @@ specifiers:
 dependencies:
   '@fontsource-variable/plus-jakarta-sans': 5.0.18
   '@t3-oss/env-core': 0.7.1_5t6euwxcdh5fbfdut3slz5dieu
-  '@tanstack/react-router': 0.0.1-beta.198_biqbaboplfbrettd7655fr4n2y
+  '@tanstack/react-router': 0.0.1-beta.199_biqbaboplfbrettd7655fr4n2y
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
   zod: 3.22.4
@@ -519,13 +519,13 @@ packages:
       zod: 3.22.4
     dev: false
 
-  /@tanstack/history/0.0.1-beta.198:
-    resolution: {integrity: sha512-iqmFTXXH8Swy18SdwT9N441EbXfiazXxSxjDMdV+RHd0OKASYkJ57GIYidtDw7AP4pW9mhLNLmeBrHwSgU/1gw==}
+  /@tanstack/history/0.0.1-beta.199:
+    resolution: {integrity: sha512-lxmc181BhRBo0gbyaMXH0vZYsF1n3/3bGzKuvYG57XhqdOEG9dx/pzRb6sApIH2l3ORMUbfXgc8UwncicGA79w==}
     engines: {node: '>=12'}
     dev: false
 
-  /@tanstack/react-router/0.0.1-beta.198_biqbaboplfbrettd7655fr4n2y:
-    resolution: {integrity: sha512-AxR4VPTyHeF0YCB2oddMNsXV79Lt0ijDVeQOvYCvISpP2BJxO/Nr9QGewemcPw1xBm9OqpCcxXe7eUKJxFyOyw==}
+  /@tanstack/react-router/0.0.1-beta.199_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-SUMlH2koAbgPJX8OErhXLD9KF0BRm0TqToIJM2lG17LyD67pw5OLg8U/1uEgFn3QPQVpW1e7x5bxWcwP0fLgcg==}
     engines: {node: '>=12'}
     peerDependencies:
       react: '>=16'
@@ -534,7 +534,7 @@ packages:
       '@babel/runtime': 7.23.2
       '@gisatcz/cross-package-react-context': 0.2.0_react@18.2.0
       '@tanstack/react-store': 0.0.1_biqbaboplfbrettd7655fr4n2y
-      '@tanstack/router-core': 0.0.1-beta.198_biqbaboplfbrettd7655fr4n2y
+      '@tanstack/router-core': 0.0.1-beta.199_biqbaboplfbrettd7655fr4n2y
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       tiny-invariant: 1.3.1
@@ -554,8 +554,8 @@ packages:
       use-sync-external-store: 1.2.0_react@18.2.0
     dev: false
 
-  /@tanstack/router-core/0.0.1-beta.198_biqbaboplfbrettd7655fr4n2y:
-    resolution: {integrity: sha512-4chqtzl28YMyrmVfT94ZFz/NAP/dYd+PaqvKFfJTlbpghvRsaJYSysRGRqMpySQE7dFUSlAzi9OVk16r7FCROA==}
+  /@tanstack/router-core/0.0.1-beta.199_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-3a0Ji9ZcjodKwc57V2nzRC8Q9VNLX0q3P+rQcaiDpUb8R7PRZpgiE+iBXDudc5N9Q1N7M8IoGQLRfQPxRQKWyA==}
     engines: {node: '>=12'}
     peerDependencies:
       react: '>=16'
@@ -563,7 +563,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.23.2
       '@gisatcz/cross-package-react-context': 0.2.0_react@18.2.0
-      '@tanstack/history': 0.0.1-beta.198
+      '@tanstack/history': 0.0.1-beta.199
       '@tanstack/store': 0.0.1
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
