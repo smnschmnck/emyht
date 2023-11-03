@@ -42,11 +42,18 @@ export const SignInPage: FC = () => {
     mutationKey: queryKeys.users.details.queryKey,
     mutationFn: login,
     onSuccess: ({ emailActive }) => {
-      if (emailActive) {
+      if (!emailActive) {
         navigate({
-          to: "/",
+          to: "/no-email",
+          replace: true,
         });
+        return;
       }
+
+      navigate({
+        to: "/",
+        replace: true,
+      });
     },
   });
 
