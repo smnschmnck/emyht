@@ -10,11 +10,17 @@ export const AuthLayout = () => {
   useEffect(() => {
     if (userData) {
       if (userData.emailActive) {
-        navigate({ to: "/" });
+        navigate({
+          to: "/",
+          replace: true,
+        });
         return;
       }
       if (!userData.emailActive) {
-        navigate({ to: "/no-email" });
+        navigate({
+          to: "/no-email",
+          replace: true,
+        });
         return;
       }
     }

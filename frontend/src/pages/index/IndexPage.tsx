@@ -8,12 +8,18 @@ export const IndexPage: FC = () => {
 
   useEffect(() => {
     if (userDataError) {
-      navigate({ to: "/sign-in" });
+      navigate({
+        to: "/sign-in",
+        replace: true,
+      });
       return;
     }
     if (userData) {
       if (!userData.emailActive) {
-        navigate({ to: "/no-email" });
+        navigate({
+          to: "/no-email",
+          replace: true,
+        });
         return;
       }
     }

@@ -38,7 +38,10 @@ export const VerifyEmailPage: FC = () => {
   useEffect(() => {
     if (userDataQuery.data) {
       if (userDataQuery.data.emailActive) {
-        navigate({ to: "/" });
+        navigate({
+          to: "/",
+          replace: true,
+        });
         return;
       }
     }

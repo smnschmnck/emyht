@@ -9,12 +9,18 @@ export const NoEmailPage: FC = () => {
 
   useEffect(() => {
     if (userDataError) {
-      navigate({ to: "/sign-in" });
+      navigate({
+        to: "/sign-in",
+        replace: true,
+      });
       return;
     }
     if (userData) {
       if (userData.emailActive) {
-        navigate({ to: "/" });
+        navigate({
+          to: "/",
+          replace: true,
+        });
         return;
       }
     }
