@@ -1,11 +1,15 @@
 import { env } from "@/env";
+import { HttpError } from "@/errors/types/httpError";
 
 export const getUserData = async () => {
   const res = await fetch(`${env.VITE_BACKEND_HOST}/user`, {
     credentials: "include",
   });
   if (!res.ok) {
-    throw new Error(await res.text());
+    throw new HttpError({
+      message: await res.text(),
+      statusCode: res.status,
+    });
   }
 
   return (await res.json()) as {

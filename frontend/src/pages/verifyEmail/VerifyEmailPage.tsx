@@ -3,12 +3,12 @@ import { FC, useEffect } from "react";
 import { verifyEmailRoute } from "./route";
 import { useQuery } from "@tanstack/react-query";
 import { env } from "@/env";
-import { queryKeys } from "@/configs/queryKeys";
+import { useUserData } from "@/hooks/api/users/useUserData";
 
 export const VerifyEmailPage: FC = () => {
   const navigate = useNavigate();
   const { token } = useSearch({ from: verifyEmailRoute.id });
-  const userDataQuery = useQuery({ ...queryKeys.users.details, retry: false });
+  const userDataQuery = useUserData();
 
   const verifyEmail = async () => {
     const res = await fetch(`${env.VITE_BACKEND_HOST}/verifyEmail`, {
@@ -26,7 +26,6 @@ export const VerifyEmailPage: FC = () => {
     }
 
     await userDataQuery.refetch();
-    navigate({ to: "/" });
 
     return res.text();
   };
@@ -43,7 +42,7 @@ export const VerifyEmailPage: FC = () => {
         return;
       }
     }
-  }, [navigate, userDataQuery.data]);
+  }, [navigate, userDataQuery.data, userDataQuery.data?.emailActive]);
 
   if (userDataQuery.isLoading) {
     return <></>;

@@ -1,14 +1,10 @@
 import illustration from "./assets/illustration.svg";
 import { Outlet, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { queryKeys } from "@/configs/queryKeys";
 import { useEffect } from "react";
+import { useUserData } from "@/hooks/api/users/useUserData";
 
 export const AuthLayout = () => {
-  const { data: userData, isLoading } = useQuery({
-    ...queryKeys.users.details,
-    retry: false,
-  });
+  const { data: userData, isLoading } = useUserData();
   const navigate = useNavigate();
 
   useEffect(() => {

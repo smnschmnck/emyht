@@ -1,14 +1,10 @@
-import { queryKeys } from "@/configs/queryKeys";
-import { useQuery } from "@tanstack/react-query";
+import { useUserData } from "@/hooks/api/users/useUserData";
 import { useNavigate } from "@tanstack/react-router";
 import { FC, useEffect } from "react";
 
 export const IndexPage: FC = () => {
   const navigate = useNavigate();
-  const { data: userData, error: userDataError } = useQuery({
-    ...queryKeys.users.details,
-    retry: false,
-  });
+  const { data: userData, error: userDataError } = useUserData();
 
   useEffect(() => {
     if (userDataError) {
