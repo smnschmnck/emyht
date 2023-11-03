@@ -1,34 +1,35 @@
-import { getUserData } from "@/api/userApi";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Link } from "@/components/ui/Link";
-import { PasswordInput } from "@/components/ui/PasswordInput";
-import { queryKeys } from "@/configs/queryKeys";
-import { env } from "@/env";
-import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
-import { FC, FormEvent, useState } from "react";
+import { getUserData } from '@/api/userApi';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Link } from '@/components/ui/Link';
+import { PasswordInput } from '@/components/ui/PasswordInput';
+import { SimpleErrorMessage } from '@/components/ui/SimpleErrorMessage';
+import { queryKeys } from '@/configs/queryKeys';
+import { env } from '@/env';
+import { useMutation } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
+import { FC, FormEvent, useState } from 'react';
 
 export const SignInPage: FC = () => {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const login = async (event: FormEvent) => {
     event.preventDefault();
 
     const res = await fetch(`${env.VITE_BACKEND_HOST}/login`, {
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify({
         email,
         password,
-        authMethod: "cookie",
+        authMethod: 'cookie',
       }),
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
-      credentials: "include",
+      credentials: 'include',
     });
 
     if (!res.ok) {
@@ -44,14 +45,14 @@ export const SignInPage: FC = () => {
     onSuccess: ({ emailActive }) => {
       if (!emailActive) {
         navigate({
-          to: "/no-email",
+          to: '/no-email',
           replace: true,
         });
         return;
       }
 
       navigate({
-        to: "/",
+        to: '/',
         replace: true,
       });
     },
@@ -82,6 +83,9 @@ export const SignInPage: FC = () => {
           />
           <Button type="submit">Sign in</Button>
         </form>
+        {loginMutation.error && (
+          <SimpleErrorMessage>{loginMutation.error.message}</SimpleErrorMessage>
+        )}
         <div className="flex gap-2">
           <p className="text-sm text-zinc-500">No account?</p>
           <Link to="/sign-up">Sign up</Link>
