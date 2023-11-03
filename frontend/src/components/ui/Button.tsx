@@ -1,14 +1,14 @@
-import { ButtonHTMLAttributes, FC } from "react";
+import { ButtonHTMLAttributes, FC } from 'react';
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement>;
 
 export const Button: FC<ButtonProps> = ({
   children,
-  type = "button",
+  type = 'button',
   ...props
 }) => (
   <button
-    className="w-full h-10 rounded-md hover:bg-blue-500 transition bg-blue-600 font-medium text-sm text-white"
+    className="h-10 w-full rounded-md bg-blue-600 text-sm font-medium text-white transition hover:bg-blue-500"
     type={type}
     {...props}
   >

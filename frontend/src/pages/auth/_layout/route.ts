@@ -1,11 +1,11 @@
-import { Route, redirect } from "@tanstack/react-router";
-import { AuthLayout } from "./AuthLayout";
-import { mainLayoutRoute } from "@/pages/_mainLayout/route";
-import { getUserData } from "@/api/userApi";
+import { Route, redirect } from '@tanstack/react-router';
+import { AuthLayout } from './AuthLayout';
+import { mainLayoutRoute } from '@/pages/_mainLayout/route';
+import { getUserData } from '@/api/userApi';
 
 export const authLayoutRoute = new Route({
   getParentRoute: () => mainLayoutRoute,
-  id: "authLayoutRoute",
+  id: 'authLayoutRoute',
   component: AuthLayout,
   beforeLoad: async () => {
     let userData;
@@ -16,11 +16,11 @@ export const authLayoutRoute = new Route({
       return;
     }
     if (userData.emailActive) {
-      throw redirect({ to: "/" });
+      throw redirect({ to: '/' });
     }
 
     if (!userData.emailActive) {
-      throw redirect({ to: "/no-email" });
+      throw redirect({ to: '/no-email' });
     }
   },
 });

@@ -1,6 +1,6 @@
-import { useRouteContext } from "@tanstack/react-router";
-import { FC } from "react";
-import { indexRoute } from "./route";
+import { useRouteContext } from '@tanstack/react-router';
+import { FC } from 'react';
+import { indexRoute } from './route';
 
 export const IndexPage: FC = () => {
   const userData = useRouteContext({ from: indexRoute.id });

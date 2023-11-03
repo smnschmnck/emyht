@@ -1,9 +1,9 @@
-import { env } from "@/env";
-import { HttpError } from "@/errors/httpError/httpError";
+import { env } from '@/env';
+import { HttpError } from '@/errors/httpError/httpError';
 
 export const getUserData = async () => {
   const res = await fetch(`${env.VITE_BACKEND_HOST}/user`, {
-    credentials: "include",
+    credentials: 'include',
   });
   if (!res.ok) {
     throw new HttpError({

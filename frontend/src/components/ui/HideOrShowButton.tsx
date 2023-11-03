@@ -1,6 +1,6 @@
-import { EyeClosedIcon } from "@/assets/icons/EyeClosedIcon";
-import { EyeOpenIcon } from "@/assets/icons/EyeOpenIcon";
-import { FC } from "react";
+import { EyeClosedIcon } from '@/assets/icons/EyeClosedIcon';
+import { EyeOpenIcon } from '@/assets/icons/EyeOpenIcon';
+import { FC } from 'react';
 
 type HideOrShowButtonProps = {
   show: boolean;
@@ -12,7 +12,7 @@ export const HideOrShowButton: FC<HideOrShowButtonProps> = ({
   setShowPassword: setShow,
 }) => (
   <button
-    className="text-zinc-400 w-6 h-6 hover:text-black transition"
+    className="h-6 w-6 text-zinc-400 transition hover:text-black"
     type="button"
     onClick={() => setShow(!show)}
   >

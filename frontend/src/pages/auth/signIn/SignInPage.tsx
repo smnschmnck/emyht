@@ -59,16 +59,16 @@ export const SignInPage: FC = () => {
   });
 
   return (
-    <div className="flex gap-6 flex-col w-full max-w-sm">
+    <div className="flex w-full max-w-sm flex-col gap-6">
       <div>
         <h1 className="text-3xl font-medium">Welcome back</h1>
         <p className="text-sm text-zinc-500">
           Please sign in to start chatting
         </p>
       </div>
-      <div className="flex gap-2 flex-col items-center">
+      <div className="flex flex-col items-center gap-2">
         <form
-          className="flex gap-2 flex-col w-full"
+          className="flex w-full flex-col gap-2"
           onSubmit={loginMutation.mutate}
         >
           <Input

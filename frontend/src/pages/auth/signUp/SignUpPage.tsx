@@ -1,37 +1,37 @@
-import { getUserData } from "@/api/userApi";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Link } from "@/components/ui/Link";
-import { PasswordInput } from "@/components/ui/PasswordInput";
-import { queryKeys } from "@/configs/queryKeys";
-import { env } from "@/env";
-import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
-import { FC, FormEvent, useState } from "react";
+import { getUserData } from '@/api/userApi';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Link } from '@/components/ui/Link';
+import { PasswordInput } from '@/components/ui/PasswordInput';
+import { queryKeys } from '@/configs/queryKeys';
+import { env } from '@/env';
+import { useMutation } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
+import { FC, FormEvent, useState } from 'react';
 
 export const SignUpPage: FC = () => {
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [repeatedPassword, setRepeatedPassword] = useState("");
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [repeatedPassword, setRepeatedPassword] = useState('');
 
   const signUp = async (event: FormEvent) => {
     event.preventDefault();
 
     const res = await fetch(`${env.VITE_BACKEND_HOST}/register`, {
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify({
         username,
         email,
         password,
-        authMethod: "cookie",
+        authMethod: 'cookie',
       }),
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
-      credentials: "include",
+      credentials: 'include',
     });
 
     if (!res.ok) {
@@ -46,20 +46,20 @@ export const SignUpPage: FC = () => {
     mutationFn: signUp,
     onSuccess: () => {
       navigate({
-        to: "/no-email",
+        to: '/no-email',
       });
     },
   });
 
   return (
-    <div className="flex gap-6 flex-col w-full max-w-sm">
+    <div className="flex w-full max-w-sm flex-col gap-6">
       <div>
         <h1 className="text-3xl font-medium">Create account</h1>
         <p className="text-sm text-zinc-500">Please enter your details</p>
       </div>
-      <div className="flex gap-2 flex-col items-center">
+      <div className="flex flex-col items-center gap-2">
         <form
-          className="flex gap-2 flex-col w-full"
+          className="flex w-full flex-col gap-2"
           onSubmit={signUpMutation.mutate}
         >
           <Input

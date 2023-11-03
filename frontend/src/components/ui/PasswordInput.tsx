@@ -1,6 +1,6 @@
-import { FC, InputHTMLAttributes, useState } from "react";
-import { Input } from "./Input";
-import { HideOrShowButton } from "./HideOrShowButton";
+import { FC, InputHTMLAttributes, useState } from 'react';
+import { Input } from './Input';
+import { HideOrShowButton } from './HideOrShowButton';
 
 type PasswordInputProps = InputHTMLAttributes<HTMLInputElement>;
 
@@ -9,7 +9,7 @@ export const PasswordInput: FC<PasswordInputProps> = (props) => {
 
   return (
     <Input
-      type={showPassword ? "text" : "password"}
+      type={showPassword ? 'text' : 'password'}
       endAdornment={
         <HideOrShowButton
           show={showPassword}

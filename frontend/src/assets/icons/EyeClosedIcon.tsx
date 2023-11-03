@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC } from 'react';
 
 export const EyeClosedIcon: FC = () => (
   <svg
@@ -7,7 +7,7 @@ export const EyeClosedIcon: FC = () => (
     viewBox="0 0 24 24"
     strokeWidth={1.5}
     stroke="currentColor"
-    className="w-full h-full"
+    className="h-full w-full"
   >
     <path
       strokeLinecap="round"

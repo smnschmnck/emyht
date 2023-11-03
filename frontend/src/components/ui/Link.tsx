@@ -1,5 +1,5 @@
-import { MakeLinkOptions, Link as RouterLink } from "@tanstack/react-router";
-import { FC } from "react";
+import { MakeLinkOptions, Link as RouterLink } from '@tanstack/react-router';
+import { FC } from 'react';
 
 interface ButtonLinkProps extends MakeLinkOptions {
   children: string;
@@ -7,7 +7,7 @@ interface ButtonLinkProps extends MakeLinkOptions {
 
 export const Link: FC<ButtonLinkProps> = ({ children, ...linkOptions }) => (
   <RouterLink
-    className="hover:underline text-sm text-blue-600"
+    className="text-sm text-blue-600 hover:underline"
     {...linkOptions}
   >
     {children}
