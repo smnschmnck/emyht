@@ -1,34 +1,10 @@
 import { Link } from "@/components/ui/Link";
-import { useUserData } from "@/hooks/api/users/useUserData";
-import { useNavigate } from "@tanstack/react-router";
-import { FC, useEffect } from "react";
+import { useRouteContext } from "@tanstack/react-router";
+import { FC } from "react";
+import { noEmailRoute } from "./route";
 
 export const NoEmailPage: FC = () => {
-  const navigate = useNavigate();
-  const { data: userData, error: userDataError } = useUserData();
-
-  useEffect(() => {
-    if (userDataError) {
-      navigate({
-        to: "/sign-in",
-        replace: true,
-      });
-      return;
-    }
-    if (userData) {
-      if (userData.emailActive) {
-        navigate({
-          to: "/",
-          replace: true,
-        });
-        return;
-      }
-    }
-  }, [userData, userDataError, navigate]);
-
-  if (!userData) {
-    return <></>;
-  }
+  const userData = useRouteContext({ from: noEmailRoute.id });
 
   return (
     <div className="h-full text-sm w-full flex flex-col gap-10 justify-center text-center items-center">

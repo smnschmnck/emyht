@@ -1,33 +1,9 @@
-import { useUserData } from "@/hooks/api/users/useUserData";
-import { useNavigate } from "@tanstack/react-router";
-import { FC, useEffect } from "react";
+import { useRouteContext } from "@tanstack/react-router";
+import { FC } from "react";
+import { indexRoute } from "./route";
 
 export const IndexPage: FC = () => {
-  const navigate = useNavigate();
-  const { data: userData, error: userDataError } = useUserData();
-
-  useEffect(() => {
-    if (userDataError) {
-      navigate({
-        to: "/sign-in",
-        replace: true,
-      });
-      return;
-    }
-    if (userData) {
-      if (!userData.emailActive) {
-        navigate({
-          to: "/no-email",
-          replace: true,
-        });
-        return;
-      }
-    }
-  }, [userData, userDataError, navigate]);
-
-  if (!userData) {
-    return <></>;
-  }
+  const userData = useRouteContext({ from: indexRoute.id });
 
   return (
     <div>

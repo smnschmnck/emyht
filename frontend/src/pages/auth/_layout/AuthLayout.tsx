@@ -1,33 +1,12 @@
 import illustration from "./assets/illustration.svg";
-import { Outlet, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { useUserData } from "@/hooks/api/users/useUserData";
+import { Outlet, useRouteContext } from "@tanstack/react-router";
+import { authLayoutRoute } from "./route";
 
 export const AuthLayout = () => {
-  const { data: userData, isLoading } = useUserData();
-  const navigate = useNavigate();
+  const routeContext = useRouteContext({ from: authLayoutRoute.id });
 
-  useEffect(() => {
-    if (userData) {
-      if (userData.emailActive) {
-        navigate({
-          to: "/",
-          replace: true,
-        });
-        return;
-      }
-      if (!userData.emailActive) {
-        navigate({
-          to: "/no-email",
-          replace: true,
-        });
-        return;
-      }
-    }
-  }, [userData, navigate]);
-
-  if (isLoading) {
-    return <></>;
+  if (routeContext.hasError) {
+    return <p>{routeContext.errorMessage}</p>;
   }
 
   return (
