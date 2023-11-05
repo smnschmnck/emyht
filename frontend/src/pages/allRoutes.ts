@@ -1,11 +1,11 @@
 import { mainLayoutRoute } from './_mainLayout/route';
 import { authRoutes } from './auth/authRoutes';
-import { indexRoute } from './index/route';
+import { indexRoutes } from './index/indexRoutes';
 import { noEmailRoute } from './noEmail/route';
 import { verifyEmailRoute } from './verifyEmail/route';
 
 export const routes = [
-  indexRoute,
+  ...indexRoutes,
   mainLayoutRoute,
   noEmailRoute,
   verifyEmailRoute,

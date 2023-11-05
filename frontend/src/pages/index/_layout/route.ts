@@ -1,12 +1,11 @@
 import { rootRoute } from '@/router/config';
 import { Route, redirect } from '@tanstack/react-router';
-import { IndexPage } from './IndexPage';
 import { getUserData } from '@/api/userApi';
+import { IndexLayout } from './IndexLayout';
 
-export const indexRoute = new Route({
+export const indexLayoutRoute = new Route({
   getParentRoute: () => rootRoute,
-  path: '/',
-  component: IndexPage,
+  id: 'indexLayoutRoute',
   beforeLoad: async () => {
     let userData;
     try {
@@ -19,6 +18,9 @@ export const indexRoute = new Route({
       throw redirect({ to: '/no-email' });
     }
 
-    return userData;
+    return {
+      userData,
+    };
   },
+  component: IndexLayout,
 });
