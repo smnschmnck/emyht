@@ -220,7 +220,7 @@ func VerifyEmail(c echo.Context) error {
 	var dbUserEmailActive bool
 	err = rows.Scan(&dbUserEmailActive)
 	if err != nil {
-		return c.String(http.StatusNotFound, "COULD NOT FIND E-MAIL ADDRESS MATHCHING THE SUPPLIED LINK")
+		return c.String(http.StatusNotFound, "COULD NOT FIND E-MAIL ADDRESS MATCHING THE SUPPLIED LINK")
 	}
 
 	insertQuery := "UPDATE users SET email_active=true, email_token=$1 WHERE email_token=$2 RETURNING email_active"
