@@ -5,6 +5,7 @@ import { FC } from 'react';
 import { verifyEmailRoute } from './route';
 import { SimpleErrorMessage } from '@/components/ui/SimpleErrorMessage';
 import { Link } from '@/components/ui/Link';
+import { Spinner } from '@/components/ui/Spinner';
 
 export const VerifyEmailPage: FC = () => {
   const { token } = useSearch({ from: verifyEmailRoute.id });
@@ -34,7 +35,14 @@ export const VerifyEmailPage: FC = () => {
   });
 
   if (verifyEmailQuery.isLoading) {
-    return <>verifying...</>;
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4">
+        <h1 className="text-center text-2xl font-medium">
+          Verifying your E-Mail
+        </h1>
+        <Spinner />
+      </div>
+    );
   }
 
   if (verifyEmailQuery.isError) {
