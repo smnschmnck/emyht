@@ -9,7 +9,9 @@ export const SimpleErrorMessage: FC<{ children: string }> = ({ children }) => {
 
   return (
     <div className="flex max-w-full gap-2 rounded-md border border-red-500 bg-red-100 p-4 font-medium text-red-500">
-      <ErrorIcon />
+      <div>
+        <ErrorIcon />
+      </div>
       <p>{formattedError}</p>
     </div>
   );
