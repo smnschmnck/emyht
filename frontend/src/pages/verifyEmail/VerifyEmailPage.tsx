@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useSearch } from '@tanstack/react-router';
 import { FC } from 'react';
 import { verifyEmailRoute } from './route';
+import { SimpleErrorMessage } from '@/components/ui/SimpleErrorMessage';
+import { Link } from '@/components/ui/Link';
 
 export const VerifyEmailPage: FC = () => {
   const { token } = useSearch({ from: verifyEmailRoute.id });
@@ -28,6 +30,7 @@ export const VerifyEmailPage: FC = () => {
   const verifyEmailQuery = useQuery({
     queryKey: ['verifyEmail'],
     queryFn: verifyEmail,
+    refetchOnWindowFocus: false,
   });
 
   if (verifyEmailQuery.isLoading) {
@@ -35,8 +38,24 @@ export const VerifyEmailPage: FC = () => {
   }
 
   if (verifyEmailQuery.isError) {
-    return <>{verifyEmailQuery.error.message}</>;
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4">
+        <h1 className="text-center text-4xl font-medium">
+          E-Mail verification failed 😞
+        </h1>
+        <SimpleErrorMessage>
+          {verifyEmailQuery.error.message}
+        </SimpleErrorMessage>
+      </div>
+    );
   }
 
-  return <>ok</>;
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-4">
+      <h1 className="text-center text-4xl font-medium">
+        E-Mail verified successfully 🥳
+      </h1>
+      <Link to="/">Start using emyht</Link>
+    </div>
+  );
 };
