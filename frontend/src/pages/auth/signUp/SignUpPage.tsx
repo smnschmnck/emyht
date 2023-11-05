@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Link } from '@/components/ui/Link';
 import { PasswordInput } from '@/components/ui/PasswordInput';
+import { SimpleErrorMessage } from '@/components/ui/SimpleErrorMessage';
 import { queryKeys } from '@/configs/queryKeys';
 import { env } from '@/env';
 import { useMutation } from '@tanstack/react-query';
@@ -85,6 +86,11 @@ export const SignUpPage: FC = () => {
           />
           <Button type="submit">Sign up</Button>
         </form>
+        {!!signUpMutation.error && (
+          <SimpleErrorMessage>
+            {signUpMutation.error.message}
+          </SimpleErrorMessage>
+        )}
         <div className="flex gap-2">
           <p className="text-sm text-zinc-500">Already got an account?</p>
           <Link to="/sign-in">Sign in</Link>
