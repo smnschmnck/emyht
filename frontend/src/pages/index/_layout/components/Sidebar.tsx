@@ -7,6 +7,7 @@ import { MagnifyingGlassIcon } from '@/assets/icons/MagnifyingGlassIcon';
 import { LogOutIcon } from '@/assets/icons/LogOutIcon';
 import { IconButton } from '@/components/ui/IconButton';
 import { SettingsIcon } from '@/assets/icons/SettingsIcon';
+import { Link } from '@tanstack/react-router';
 
 type SidebarProps = {
   userData: UserData;
@@ -14,7 +15,7 @@ type SidebarProps = {
 
 export const Sidebar: FC<SidebarProps> = ({ userData }) => {
   return (
-    <div className="flex h-full min-w-[22rem] flex-col justify-between border-r border-r-zinc-100">
+    <div className="flex h-full w-full flex-col justify-between border-r border-r-zinc-100">
       <div className="flex h-full w-full flex-col gap-8 px-6 py-8">
         <img className="w-24" src={emyhtLogo} alt="emyht" />
         <div className="flex flex-col gap-4">
@@ -37,6 +38,9 @@ export const Sidebar: FC<SidebarProps> = ({ userData }) => {
           />
         </div>
       </div>
+      <Link to="/chat/$chatId" params={{ chatId: '232' }}>
+        CHAT
+      </Link>
       <div className="flex h-20 w-full items-center justify-between bg-blue-600 px-6 text-white">
         <div className="text-sm">
           <p className="font-medium">{userData.username}</p>

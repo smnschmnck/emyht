@@ -1,5 +1,9 @@
+import { useLoader } from '@tanstack/react-router';
 import { FC } from 'react';
+import { chatRoute } from './route';
 
 export const ChatView: FC = () => {
-  return <h1>some chat</h1>;
+  const { chatId } = useLoader({ from: chatRoute.id });
+
+  return <h1>some chat with id: {chatId}</h1>;
 };
