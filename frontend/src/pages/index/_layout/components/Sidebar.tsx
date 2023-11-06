@@ -1,19 +1,23 @@
 import { UserData } from '@/api/userApi';
-import { FC } from 'react';
-import emyhtLogo from '@assets/images/emyht-logo.svg';
-import { PlusIcon } from '@/assets/icons/PlusIcon';
-import { Input } from '@/components/ui/Input';
-import { MagnifyingGlassIcon } from '@/assets/icons/MagnifyingGlassIcon';
 import { LogOutIcon } from '@/assets/icons/LogOutIcon';
-import { IconButton } from '@/components/ui/IconButton';
+import { MagnifyingGlassIcon } from '@/assets/icons/MagnifyingGlassIcon';
+import { PlusIcon } from '@/assets/icons/PlusIcon';
 import { SettingsIcon } from '@/assets/icons/SettingsIcon';
-import { Link } from '@tanstack/react-router';
+import { IconButton } from '@/components/ui/IconButton';
+import { Input } from '@/components/ui/Input';
+import { queryKeys } from '@/configs/queryKeys';
+import emyhtLogo from '@assets/images/emyht-logo.svg';
+import { useQuery } from '@tanstack/react-query';
+import { FC } from 'react';
 
 type SidebarProps = {
   userData: UserData;
 };
 
 export const Sidebar: FC<SidebarProps> = ({ userData }) => {
+  const { data: chats } = useQuery(queryKeys.chats.all);
+  const hasChats = !!chats && chats.length > 0;
+
   return (
     <div className="flex h-full w-full flex-col justify-between border-r border-r-zinc-100">
       <div className="flex h-full w-full flex-col gap-8 px-6 py-8">
@@ -37,10 +41,11 @@ export const Sidebar: FC<SidebarProps> = ({ userData }) => {
             }
           />
         </div>
+        <div className="flex h-full w-full items-center justify-center">
+          {!hasChats && <p>no chats :(</p>}
+          {hasChats && chats.map((c) => <p>{c.chatName}</p>)}
+        </div>
       </div>
-      <Link to="/chat/$chatId" params={{ chatId: '232' }}>
-        CHAT
-      </Link>
       <div className="flex h-20 w-full items-center justify-between bg-blue-600 px-6 text-white">
         <div className="text-sm">
           <p className="font-medium">{userData.username}</p>
