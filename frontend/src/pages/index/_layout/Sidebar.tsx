@@ -39,7 +39,7 @@ export const Sidebar: FC<SidebarProps> = ({ userData }) => {
       </div>
       <div className="flex h-20 w-full items-center justify-between bg-blue-600 px-6 text-white">
         <div className="text-sm">
-          <p className="font-semibold">{userData.username}</p>
+          <p className="font-medium">{userData.username}</p>
           <p>{userData.email}</p>
         </div>
         <div className="flex gap-1">
