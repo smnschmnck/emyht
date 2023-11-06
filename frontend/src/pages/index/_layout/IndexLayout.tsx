@@ -1,4 +1,8 @@
-import { Outlet, useRouteContext } from '@tanstack/react-router';
+import {
+  Outlet,
+  useRouteContext,
+  useRouterState,
+} from '@tanstack/react-router';
 import { FC } from 'react';
 import { indexLayoutRoute } from './route';
 import { useQuery } from '@tanstack/react-query';
@@ -11,7 +15,8 @@ export const IndexLayout: FC = () => {
   const { userData } = useRouteContext({ from: indexLayoutRoute.id });
   const { data: chats } = useQuery(queryKeys.chats.all);
   const isDesktopScreen = useMediaQuery('(min-width: 768px)');
-  const chatOpen = false;
+  const { location } = useRouterState();
+  const chatOpen = location.pathname.startsWith('/chat');
 
   const hasChats = !!chats && chats.length > 0;
   const showChat = chatOpen || isDesktopScreen;
