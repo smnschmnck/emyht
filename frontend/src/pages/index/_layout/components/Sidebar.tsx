@@ -14,7 +14,7 @@ type SidebarProps = {
 
 export const Sidebar: FC<SidebarProps> = ({ userData }) => {
   return (
-    <div className="flex h-full w-[28rem] flex-col justify-between border-r border-r-zinc-100">
+    <div className="flex h-full min-w-[22rem] flex-col justify-between border-r border-r-zinc-100">
       <div className="flex h-full w-full flex-col gap-8 px-6 py-8">
         <img className="w-24" src={emyhtLogo} alt="emyht" />
         <div className="flex flex-col gap-4">
