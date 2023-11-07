@@ -10,15 +10,24 @@ import { FC } from 'react';
 import { NewChatDialog } from '../../components/NewChatDialog';
 import { LogOutButton } from './LogOutButton';
 import { UserData } from '@/api/user';
+import { ContactRequestDialog } from '../../components/ContactRequestDialog';
 
-const NoChatsScreen: FC = () => (
-  <div className="flex w-full flex-col items-center justify-center gap-4">
-    <p className="text-xl font-semibold">No chats 🧐</p>
-    <div className="w-fit">
-      <NewChatDialog />
+const NoChatsScreen: FC = () => {
+  const { data: contacts } = useQuery(queryKeys.chats.all);
+  const hasContacts = !!contacts && contacts.length > 0;
+
+  return (
+    <div className="flex w-full flex-col items-center justify-center gap-4">
+      <p className="text-xl font-semibold">
+        No {hasContacts ? 'chats' : 'contacts'} 🧐
+      </p>
+      <div className="w-fit">
+        {hasContacts && <NewChatDialog />}
+        {!hasContacts && <ContactRequestDialog />}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 type SidebarProps = {
   userData: UserData;
