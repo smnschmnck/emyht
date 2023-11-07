@@ -1,5 +1,6 @@
-import { getChats } from '@/api/chatsApi';
-import { getUserData } from '@/api/userApi';
+import { getChats } from '@/api/chats';
+import { getContacts } from '@/api/contacts';
+import { getUserData } from '@/api/user';
 import { createQueryKeyStore } from '@lukemorales/query-key-factory';
 
 export const queryKeys = createQueryKeyStore({
@@ -13,6 +14,12 @@ export const queryKeys = createQueryKeyStore({
     all: {
       queryKey: ['allChats'],
       queryFn: getChats,
+    },
+  },
+  contacts: {
+    all: {
+      queryKey: ['allContacts'],
+      queryFn: getContacts,
     },
   },
 });
