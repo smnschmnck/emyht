@@ -1,6 +1,6 @@
-import { mainLayoutRoute } from './_mainLayout/route';
 import { authRoutes } from './auth/authRoutes';
 import { indexRoutes } from './index/indexRoutes';
+import { mainLayoutRoute } from './mainLayout/route';
 import { noEmailRoute } from './noEmail/route';
 import { verifyEmailRoute } from './verifyEmail/route';
 

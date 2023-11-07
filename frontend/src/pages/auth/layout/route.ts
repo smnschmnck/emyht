@@ -1,7 +1,7 @@
 import { Route, redirect } from '@tanstack/react-router';
 import { AuthLayout } from './AuthLayout';
-import { mainLayoutRoute } from '@/pages/_mainLayout/route';
 import { getUserData } from '@/api/userApi';
+import { mainLayoutRoute } from '@/pages/mainLayout/route';
 
 export const authLayoutRoute = new Route({
   getParentRoute: () => mainLayoutRoute,

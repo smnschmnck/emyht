@@ -1,7 +1,7 @@
 import { Route } from '@tanstack/react-router';
-import { mainLayoutRoute } from '../_mainLayout/route';
 import { VerifyEmailPage } from './VerifyEmailPage';
 import { z } from 'zod';
+import { mainLayoutRoute } from '../mainLayout/route';
 
 const searchParamSchema = z.object({
   token: z.string().uuid(),
