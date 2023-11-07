@@ -48,7 +48,7 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={twMerge('text-lg font-medium', className)}
+    className={twMerge('text-lg font-semibold', className)}
     {...props}
   />
 ));

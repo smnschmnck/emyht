@@ -9,10 +9,10 @@ export const NoEmailPage: FC = () => {
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-10 text-center text-sm">
       <div className="flex flex-col gap-4">
-        <h1 className="text-4xl font-medium">Verify your E-Mail</h1>
+        <h1 className="text-4xl font-semibold">Verify your E-Mail</h1>
         <p className="max-w-md text-center text-zinc-500">
           We have sent an E-Mail with a verification link to
-          <span className="font-medium text-blue-400">
+          <span className="font-semibold text-blue-400">
             {' '}
             {userData.email}
           </span>{' '}
@@ -28,7 +28,7 @@ export const NoEmailPage: FC = () => {
       <span className="text-3xl">🤔</span>
       <div className="flex flex-col gap-1">
         <p className="text-zinc-500">
-          <span className="font-medium text-blue-400">{userData.email}</span>{' '}
+          <span className="font-semibold text-blue-400">{userData.email}</span>{' '}
           does not look like your E-Mail?
         </p>
         <Link to="/no-email">Change E-Mail Address</Link>

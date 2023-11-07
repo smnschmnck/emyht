@@ -55,7 +55,7 @@ export const SignUpPage: FC = () => {
   return (
     <div className="flex w-full max-w-sm flex-col gap-6">
       <div>
-        <h1 className="text-3xl font-medium">Create account</h1>
+        <h1 className="text-3xl font-semibold">Create account</h1>
         <p className="text-sm text-zinc-500">Please enter your details</p>
       </div>
       <div className="flex flex-col items-center gap-2">

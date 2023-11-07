@@ -61,7 +61,7 @@ export const SignInPage: FC = () => {
   return (
     <div className="flex w-full max-w-sm flex-col gap-6">
       <div>
-        <h1 className="text-3xl font-medium">Welcome back</h1>
+        <h1 className="text-3xl font-semibold">Welcome back</h1>
         <p className="text-sm text-zinc-500">
           Please sign in to start chatting
         </p>

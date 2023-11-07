@@ -24,7 +24,7 @@ export const Sidebar: FC<SidebarProps> = ({ userData }) => {
         <img className="w-24" src={emyhtLogo} alt="emyht" />
         <div className="flex flex-col gap-4">
           <div className="flex w-full justify-between">
-            <h2 className="text-2xl font-medium">Chats</h2>
+            <h2 className="text-2xl font-semibold">Chats</h2>
             <IconButton
               ariaLabel="Add chat"
               classOverrides="text-blue-500 hover:bg-blue-100"
@@ -48,7 +48,7 @@ export const Sidebar: FC<SidebarProps> = ({ userData }) => {
       </div>
       <div className="flex h-20 w-full items-center justify-between bg-blue-600 px-6 text-white">
         <div className="text-sm">
-          <p className="font-medium">{userData.username}</p>
+          <p className="font-semibold">{userData.username}</p>
           <p>{userData.email}</p>
         </div>
         <div className="flex gap-1">

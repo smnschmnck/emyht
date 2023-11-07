@@ -37,7 +37,7 @@ export const VerifyEmailPage: FC = () => {
   if (verifyEmailQuery.isLoading) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4">
-        <h1 className="text-center text-2xl font-medium">
+        <h1 className="text-center text-2xl font-semibold">
           Verifying your E-Mail
         </h1>
         <Spinner />
@@ -48,7 +48,7 @@ export const VerifyEmailPage: FC = () => {
   if (verifyEmailQuery.isError) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4">
-        <h1 className="text-center text-4xl font-medium">
+        <h1 className="text-center text-4xl font-semibold">
           E-Mail verification failed 😞
         </h1>
         <SimpleErrorMessage>
@@ -60,7 +60,7 @@ export const VerifyEmailPage: FC = () => {
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4">
-      <h1 className="text-center text-4xl font-medium">
+      <h1 className="text-center text-4xl font-semibold">
         E-Mail verified successfully 🥳
       </h1>
       <Link to="/">Start using emyht</Link>

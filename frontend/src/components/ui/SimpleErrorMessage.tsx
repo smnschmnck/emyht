@@ -8,7 +8,7 @@ export const SimpleErrorMessage: FC<{ children: string }> = ({ children }) => {
   const formattedError = `${firstLetter}${lastSubString}`;
 
   return (
-    <div className="flex max-w-full gap-2 rounded-md border border-red-500 bg-red-100 p-4 font-medium text-red-500">
+    <div className="flex max-w-full gap-2 rounded-md border border-red-500 bg-red-100 p-4 font-semibold text-red-500">
       <div>
         <ErrorIcon />
       </div>
