@@ -31,7 +31,7 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={twMerge(
-        'fixed left-[50%] top-[50%] z-50 h-full w-full translate-x-[-50%] translate-y-[-50%] gap-4 border bg-white p-6 shadow-lg sm:h-fit sm:max-w-md sm:rounded-lg',
+        'fixed left-[50%] top-[50%] z-50 h-full w-full translate-x-[-50%] translate-y-[-50%] gap-4 border bg-white px-6 py-4 shadow-lg sm:h-fit sm:max-w-sm sm:rounded-lg',
         className
       )}
       {...props}

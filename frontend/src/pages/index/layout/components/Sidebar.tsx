@@ -9,6 +9,16 @@ import { queryKeys } from '@/configs/queryKeys';
 import emyhtLogo from '@assets/images/emyht-logo.svg';
 import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
+import { NewChatDialog } from '../../components/NewChatDialog';
+
+const NoChatsScreen: FC = () => (
+  <div className="flex w-full flex-col items-center justify-center gap-4">
+    <p className="text-xl font-semibold">No chats 🧐</p>
+    <div className="w-fit">
+      <NewChatDialog />
+    </div>
+  </div>
+);
 
 type SidebarProps = {
   userData: UserData;
@@ -39,7 +49,7 @@ export const Sidebar: FC<SidebarProps> = ({ userData }) => {
           />
         </div>
         <div className="flex h-full w-full items-center justify-center">
-          {!hasChats && <p>no chats :(</p>}
+          {!hasChats && <NoChatsScreen />}
           {hasChats && chats.map((c) => <p>{c.chatName}</p>)}
         </div>
       </div>
