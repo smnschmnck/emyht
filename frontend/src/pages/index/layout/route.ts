@@ -1,7 +1,7 @@
 import { rootRoute } from '@/router/config';
 import { Route, redirect } from '@tanstack/react-router';
-import { getUserData } from '@/api/userApi';
 import { IndexLayout } from './IndexLayout';
+import { getUserData } from '@/api/user';
 
 export const indexLayoutRoute = new Route({
   getParentRoute: () => rootRoute,

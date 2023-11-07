@@ -1,7 +1,7 @@
 import { Route, redirect } from '@tanstack/react-router';
 import { NoEmailPage } from './NoEmailPage';
-import { getUserData } from '@/api/userApi';
 import { mainLayoutRoute } from '../mainLayout/route';
+import { getUserData } from '@/api/user';
 
 export const noEmailRoute = new Route({
   getParentRoute: () => mainLayoutRoute,

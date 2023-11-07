@@ -1,4 +1,3 @@
-import { UserData } from '@/api/userApi';
 import { MagnifyingGlassIcon } from '@/assets/icons/MagnifyingGlassIcon';
 import { PlusIcon } from '@/assets/icons/PlusIcon';
 import { SettingsIcon } from '@/assets/icons/SettingsIcon';
@@ -10,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
 import { NewChatDialog } from '../../components/NewChatDialog';
 import { LogOutButton } from './LogOutButton';
+import { UserData } from '@/api/user';
 
 const NoChatsScreen: FC = () => (
   <div className="flex w-full flex-col items-center justify-center gap-4">
