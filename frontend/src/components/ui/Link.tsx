@@ -7,7 +7,7 @@ interface ButtonLinkProps extends MakeLinkOptions {
 
 export const Link: FC<ButtonLinkProps> = ({ children, ...linkOptions }) => (
   <RouterLink
-    className="text-sm text-blue-600 hover:underline"
+    className="text-sm font-medium text-blue-600 hover:underline"
     {...linkOptions}
   >
     {children}

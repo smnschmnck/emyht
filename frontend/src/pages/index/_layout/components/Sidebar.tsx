@@ -25,10 +25,7 @@ export const Sidebar: FC<SidebarProps> = ({ userData }) => {
         <div className="flex flex-col gap-4">
           <div className="flex w-full justify-between">
             <h2 className="text-2xl font-semibold">Chats</h2>
-            <IconButton
-              ariaLabel="Add chat"
-              classOverrides="text-blue-500 hover:bg-blue-100"
-            >
+            <IconButton ariaLabel="Add chat">
               <PlusIcon />
             </IconButton>
           </div>
@@ -46,16 +43,16 @@ export const Sidebar: FC<SidebarProps> = ({ userData }) => {
           {hasChats && chats.map((c) => <p>{c.chatName}</p>)}
         </div>
       </div>
-      <div className="flex h-20 w-full items-center justify-between bg-blue-600 px-6 text-white">
-        <div className="text-sm">
+      <div className="flex h-24 w-full items-center justify-between bg-blue-600 px-6 text-white">
+        <div className="flex flex-col gap-1 text-sm">
           <p className="font-semibold">{userData.username}</p>
           <p>{userData.email}</p>
         </div>
         <div className="flex gap-1">
-          <IconButton ariaLabel="Settings">
+          <IconButton ariaLabel="Settings" className="text-white">
             <SettingsIcon />
           </IconButton>
-          <IconButton ariaLabel="Sign out">
+          <IconButton ariaLabel="Sign out" className="text-white">
             <LogOutIcon />
           </IconButton>
         </div>

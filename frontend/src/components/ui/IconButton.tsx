@@ -7,14 +7,14 @@ type IconButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 export const IconButton: FC<IconButtonProps> = ({
-  classOverrides,
+  className,
   ariaLabel,
   ...props
 }) => (
   <button
     className={twMerge(
-      'flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-white/25',
-      classOverrides
+      'flex h-9 w-9 items-center justify-center rounded-md text-blue-600 transition hover:bg-blue-300/25',
+      className
     )}
     aria-label={ariaLabel}
     {...props}
