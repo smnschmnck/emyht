@@ -23,6 +23,7 @@ import (
 )
 
 const SESSION_DURATION = 24 * time.Hour
+const SESSION_COOKIE_NAME = "SESSION"
 
 var validate = validator.New()
 
@@ -164,7 +165,7 @@ func Register(c echo.Context) error {
 	}
 
 	if reqUser.AuthMethod == "cookie" {
-		cookie := createSessionCookie(session.SessionID)
+		cookie := createSessionCookie(session.SessionID, time.Now().Add(SESSION_DURATION))
 		c.SetCookie(cookie)
 		return c.String(http.StatusOK, "SUCCESS")
 	}
@@ -234,12 +235,12 @@ func VerifyEmail(c echo.Context) error {
 	return c.String(http.StatusOK, "EMAIL VERIFIED SUCCESSFULLY")
 }
 
-func createSessionCookie(value string) *http.Cookie {
+func createSessionCookie(value string, expirationDate time.Time) *http.Cookie {
 	cookie := new(http.Cookie)
 	cookie.Path = "/"
-	cookie.Name = "SESSION"
+	cookie.Name = SESSION_COOKIE_NAME
 	cookie.Value = value
-	cookie.Expires = time.Now().Add(SESSION_DURATION)
+	cookie.Expires = expirationDate
 	cookie.SameSite = http.SameSiteLaxMode
 	cookie.HttpOnly = true
 	cookie.Secure = true
@@ -282,7 +283,7 @@ func Authenticate(c echo.Context) error {
 	}
 
 	if credentials.AuthMethod == "cookie" {
-		cookie := createSessionCookie(session.SessionID)
+		cookie := createSessionCookie(session.SessionID, time.Now().Add(SESSION_DURATION))
 		c.SetCookie(cookie)
 		return c.String(http.StatusOK, "SUCCESS")
 	}
@@ -459,5 +460,13 @@ func Logout(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
+
+	_, err = c.Cookie(SESSION_COOKIE_NAME)
+	if err != nil {
+		return c.String(http.StatusOK, "SUCCESSFULLY LOGGED OUT")
+	}
+	cookie := createSessionCookie("", time.Unix(0, 0))
+	c.SetCookie(cookie)
+
 	return c.String(http.StatusOK, "SUCCESSFULLY LOGGED OUT")
 }

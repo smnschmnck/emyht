@@ -1,5 +1,4 @@
 import { UserData } from '@/api/userApi';
-import { LogOutIcon } from '@/assets/icons/LogOutIcon';
 import { MagnifyingGlassIcon } from '@/assets/icons/MagnifyingGlassIcon';
 import { PlusIcon } from '@/assets/icons/PlusIcon';
 import { SettingsIcon } from '@/assets/icons/SettingsIcon';
@@ -10,6 +9,7 @@ import emyhtLogo from '@assets/images/emyht-logo.svg';
 import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
 import { NewChatDialog } from '../../components/NewChatDialog';
+import { LogOutButton } from './LogOutButton';
 
 const NoChatsScreen: FC = () => (
   <div className="flex w-full flex-col items-center justify-center gap-4">
@@ -62,9 +62,7 @@ export const Sidebar: FC<SidebarProps> = ({ userData }) => {
           <IconButton ariaLabel="Settings" className="text-white">
             <SettingsIcon />
           </IconButton>
-          <IconButton ariaLabel="Sign out" className="text-white">
-            <LogOutIcon />
-          </IconButton>
+          <LogOutButton />
         </div>
       </div>
     </div>
