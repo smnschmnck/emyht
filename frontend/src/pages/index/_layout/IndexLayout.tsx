@@ -6,6 +6,7 @@ import {
 import { FC } from 'react';
 import { indexLayoutRoute } from './route';
 import { Sidebar } from './components/Sidebar';
+import { twMerge } from 'tailwind-merge';
 
 export const IndexLayout: FC = () => {
   const { userData } = useRouteContext({ from: indexLayoutRoute.id });
@@ -16,18 +17,18 @@ export const IndexLayout: FC = () => {
   return (
     <div className="flex h-screen">
       <div
-        className={
-          chatOpen
-            ? 'hidden h-full w-full lg:flex lg:w-[22rem]'
-            : 'flex h-full w-full lg:flex lg:w-[22rem]'
-        }
+        className={twMerge(
+          'h-full w-full lg:flex lg:min-w-[22rem] lg:max-w-[22rem]',
+          chatOpen ? 'hidden' : 'flex'
+        )}
       >
         <Sidebar userData={userData} />
       </div>
       <div
-        className={
-          chatOpen ? 'block h-full w-full' : 'hidden h-full w-full lg:block'
-        }
+        className={twMerge(
+          'h-full w-full',
+          chatOpen ? 'block' : 'hidden lg:block'
+        )}
       >
         <Outlet />
       </div>
