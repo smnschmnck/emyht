@@ -24,7 +24,11 @@ export const IndexLayout: FC = () => {
       >
         <Sidebar userData={userData} />
       </div>
-      <div className={chatOpen ? 'block' : 'hidden lg:block'}>
+      <div
+        className={
+          chatOpen ? 'block h-full w-full' : 'hidden h-full w-full lg:block'
+        }
+      >
         <Outlet />
       </div>
     </div>
