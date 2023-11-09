@@ -7,27 +7,9 @@ import { queryKeys } from '@/configs/queryKeys';
 import emyhtLogo from '@assets/images/emyht-logo.svg';
 import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
-import { NewChatDialog } from '../../components/NewChatDialog';
 import { LogOutButton } from './LogOutButton';
 import { UserData } from '@/api/user';
-import { ContactRequestDialog } from '../../components/ContactRequestDialog';
-
-const NoChatsScreen: FC = () => {
-  const { data: contacts } = useQuery(queryKeys.chats.all);
-  const hasContacts = !!contacts && contacts.length > 0;
-
-  return (
-    <div className="flex w-full flex-col items-center justify-center gap-4">
-      <p className="text-xl font-semibold">
-        No {hasContacts ? 'chats' : 'contacts'} 🧐
-      </p>
-      <div className="w-fit">
-        {hasContacts && <NewChatDialog />}
-        {!hasContacts && <ContactRequestDialog />}
-      </div>
-    </div>
-  );
-};
+import { Link } from '@/components/ui/Link';
 
 type SidebarProps = {
   userData: UserData;
@@ -58,7 +40,12 @@ export const Sidebar: FC<SidebarProps> = ({ userData }) => {
           />
         </div>
         <div className="flex h-full w-full items-center justify-center">
-          {!hasChats && <NoChatsScreen />}
+          {!hasChats && (
+            <div className="flex flex-col items-center justify-center">
+              <p className="text-lg font-medium">No chats</p>
+              <Link to="/initiate">Start new chat</Link>
+            </div>
+          )}
           {hasChats && chats.map((c) => <p>{c.chatName}</p>)}
         </div>
       </div>
