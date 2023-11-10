@@ -2,13 +2,14 @@ import { FC } from 'react';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
 import { defaultProfilePictures } from '@/assets/images/defaultProfilePictures';
 import { defaultGroupPictures } from '@/assets/images/defaultGroupPictures';
+import { twMerge } from 'tailwind-merge';
 
 const Fallback: FC = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="currentColor"
-    className="h-6 w-6 text-zinc-500"
+    className="h-full w-full p-2 text-zinc-500"
   >
     <path
       fillRule="evenodd"
@@ -43,11 +44,17 @@ const formatPicURL = (profilePictureUrl?: string) => {
 type AvatarProps = {
   imgUrl?: string;
   alt?: string;
+  className?: string;
 };
 
-export const Avatar: FC<AvatarProps> = ({ imgUrl, alt }) => {
+export const Avatar: FC<AvatarProps> = ({ imgUrl, alt, className }) => {
   return (
-    <AvatarPrimitive.Root className="inline-flex h-10 w-10 select-none items-center justify-center overflow-hidden rounded-full bg-zinc-100 align-middle">
+    <AvatarPrimitive.Root
+      className={twMerge(
+        'inline-flex h-10 min-h-[2.5rem] w-10 min-w-[2.5rem] select-none items-center justify-center overflow-hidden rounded-full bg-zinc-100 align-middle',
+        className
+      )}
+    >
       <AvatarPrimitive.Image
         src={formatPicURL(imgUrl)}
         alt={alt}

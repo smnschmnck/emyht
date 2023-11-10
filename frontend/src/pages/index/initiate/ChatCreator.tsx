@@ -106,8 +106,8 @@ export const ChatCreator: FC = () => {
             ))}
           </ul>
         </div>
-        <div className="flex h-full w-full flex-col gap-8">
-          <div className="flex flex-col gap-2">
+        <div className="flex h-full w-full flex-col">
+          <div className="flex h-fit flex-col gap-2 pb-6">
             <p className="text-sm font-semibold">Chat mode</p>
             <RadioGroup<ChatModes>
               disabled={!hasSelectedUsers}
@@ -129,8 +129,11 @@ export const ChatCreator: FC = () => {
             </RadioGroup>
           </div>
           {chatMode === 'group' && (
-            <div className="flex w-full flex-col gap-2">
-              <Button>Change group picture</Button>
+            <div className="flex h-full w-full flex-col justify-between">
+              <div className="flex w-full items-center justify-center gap-2">
+                <Avatar className="h-14 min-h-[3.5rem] w-14 min-w-[3.5rem]" />
+                <Button className="w-full">Change group picture</Button>
+              </div>
               <Input placeholder="Group name" />
               <Button disabled={!hasSelectedUsers}>Create group</Button>
             </div>
