@@ -45,9 +45,15 @@ type AvatarProps = {
   imgUrl?: string;
   alt?: string;
   className?: string;
+  fallbackDelay?: number;
 };
 
-export const Avatar: FC<AvatarProps> = ({ imgUrl, alt, className }) => {
+export const Avatar: FC<AvatarProps> = ({
+  imgUrl,
+  alt,
+  className,
+  fallbackDelay = 600,
+}) => {
   return (
     <AvatarPrimitive.Root
       className={twMerge(
@@ -60,7 +66,7 @@ export const Avatar: FC<AvatarProps> = ({ imgUrl, alt, className }) => {
         alt={alt}
         className="h-full w-full rounded-full object-cover"
       />
-      <AvatarPrimitive.Fallback delayMs={600}>
+      <AvatarPrimitive.Fallback delayMs={fallbackDelay}>
         <Fallback />
       </AvatarPrimitive.Fallback>
     </AvatarPrimitive.Root>
