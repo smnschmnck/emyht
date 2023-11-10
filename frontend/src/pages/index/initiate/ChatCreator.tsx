@@ -1,55 +1,9 @@
 import { FC, useState } from 'react';
-
-import { Avatar } from '@/components/ui/Avatar';
-import { twMerge } from 'tailwind-merge';
-import { CheckMarkIcon } from '@/assets/icons/CheckmarkIcon';
 import { RadioGroup, RadioGroupItem } from '@/assets/icons/RadioGroup';
+import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-
-const fakeUsers = [
-  {
-    uuid: 'jsnkjdnf',
-    profilePictureUrl: 'default_1',
-    username: 'John Doe',
-  },
-  {
-    uuid: 'ubwetiwr',
-    profilePictureUrl: 'default_4',
-    username: 'John Doe',
-  },
-  {
-    uuid: 'jdskfbskjd',
-    profilePictureUrl: 'default_9',
-    username: 'John Doe',
-  },
-  {
-    uuid: 'o9b93r8b',
-    profilePictureUrl: 'default_1',
-    username: 'John Doe',
-  },
-  {
-    uuid: 'udbsifbd9',
-    profilePictureUrl: 'default_4',
-    username: 'John Doe',
-  },
-  {
-    uuid: 'ofsdnoin',
-    profilePictureUrl: 'default_9',
-    username: 'John Doe',
-  },
-];
-
-const SelectedIndicator: FC<{ selected: boolean }> = ({ selected }) => (
-  <div
-    className={twMerge(
-      'flex h-4 w-4 items-center justify-center rounded-full p-[0.2rem] text-white',
-      selected ? 'bg-blue-500' : 'border border-zinc-300'
-    )}
-  >
-    {selected && <CheckMarkIcon />}
-  </div>
-);
+import { UserList } from './components/UserList';
 
 type ChatModes = 'personal' | 'group';
 
@@ -59,21 +13,9 @@ export const ChatCreator: FC = () => {
 
   const hasSelectedUsers = selectedUsers.length >= 1;
 
-  const changeUser = (uuid: string) => {
-    if (selectedUsers.includes(uuid)) {
-      const filteredUsers = selectedUsers.filter((u) => u !== uuid);
-      setSelectedUsers(filteredUsers);
-      if (filteredUsers.length <= 1) {
-        setChatMode('personal');
-      }
-      return;
-    }
-
-    const tmpSelectedUsers = [...selectedUsers, uuid];
-    if (tmpSelectedUsers.length > 1) {
-      setChatMode('group');
-    }
-    setSelectedUsers(tmpSelectedUsers);
+  const onUserChange = (selectedUsers: string[]) => {
+    setChatMode(selectedUsers.length > 1 ? 'group' : 'personal');
+    setSelectedUsers(selectedUsers);
   };
 
   return (
@@ -86,25 +28,10 @@ export const ChatCreator: FC = () => {
       </div>
       <div className="flex gap-10">
         <div className="h-60 w-full overflow-y-scroll">
-          <ul className="pr-4">
-            {fakeUsers.map((user) => (
-              <li key={user.uuid}>
-                <button
-                  onClick={() => changeUser(user.uuid)}
-                  aria-label={`Add ${user.username} to chat`}
-                  className="flex w-full items-center justify-between border-b border-b-zinc-100 p-2 transition hover:bg-zinc-100"
-                >
-                  <div className="flex items-center gap-4">
-                    <Avatar imgUrl={user.profilePictureUrl} />
-                    <p className="text-sm font-semibold">{user.username}</p>
-                  </div>
-                  <SelectedIndicator
-                    selected={selectedUsers.includes(user.uuid)}
-                  />
-                </button>
-              </li>
-            ))}
-          </ul>
+          <UserList
+            selectedUsers={selectedUsers}
+            setSelectedUsers={onUserChange}
+          />
         </div>
         <div className="flex h-full w-full flex-col">
           <div className="flex h-fit flex-col gap-2 pb-6">
