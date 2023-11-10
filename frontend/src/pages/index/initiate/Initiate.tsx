@@ -11,8 +11,8 @@ export const InitiationView: FC = () => {
           Start a new chat or send a contact request
         </p>
       </div>
-      <ChatCreator />
       <ContactRequests />
+      <ChatCreator />
     </div>
   );
 };

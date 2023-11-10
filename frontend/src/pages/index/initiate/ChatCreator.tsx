@@ -27,7 +27,7 @@ export const ChatCreator: FC = () => {
         </p>
       </div>
       <div className="flex gap-10">
-        <div className="h-60 w-full overflow-y-scroll">
+        <div className="h-96 max-h-60 w-full">
           <UserList
             selectedUsers={selectedUsers}
             setSelectedUsers={onUserChange}

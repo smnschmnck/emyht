@@ -1,7 +1,8 @@
 import { Contact } from '@/api/contacts';
 import { CheckMarkIcon } from '@/assets/icons/CheckmarkIcon';
 import { Avatar } from '@/components/ui/Avatar';
-import { FC } from 'react';
+import { Input } from '@/components/ui/Input';
+import { FC, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 const fakeUsers: Contact[] = [
@@ -28,7 +29,7 @@ const fakeUsers: Contact[] = [
   {
     id: 'udbsifbd9',
     profilePictureUrl: 'default_4',
-    name: 'John Doe',
+    name: 'Jane Doe',
   },
   {
     id: 'ofsdnoin',
@@ -57,6 +58,7 @@ export const UserList: FC<UserListProps> = ({
   selectedUsers,
   setSelectedUsers,
 }) => {
+  const [searchQuery, setSearchQuery] = useState('');
   const changeUser = (id: string) => {
     if (selectedUsers.includes(id)) {
       const filteredUsers = selectedUsers.filter((u) => u !== id);
@@ -67,23 +69,45 @@ export const UserList: FC<UserListProps> = ({
     setSelectedUsers([...selectedUsers, id]);
   };
 
+  const onSearchQueryChange = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const filteredUsers = fakeUsers.filter((user) => {
+    const curUsernameLowerCase = user.name.toLowerCase();
+    const queryLowerCase = searchQuery.toLowerCase();
+
+    return curUsernameLowerCase.includes(queryLowerCase);
+  });
+
   return (
-    <ul className="pr-4">
-      {fakeUsers.map((user) => (
-        <li key={user.id}>
-          <button
-            onClick={() => changeUser(user.id)}
-            aria-label={`Add ${user.name} to chat`}
-            className="flex w-full items-center justify-between border-b border-b-zinc-100 p-2 transition hover:bg-zinc-100"
-          >
-            <div className="flex items-center gap-4">
-              <Avatar imgUrl={user.profilePictureUrl} />
-              <p className="text-sm font-semibold">{user.name}</p>
-            </div>
-            <SelectedIndicator selected={selectedUsers.includes(user.id)} />
-          </button>
-        </li>
-      ))}
-    </ul>
+    <div className="flex h-full flex-col gap-2">
+      <div>
+        <Input
+          placeholder="Search user"
+          value={searchQuery}
+          onChange={(e) => onSearchQueryChange(e.target.value)}
+        />
+      </div>
+      <div className="h-full overflow-scroll">
+        <ul className="pr-4">
+          {filteredUsers.map((user) => (
+            <li key={user.id}>
+              <button
+                onClick={() => changeUser(user.id)}
+                aria-label={`Add ${user.name} to chat`}
+                className="flex w-full items-center justify-between border-b border-b-zinc-100 p-2 transition hover:bg-zinc-100"
+              >
+                <div className="flex items-center gap-4">
+                  <Avatar imgUrl={user.profilePictureUrl} />
+                  <p className="text-sm font-semibold">{user.name}</p>
+                </div>
+                <SelectedIndicator selected={selectedUsers.includes(user.id)} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 };
