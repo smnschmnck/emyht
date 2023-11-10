@@ -21,6 +21,7 @@ import (
 
 var PORT string
 
+// TODO Check if email is active for most requests!
 func handleRequest() {
 	e := echo.New()
 	//TODO: Use Redis for distributed rate limiting
