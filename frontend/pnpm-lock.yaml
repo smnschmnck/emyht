@@ -25,6 +25,7 @@ specifiers:
   prettier-plugin-tailwindcss: ^0.5.6
   react: ^18.2.0
   react-dom: ^18.2.0
+  sonner: ^1.2.0
   tailwind-merge: ^2.0.0
   tailwindcss: ^3.3.5
   typescript: ^5.0.2
@@ -43,6 +44,7 @@ dependencies:
   class-variance-authority: 0.7.0
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
+  sonner: 1.2.0_biqbaboplfbrettd7655fr4n2y
   tailwind-merge: 2.0.0
   zod: 3.22.4
 
@@ -2392,6 +2394,16 @@ packages:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
     engines: {node: '>=8'}
     dev: true
+
+  /sonner/1.2.0_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-4bIPKrhF+Z4yEC4EZvNBswcVzMrUhztOQXqyIoiZqiqN1TT39FeK+TgRsQidvvztnYgOn4+S3LdAsri61c7ATA==}
+    peerDependencies:
+      react: ^18.0.0
+      react-dom: ^18.0.0
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+    dev: false
 
   /source-map-js/1.0.2:
     resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}
