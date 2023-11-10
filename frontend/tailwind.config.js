@@ -6,6 +6,9 @@ export default {
       fontFamily: {
         sans: ['Plus Jakarta Sans Variable'],
       },
+      boxShadow: {
+        line: '0 1px 0 0 rgb(244, 244, 245, 1)',
+      },
     },
   },
   plugins: [],
