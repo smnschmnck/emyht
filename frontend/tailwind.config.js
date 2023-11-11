@@ -9,6 +9,9 @@ export default {
       boxShadow: {
         line: '0 1px 0 0 rgb(244, 244, 245, 1)',
       },
+      animation: {
+        'spin-fast': 'spin 0.6s linear infinite',
+      },
     },
   },
   plugins: [],
