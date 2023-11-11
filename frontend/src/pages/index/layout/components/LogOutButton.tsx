@@ -1,11 +1,12 @@
 import { LogOutIcon } from '@/assets/icons/LogOutIcon';
 import { IconButton } from '@/components/ui/IconButton';
 import { env } from '@/env';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useRouter } from '@tanstack/react-router';
 import { FC } from 'react';
 
 export const LogOutButton: FC = () => {
   const navigate = useNavigate();
+  const router = useRouter();
 
   const logOut = async () => {
     const res = await fetch(`${env.VITE_BACKEND_HOST}/logout`, {
@@ -13,6 +14,7 @@ export const LogOutButton: FC = () => {
     });
 
     if (res.ok) {
+      await router.invalidate();
       navigate({ to: '/' });
     }
   };
