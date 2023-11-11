@@ -1,7 +1,14 @@
 import { FC } from 'react';
 import emyhtLogo from '@assets/images/emyht-logo.svg';
 import ballonIllustration from './assets/balloon_illustration.svg';
-import { Link } from '@tanstack/react-router';
+import { Link, MakeLinkOptions } from '@tanstack/react-router';
+
+const CtaLink: FC<MakeLinkOptions> = (props) => (
+  <Link
+    className="flex h-16 w-full flex-col items-center justify-center gap-8 rounded-2xl border border-zinc-100 bg-white px-12 text-sm font-semibold shadow-sm transition hover:bg-zinc-100"
+    {...props}
+  />
+);
 
 export const IndexPage: FC = () => {
   return (
@@ -14,19 +21,9 @@ export const IndexPage: FC = () => {
         </div>
       </div>
       <img className="max-w-xs" src={ballonIllustration} alt="balloons" />
-      <div className="flex w-full gap-8 font-semibold">
-        <Link
-          to="/initiate"
-          className="flex h-16 w-full flex-col items-center justify-center gap-8 rounded-2xl border border-zinc-100 bg-white px-12 shadow-sm transition hover:bg-zinc-100"
-        >
-          Check incoming contact requests
-        </Link>
-        <Link
-          to="/initiate"
-          className="flex h-16 w-full flex-col items-center justify-center gap-8 rounded-2xl border border-zinc-100 bg-white px-12 shadow-sm transition hover:bg-zinc-100"
-        >
-          Start a new chat
-        </Link>
+      <div className="flex w-full gap-8">
+        <CtaLink to="/">Check incoming contact requests</CtaLink>
+        <CtaLink to="/initiate">Start new chat</CtaLink>
       </div>
     </div>
   );
