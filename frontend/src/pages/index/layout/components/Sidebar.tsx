@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
 import { LogOutButton } from './LogOutButton';
 import { UserData } from '@/api/user';
+import { Link as RouterLink } from '@tanstack/react-router';
 import { Link } from '@/components/ui/Link';
 
 type SidebarProps = {
@@ -22,13 +23,19 @@ export const Sidebar: FC<SidebarProps> = ({ userData }) => {
   return (
     <div className="flex h-full w-full flex-col justify-between border-r border-r-zinc-100">
       <div className="flex h-full w-full flex-col gap-8 px-6 py-8">
-        <img className="w-24" src={emyhtLogo} alt="emyht" />
+        <RouterLink to="/">
+          <img className="w-24" src={emyhtLogo} alt="emyht" />
+        </RouterLink>
         <div className="flex flex-col gap-4">
           <div className="flex w-full justify-between">
             <h2 className="text-2xl font-semibold">Chats</h2>
-            <IconButton ariaLabel="Add chat">
+            <RouterLink
+              to="/initiate"
+              aria-label="Initiate new conversation"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md text-blue-600 hover:bg-blue-100"
+            >
               <PlusIcon />
-            </IconButton>
+            </RouterLink>
           </div>
           <Input
             placeholder="Search chats"

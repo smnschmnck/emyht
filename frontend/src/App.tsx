@@ -12,7 +12,7 @@ const queryClient = new QueryClient({
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <Toaster richColors />
+    <Toaster richColors position="top-right" />
     <RouterProvider router={router} />
   </QueryClientProvider>
 );

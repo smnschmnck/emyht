@@ -29,9 +29,10 @@ export const ContactRequests: FC = () => {
       }
     },
     onSuccess: () => {
-      toast.success('Contact request sent successfully', {
-        position: 'top-right',
-      });
+      toast.success('Contact request sent successfully');
+    },
+    onError: (e) => {
+      toast.error(e.message);
     },
   });
 
