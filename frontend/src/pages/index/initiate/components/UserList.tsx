@@ -61,7 +61,7 @@ export const UserList: FC<UserListProps> = ({
       </div>
       <div className="h-full overflow-scroll">
         <ul className="pr-4">
-          {filteredUsers &&
+          {!!filteredUsers &&
             filteredUsers.map((user) => (
               <li key={user.id}>
                 <button
@@ -83,6 +83,11 @@ export const UserList: FC<UserListProps> = ({
         {isLoading && (
           <div className="flex h-full w-full items-center justify-center py-8">
             <Spinner />
+          </div>
+        )}
+        {!!filteredUsers && filteredUsers.length <= 0 && (
+          <div className="flex h-full w-full items-center justify-center py-8">
+            <span className="font-semibold text-zinc-500">No contacts</span>
           </div>
         )}
       </div>
