@@ -63,7 +63,7 @@ export const Sidebar = () => {
               <Link to="/initiate">Start new chat</Link>
             </div>
           )}
-          {hasChats && chats.map((c) => <p>{c.chatName}</p>)}
+          {hasChats && chats.map((c) => <p key={c.chatID}>{c.chatName}</p>)}
         </div>
       </div>
       <div className="flex h-24 w-full items-center justify-between bg-blue-600 px-6 text-white">
