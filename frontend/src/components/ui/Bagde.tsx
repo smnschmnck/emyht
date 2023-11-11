@@ -2,7 +2,7 @@ import { VariantProps, cva } from 'class-variance-authority';
 import { FC, ReactNode } from 'react';
 
 const badgeVariants = cva(
-  'absolute right-[-0.25rem] top-[-0.25rem] flex items-center justify-center rounded-full bg-red-500 font-semibold text-white',
+  'pointer-events-none absolute right-[-0.25rem] top-[-0.25rem] flex items-center justify-center rounded-full bg-red-500 font-semibold text-white',
   {
     variants: {
       size: {
