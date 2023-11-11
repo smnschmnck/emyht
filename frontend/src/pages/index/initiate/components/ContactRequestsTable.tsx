@@ -1,31 +1,13 @@
 import { CloseIcon } from '@/assets/icons/CloseIcon';
 import { IconButton } from '@/components/ui/IconButton';
+import { Spinner } from '@/components/ui/Spinner';
+import { queryKeys } from '@/configs/queryKeys';
+import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
 
-const fakeRequests: { email: string; date: string }[] = [
-  {
-    email: 'email@example.com',
-    date: '03.11.2022',
-  },
-  {
-    email: 'email@example.com',
-    date: '03.11.2022',
-  },
-  {
-    email: 'email@example.com',
-    date: '03.11.2022',
-  },
-  {
-    email: 'email@example.com',
-    date: '03.11.2022',
-  },
-  {
-    email: 'email@example.com',
-    date: '03.11.2022',
-  },
-];
-
 export const ContactRequestsTable: FC = () => {
+  const { data, isLoading } = useQuery(queryKeys.contacts.sentRequests);
+
   return (
     <div className="max-h-72 w-full overflow-scroll pr-4">
       <table className="h-fit w-full text-left text-sm">
@@ -34,19 +16,32 @@ export const ContactRequestsTable: FC = () => {
           <th className="pb-3 font-semibold">Date</th>
           <th className="pb-3 text-right font-semibold">Cancel</th>
         </tr>
-        {fakeRequests.map((r) => (
-          <tr className="border-b border-b-zinc-100">
-            <td className="max-w-xs truncate py-3 font-semibold">{r.email}</td>
-            <td className="py-3 text-zinc-500">{r.date}</td>
-            <td className="flex justify-end py-3 text-red-500">
-              <IconButton ariaLabel={'Cancel request'} className="text-red-500">
-                <CloseIcon />
-              </IconButton>
-            </td>
-          </tr>
-        ))}
+        {data &&
+          data.map((r) => (
+            <tr className="border-b border-b-zinc-100">
+              <td className="max-w-xs truncate py-3 font-semibold">
+                {r.email}
+              </td>
+              <td className="py-3 text-zinc-500">{r.date}</td>
+              <td className="flex justify-end py-3 text-red-500">
+                <IconButton
+                  ariaLabel={'Cancel request'}
+                  className="text-red-500"
+                >
+                  <CloseIcon />
+                </IconButton>
+              </td>
+            </tr>
+          ))}
       </table>
-      {fakeRequests.length <= 0 && (
+      {isLoading && (
+        <div className="flex w-full justify-center pt-12">
+          <span className="text-sm font-semibold text-zinc-500">
+            <Spinner />
+          </span>
+        </div>
+      )}
+      {data && data.length <= 0 && (
         <div className="flex w-full justify-center pt-12">
           <span className="text-sm font-semibold text-zinc-500">
             No requests

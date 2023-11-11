@@ -356,3 +356,38 @@ func BlockUser(c echo.Context) error {
 
 	return c.String(http.StatusOK, "SUCCESS")
 }
+
+func GetSentContactRequests(c echo.Context) error {
+	token, err := authService.GetSessionToken(c)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NO AUTH")
+	}
+	uuid, err := userService.GetUUIDBySessionID(token)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NO AUTH")
+	}
+
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		return errors.New("INTERNAL ERROR")
+	}
+	defer conn.Close(ctx)
+
+	type contactRequest struct {
+		Email string `json:"email"`
+		Date  string `json:"date"`
+	}
+
+	query := "SELECT u.email as email, TO_CHAR(created_at, 'DD.MM.YYYY') as date FROM friends " +
+		"JOIN users u on u.uuid = friends.reciever " +
+		"WHERE sender = $1"
+	var contactRequests []contactRequest
+	err = pgxscan.Select(ctx, conn, &contactRequests, query, uuid)
+	if err != nil {
+		fmt.Println(err.Error())
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
+	return c.JSON(http.StatusOK, contactRequests)
+}

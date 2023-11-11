@@ -17,3 +17,20 @@ export const getContacts = async () => {
 
   return (await res.json()) as Contact[];
 };
+
+export type SentContactRequest = {
+  email: string;
+  date: string;
+};
+
+export const getSentContactRequests = async () => {
+  const res = await fetch(`${env.VITE_BACKEND_HOST}/sentContactRequests`, {
+    credentials: 'include',
+  });
+
+  if (!res.ok) {
+    throw new Error(await res.text());
+  }
+
+  return (await res.json()) as SentContactRequest[];
+};
