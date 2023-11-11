@@ -2,6 +2,7 @@ import { FC } from 'react';
 import emyhtLogo from '@assets/images/emyht-logo.svg';
 import ballonIllustration from './assets/balloon_illustration.svg';
 import { Link, MakeLinkOptions } from '@tanstack/react-router';
+import { Badge } from '@/components/ui/Bagde';
 
 const CtaLink: FC<MakeLinkOptions> = (props) => (
   <Link
@@ -26,9 +27,12 @@ export const IndexPage: FC = () => {
         alt="balloons"
       />
       <div className="flex w-full flex-col gap-4 xl:flex-row 2xl:gap-8">
-        <CtaLink to="/incoming-requests">
-          Check incoming contact requests
-        </CtaLink>
+        <div className="relative w-full">
+          <Badge size="md">3</Badge>
+          <CtaLink to="/incoming-requests">
+            Check incoming contact requests
+          </CtaLink>
+        </div>
         <CtaLink to="/initiate">Start new chat</CtaLink>
       </div>
     </div>

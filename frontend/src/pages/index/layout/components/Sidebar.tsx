@@ -11,6 +11,7 @@ import { LogOutButton } from './LogOutButton';
 import { MakeLinkOptions, Link as RouterLink } from '@tanstack/react-router';
 import { Link } from '@/components/ui/Link';
 import { UsersIcon } from '@/assets/icons/UsersIcon';
+import { Badge } from '@/components/ui/Bagde';
 
 const ButtonLink: FC<MakeLinkOptions> = (props) => (
   <RouterLink
@@ -34,9 +35,12 @@ export const Sidebar = () => {
           <div className="flex w-full justify-between">
             <h2 className="text-2xl font-semibold">Chats</h2>
             <div className="flex items-center gap-2 rounded-lg bg-zinc-100 p-1">
-              <ButtonLink to="/incoming-requests" aria-label="Start new chat">
-                <UsersIcon />
-              </ButtonLink>
+              <div className="relative">
+                <Badge>3</Badge>
+                <ButtonLink to="/incoming-requests" aria-label="Start new chat">
+                  <UsersIcon />
+                </ButtonLink>
+              </div>
               <hr className="h-3/4 w-0.5 rounded-full bg-zinc-300" />
               <ButtonLink to="/initiate" aria-label="Start new chat">
                 <PlusIcon />
