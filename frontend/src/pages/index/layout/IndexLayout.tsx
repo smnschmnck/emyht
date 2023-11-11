@@ -26,7 +26,7 @@ export const IndexLayout: FC = () => {
       </div>
       <div
         className={twMerge(
-          'h-full w-full',
+          'h-full w-full bg-slate-50',
           chatOpen ? 'block' : 'hidden lg:block'
         )}
       >
