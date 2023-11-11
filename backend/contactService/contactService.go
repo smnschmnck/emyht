@@ -389,5 +389,9 @@ func GetSentContactRequests(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
+	if contactRequests == nil {
+		return c.JSON(http.StatusOK, make([]singleContactRequest, 0))
+	}
+
 	return c.JSON(http.StatusOK, contactRequests)
 }
