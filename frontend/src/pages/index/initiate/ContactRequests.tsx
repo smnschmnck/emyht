@@ -42,7 +42,7 @@ export const ContactRequests: FC = () => {
   return (
     <div className="flex w-full flex-col gap-8 rounded-xl border border-zinc-100 bg-white p-10 shadow-sm">
       <div>
-        <h2 className="text-sm font-semibold">Your requests</h2>
+        <h2 className="text-sm font-semibold">Your sent requests</h2>
         <p className="text-sm text-zinc-500">
           You asked contacts associated with these E-Mails to connect
         </p>
