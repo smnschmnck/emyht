@@ -6,7 +6,7 @@ import { getUserData } from '@/api/user';
 export const indexLayoutRoute = new Route({
   getParentRoute: () => rootRoute,
   id: 'indexLayoutRoute',
-  beforeLoad: async () => {
+  loader: async () => {
     let userData;
     try {
       userData = await getUserData();

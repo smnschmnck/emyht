@@ -8,34 +8,40 @@ import emyhtLogo from '@assets/images/emyht-logo.svg';
 import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
 import { LogOutButton } from './LogOutButton';
-import { UserData } from '@/api/user';
-import { Link as RouterLink } from '@tanstack/react-router';
+import { MakeLinkOptions, Link as RouterLink } from '@tanstack/react-router';
 import { Link } from '@/components/ui/Link';
+import { UsersIcon } from '@/assets/icons/UsersIcon';
 
-type SidebarProps = {
-  userData: UserData;
-};
+const ButtonLink: FC<MakeLinkOptions> = (props) => (
+  <RouterLink
+    className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-white text-blue-600 hover:bg-blue-100"
+    {...props}
+  />
+);
 
-export const Sidebar: FC<SidebarProps> = ({ userData }) => {
+export const Sidebar = () => {
   const { data: chats } = useQuery(queryKeys.chats.all);
+  const { data: userData } = useQuery(queryKeys.users.details);
   const hasChats = !!chats && chats.length > 0;
 
   return (
     <div className="flex h-full w-full flex-col justify-between border-r border-r-zinc-100">
       <div className="flex h-full w-full flex-col gap-8 px-6 py-8">
-        <RouterLink to="/">
+        <RouterLink to="/" className="w-fit">
           <img className="w-24" src={emyhtLogo} alt="emyht" />
         </RouterLink>
         <div className="flex flex-col gap-4">
           <div className="flex w-full justify-between">
             <h2 className="text-2xl font-semibold">Chats</h2>
-            <RouterLink
-              to="/initiate"
-              aria-label="Initiate new conversation"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md text-blue-600 hover:bg-blue-100"
-            >
-              <PlusIcon />
-            </RouterLink>
+            <div className="flex items-center gap-2 rounded-lg bg-zinc-100 p-1">
+              <ButtonLink to="/incoming-requests" aria-label="Start new chat">
+                <UsersIcon />
+              </ButtonLink>
+              <hr className="h-3/4 w-0.5 rounded-full bg-zinc-300" />
+              <ButtonLink to="/initiate" aria-label="Start new chat">
+                <PlusIcon />
+              </ButtonLink>
+            </div>
           </div>
           <Input
             placeholder="Search chats"
@@ -58,8 +64,8 @@ export const Sidebar: FC<SidebarProps> = ({ userData }) => {
       </div>
       <div className="flex h-24 w-full items-center justify-between bg-blue-600 px-6 text-white">
         <div className="flex flex-col gap-1 text-sm">
-          <p className="font-semibold">{userData.username}</p>
-          <p>{userData.email}</p>
+          <p className="font-semibold">{userData?.username ?? ''}</p>
+          <p>{userData?.email ?? ''}</p>
         </div>
         <div className="flex gap-1">
           <IconButton ariaLabel="Settings" className="text-white">
