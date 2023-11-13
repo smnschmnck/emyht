@@ -183,6 +183,7 @@ type singleContactRequest struct {
 	SenderID             string `json:"senderID"`
 	SenderUsername       string `json:"senderUsername"`
 	SenderProfilePicture string `json:"senderProfilePicture"`
+	SenderEmail          string `json:"senderEmail"`
 }
 
 func GetPendingContactRequestsByUUID(uuid string) ([]singleContactRequest, error) {
@@ -192,7 +193,7 @@ func GetPendingContactRequestsByUUID(uuid string) ([]singleContactRequest, error
 		return make([]singleContactRequest, 0), errors.New("INTERNAL ERROR")
 	}
 	defer conn.Close()
-	pendingRequestQuery := "SELECT sender AS sender_id, u.username AS sender_username, u.picture_url AS sender_profile_picture " +
+	pendingRequestQuery := "SELECT sender AS sender_id, u.username AS sender_username, u.picture_url AS sender_profile_picture, u.email AS sender_email " +
 		"FROM friends " +
 		"JOIN users u on friends.sender = u.uuid " +
 		"WHERE reciever=$1 AND status='pending' "

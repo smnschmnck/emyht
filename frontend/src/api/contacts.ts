@@ -39,6 +39,7 @@ export type ContactRequest = {
   senderID: string;
   senderUsername: string;
   senderProfilePicture?: string;
+  senderEmail: string;
 };
 
 export const getContactRequests = async () => {
