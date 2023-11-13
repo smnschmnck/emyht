@@ -1,4 +1,5 @@
 import { CheckMarkIcon } from '@/assets/icons/CheckmarkIcon';
+import { MagnifyingGlassIcon } from '@/assets/icons/MagnifyingGlassIcon';
 import { Avatar } from '@/components/ui/Avatar';
 import { Input } from '@/components/ui/Input';
 import { Spinner } from '@/components/ui/Spinner';
@@ -54,9 +55,14 @@ export const UserList: FC<UserListProps> = ({
     <div className="flex h-full flex-col gap-2">
       <div>
         <Input
-          placeholder="Search user"
+          placeholder="Search contacts"
           value={searchQuery}
           onChange={(e) => onSearchQueryChange(e.target.value)}
+          startAdornment={
+            <div className="text-zinc-500">
+              <MagnifyingGlassIcon />
+            </div>
+          }
         />
       </div>
       <div className="h-full overflow-scroll">

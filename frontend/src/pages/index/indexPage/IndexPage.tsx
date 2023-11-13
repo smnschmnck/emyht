@@ -3,6 +3,8 @@ import emyhtLogo from '@assets/images/emyht-logo.svg';
 import ballonIllustration from './assets/balloon_illustration.svg';
 import { Link, MakeLinkOptions } from '@tanstack/react-router';
 import { Badge } from '@/components/ui/Bagde';
+import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '@/configs/queryKeys';
 
 const CtaLink: FC<MakeLinkOptions> = (props) => (
   <Link
@@ -12,6 +14,9 @@ const CtaLink: FC<MakeLinkOptions> = (props) => (
 );
 
 export const IndexPage: FC = () => {
+  const { data } = useQuery(queryKeys.contacts.incomingRequests);
+  const hasContactRequests = !!data && data.length > 0;
+
   return (
     <div className="flex h-full w-full flex-col items-center justify-around px-32">
       <div className="flex flex-col items-center gap-4">
@@ -28,7 +33,7 @@ export const IndexPage: FC = () => {
       />
       <div className="flex w-full flex-col gap-4 xl:flex-row 2xl:gap-8">
         <div className="relative w-full">
-          <Badge size="md">3</Badge>
+          {hasContactRequests && <Badge size="md">{data.length}</Badge>}
           <CtaLink to="/incoming-requests">
             Check incoming contact requests
           </CtaLink>

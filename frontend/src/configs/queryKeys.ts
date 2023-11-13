@@ -1,5 +1,9 @@
 import { getChats } from '@/api/chats';
-import { getContacts, getSentContactRequests } from '@/api/contacts';
+import {
+  getContactRequests,
+  getContacts,
+  getSentContactRequests,
+} from '@/api/contacts';
 import { getUserData } from '@/api/user';
 import { createQueryKeyStore } from '@lukemorales/query-key-factory';
 
@@ -24,6 +28,10 @@ export const queryKeys = createQueryKeyStore({
     sentRequests: {
       queryKey: ['sentRequests'],
       queryFn: getSentContactRequests,
+    },
+    incomingRequests: {
+      queryKey: ['incomingRequests'],
+      queryFn: getContactRequests,
     },
   },
 });

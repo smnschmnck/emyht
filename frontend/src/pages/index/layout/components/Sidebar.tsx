@@ -23,7 +23,13 @@ const ButtonLink: FC<MakeLinkOptions> = (props) => (
 export const Sidebar = () => {
   const { data: chats } = useQuery(queryKeys.chats.all);
   const { data: userData } = useQuery(queryKeys.users.details);
+  const { data: contactRequests } = useQuery(
+    queryKeys.contacts.incomingRequests
+  );
+
   const hasChats = !!chats && chats.length > 0;
+
+  const hasContactRequests = !!contactRequests && contactRequests.length > 0;
 
   return (
     <div className="flex h-full w-full flex-col justify-between border-r border-r-zinc-100">
@@ -36,7 +42,9 @@ export const Sidebar = () => {
             <h2 className="text-2xl font-semibold">Chats</h2>
             <div className="flex items-center gap-2 rounded-lg bg-zinc-100 p-1">
               <div className="relative">
-                <Badge>3</Badge>
+                {hasContactRequests && (
+                  <Badge size="sm">{contactRequests.length}</Badge>
+                )}
                 <ButtonLink to="/incoming-requests" aria-label="Start new chat">
                   <UsersIcon />
                 </ButtonLink>

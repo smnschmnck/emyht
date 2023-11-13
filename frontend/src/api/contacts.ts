@@ -34,3 +34,21 @@ export const getSentContactRequests = async () => {
 
   return (await res.json()) as SentContactRequest[];
 };
+
+export type ContactRequest = {
+  senderID: string;
+  senderUsername: string;
+  senderProfilePicture?: string;
+};
+
+export const getContactRequests = async () => {
+  const res = await fetch(`${env.VITE_BACKEND_HOST}/pendingContactRequests`, {
+    credentials: 'include',
+  });
+
+  if (!res.ok) {
+    throw new Error(await res.text());
+  }
+
+  return (await res.json()) as ContactRequest[];
+};
