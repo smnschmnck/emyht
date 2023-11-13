@@ -382,7 +382,7 @@ func GetSentContactRequests(c echo.Context) error {
 
 	query := "SELECT u.email as email, TO_CHAR(created_at, 'DD.MM.YYYY') as date FROM friends " +
 		"JOIN users u on u.uuid = friends.reciever " +
-		"WHERE sender = $1"
+		"WHERE sender = $1 AND status='pending'"
 	var contactRequests []contactRequest
 	err = pgxscan.Select(ctx, conn, &contactRequests, query, uuid)
 	if err != nil {
