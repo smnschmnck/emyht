@@ -68,7 +68,7 @@ export const RequestTable: FC<RequestTableProps> = ({ handleRequest }) => {
                     onClick={() =>
                       handleRequest({
                         senderID: r.senderID,
-                        action: 'accept',
+                        action: 'decline',
                       })
                     }
                   >
@@ -82,7 +82,7 @@ export const RequestTable: FC<RequestTableProps> = ({ handleRequest }) => {
                     onClick={() =>
                       handleRequest({
                         senderID: r.senderID,
-                        action: 'accept',
+                        action: 'block',
                       })
                     }
                   >
