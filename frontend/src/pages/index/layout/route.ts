@@ -17,10 +17,6 @@ export const indexLayoutRoute = new Route({
     if (!userData.emailActive) {
       throw redirect({ to: '/no-email' });
     }
-
-    return {
-      userData,
-    };
   },
   component: IndexLayout,
 });
