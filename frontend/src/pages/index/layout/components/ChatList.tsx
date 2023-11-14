@@ -5,17 +5,15 @@ import { queryKeys } from '@/configs/queryKeys';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { FC, Key } from 'react';
+import { FC } from 'react';
 
 type SingleChatProps = {
   chat: Chat;
-  key: Key;
 };
 
-const SingleChat: FC<SingleChatProps> = ({ key, chat }) => (
+const SingleChat: FC<SingleChatProps> = ({ chat }) => (
   <li>
     <Link
-      key={key}
       className="flex w-full items-center gap-3 border-b border-b-zinc-100 px-2 py-3 transition hover:bg-zinc-100"
       to="/chat/$chatId"
       params={{ chatId: chat.chatID }}
