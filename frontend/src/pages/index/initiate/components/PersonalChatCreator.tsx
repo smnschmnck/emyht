@@ -35,6 +35,7 @@ export const PersonalChatCreator: FC<PersonalChatCreatorProps> = ({
       }
     },
     onSuccess: () => {
+      toast.success('Chat created successfully');
       queryClient.refetchQueries({
         queryKey: queryKeys.chats.all.queryKey,
       });
