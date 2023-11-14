@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { RadioGroup, RadioGroupItem } from '@/assets/icons/RadioGroup';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/RadioGroup';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
