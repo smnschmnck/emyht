@@ -1,9 +1,9 @@
 import { CheckMarkIcon } from '@/assets/icons/CheckmarkIcon';
-import { MagnifyingGlassIcon } from '@/assets/icons/MagnifyingGlassIcon';
 import { Avatar } from '@/components/ui/Avatar';
 import { Input } from '@/components/ui/Input';
 import { Spinner } from '@/components/ui/Spinner';
 import { queryKeys } from '@/configs/queryKeys';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useQuery } from '@tanstack/react-query';
 import { FC, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
@@ -60,7 +60,7 @@ export const UserList: FC<UserListProps> = ({
           onChange={(e) => onSearchQueryChange(e.target.value)}
           startAdornment={
             <div className="text-zinc-500">
-              <MagnifyingGlassIcon />
+              <MagnifyingGlassIcon className="h-4 w-4" />
             </div>
           }
         />

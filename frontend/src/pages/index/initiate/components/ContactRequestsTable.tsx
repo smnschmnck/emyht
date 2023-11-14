@@ -1,7 +1,7 @@
-import { CloseIcon } from '@/assets/icons/CloseIcon';
 import { IconButton } from '@/components/ui/IconButton';
 import { Spinner } from '@/components/ui/Spinner';
 import { queryKeys } from '@/configs/queryKeys';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
 
@@ -31,7 +31,7 @@ export const ContactRequestsTable: FC = () => {
                     ariaLabel={'Cancel request'}
                     className="text-red-500"
                   >
-                    <CloseIcon />
+                    <XMarkIcon />
                   </IconButton>
                 </td>
               </tr>

@@ -1,4 +1,4 @@
-import { ErrorIcon } from '@/assets/icons/ErrorIcon';
+import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { FC } from 'react';
 
 export const SimpleErrorMessage: FC<{ children: string }> = ({ children }) => {
@@ -10,7 +10,7 @@ export const SimpleErrorMessage: FC<{ children: string }> = ({ children }) => {
   return (
     <div className="flex max-w-full gap-2 rounded-md border border-red-500 bg-red-100 p-4 font-semibold text-red-500">
       <div>
-        <ErrorIcon />
+        <ExclamationCircleIcon />
       </div>
       <p>{formattedError}</p>
     </div>

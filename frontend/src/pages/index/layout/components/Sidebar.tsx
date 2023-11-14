@@ -1,6 +1,3 @@
-import { MagnifyingGlassIcon } from '@/assets/icons/MagnifyingGlassIcon';
-import { PlusIcon } from '@/assets/icons/PlusIcon';
-import { SettingsIcon } from '@/assets/icons/SettingsIcon';
 import { IconButton } from '@/components/ui/IconButton';
 import { Input } from '@/components/ui/Input';
 import { queryKeys } from '@/configs/queryKeys';
@@ -10,13 +7,22 @@ import { FC } from 'react';
 import { LogOutButton } from './LogOutButton';
 import { MakeLinkOptions, Link as RouterLink } from '@tanstack/react-router';
 import { Link } from '@/components/ui/Link';
-import { UsersIcon } from '@/assets/icons/UsersIcon';
 import { Badge } from '@/components/ui/Bagde';
+import {
+  Cog6ToothIcon,
+  MagnifyingGlassIcon,
+  PlusIcon,
+} from '@heroicons/react/24/outline';
+import { UsersIcon } from '@heroicons/react/24/solid';
+import { twMerge } from 'tailwind-merge';
 
 const ButtonLink: FC<MakeLinkOptions> = (props) => (
   <RouterLink
-    className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-white text-blue-600 hover:bg-blue-100"
     {...props}
+    className={twMerge(
+      'inline-flex h-9 w-9 items-center justify-center rounded-md bg-white p-2 text-blue-600 hover:bg-blue-100',
+      props.className
+    )}
   />
 );
 
@@ -50,7 +56,11 @@ export const Sidebar = () => {
                 </ButtonLink>
               </div>
               <hr className="h-3/4 w-0.5 rounded-full bg-zinc-300" />
-              <ButtonLink to="/initiate" aria-label="Start new chat">
+              <ButtonLink
+                to="/initiate"
+                aria-label="Start new chat"
+                className="p-1.5"
+              >
                 <PlusIcon />
               </ButtonLink>
             </div>
@@ -59,7 +69,7 @@ export const Sidebar = () => {
             placeholder="Search chats"
             startAdornment={
               <div className="text-zinc-500">
-                <MagnifyingGlassIcon />
+                <MagnifyingGlassIcon className="h-4 w-4" />
               </div>
             }
           />
@@ -81,7 +91,7 @@ export const Sidebar = () => {
         </div>
         <div className="flex gap-1">
           <IconButton ariaLabel="Settings" className="text-white">
-            <SettingsIcon />
+            <Cog6ToothIcon />
           </IconButton>
           <LogOutButton />
         </div>

@@ -1,5 +1,4 @@
-import { EyeClosedIcon } from '@/assets/icons/EyeClosedIcon';
-import { EyeOpenIcon } from '@/assets/icons/EyeOpenIcon';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { FC } from 'react';
 
 type HideOrShowButtonProps = {
@@ -17,6 +16,6 @@ export const HideOrShowButton: FC<HideOrShowButtonProps> = ({
     onClick={() => setShow(!show)}
     aria-label={`${show ? 'Hide' : 'Show'} field content`}
   >
-    {show ? <EyeClosedIcon /> : <EyeOpenIcon />}
+    {show ? <EyeSlashIcon /> : <EyeIcon />}
   </button>
 );

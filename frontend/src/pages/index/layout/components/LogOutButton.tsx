@@ -1,6 +1,6 @@
-import { LogOutIcon } from '@/assets/icons/LogOutIcon';
 import { IconButton } from '@/components/ui/IconButton';
 import { env } from '@/env';
+import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { useNavigate, useRouter } from '@tanstack/react-router';
 import { FC } from 'react';
 
@@ -21,7 +21,7 @@ export const LogOutButton: FC = () => {
 
   return (
     <IconButton onClick={logOut} ariaLabel="Sign out" className="text-white">
-      <LogOutIcon />
+      <ArrowRightOnRectangleIcon />
     </IconButton>
   );
 };

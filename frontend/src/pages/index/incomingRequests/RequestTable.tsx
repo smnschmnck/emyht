@@ -1,12 +1,11 @@
 import { FC } from 'react';
-import { CloseIcon } from '@/assets/icons/CloseIcon';
 import { Avatar } from '@/components/ui/Avatar';
 import { IconButton } from '@/components/ui/IconButton';
 import { Spinner } from '@/components/ui/Spinner';
 import { queryKeys } from '@/configs/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import { CheckMarkIcon } from '@/assets/icons/CheckmarkIcon';
-import { NoEntryIcon } from '@/assets/icons/NoEntryIcon';
+import { NoSymbolIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 export type ContactRequestActions = 'accept' | 'decline' | 'block';
 
@@ -72,7 +71,7 @@ export const RequestTable: FC<RequestTableProps> = ({ handleRequest }) => {
                       })
                     }
                   >
-                    <CloseIcon className="h-6 w-6" />
+                    <XMarkIcon className="h-6 w-6" />
                   </IconButton>
                 </td>
                 <td className="py-3 text-red-500">
@@ -86,7 +85,7 @@ export const RequestTable: FC<RequestTableProps> = ({ handleRequest }) => {
                       })
                     }
                   >
-                    <NoEntryIcon className="h-6 w-6" />
+                    <NoSymbolIcon className="h-6 w-6" />
                   </IconButton>
                 </td>
               </tr>

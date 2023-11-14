@@ -13,7 +13,7 @@ export const IconButton: FC<IconButtonProps> = ({
 }) => (
   <button
     className={twMerge(
-      'flex h-9 w-9 items-center justify-center rounded-md text-blue-600 transition hover:bg-blue-300/25',
+      'flex h-9 w-9 items-center justify-center rounded-md p-1.5 text-blue-600 transition hover:bg-blue-300/25',
       className
     )}
     aria-label={ariaLabel}
