@@ -1,6 +1,6 @@
 import { env } from '@/env';
 
-type Chat = {
+export type Chat = {
   chatID: string;
   creationTimestamp: string;
   chatName: string;
