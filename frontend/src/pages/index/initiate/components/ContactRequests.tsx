@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { FC, FormEvent, useState } from 'react';
-import { ContactRequestsTable } from './components/ContactRequestsTable';
+import { ContactRequestsTable } from './ContactRequestsTable';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { env } from '@/env';
 import { toast } from 'sonner';

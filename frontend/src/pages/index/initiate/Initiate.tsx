@@ -1,6 +1,6 @@
 import { FC } from 'react';
-import { ContactRequests } from './ContactRequests';
-import { ChatCreator } from './ChatCreator';
+import { ContactRequests } from './components/ContactRequests';
+import { ChatCreator } from './components/ChatCreator';
 
 export const InitiationView: FC = () => {
   return (
