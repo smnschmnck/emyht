@@ -100,9 +100,9 @@ export const ChatView: FC = () => {
   );
 
   return (
-    <div className="flex h-full w-full flex-col">
+    <div className="flex h-full w-full flex-col items-center">
       <ChatHeader chatId={chatId} />
-      <div className="flex h-full w-full flex-col px-32">
+      <div className="flex h-full w-full max-w-2xl flex-col px-6">
         <ul className="flex h-20 grow flex-col gap-2 overflow-y-scroll pt-4">
           {messages?.map((message) => (
             <li className="w-fit rounded-2xl bg-blue-600 px-2 py-1 text-sm text-white">
