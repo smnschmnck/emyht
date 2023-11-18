@@ -3,7 +3,7 @@ import { FC, FormEvent, useState } from 'react';
 import { chatRoute } from './route';
 import { Avatar } from '@/components/ui/Avatar';
 import { queryKeys } from '@/configs/queryKeys';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
 import { env } from '@/env';
 import { HttpError } from '@/errors/httpError/httpError';
@@ -33,6 +33,7 @@ const MessageInput: FC<{ chatId: string; refetchMessages: () => void }> = ({
   refetchMessages,
 }) => {
   const [textContent, setTextContent] = useState('');
+  const queryClient = useQueryClient();
 
   const { mutate: sendMessage } = useMutation({
     mutationFn: async (event: FormEvent) => {
@@ -64,6 +65,7 @@ const MessageInput: FC<{ chatId: string; refetchMessages: () => void }> = ({
     onSuccess: () => {
       setTextContent('');
       refetchMessages();
+      queryClient.refetchQueries(queryKeys.chats.all);
     },
     onError: (err) => {
       toast.error(err.message);
