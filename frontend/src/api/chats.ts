@@ -1,4 +1,5 @@
 import { env } from '@/env';
+import { HttpError } from '@/errors/httpError/httpError';
 
 export type Chat = {
   chatID: string;
@@ -24,6 +25,26 @@ export const getChats = async () => {
     return [];
   }
   const json = (await res.json()) as Chat[];
+
+  return json;
+};
+
+type ChatInfo = {
+  info: string;
+};
+
+export const getChatInfo = async (chatId: string) => {
+  const res = await fetch(`${env.VITE_BACKEND_HOST}/chatInfo/${chatId}`, {
+    credentials: 'include',
+  });
+
+  if (!res.ok) {
+    throw new HttpError({
+      message: await res.text(),
+      statusCode: res.status,
+    });
+  }
+  const json = (await res.json()) as ChatInfo;
 
   return json;
 };

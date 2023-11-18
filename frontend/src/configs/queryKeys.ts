@@ -1,9 +1,10 @@
-import { getChats } from '@/api/chats';
+import { getChatInfo, getChats } from '@/api/chats';
 import {
   getContactRequests,
   getContacts,
   getSentContactRequests,
 } from '@/api/contacts';
+import { getMessagesByChat } from '@/api/messages';
 import { getUserData } from '@/api/user';
 import { createQueryKeyStore } from '@lukemorales/query-key-factory';
 
@@ -19,6 +20,10 @@ export const queryKeys = createQueryKeyStore({
       queryKey: ['allChats'],
       queryFn: getChats,
     },
+    info: (chatId: string) => ({
+      queryKey: [chatId],
+      queryFn: () => getChatInfo(chatId),
+    }),
   },
   contacts: {
     all: {
@@ -33,5 +38,11 @@ export const queryKeys = createQueryKeyStore({
       queryKey: ['incomingRequests'],
       queryFn: getContactRequests,
     },
+  },
+  messages: {
+    chat: (chatId: string) => ({
+      queryKey: [chatId],
+      queryFn: () => getMessagesByChat(chatId),
+    }),
   },
 });
