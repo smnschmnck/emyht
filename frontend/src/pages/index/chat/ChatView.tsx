@@ -1,5 +1,5 @@
 import { useLoader } from '@tanstack/react-router';
-import { FC, FormEvent, useState } from 'react';
+import { FC, FormEvent, useEffect, useRef, useState } from 'react';
 import { chatRoute } from './route';
 import { Avatar } from '@/components/ui/Avatar';
 import { queryKeys } from '@/configs/queryKeys';
@@ -111,6 +111,12 @@ export const ChatView: FC = () => {
     queryKeys.messages.chat(chatId)
   );
 
+  const lastMessage = useRef<null | HTMLLIElement>(null);
+
+  useEffect(() => {
+    lastMessage.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   return (
     <div className="flex h-full w-full flex-col items-center bg-white">
       <ChatHeader chatId={chatId} />
@@ -121,6 +127,9 @@ export const ChatView: FC = () => {
               {message.textContent}
             </li>
           ))}
+          <li className="h-0 w-0 overflow-hidden opacity-0" ref={lastMessage}>
+            end of messages
+          </li>
         </ul>
         <div className="flex h-24 items-center justify-center">
           <MessageInput chatId={chatId} refetchMessages={refetchMessages} />
