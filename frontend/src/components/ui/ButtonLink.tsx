@@ -6,7 +6,7 @@ export const ButtonLink: FC<MakeLinkOptions> = (props) => (
   <Link
     {...props}
     className={twMerge(
-      'inline-flex h-9 w-9 items-center justify-center rounded-md bg-white p-2 text-blue-600 hover:bg-blue-100',
+      'inline-flex h-9 w-9 items-center justify-center rounded-md bg-white p-2 text-blue-600 transition hover:bg-blue-100',
       props.className
     )}
   />
