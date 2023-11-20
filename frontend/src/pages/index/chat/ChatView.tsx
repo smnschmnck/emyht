@@ -114,7 +114,7 @@ export const ChatView: FC = () => {
   const lastMessage = useRef<null | HTMLLIElement>(null);
 
   useEffect(() => {
-    lastMessage.current?.scrollIntoView({ behavior: 'smooth' });
+    lastMessage.current?.scrollIntoView();
   }, [messages]);
 
   return (
@@ -123,7 +123,10 @@ export const ChatView: FC = () => {
       <div className="flex h-full w-full max-w-3xl flex-col px-6">
         <ul className="flex h-20 grow flex-col gap-2 overflow-y-scroll pt-4">
           {messages?.map((message) => (
-            <li className="w-fit rounded-2xl bg-blue-600 px-2 py-1 text-sm text-white">
+            <li
+              key={message.messageID}
+              className="w-fit rounded-2xl bg-blue-600 px-2 py-1 text-sm text-white"
+            >
               {message.textContent}
             </li>
           ))}
