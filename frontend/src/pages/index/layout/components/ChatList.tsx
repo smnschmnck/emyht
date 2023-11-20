@@ -2,6 +2,7 @@ import { Chat } from '@/api/chats';
 import { Avatar } from '@/components/ui/Avatar';
 import { Input } from '@/components/ui/Input';
 import { queryKeys } from '@/configs/queryKeys';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
@@ -32,6 +33,7 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => (
 export const ChatList: FC = () => {
   const { data: chats } = useQuery(queryKeys.chats.all);
   const hasChats = !!chats && chats.length > 0;
+  const [animationParent] = useAutoAnimate();
 
   return (
     <div className="flex h-full w-full flex-col gap-4">
@@ -50,7 +52,7 @@ export const ChatList: FC = () => {
             <Link to="/initiate">Start new chat</Link>
           </div>
         )}
-        <ul className="flex h-1 w-full grow flex-col">
+        <ul className="flex h-1 w-full grow flex-col" ref={animationParent}>
           {hasChats && chats.map((c) => <SingleChat key={c.chatID} chat={c} />)}
         </ul>
       </div>
