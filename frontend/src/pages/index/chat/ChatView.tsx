@@ -8,6 +8,12 @@ import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
 import { env } from '@/env';
 import { HttpError } from '@/errors/httpError/httpError';
 import { toast } from 'sonner';
+import { IconButton } from '@/components/ui/IconButton';
+import {
+  ChevronLeftIcon,
+  EllipsisHorizontalIcon,
+} from '@heroicons/react/24/outline';
+import { ButtonLink } from '@/components/ui/ButtonLink';
 
 const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
   const { data: allChats } = useQuery(queryKeys.chats.all);
@@ -16,7 +22,10 @@ const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
   const curChat = allChats?.find((c) => c.chatID === chatId);
 
   return (
-    <div className="flex h-24 w-full items-center justify-center border-b border-b-zinc-100 bg-white">
+    <div className="flex h-24 w-full items-center justify-between border-b border-b-zinc-100 bg-white px-8">
+      <ButtonLink to="/" aria-label={'back'} className="h-8 w-8">
+        <ChevronLeftIcon className="text-zinc-400" />
+      </ButtonLink>
       <div className="flex items-center justify-center gap-2">
         <Avatar imgUrl={curChat?.pictureUrl} alt={curChat?.chatName} />
         <div className="flex flex-col text-sm">
@@ -24,6 +33,9 @@ const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
           <p className="text-zinc-500">{chatInfo?.info}</p>
         </div>
       </div>
+      <IconButton ariaLabel={'Chat settings'} className="h-8 w-8">
+        <EllipsisHorizontalIcon className="text-zinc-400" />
+      </IconButton>
     </div>
   );
 };
@@ -75,11 +87,11 @@ const MessageInput: FC<{ chatId: string; refetchMessages: () => void }> = ({
   return (
     <form
       onSubmit={sendMessage}
-      className="flex h-14 w-full items-center justify-center gap-8 rounded-xl border border-zinc-200 bg-white px-4 transition focus-within:border-blue-500"
+      className="flex h-12 w-full items-center justify-center gap-1 rounded-xl border border-zinc-200 bg-white px-2 transition focus-within:border-blue-500"
     >
       <input
         onChange={(e) => setTextContent(e.target.value)}
-        className="w-full bg-transparent text-sm outline-none placeholder:text-zinc-500"
+        className="w-full bg-transparent px-2 text-sm outline-none placeholder:text-zinc-500"
         placeholder="Send a message"
         value={textContent}
       />
@@ -100,9 +112,9 @@ export const ChatView: FC = () => {
   );
 
   return (
-    <div className="flex h-full w-full flex-col items-center">
+    <div className="flex h-full w-full flex-col items-center bg-white">
       <ChatHeader chatId={chatId} />
-      <div className="flex h-full w-full max-w-2xl flex-col px-6">
+      <div className="flex h-full w-full max-w-3xl flex-col px-6">
         <ul className="flex h-20 grow flex-col gap-2 overflow-y-scroll pt-4">
           {messages?.map((message) => (
             <li className="w-fit rounded-2xl bg-blue-600 px-2 py-1 text-sm text-white">

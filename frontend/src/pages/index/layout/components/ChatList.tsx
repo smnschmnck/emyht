@@ -19,9 +19,9 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => (
       params={{ chatId: chat.chatID }}
     >
       <Avatar imgUrl={chat.pictureUrl} />
-      <div className="text-sm">
+      <div className="truncate text-sm">
         <p className="font-semibold">{chat.chatName}</p>
-        <p className="text-zinc-500">
+        <p className="truncate text-zinc-500">
           {chat.textContent ?? `Send a message to ${chat.chatName}`}
         </p>
       </div>
