@@ -1,7 +1,15 @@
-import { Outlet, useRouter, useRouterState } from '@tanstack/react-router';
+import {
+  Outlet,
+  useLoader,
+  useRouter,
+  useRouterState,
+} from '@tanstack/react-router';
 import { FC } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { twMerge } from 'tailwind-merge';
+import { indexLayoutRoute } from './route';
+import { handleWebsocketMessage } from '@/websocket/handleWebsocketMessage';
+import { useQueryClient } from '@tanstack/react-query';
 
 const useIsChatRoute = () => {
   const { routesByPath } = useRouter();
@@ -20,6 +28,11 @@ const useIsChatRoute = () => {
 
 export const IndexLayout: FC = () => {
   const isChatRoute = useIsChatRoute();
+  const { webSocket } = useLoader({ from: indexLayoutRoute.id });
+  const queryClient = useQueryClient();
+  webSocket.onmessage = (msg) => {
+    handleWebsocketMessage(msg, queryClient);
+  };
 
   return (
     <div className="flex h-screen">

@@ -6,6 +6,7 @@ export const env = createEnv({
 
   client: {
     VITE_BACKEND_HOST: z.string().url(),
+    VITE_WEBSOCKET_HOST: z.string().min(1),
   },
   runtimeEnv: import.meta.env,
 
