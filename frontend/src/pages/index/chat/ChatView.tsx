@@ -91,7 +91,7 @@ const MessageInput: FC<{ chatId: string; refetchMessages: () => void }> = ({
     >
       <input
         onChange={(e) => setTextContent(e.target.value)}
-        className="w-full bg-transparent px-2 text-sm outline-none placeholder:text-zinc-500"
+        className="w-full bg-transparent px-1.5 text-sm outline-none placeholder:text-zinc-500"
         placeholder="Send a message"
         value={textContent}
       />
