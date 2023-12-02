@@ -2,11 +2,12 @@ import { Chat } from '@/api/chats';
 import { Avatar } from '@/components/ui/Avatar';
 import { Input } from '@/components/ui/Input';
 import { queryKeys } from '@/configs/queryKeys';
+import { useDataChangeDetector } from '@/hooks/api/useDataChangeDetector';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { FC } from 'react';
+import { FC, useState } from 'react';
 
 type SingleChatProps = {
   chat: Chat;
@@ -32,12 +33,33 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => (
 
 export const ChatList: FC = () => {
   const { data: chats } = useQuery(queryKeys.chats.all);
-  const hasChats = !!chats && chats.length > 0;
-  const [animationParent] = useAutoAnimate();
+  const [chatSearchQuery, setChatSearchQuery] = useState('');
+  const [animationParent, enable] = useAutoAnimate();
+
+  const filteredChats = chats?.filter((chat) => {
+    const chatLowerCase = chat.chatName.toLowerCase();
+    const queryLowerCase = chatSearchQuery.toLowerCase();
+
+    return chatLowerCase.includes(queryLowerCase);
+  });
+
+  const hasChats = !!filteredChats && filteredChats.length > 0;
+
+  useDataChangeDetector({
+    data: chats,
+    onChange: () => {
+      enable(true);
+    },
+    onNoChange: () => {
+      enable(false);
+    },
+  });
 
   return (
     <div className="flex h-full w-full flex-col gap-4">
       <Input
+        onChange={(e) => setChatSearchQuery(e.target.value)}
+        value={chatSearchQuery}
         placeholder="Search chats"
         startAdornment={
           <div className="text-zinc-500">
@@ -53,7 +75,8 @@ export const ChatList: FC = () => {
           </div>
         )}
         <ul className="flex h-1 w-full grow flex-col" ref={animationParent}>
-          {hasChats && chats.map((c) => <SingleChat key={c.chatID} chat={c} />)}
+          {hasChats &&
+            filteredChats.map((c) => <SingleChat key={c.chatID} chat={c} />)}
         </ul>
       </div>
     </div>
