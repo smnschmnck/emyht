@@ -1,37 +1,20 @@
-import {
-  Outlet,
-  useLoader,
-  useRouter,
-  useRouterState,
-} from '@tanstack/react-router';
-import { FC } from 'react';
-import { Sidebar } from './components/Sidebar';
-import { twMerge } from 'tailwind-merge';
-import { indexLayoutRoute } from './route';
 import { handleWebsocketMessage } from '@/websocket/handleWebsocketMessage';
 import { useQueryClient } from '@tanstack/react-query';
-
-const useIsChatRoute = () => {
-  const { routesByPath } = useRouter();
-  const { location } = useRouterState();
-
-  const hideRoutes = [
-    routesByPath['/initiate'].fullPath,
-    routesByPath['/incoming-requests'].fullPath,
-    '/chat/',
-  ];
-
-  const idx = hideRoutes.findIndex((r) => location.pathname.startsWith(r));
-
-  return idx !== -1;
-};
+import { Outlet, useLoader } from '@tanstack/react-router';
+import { FC } from 'react';
+import { twMerge } from 'tailwind-merge';
+import { Sidebar } from './components/Sidebar';
+import { indexLayoutRoute } from './route';
+import { useChatId, useIsSidebarHidden } from './hooks';
 
 export const IndexLayout: FC = () => {
-  const isChatRoute = useIsChatRoute();
+  const isSidebarHidden = useIsSidebarHidden();
+  const chatId = useChatId();
   const { webSocket } = useLoader({ from: indexLayoutRoute.id });
   const queryClient = useQueryClient();
+
   webSocket.onmessage = (msg) => {
-    handleWebsocketMessage(msg, queryClient);
+    handleWebsocketMessage(msg, queryClient, chatId);
   };
 
   return (
@@ -39,7 +22,7 @@ export const IndexLayout: FC = () => {
       <div
         className={twMerge(
           'h-full w-full lg:flex lg:min-w-[22rem] lg:max-w-[22rem]',
-          isChatRoute ? 'hidden' : 'flex'
+          isSidebarHidden ? 'hidden' : 'flex'
         )}
       >
         <Sidebar />
@@ -47,7 +30,7 @@ export const IndexLayout: FC = () => {
       <div
         className={twMerge(
           'h-full w-full bg-slate-50',
-          isChatRoute ? 'block' : 'hidden lg:block'
+          isSidebarHidden ? 'block' : 'hidden lg:block'
         )}
       >
         <Outlet />

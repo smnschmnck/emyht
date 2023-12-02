@@ -31,7 +31,8 @@ type WebSocketData = {
 
 export const handleWebsocketMessage = async (
   msg: MessageEvent<string>,
-  queryClient: QueryClient
+  queryClient: QueryClient,
+  chatId?: string
 ) => {
   const json: WebSocketData = JSON.parse(msg.data);
   const event = json.event;
@@ -39,6 +40,9 @@ export const handleWebsocketMessage = async (
 
   if (event === 'message') {
     queryClient.refetchQueries(queryKeys.chats.all);
+    if (chatId) {
+      queryClient.refetchQueries(queryKeys.messages.chat(chatId));
+    }
   }
   if (event === 'chat') {
     queryClient.refetchQueries(queryKeys.chats.all);
