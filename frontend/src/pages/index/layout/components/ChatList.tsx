@@ -1,13 +1,14 @@
 import { Chat } from '@/api/chats';
 import { Avatar } from '@/components/ui/Avatar';
 import { Input } from '@/components/ui/Input';
+import { Link } from '@/components/ui/Link';
 import { queryKeys } from '@/configs/queryKeys';
 import { useDataChangeDetector } from '@/hooks/api/useDataChangeDetector';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from '@tanstack/react-router';
 import { FC, useState } from 'react';
+import { Link as RouterLink } from '@tanstack/react-router';
 
 type SingleChatProps = {
   chat: Chat;
@@ -15,7 +16,7 @@ type SingleChatProps = {
 
 const SingleChat: FC<SingleChatProps> = ({ chat }) => (
   <li>
-    <Link
+    <RouterLink
       className="flex w-full items-center gap-3 border-b border-b-zinc-100 px-2 py-3 transition hover:bg-zinc-100"
       to="/chat/$chatId"
       params={{ chatId: chat.chatID }}
@@ -27,7 +28,7 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => (
           {chat.textContent ?? `Send a message to ${chat.chatName}`}
         </p>
       </div>
-    </Link>
+    </RouterLink>
   </li>
 );
 
@@ -67,17 +68,20 @@ export const ChatList: FC = () => {
           </div>
         }
       />
-      <div className="flex h-full justify-center overflow-y-scroll">
+      <div className="flex h-full w-full justify-center overflow-y-scroll">
         {!hasChats && (
-          <div className="flex flex-col items-center justify-center">
+          <div className="flex w-full flex-col items-center justify-center">
             <p className="text-lg font-medium">No chats</p>
             <Link to="/initiate">Start new chat</Link>
           </div>
         )}
-        <ul className="flex h-1 w-full grow flex-col" ref={animationParent}>
-          {hasChats &&
-            filteredChats.map((c) => <SingleChat key={c.chatID} chat={c} />)}
-        </ul>
+        {hasChats && (
+          <ul className="flex h-1 w-full grow flex-col" ref={animationParent}>
+            {filteredChats.map((c) => (
+              <SingleChat key={c.chatID} chat={c} />
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
