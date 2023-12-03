@@ -116,7 +116,7 @@ const ChatMessage: FC<{ message: ChatMessage }> = ({ message }) => {
 
   if (data.uuid === message.senderID) {
     return (
-      <li className="flex w-full flex-col items-end gap-0.5">
+      <li className="flex w-full flex-col items-end gap-1">
         <span className="w-fit rounded-2xl bg-blue-600 px-2 py-1 text-sm text-white">
           {message.textContent}
         </span>
@@ -128,7 +128,7 @@ const ChatMessage: FC<{ message: ChatMessage }> = ({ message }) => {
   }
 
   return (
-    <li className="flex w-full flex-col items-start gap-0.5">
+    <li className="flex w-full flex-col items-start gap-1">
       <div className="flex gap-2">
         <span className="text-xs font-semibold">{message.senderUsername}</span>
         <span className="text-xs text-zinc-400">
@@ -158,7 +158,7 @@ export const ChatView: FC = () => {
     <div className="flex h-full w-full flex-col items-center bg-white">
       <ChatHeader chatId={chatId} />
       <div className="flex h-full w-full max-w-3xl flex-col px-6">
-        <ul className="flex h-20 grow flex-col gap-4 overflow-y-scroll pt-4">
+        <ul className="flex h-20 grow flex-col gap-5 overflow-y-scroll pt-4">
           {messages?.map((message) => (
             <ChatMessage key={message.messageID} message={message} />
           ))}
