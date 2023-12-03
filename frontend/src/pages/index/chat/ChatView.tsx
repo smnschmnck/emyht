@@ -14,6 +14,7 @@ import {
   EllipsisHorizontalIcon,
 } from '@heroicons/react/24/outline';
 import { ButtonLink } from '@/components/ui/ButtonLink';
+import { ChatMessage } from '@/api/messages';
 
 const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
   const { data: allChats } = useQuery(queryKeys.chats.all);
@@ -105,6 +106,32 @@ const MessageInput: FC<{ chatId: string; refetchMessages: () => void }> = ({
   );
 };
 
+const ChatMessage: FC<{ message: ChatMessage }> = ({ message }) => {
+  const { data } = useQuery(queryKeys.users.details);
+
+  if (!data) {
+    return <></>;
+  }
+
+  if (data.uuid === message.senderID) {
+    return (
+      <li className="flex w-full justify-end">
+        <span className="w-fit rounded-2xl bg-blue-600 px-2 py-1 text-sm text-white">
+          {message.textContent}
+        </span>
+      </li>
+    );
+  }
+
+  return (
+    <li className="flex w-full justify-start">
+      <span className="w-fit rounded-2xl bg-zinc-200 px-2 py-1 text-sm text-black">
+        {message.textContent}
+      </span>
+    </li>
+  );
+};
+
 export const ChatView: FC = () => {
   const { chatId } = useLoader({ from: chatRoute.id });
   const { data: messages, refetch: refetchMessages } = useQuery(
@@ -123,12 +150,7 @@ export const ChatView: FC = () => {
       <div className="flex h-full w-full max-w-3xl flex-col px-6">
         <ul className="flex h-20 grow flex-col gap-2 overflow-y-scroll pt-4">
           {messages?.map((message) => (
-            <li
-              key={message.messageID}
-              className="w-fit rounded-2xl bg-blue-600 px-2 py-1 text-sm text-white"
-            >
-              {message.textContent}
-            </li>
+            <ChatMessage key={message.messageID} message={message} />
           ))}
           <li className="h-0 w-0 overflow-hidden opacity-0" ref={lastMessage}>
             end of messages
