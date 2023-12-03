@@ -2,7 +2,7 @@ import { queryKeys } from '@/configs/queryKeys';
 import { env } from '@/env';
 import { QueryClient } from '@tanstack/react-query';
 
-export const sendSocketAuthRequest = async (id: string) => {
+const sendSocketAuthRequest = async (id: string) => {
   const body = {
     id: id,
   };

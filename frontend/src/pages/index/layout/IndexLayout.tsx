@@ -1,4 +1,3 @@
-import { handleWebsocketMessage } from '@/websocket/handleWebsocketMessage';
 import { useQueryClient } from '@tanstack/react-query';
 import { Outlet, useLoader } from '@tanstack/react-router';
 import { FC } from 'react';
@@ -6,6 +5,7 @@ import { twMerge } from 'tailwind-merge';
 import { Sidebar } from './components/Sidebar';
 import { indexLayoutRoute } from './route';
 import { useChatId, useIsSidebarHidden } from './hooks';
+import { handleWebsocketMessage } from '@/utils/websocket/handleWebsocketMessage';
 
 export const IndexLayout: FC = () => {
   const isSidebarHidden = useIsSidebarHidden();
