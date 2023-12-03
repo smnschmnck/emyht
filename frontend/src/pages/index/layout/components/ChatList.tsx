@@ -9,6 +9,7 @@ import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useQuery } from '@tanstack/react-query';
 import { FC, useState } from 'react';
 import { Link as RouterLink } from '@tanstack/react-router';
+import { Spinner } from '@/components/ui/Spinner';
 
 type SingleChatProps = {
   chat: Chat;
@@ -33,7 +34,9 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => (
 );
 
 export const ChatList: FC = () => {
-  const { data: chats } = useQuery(queryKeys.chats.all);
+  const { data: chats, isLoading: isLoadingChats } = useQuery(
+    queryKeys.chats.all
+  );
   const [chatSearchQuery, setChatSearchQuery] = useState('');
   const [animationParent, enable] = useAutoAnimate();
 
@@ -69,7 +72,8 @@ export const ChatList: FC = () => {
         }
       />
       <div className="flex h-full w-full justify-center overflow-y-scroll">
-        {!hasChats && (
+        {!hasChats && isLoadingChats && <Spinner />}
+        {!hasChats && !isLoadingChats && (
           <div className="flex w-full flex-col items-center justify-center">
             <p className="text-lg font-medium">No chats</p>
             <Link to="/initiate">Start new chat</Link>
