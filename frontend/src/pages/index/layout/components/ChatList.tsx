@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FC, useState } from 'react';
 import { Link as RouterLink } from '@tanstack/react-router';
 import { Spinner } from '@/components/ui/Spinner';
+import { formatTimestamp } from '@/utils/dateUtils';
 
 type SingleChatProps = {
   chat: Chat;
@@ -23,8 +24,13 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => (
       params={{ chatId: chat.chatID }}
     >
       <Avatar imgUrl={chat.pictureUrl} />
-      <div className="truncate text-sm">
-        <p className="font-semibold">{chat.chatName}</p>
+      <div className="w-full truncate text-sm">
+        <div className="flex w-full items-center justify-between">
+          <p className="font-semibold">{chat.chatName}</p>
+          <p className="text-xs text-zinc-400">
+            {formatTimestamp(Number(chat.timestamp))}
+          </p>
+        </div>
         <p className="truncate text-zinc-500">
           {chat.textContent ?? `Send a message to ${chat.chatName}`}
         </p>
