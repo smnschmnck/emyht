@@ -15,6 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { ButtonLink } from '@/components/ui/ButtonLink';
 import { ChatMessage } from '@/api/messages';
+import { formatTimestamp } from '@/utils/dateUtils';
 
 const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
   const { data: allChats } = useQuery(queryKeys.chats.all);
@@ -115,16 +116,25 @@ const ChatMessage: FC<{ message: ChatMessage }> = ({ message }) => {
 
   if (data.uuid === message.senderID) {
     return (
-      <li className="flex w-full justify-end">
+      <li className="flex w-full flex-col items-end gap-0.5">
         <span className="w-fit rounded-2xl bg-blue-600 px-2 py-1 text-sm text-white">
           {message.textContent}
+        </span>
+        <span className="text-xs text-zinc-400">
+          {formatTimestamp(message.timestamp)}
         </span>
       </li>
     );
   }
 
   return (
-    <li className="flex w-full justify-start">
+    <li className="flex w-full flex-col items-start gap-0.5">
+      <div className="flex gap-2">
+        <span className="text-xs font-semibold">{message.senderUsername}</span>
+        <span className="text-xs text-zinc-400">
+          {formatTimestamp(message.timestamp)}
+        </span>
+      </div>
       <span className="w-fit rounded-2xl bg-zinc-200 px-2 py-1 text-sm text-black">
         {message.textContent}
       </span>
@@ -148,7 +158,7 @@ export const ChatView: FC = () => {
     <div className="flex h-full w-full flex-col items-center bg-white">
       <ChatHeader chatId={chatId} />
       <div className="flex h-full w-full max-w-3xl flex-col px-6">
-        <ul className="flex h-20 grow flex-col gap-2 overflow-y-scroll pt-4">
+        <ul className="flex h-20 grow flex-col gap-4 overflow-y-scroll pt-4">
           {messages?.map((message) => (
             <ChatMessage key={message.messageID} message={message} />
           ))}
