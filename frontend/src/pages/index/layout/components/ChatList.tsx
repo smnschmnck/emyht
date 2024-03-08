@@ -67,16 +67,18 @@ export const ChatList: FC = () => {
 
   return (
     <div className="flex h-full w-full flex-col gap-4">
-      <Input
-        onChange={(e) => setChatSearchQuery(e.target.value)}
-        value={chatSearchQuery}
-        placeholder="Search chats"
-        startAdornment={
-          <div className="text-zinc-500">
-            <MagnifyingGlassIcon className="h-4 w-4" />
-          </div>
-        }
-      />
+      <div>
+        <Input
+          onChange={(e) => setChatSearchQuery(e.target.value)}
+          value={chatSearchQuery}
+          placeholder="Search chats"
+          startAdornment={
+            <div className="text-zinc-500">
+              <MagnifyingGlassIcon className="h-4 w-4" />
+            </div>
+          }
+        />
+      </div>
       <div className="flex h-full w-full justify-center overflow-y-scroll">
         {!hasChats && isLoadingChats && <Spinner />}
         {!hasChats && !isLoadingChats && (
