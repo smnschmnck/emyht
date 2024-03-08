@@ -66,9 +66,9 @@ export const SignInPage: FC = () => {
           Please sign in to start chatting
         </p>
       </div>
-      <div className="flex flex-col items-center gap-2">
+      <div className="flex flex-col items-center gap-4">
         <form
-          className="flex w-full flex-col gap-2"
+          className="flex w-full flex-col gap-4"
           onSubmit={loginMutation.mutate}
         >
           <Input
