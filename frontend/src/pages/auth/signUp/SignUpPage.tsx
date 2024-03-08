@@ -58,9 +58,9 @@ export const SignUpPage: FC = () => {
         <h1 className="text-3xl font-semibold">Create account</h1>
         <p className="text-sm text-zinc-500">Please enter your details</p>
       </div>
-      <div className="flex flex-col items-center gap-2">
+      <div className="flex flex-col items-center gap-4">
         <form
-          className="flex w-full flex-col gap-2"
+          className="flex w-full flex-col gap-4"
           onSubmit={signUpMutation.mutate}
         >
           <Input

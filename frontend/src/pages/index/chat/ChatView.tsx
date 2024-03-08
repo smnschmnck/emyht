@@ -37,7 +37,7 @@ const FilePicker: FC = () => {
 };
 
 export const ChatView: FC = () => {
-  const [showFilePicker, setShowFilePicker] = useState(true);
+  const [showFilePicker, setShowFilePicker] = useState(false);
   const { chatId } = useLoader({ from: chatRoute.id });
 
   return (
