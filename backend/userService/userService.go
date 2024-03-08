@@ -19,12 +19,6 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
-type ReqUser struct {
-	Email    string `json:"email" validate:"required"`
-	Username string `json:"username" validate:"required"`
-	Password string `json:"password" validate:"required"`
-}
-
 type User struct {
 	Uuid              string `json:"uuid"`
 	Email             string `json:"email"`

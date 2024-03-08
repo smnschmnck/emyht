@@ -22,7 +22,7 @@ import (
 var validate = validator.New()
 
 func SendContactRequest(c echo.Context) error {
-	token, err := authService.GetBearer(c)
+	token, err := authService.GetSessionToken(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
@@ -157,7 +157,7 @@ func AreUsersInContacts(usersUUIDs []string, uuid string) (bool, error) {
 }
 
 func GetContacts(c echo.Context) error {
-	token, err := authService.GetBearer(c)
+	token, err := authService.GetSessionToken(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
@@ -183,6 +183,7 @@ type singleContactRequest struct {
 	SenderID             string `json:"senderID"`
 	SenderUsername       string `json:"senderUsername"`
 	SenderProfilePicture string `json:"senderProfilePicture"`
+	SenderEmail          string `json:"senderEmail"`
 }
 
 func GetPendingContactRequestsByUUID(uuid string) ([]singleContactRequest, error) {
@@ -192,7 +193,7 @@ func GetPendingContactRequestsByUUID(uuid string) ([]singleContactRequest, error
 		return make([]singleContactRequest, 0), errors.New("INTERNAL ERROR")
 	}
 	defer conn.Close()
-	pendingRequestQuery := "SELECT sender AS sender_id, u.username AS sender_username, u.picture_url AS sender_profile_picture " +
+	pendingRequestQuery := "SELECT sender AS sender_id, u.username AS sender_username, u.picture_url AS sender_profile_picture, u.email AS sender_email " +
 		"FROM friends " +
 		"JOIN users u on friends.sender = u.uuid " +
 		"WHERE reciever=$1 AND status='pending' "
@@ -210,7 +211,7 @@ func GetPendingContactRequestsByUUID(uuid string) ([]singleContactRequest, error
 }
 
 func GetPendingContactRequests(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -228,7 +229,7 @@ func GetPendingContactRequests(c echo.Context) error {
 }
 
 func HandleContactRequest(c echo.Context) error {
-	token, err := authService.GetBearer(c)
+	token, err := authService.GetSessionToken(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
@@ -326,7 +327,7 @@ func blockUser(uuidToBeBlocked string, uuid string, chatID string) error {
 }
 
 func BlockUser(c echo.Context) error {
-	token, err := authService.GetBearer(c)
+	token, err := authService.GetSessionToken(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
@@ -355,4 +356,43 @@ func BlockUser(c echo.Context) error {
 	}
 
 	return c.String(http.StatusOK, "SUCCESS")
+}
+
+func GetSentContactRequests(c echo.Context) error {
+	token, err := authService.GetSessionToken(c)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NO AUTH")
+	}
+	uuid, err := userService.GetUUIDBySessionID(token)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NO AUTH")
+	}
+
+	ctx := context.Background()
+	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
+	if err != nil {
+		return errors.New("INTERNAL ERROR")
+	}
+	defer conn.Close(ctx)
+
+	type contactRequest struct {
+		Email string `json:"email"`
+		Date  string `json:"date"`
+	}
+
+	query := "SELECT u.email as email, TO_CHAR(created_at, 'DD.MM.YYYY') as date FROM friends " +
+		"JOIN users u on u.uuid = friends.reciever " +
+		"WHERE sender = $1 AND status='pending'"
+	var contactRequests []contactRequest
+	err = pgxscan.Select(ctx, conn, &contactRequests, query, uuid)
+	if err != nil {
+		fmt.Println(err.Error())
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
+	if contactRequests == nil {
+		return c.JSON(http.StatusOK, make([]singleContactRequest, 0))
+	}
+
+	return c.JSON(http.StatusOK, contactRequests)
 }

@@ -3,11 +3,12 @@ package wsService
 import (
 	"chat/authService"
 	"chat/userService"
+	"chat/utils"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
+	"slices"
 	"sync"
 
 	"github.com/go-playground/validator/v10"
@@ -28,11 +29,13 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
 		origin := r.Header.Get("Origin")
-		corsOrigins := os.Getenv("CORS_ORIGINS")
-		if corsOrigins == "*" {
+		corsOrigins := utils.GetAllowedCorsOrigins()
+
+		if slices.Contains(corsOrigins, "*") {
 			return true
 		}
-		return origin == corsOrigins
+
+		return slices.Contains(corsOrigins, origin)
 	},
 }
 
@@ -54,7 +57,7 @@ func recieveIncomingWebsocketMessages(ws *websocket.Conn) error {
 	}
 }
 
-//yeah that name is long
+// yeah that name is long
 func deleteWsIdFromUuidToWsId(websocketID string) {
 	uuid := websocketIDToUuid[websocketID]
 	websocketIDArray := uuidToWebsocketID[uuid]
@@ -106,7 +109,7 @@ func InitializeNewSocketConnection(c echo.Context) error {
 }
 
 func AuthenticateSocketConnection(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -151,7 +154,7 @@ func GetSocketsByUUID(uuid string) []*websocket.Conn {
 	return connArray
 }
 
-//If payload is a struct remember to export your fields
+// If payload is a struct remember to export your fields
 func WriteStruct(ws *websocket.Conn, event string, payload any) error {
 	out, err := json.Marshal(wsData{Event: event, Payload: payload})
 	if err != nil {
@@ -161,7 +164,7 @@ func WriteStruct(ws *websocket.Conn, event string, payload any) error {
 	return err
 }
 
-//If payload is a struct remember to export your fields
+// If payload is a struct remember to export your fields
 func WriteStructToSingleUUID(uuid string, event string, payload any) error {
 	sockets := GetSocketsByUUID(uuid)
 	var err error
@@ -171,7 +174,7 @@ func WriteStructToSingleUUID(uuid string, event string, payload any) error {
 	return err
 }
 
-//If payload is a struct remember to export your fields
+// If payload is a struct remember to export your fields
 func WriteStructToMultipleUUIDs(uuids []string, event string, payload any) error {
 	var err error
 	for _, uuid := range uuids {

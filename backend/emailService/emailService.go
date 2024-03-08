@@ -87,7 +87,7 @@ func SendVerificationEmail(username string, recipientMail string, token string) 
 	if frontendHost == "" {
 		panic("NO FRONTEND HOST IN .ENV!")
 	}
-	url := frontendHost + "/verifyEmail/" + token
+	url := frontendHost + "/verify-email?token=" + token
 	templateData := VerifyPageData{Username: username, VerifyLink: url}
 	htmlBody, err := populateHtmlTemplate(templateData, templatePath)
 	if err != nil {
@@ -122,7 +122,7 @@ func SendVerifyEmailChangeEmail(username string, recipientMail string, token str
 	if frontendHost == "" {
 		panic("NO FRONTEND HOST IN .ENV!")
 	}
-	url := frontendHost + "/confirmNewEmail/" + token
+	url := frontendHost + "/confirm-new-email?token=" + token
 	templateData := VerifyPageData{Username: username, VerifyLink: url}
 	htmlBody, err := populateHtmlTemplate(templateData, templatePath)
 	if err != nil {

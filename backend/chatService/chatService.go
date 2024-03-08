@@ -29,7 +29,7 @@ import (
 var validate = validator.New()
 
 func StartOneOnOneChat(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -140,7 +140,7 @@ func StartOneOnOneChat(c echo.Context) error {
 }
 
 func StartGroupChat(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -315,7 +315,7 @@ func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) 
 }
 
 func AddUsersToGroupChat(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -349,7 +349,7 @@ func AddUsersToGroupChat(c echo.Context) error {
 }
 
 func GetChatParticipantsExceptUser(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -489,7 +489,7 @@ func getChatsByUUID(uuid string) ([]singleChat, error) {
 }
 
 func GetChats(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -525,7 +525,7 @@ func isUserInChat(uuid string, chatID string) (bool, error) {
 }
 
 func SendMessage(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -683,7 +683,7 @@ func getMessagesByChatID(chatID string, uuid string) ([]singleMessage, error) {
 }
 
 func GetMessages(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -777,7 +777,7 @@ func GetChatInfo(c echo.Context) error {
 		Info string `json:"info"`
 	}
 
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -839,7 +839,7 @@ func GetChatInfo(c echo.Context) error {
 }
 
 func GetMediaPutURL(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -885,7 +885,7 @@ func GetMediaPutURL(c echo.Context) error {
 }
 
 func GetGroupPicturePutURL(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -930,7 +930,7 @@ func GetGroupPicturePutURL(c echo.Context) error {
 }
 
 func LeaveGroupChat(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -1033,7 +1033,7 @@ func getGroupchatsNewUserIsNotPartOf(uuid string, newUserUUID string) ([]simpleC
 }
 
 func GetGroupchatsNewUserIsNotPartOf(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -1069,7 +1069,7 @@ func GetGroupchatsNewUserIsNotPartOf(c echo.Context) error {
 }
 
 func AddSingleUserToGroupChats(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -1150,7 +1150,7 @@ func AddSingleUserToGroupChats(c echo.Context) error {
 }
 
 func GetOneOnOneChatParticipant(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -1196,7 +1196,7 @@ func GetOneOnOneChatParticipant(c echo.Context) error {
 }
 
 func GetContactsNotInChat(c echo.Context) error {
-	sessionID, responseErr := authService.GetBearer(c)
+	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}

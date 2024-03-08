@@ -7,6 +7,7 @@ import (
 	"chat/dbHelpers/postgresHelper"
 	"chat/dbHelpers/redisHelper"
 	"chat/userSettingsService"
+	"chat/utils"
 	"chat/wsService"
 	"fmt"
 	"os"
@@ -20,10 +21,16 @@ import (
 
 var PORT string
 
+// TODO Check if email is active for most requests!
 func handleRequest() {
 	e := echo.New()
 	//TODO: Use Redis for distributed rate limiting
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
+	//CORS
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     utils.GetAllowedCorsOrigins(),
+		AllowCredentials: true,
+	}))
 	//Websocket
 	e.Any("/ws", wsService.InitializeNewSocketConnection)
 	e.POST("/authenticateSocketConnection", wsService.AuthenticateSocketConnection)
@@ -59,6 +66,7 @@ func handleRequest() {
 	e.GET("/pendingContactRequests", contactService.GetPendingContactRequests)
 	e.GET("/contacts", contactService.GetContacts)
 	e.POST("/blockUser", contactService.BlockUser)
+	e.GET("/sentContactRequests", contactService.GetSentContactRequests)
 	//user settings
 	e.POST("/changeProfilePicturePutURL", userSettingsService.GetChangeProfilePicturePutURL)
 	e.POST("/confirmChangedProfilePic", userSettingsService.ConfirmChangedProfilePic)
