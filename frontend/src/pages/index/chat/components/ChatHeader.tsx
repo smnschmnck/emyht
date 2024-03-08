@@ -20,9 +20,11 @@ export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
       <ButtonLink to="/" aria-label={'back'} className="h-8 w-8">
         <ChevronLeftIcon className="text-zinc-400" />
       </ButtonLink>
-      <div className="flex items-center justify-center gap-2">
-        <Avatar imgUrl={curChat?.pictureUrl} alt={curChat?.chatName} />
-        <div className="flex flex-col text-sm">
+      <div className="flex h-full w-full">
+        <div className="flex w-1/2 items-center justify-end px-1">
+          <Avatar imgUrl={curChat?.pictureUrl} alt={curChat?.chatName} />
+        </div>
+        <div className="flex flex-col justify-center px-1 text-sm">
           <h1 className="font-semibold">{curChat?.chatName}</h1>
           <p className="text-zinc-500">{chatInfo?.info}</p>
         </div>
