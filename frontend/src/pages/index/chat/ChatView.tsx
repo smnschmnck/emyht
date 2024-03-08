@@ -7,6 +7,7 @@ import { MessageInput } from './components/MessageInput';
 import { chatRoute } from './route';
 import { ChatMessage } from './components/ChatMessage';
 import { Button } from '@/components/ui/Button';
+import { FilePickerButton } from '@/components/ui/FilePickerButton';
 
 const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
   const { data: messages } = useQuery(queryKeys.messages.chat(chatId));
@@ -31,13 +32,13 @@ const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
 const FilePicker: FC = () => {
   return (
     <div className="flex h-20 w-full grow flex-col p-8">
-      <div className="flex w-full justify-between border-b pb-2">
+      <div className="flex w-full justify-between border-b px-2 pb-3">
         <div className="flex gap-2">
           <Button variant="secondaryDestructive">Cancel</Button>
           <Button variant="text">Deselect X files</Button>
           <Button variant="text">Remove X files</Button>
         </div>
-        <Button>Add files</Button>
+        <FilePickerButton id="chatFilePicker" />
       </div>
     </div>
   );
