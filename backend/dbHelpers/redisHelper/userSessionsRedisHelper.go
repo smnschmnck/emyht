@@ -1,6 +1,7 @@
 package redisHelper
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 
@@ -20,7 +21,9 @@ func LoadUserSessionsRedisEnv() {
 	envDB := os.Getenv("REDIS_PRESIGNED_URLS_DB")
 
 	if envHost != "" && envPort != "" {
-		PresignedURLsRedisConfig.Addr = envHost + ":" + envPort
+		envAddr := envHost + ":" + envPort
+		fmt.Println(envAddr)
+		PresignedURLsRedisConfig.Addr = envAddr
 	}
 
 	if envPW != "" {
