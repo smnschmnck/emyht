@@ -14,24 +14,20 @@ var PresignedURLsRedisConfig = redis.Options{
 }
 
 func LoadPresignedURLsRedisEnv() {
-	envHost := os.Getenv("REDISHOST")
-	envPort := os.Getenv("REDISPORT")
-	envPW := os.Getenv("REDISPASSWORD")
+	connectionString := os.Getenv("REDIS_PRIVATE_URL")
 	envDB := os.Getenv("REDIS_PRESIGNED_URLS_DB")
 
-	if envHost != "" && envPort != "" {
-		PresignedURLsRedisConfig.Addr = envHost + ":" + envPort
+	opts, err := redis.ParseURL(connectionString)
+	if err != nil {
+		panic(err)
 	}
 
-	if envPW != "" {
-		PresignedURLsRedisConfig.Password = envPW
+	db, err := strconv.Atoi(envDB)
+	if err != nil {
+		panic(err)
 	}
 
-	if envDB != "" {
-		db, err := strconv.Atoi(envDB)
-		if err != nil {
-			panic(err)
-		}
-		PresignedURLsRedisConfig.DB = db
-	}
+	opts.DB = db
+
+	PresignedURLsRedisConfig = *opts
 }

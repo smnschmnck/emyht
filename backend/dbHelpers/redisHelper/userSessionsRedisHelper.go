@@ -1,7 +1,6 @@
 package redisHelper
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 
@@ -15,26 +14,20 @@ var UserSessionsRedisConfig = redis.Options{
 }
 
 func LoadUserSessionsRedisEnv() {
-	envHost := os.Getenv("REDISHOST")
-	envPort := os.Getenv("REDISPORT")
-	envPW := os.Getenv("REDISPASSWORD")
-	envDB := os.Getenv("REDIS_PRESIGNED_URLS_DB")
+	connectionString := os.Getenv("REDIS_PRIVATE_URL")
+	envDB := os.Getenv("REDIS_USER_SESSIONS_DB")
 
-	if envHost != "" && envPort != "" {
-		envAddr := envHost + ":" + envPort
-		fmt.Println(envAddr)
-		PresignedURLsRedisConfig.Addr = envAddr
+	opts, err := redis.ParseURL(connectionString)
+	if err != nil {
+		panic(err)
 	}
 
-	if envPW != "" {
-		UserSessionsRedisConfig.Password = envPW
+	db, err := strconv.Atoi(envDB)
+	if err != nil {
+		panic(err)
 	}
 
-	if envDB != "" {
-		db, err := strconv.Atoi(envDB)
-		if err != nil {
-			panic(err)
-		}
-		UserSessionsRedisConfig.DB = db
-	}
+	opts.DB = db
+
+	UserSessionsRedisConfig = *opts
 }
