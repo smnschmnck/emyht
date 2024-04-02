@@ -10,6 +10,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -155,12 +156,14 @@ func Register(c echo.Context) error {
 	session, err := startSession(user.Uuid)
 
 	if err != nil {
+		fmt.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
 	}
 
 	err = emailService.SendVerificationEmail(reqUser.Username, reqUser.Email, user.EmailToken)
 
 	if err != nil {
+		fmt.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
 	}
 
