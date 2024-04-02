@@ -7,5 +7,5 @@ import (
 var PGConnString string
 
 func LoadEnv() {
-	PGConnString = os.Getenv("PG_CONN_STRING")
+	PGConnString = os.Getenv("DATABASE_PRIVATE_URL")
 }
