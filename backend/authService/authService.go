@@ -107,6 +107,7 @@ func makeToken() (string, error) {
 func startSession(uuid string) (Session, error) {
 	token, err := makeToken()
 	if err != nil {
+		fmt.Println(err.Error())
 		return Session{}, err
 	}
 
@@ -115,6 +116,7 @@ func startSession(uuid string) (Session, error) {
 	err = rdb.Set(ctx, token, uuid, SESSION_DURATION).Err()
 
 	if err != nil {
+		fmt.Println(err.Error())
 		return Session{}, err
 	}
 	tmpSession := Session{token, uuid}
