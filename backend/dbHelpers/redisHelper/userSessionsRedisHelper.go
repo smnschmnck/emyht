@@ -3,7 +3,6 @@ package redisHelper
 import (
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -15,13 +14,12 @@ var UserSessionsRedisConfig = redis.Options{
 }
 
 func LoadUserSessionsRedisEnv() {
-	envAddr := os.Getenv("REDIS_URL")
-	trimmedEnvAddr := strings.ReplaceAll(envAddr, "redis://", "")
+	envAddr := os.Getenv("REDISHOST")
 	envPW := os.Getenv("REDISPASSWORD")
 	envDB := os.Getenv("REDIS_USER_SESSIONS_DB")
 
-	if trimmedEnvAddr != "" {
-		UserSessionsRedisConfig.Addr = trimmedEnvAddr
+	if envAddr != "" {
+		UserSessionsRedisConfig.Addr = envAddr
 	}
 
 	if envPW != "" {

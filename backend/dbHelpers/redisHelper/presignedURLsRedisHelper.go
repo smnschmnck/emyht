@@ -3,7 +3,6 @@ package redisHelper
 import (
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -15,13 +14,12 @@ var PresignedURLsRedisConfig = redis.Options{
 }
 
 func LoadPresignedURLsRedisEnv() {
-	envAddr := os.Getenv("REDIS_URL")
-	trimmedEnvAddr := strings.ReplaceAll(envAddr, "redis://", "")
+	envAddr := os.Getenv("REDISHOST")
 	envPW := os.Getenv("REDISPASSWORD")
 	envDB := os.Getenv("REDIS_PRESIGNED_URLS_DB")
 
-	if trimmedEnvAddr != "" {
-		PresignedURLsRedisConfig.Addr = trimmedEnvAddr
+	if envAddr != "" {
+		PresignedURLsRedisConfig.Addr = envAddr
 	}
 
 	if envPW != "" {
