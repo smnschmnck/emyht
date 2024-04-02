@@ -14,12 +14,13 @@ var UserSessionsRedisConfig = redis.Options{
 }
 
 func LoadUserSessionsRedisEnv() {
-	envAddr := os.Getenv("REDISHOST")
+	envHost := os.Getenv("REDISHOST")
+	envPort := os.Getenv("REDISPORT")
 	envPW := os.Getenv("REDISPASSWORD")
-	envDB := os.Getenv("REDIS_USER_SESSIONS_DB")
+	envDB := os.Getenv("REDIS_PRESIGNED_URLS_DB")
 
-	if envAddr != "" {
-		UserSessionsRedisConfig.Addr = envAddr
+	if envHost != "" && envPort != "" {
+		PresignedURLsRedisConfig.Addr = envHost + ":" + envPort
 	}
 
 	if envPW != "" {
