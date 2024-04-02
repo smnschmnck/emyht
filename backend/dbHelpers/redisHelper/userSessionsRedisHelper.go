@@ -14,8 +14,8 @@ var UserSessionsRedisConfig = redis.Options{
 }
 
 func LoadUserSessionsRedisEnv() {
-	envAddr := os.Getenv("REDIS_USER_SESSIONS_DB_ADDR")
-	envPW := os.Getenv("REDIS_USER_SESSIONS_DB_PW")
+	envAddr := os.Getenv("REDIS_URL")
+	envPW := os.Getenv("REDISPASSWORD")
 	envDB := os.Getenv("REDIS_USER_SESSIONS_DB")
 
 	if envAddr != "" {

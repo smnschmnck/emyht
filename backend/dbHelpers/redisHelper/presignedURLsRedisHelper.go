@@ -14,8 +14,8 @@ var PresignedURLsRedisConfig = redis.Options{
 }
 
 func LoadPresignedURLsRedisEnv() {
-	envAddr := os.Getenv("REDIS_PRESIGNED_URLS_DB_ADDR")
-	envPW := os.Getenv("REDIS_PRESIGNED_URLS_DB_PW")
+	envAddr := os.Getenv("REDIS_URL")
+	envPW := os.Getenv("REDISPASSWORD")
 	envDB := os.Getenv("REDIS_PRESIGNED_URLS_DB")
 
 	if envAddr != "" {
