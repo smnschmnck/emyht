@@ -15,7 +15,7 @@ export const LogOutButton: FC = () => {
 
     if (res.ok) {
       await router.invalidate();
-      navigate({ to: '/' });
+      navigate({ to: '/sign-in' });
     }
   };
 
