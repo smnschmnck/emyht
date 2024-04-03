@@ -1,8 +1,7 @@
 import { getUserData } from '@/api/user';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { FormInput } from '@/components/ui/FormInput';
 import { Link } from '@/components/ui/Link';
-import { PasswordInput } from '@/components/ui/PasswordInput';
 import { SimpleErrorMessage } from '@/components/ui/SimpleErrorMessage';
 import { queryKeys } from '@/configs/queryKeys';
 import { env } from '@/env';
@@ -63,24 +62,27 @@ export const SignUpPage: FC = () => {
           className="flex w-full flex-col gap-4"
           onSubmit={signUpMutation.mutate}
         >
-          <Input
-            placeholder="Username"
+          <FormInput
+            label="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
-          <Input
-            placeholder="E-Mail"
+          <FormInput
+            type="email"
+            label="E-Mail"
             autoComplete="username"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <PasswordInput
-            placeholder="Password"
+          <FormInput
+            type="password"
+            label="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <PasswordInput
-            placeholder="Repeat password"
+          <FormInput
+            type="password"
+            label="Repeat password"
             value={repeatedPassword}
             onChange={(e) => setRepeatedPassword(e.target.value)}
           />

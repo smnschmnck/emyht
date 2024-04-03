@@ -1,8 +1,7 @@
 import { getUserData } from '@/api/user';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { FormInput } from '@/components/ui/FormInput';
 import { Link } from '@/components/ui/Link';
-import { PasswordInput } from '@/components/ui/PasswordInput';
 import { SimpleErrorMessage } from '@/components/ui/SimpleErrorMessage';
 import { queryKeys } from '@/configs/queryKeys';
 import { env } from '@/env';
@@ -71,13 +70,15 @@ export const SignInPage: FC = () => {
           className="flex w-full flex-col gap-4"
           onSubmit={loginMutation.mutate}
         >
-          <Input
-            placeholder="E-Mail"
+          <FormInput
+            label="E-Mail"
             value={email}
+            type="email"
             onChange={(e) => setEmail(e.target.value)}
           />
-          <PasswordInput
-            placeholder="Password"
+          <FormInput
+            label="Password"
+            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
