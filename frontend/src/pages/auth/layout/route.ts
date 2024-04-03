@@ -7,7 +7,7 @@ export const authLayoutRoute = new Route({
   getParentRoute: () => mainLayoutRoute,
   id: 'authLayoutRoute',
   component: AuthLayout,
-  beforeLoad: async () => {
+  loader: async () => {
     let userData;
     try {
       userData = await getUserData();
