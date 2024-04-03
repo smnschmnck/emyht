@@ -14,7 +14,7 @@ export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
   if (data.uuid === message.senderID) {
     return (
       <li className="flex w-full flex-col items-end gap-1">
-        <span className="w-fit rounded-2xl bg-blue-600 px-2 py-1 text-sm text-white">
+        <span className="w-fit rounded-2xl bg-blue-600 px-3 py-1.5 text-sm text-white">
           {message.textContent}
         </span>
         <span className="text-xs text-zinc-400">
@@ -32,7 +32,7 @@ export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
           {formatTimestamp(message.timestamp)}
         </span>
       </div>
-      <span className="w-fit rounded-2xl bg-zinc-200 px-2 py-1 text-sm text-black">
+      <span className="w-fit rounded-2xl bg-zinc-100 px-3 py-1.5 text-sm text-black">
         {message.textContent}
       </span>
     </li>

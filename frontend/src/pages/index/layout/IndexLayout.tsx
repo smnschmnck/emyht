@@ -18,7 +18,7 @@ export const IndexLayout: FC = () => {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-full">
       <div
         className={twMerge(
           'h-full w-full lg:flex lg:min-w-[22rem] lg:max-w-[22rem]',

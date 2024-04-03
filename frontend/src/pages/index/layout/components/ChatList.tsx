@@ -80,7 +80,11 @@ export const ChatList: FC = () => {
         />
       </div>
       <div className="flex h-full w-full justify-center overflow-y-scroll">
-        {!hasChats && isLoadingChats && <Spinner />}
+        {!hasChats && isLoadingChats && (
+          <div className="flex h-full w-full items-center justify-center">
+            <Spinner />
+          </div>
+        )}
         {!hasChats && !isLoadingChats && (
           <div className="flex w-full flex-col items-center justify-center">
             <p className="text-lg font-medium">No chats</p>
