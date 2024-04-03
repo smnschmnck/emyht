@@ -88,7 +88,12 @@ const FilePicker: FC = () => {
 
 export const ChatView: FC = () => {
   const [showFilePicker, setShowFilePicker] = useState(false);
+  console.log('SHOW', showFilePicker);
   const { chatId } = useLoaderData({ from: chatRoute.id });
+
+  useEffect(() => {
+    setShowFilePicker(false);
+  }, [chatId]);
 
   return (
     <div className="flex h-full w-full flex-col items-center bg-white">
