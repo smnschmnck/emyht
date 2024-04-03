@@ -9,6 +9,7 @@ type IconButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 export const IconButton: FC<IconButtonProps> = ({
   className,
   ariaLabel,
+  children,
   ...props
 }) => (
   <button
@@ -18,5 +19,7 @@ export const IconButton: FC<IconButtonProps> = ({
     )}
     aria-label={ariaLabel}
     {...props}
-  />
+  >
+    <div className="h-full w-full">{children}</div>
+  </button>
 );
