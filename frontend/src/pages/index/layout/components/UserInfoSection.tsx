@@ -16,7 +16,9 @@ export const UserInfoSection: FC = () => {
       </div>
       <div className="flex gap-1">
         <IconButton ariaLabel="Settings" className="text-white">
-          <Cog6ToothIcon />
+          <div>
+            <Cog6ToothIcon stroke="orange" />
+          </div>
         </IconButton>
         <LogOutButton />
       </div>
