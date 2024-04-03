@@ -12,7 +12,6 @@ export const authLayoutRoute = new Route({
     try {
       userData = await getUserData();
     } catch (e) {
-      console.log(e);
       return;
     }
     if (userData.emailActive) {
