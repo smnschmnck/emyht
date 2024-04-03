@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { Outlet, useLoader } from '@tanstack/react-router';
+import { Outlet, useLoaderData } from '@tanstack/react-router';
 import { FC } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Sidebar } from './components/Sidebar';
@@ -10,7 +10,7 @@ import { handleWebsocketMessage } from '@/utils/websocket/handleWebsocketMessage
 export const IndexLayout: FC = () => {
   const isSidebarHidden = useIsSidebarHidden();
   const chatId = useChatId();
-  const { webSocket } = useLoader({ from: indexLayoutRoute.id });
+  const { webSocket } = useLoaderData({ from: indexLayoutRoute.id });
   const queryClient = useQueryClient();
 
   webSocket.onmessage = (msg) => {

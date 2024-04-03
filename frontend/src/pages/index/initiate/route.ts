@@ -1,8 +1,8 @@
-import { Route } from '@tanstack/react-router';
-import { InitiationView } from './Initiate';
+import { createRoute } from '@tanstack/react-router';
 import { indexLayoutRoute } from '../layout/route';
+import { InitiationView } from './Initiate';
 
-export const initiateRoute = new Route({
+export const initiateRoute = createRoute({
   getParentRoute: () => indexLayoutRoute,
   path: '/initiate',
   component: InitiationView,

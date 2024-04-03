@@ -1,15 +1,16 @@
-import { MakeLinkOptions, Link as RouterLink } from '@tanstack/react-router';
-import { FC } from 'react';
+import { TLinkProps } from '@/router/config';
+import { Link as RouterLink } from '@tanstack/react-router';
+import { ReactNode } from 'react';
 
-interface ButtonLinkProps extends MakeLinkOptions {
-  children: string;
-}
+type ExtraProps = {
+  children: ReactNode;
+};
 
-export const Link: FC<ButtonLinkProps> = ({ children, ...linkOptions }) => (
+export const Link = <TLinkOptions extends string = '.'>({
+  ...props
+}: TLinkProps<TLinkOptions> & ExtraProps) => (
   <RouterLink
     className="text-sm font-medium text-blue-600 hover:underline"
-    {...linkOptions}
-  >
-    {children}
-  </RouterLink>
+    {...props}
+  />
 );

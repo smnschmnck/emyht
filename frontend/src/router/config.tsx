@@ -1,16 +1,30 @@
 import { routes } from '@/pages/allRoutes';
-import { Outlet, RootRoute, Router } from '@tanstack/react-router';
+import {
+  LinkOptions,
+  Outlet,
+  RegisteredRouter,
+  createRootRoute,
+  createRouter,
+} from '@tanstack/react-router';
 
-export const rootRoute = new RootRoute({
+export const rootRoute = createRootRoute({
   component: () => <Outlet />,
 });
 
 const routeTree = rootRoute.addChildren(routes);
 
-export const router = new Router({ routeTree });
+export const router = createRouter({ routeTree });
 
 declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router;
   }
 }
+
+type TRouteTree = RegisteredRouter['routeTree'];
+
+export type TLinkProps<TLinkOptions extends string = '.'> = LinkOptions<
+  TRouteTree,
+  '/',
+  TLinkOptions
+>;

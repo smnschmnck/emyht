@@ -31,7 +31,7 @@ export const NoEmailPage: FC = () => {
           <span className="font-semibold text-blue-400">{userData.email}</span>{' '}
           does not look like your E-Mail?
         </p>
-        <Link to="/no-email">Change E-Mail Address</Link>
+        <Link>Change E-Mail Address</Link>
       </div>
     </div>
   );

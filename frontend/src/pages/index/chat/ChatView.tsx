@@ -1,7 +1,6 @@
 import { queryKeys } from '@/configs/queryKeys';
 import { useQuery } from '@tanstack/react-query';
 import prettyBytes from 'pretty-bytes';
-import { useLoader } from '@tanstack/react-router';
 import { FC, useEffect, useRef, useState } from 'react';
 import { ChatHeader } from './components/ChatHeader';
 import { MessageInput } from './components/MessageInput';
@@ -9,6 +8,7 @@ import { chatRoute } from './route';
 import { ChatMessage } from './components/ChatMessage';
 import { Button } from '@/components/ui/Button';
 import { FilePickerButton } from '@/components/ui/FilePickerButton';
+import { useLoaderData } from '@tanstack/react-router';
 
 const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
   const { data: messages } = useQuery(queryKeys.messages.chat(chatId));
@@ -88,7 +88,7 @@ const FilePicker: FC = () => {
 
 export const ChatView: FC = () => {
   const [showFilePicker, setShowFilePicker] = useState(false);
-  const { chatId } = useLoader({ from: chatRoute.id });
+  const { chatId } = useLoaderData({ from: chatRoute.id });
 
   return (
     <div className="flex h-full w-full flex-col items-center bg-white">

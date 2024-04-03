@@ -1,10 +1,10 @@
-import { rootRoute } from '@/router/config';
-import { Route, redirect } from '@tanstack/react-router';
-import { IndexLayout } from './IndexLayout';
 import { getUserData } from '@/api/user';
 import { env } from '@/env';
+import { rootRoute } from '@/router/config';
+import { createRoute, redirect } from '@tanstack/react-router';
+import { IndexLayout } from './IndexLayout';
 
-export const indexLayoutRoute = new Route({
+export const indexLayoutRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: 'indexLayoutRoute',
   loader: async () => {

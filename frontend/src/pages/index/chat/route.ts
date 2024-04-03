@@ -1,12 +1,11 @@
-import { Route } from '@tanstack/react-router';
-import { ChatView } from './ChatView';
+import { createRoute } from '@tanstack/react-router';
 import { indexLayoutRoute } from '../layout/route';
+import { ChatView } from './ChatView';
 
-export const chatRoute = new Route({
+export const chatRoute = createRoute({
   getParentRoute: () => indexLayoutRoute,
   path: '/chat/$chatId',
   component: ChatView,
-  loaderContext: (ctx) => ctx,
   loader: (ctx) => {
     return {
       chatId: ctx.params.chatId,
