@@ -1,22 +1,24 @@
+import { Button } from '@/components/ui/Button';
+import { FilePickerButton } from '@/components/ui/FilePickerButton';
 import { queryKeys } from '@/configs/queryKeys';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useLoaderData } from '@tanstack/react-router';
 import prettyBytes from 'pretty-bytes';
 import { FC, useEffect, useRef, useState } from 'react';
 import { ChatHeader } from './components/ChatHeader';
+import { ChatMessage } from './components/ChatMessage';
 import { MessageInput } from './components/MessageInput';
 import { chatRoute } from './route';
-import { ChatMessage } from './components/ChatMessage';
-import { Button } from '@/components/ui/Button';
-import { FilePickerButton } from '@/components/ui/FilePickerButton';
-import { useLoaderData } from '@tanstack/react-router';
 
 const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
   const { data: messages } = useQuery(queryKeys.messages.chat(chatId));
   const lastMessage = useRef<null | HTMLLIElement>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     lastMessage.current?.scrollIntoView();
-  }, [messages]);
+    queryClient.refetchQueries({ queryKey: queryKeys.chats.all.queryKey });
+  }, [messages, queryClient]);
 
   return (
     <ul className="flex h-20 w-full max-w-3xl grow flex-col gap-5 overflow-y-scroll pt-4">
@@ -88,7 +90,6 @@ const FilePicker: FC = () => {
 
 export const ChatView: FC = () => {
   const [showFilePicker, setShowFilePicker] = useState(false);
-  console.log('SHOW', showFilePicker);
   const { chatId } = useLoaderData({ from: chatRoute.id });
 
   useEffect(() => {
