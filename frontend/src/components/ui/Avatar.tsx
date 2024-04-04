@@ -35,7 +35,7 @@ export const Avatar: FC<AvatarProps> = ({ imgUrl, alt }) => {
     <img
       src={formatPicURL(imgUrl)}
       alt={alt}
-      className="h-10 w-10 rounded-full object-cover"
+      className="max-w-10 max-h-10 min-h-[2.5rem] min-w-[2.5rem] rounded-full object-cover"
     />
   );
 };

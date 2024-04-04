@@ -23,7 +23,14 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => (
       to="/chat/$chatId"
       params={{ chatId: chat.chatID }}
     >
-      <Avatar imgUrl={chat.pictureUrl} />
+      <div className="relative">
+        {chat.unreadMessages > 0 && (
+          <div className="absolute -left-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-xs font-medium text-white">
+            {chat.unreadMessages}
+          </div>
+        )}
+        <Avatar imgUrl={chat.pictureUrl} />
+      </div>
       <div className="w-full truncate text-sm">
         <div className="flex w-full items-center justify-between">
           <p className="font-semibold">{chat.chatName}</p>
