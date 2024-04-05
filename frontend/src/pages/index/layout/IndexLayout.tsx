@@ -12,10 +12,10 @@ export const IndexLayout: FC = () => {
   const chatId = useChatId();
   const queryClient = useQueryClient();
 
-  const { webSocket, isAuthenticated, setIsAuthenticated } =
+  const { webSocket, isAuthenticated, setIsAuthenticated, isReady } =
     useContext(WebSocketContext);
 
-  if (webSocket) {
+  if (webSocket && isReady) {
     if (!isAuthenticated) {
       webSocket.send('AUTH');
     }

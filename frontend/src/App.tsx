@@ -16,14 +16,17 @@ export const WebSocketContext = createContext<{
   webSocket: WebSocket | null;
   isAuthenticated: boolean;
   setIsAuthenticated: ((isAuthenticated: boolean) => void) | null;
+  isReady: boolean;
 }>({
   webSocket: null,
   isAuthenticated: false,
   setIsAuthenticated: null,
+  isReady: false,
 });
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const [webSocket, setWebSocket] = useState<WebSocket | null>(null);
 
   useEffect(() => {
@@ -31,16 +34,17 @@ const App = () => {
     setWebSocket(ws);
 
     ws.onopen = () => {
-      ws.send('LOL');
+      setIsReady(true);
     };
   }, []);
 
   return (
     <WebSocketContext.Provider
       value={{
-        webSocket: webSocket,
-        isAuthenticated: isAuthenticated,
-        setIsAuthenticated: setIsAuthenticated,
+        webSocket,
+        isAuthenticated,
+        setIsAuthenticated,
+        isReady,
       }}
     >
       <QueryClientProvider client={queryClient}>
