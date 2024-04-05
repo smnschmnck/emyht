@@ -1,21 +1,28 @@
+import { WebSocketContext } from '@/App';
+import { handleWebsocketMessage } from '@/utils/websocket/handleWebsocketMessage';
 import { useQueryClient } from '@tanstack/react-query';
-import { Outlet, useLoaderData } from '@tanstack/react-router';
-import { FC } from 'react';
+import { Outlet } from '@tanstack/react-router';
+import { FC, useContext } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Sidebar } from './components/Sidebar';
-import { indexLayoutRoute } from './route';
 import { useChatId, useIsSidebarHidden } from './hooks';
-import { handleWebsocketMessage } from '@/utils/websocket/handleWebsocketMessage';
 
 export const IndexLayout: FC = () => {
   const isSidebarHidden = useIsSidebarHidden();
   const chatId = useChatId();
-  const { webSocket } = useLoaderData({ from: indexLayoutRoute.id });
   const queryClient = useQueryClient();
 
-  webSocket.onmessage = (msg) => {
-    handleWebsocketMessage(msg, queryClient, chatId);
-  };
+  const { webSocket, isAuthenticated, setIsAuthenticated } =
+    useContext(WebSocketContext);
+
+  if (webSocket) {
+    if (!isAuthenticated) {
+      webSocket.send('AUTH');
+    }
+    webSocket.onmessage = (msg) => {
+      handleWebsocketMessage(msg, queryClient, setIsAuthenticated, chatId);
+    };
+  }
 
   return (
     <div className="flex h-full">

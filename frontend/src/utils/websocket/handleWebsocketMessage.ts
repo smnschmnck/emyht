@@ -18,8 +18,10 @@ const sendSocketAuthRequest = async (id: string) => {
     }
   );
   if (!res.ok) {
-    alert(await res.text());
+    return { success: false };
   }
+
+  return { success: true };
 };
 
 type EventTypes = 'message' | 'chat' | 'contactRequest' | 'auth';
@@ -32,6 +34,7 @@ type WebSocketData = {
 export const handleWebsocketMessage = async (
   msg: MessageEvent<string>,
   queryClient: QueryClient,
+  setIsAuthenticated: ((isAuthenticated: boolean) => void) | null,
   chatId?: string
 ) => {
   const json: WebSocketData = JSON.parse(msg.data);
@@ -54,6 +57,7 @@ export const handleWebsocketMessage = async (
     if (!payload?.id) {
       return;
     }
-    sendSocketAuthRequest(payload.id);
+    const { success } = await sendSocketAuthRequest(payload.id);
+    setIsAuthenticated?.(success);
   }
 };

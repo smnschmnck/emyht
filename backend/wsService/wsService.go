@@ -48,11 +48,15 @@ type wsEvent struct {
 	Event string `json:"event"`
 }
 
-func recieveIncomingWebsocketMessages(ws *websocket.Conn) error {
+func recieveIncomingWebsocketMessages(ws *websocket.Conn, websocketId string) error {
 	for {
-		_, _, err := ws.ReadMessage()
+		_, msg, err := ws.ReadMessage()
 		if err != nil {
 			return err
+		}
+
+		if string(msg) == "AUTH" {
+			sendSocketID(ws, websocketId)
 		}
 	}
 }
@@ -85,7 +89,7 @@ func handleWsClose(websocketID string) error {
 	return errors.New("SOCKET NOT FOUND")
 }
 
-func sendInitialSocketID(ws *websocket.Conn, uuid string) error {
+func sendSocketID(ws *websocket.Conn, uuid string) error {
 	type socketAuthID struct {
 		Id string `json:"id"`
 	}
@@ -100,8 +104,7 @@ func InitializeNewSocketConnection(c echo.Context) error {
 	}
 	websocketID := uuid.New().String()
 	socketIdToConn[websocketID] = ws
-	sendInitialSocketID(ws, websocketID)
-	err = recieveIncomingWebsocketMessages(ws)
+	err = recieveIncomingWebsocketMessages(ws, websocketID)
 	if err != nil {
 		handleWsClose(websocketID)
 	}
