@@ -7,7 +7,7 @@ import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 export const InitiationView: FC = () => {
   return (
     <div className="flex h-full w-full flex-col gap-8 overflow-scroll px-6 py-10 md:px-8 lg:px-10 xl:px-14">
-      <div className="flex gap-6">
+      <div className="flex items-center gap-6">
         <ButtonLink to="/" aria-label={'back'} className="h-8 w-8 lg:hidden">
           <ChevronLeftIcon className="text-zinc-400" />
         </ButtonLink>
