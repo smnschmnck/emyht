@@ -18,14 +18,14 @@ export const ChatCreator: FC = () => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-8 rounded-xl border border-zinc-100 bg-white p-10 shadow-sm">
+    <div className="flex w-full flex-col gap-8 rounded-xl border border-zinc-100 bg-white p-6 shadow-sm lg:p-10">
       <div>
         <h2 className="text-sm font-semibold">New chat</h2>
         <p className="text-sm text-zinc-500">
           Start a new chat or group chat with your contacts
         </p>
       </div>
-      <div className="flex gap-10">
+      <div className="flex flex-col gap-10 xl:flex-row">
         <div className="h-96 max-h-60 w-full">
           <UserList
             selectedUsers={selectedUsers}

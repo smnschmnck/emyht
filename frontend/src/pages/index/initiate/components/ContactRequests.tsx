@@ -40,16 +40,16 @@ export const ContactRequests: FC = () => {
   });
 
   return (
-    <div className="flex w-full flex-col gap-8 rounded-xl border border-zinc-100 bg-white p-10 shadow-sm">
+    <div className="flex w-full flex-col gap-8 rounded-xl border border-zinc-100 bg-white p-6 shadow-sm lg:p-10">
       <div>
         <h2 className="text-sm font-semibold">Your sent requests</h2>
         <p className="text-sm text-zinc-500">
           You asked contacts associated with these E-Mails to connect
         </p>
       </div>
-      <div className="flex w-full gap-12">
+      <div className="flex w-full flex-col gap-12 xl:flex-row">
         <ContactRequestsTable />
-        <div className="flex h-fit flex-col gap-4 rounded-xl bg-zinc-50 p-8">
+        <div className="flex h-fit flex-col gap-4 rounded-xl bg-zinc-50 p-6 lg:p-8">
           <div className="pr-20">
             <h3 className="text-sm font-semibold">Send request</h3>
             <p className="w-max text-sm text-zinc-500">
