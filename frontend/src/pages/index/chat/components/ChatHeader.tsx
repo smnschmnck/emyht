@@ -7,7 +7,33 @@ import {
   EllipsisHorizontalIcon,
 } from '@heroicons/react/24/outline';
 import { useQuery } from '@tanstack/react-query';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { FC } from 'react';
+
+const DropdownOptions: FC = () => {
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
+        <IconButton ariaLabel={'Chat settings'} className="h-8 w-8">
+          <EllipsisHorizontalIcon className="text-zinc-400" />
+        </IconButton>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          className="rounded-md border bg-white p-1 shadow-sm"
+          align="end"
+        >
+          <DropdownMenu.Item className="flex h-8 w-32 cursor-pointer items-center rounded-sm pl-3 text-sm font-medium outline-none data-[highlighted]:bg-blue-50">
+            Leave
+          </DropdownMenu.Item>
+          <DropdownMenu.Item className="flex h-8 w-32 cursor-pointer items-center rounded-sm pl-3 text-sm font-medium outline-none data-[highlighted]:bg-blue-50">
+            Invite
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  );
+};
 
 export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
   const { data: allChats } = useQuery(queryKeys.chats.all);
@@ -29,9 +55,7 @@ export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
           <p className="text-zinc-500">{chatInfo?.info}</p>
         </div>
       </div>
-      <IconButton ariaLabel={'Chat settings'} className="h-8 w-8">
-        <EllipsisHorizontalIcon className="text-zinc-400" />
-      </IconButton>
+      <DropdownOptions />
     </div>
   );
 };
