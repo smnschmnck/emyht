@@ -10,10 +10,12 @@ emyht is a chat app that lets you stay in touch with your friends, family and ev
 
 - Frontend
   - [TypeScript](https://github.com/microsoft/TypeScript)
-  - [Next.js](https://github.com/vercel/next.js/)
+  - [React](https://github.com/facebook/react)
   - [TanStack Query](https://github.com/TanStack/query)
+  - [TanStack Router](https://github.com/TanStack/router)
   - [Native WebSockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket?retiredLocale=de)
-  - [CSS Modules](https://github.com/css-modules)
+  - [Tailwind](https://github.com/tailwindlabs/tailwindcss)
+  - [Vite](https://github.com/vitejs/vite)
 - Backend
   - [Go](https://github.com/golang/go)
   - [Labstack Echo](https://github.com/labstack/echo)
