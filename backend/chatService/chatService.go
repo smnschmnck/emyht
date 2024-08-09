@@ -625,7 +625,7 @@ func SendMessage(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	err = sendNewMessageNotification(chatID, messages)
+	err = sendNewMessageNotification(chatID)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -753,7 +753,7 @@ func getChatMembers(chatId string) ([]string, error) {
 	return uuids, nil
 }
 
-func sendNewMessageNotification(chatId string, messages []singleMessage) error {
+func sendNewMessageNotification(chatId string) error {
 	chatmembers, err := getChatMembers(chatId)
 	if err != nil {
 		return err
