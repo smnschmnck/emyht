@@ -1,19 +1,18 @@
 import { Badge } from '@/components/ui/Bagde';
-import { TLinkProps } from '@/router/config';
 import emyhtLogo from '@assets/images/emyht-logo.svg';
-import { Link } from '@tanstack/react-router';
+import { Link, createLink } from '@tanstack/react-router';
 import { FC, ReactNode } from 'react';
 import ballonIllustration from './assets/balloon_illustration.svg';
 import { useContactRequests } from '@/hooks/api/contacts';
 
-const CtaLink = <TLinkOptions extends string = '.'>(
-  props: TLinkProps<TLinkOptions> & { children: ReactNode }
-) => (
+const CtaLinkWrapper = (props: { children: ReactNode }) => (
   <Link
     className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl border border-zinc-100 bg-white px-12 text-sm font-semibold shadow-sm transition hover:bg-zinc-100"
     {...props}
   />
 );
+
+const CtaLink = createLink(CtaLinkWrapper);
 
 export const IndexPage: FC = () => {
   const { data } = useContactRequests();

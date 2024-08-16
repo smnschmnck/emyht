@@ -1,5 +1,4 @@
-import { TLinkProps } from '@/router/config';
-import { Link as RouterLink } from '@tanstack/react-router';
+import { createLink } from '@tanstack/react-router';
 import { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 
@@ -9,18 +8,16 @@ type ExtraProps = {
   'aria-label': string;
 };
 
-export const ButtonLink = <TLinkOptions extends string = '.'>({
-  children,
-  className,
-  ...props
-}: TLinkProps<TLinkOptions> & ExtraProps) => (
-  <RouterLink
+const ButtonLinkWrapper = ({ children, className, ...props }: ExtraProps) => (
+  <div
     className={twMerge(
-      'inline-flex h-9 w-9 items-center justify-center rounded-md bg-white p-2 text-blue-600 transition hover:bg-blue-100',
+      'inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-md bg-white p-2 text-blue-600 transition hover:bg-blue-100',
       className
     )}
     {...props}
   >
     <div className="h-full w-full">{children as ReactNode}</div>
-  </RouterLink>
+  </div>
 );
+
+export const ButtonLink = createLink(ButtonLinkWrapper);

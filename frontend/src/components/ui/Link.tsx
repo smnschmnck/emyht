@@ -1,16 +1,11 @@
-import { TLinkProps } from '@/router/config';
-import { Link as RouterLink } from '@tanstack/react-router';
+import { createLink } from '@tanstack/react-router';
 import { ReactNode } from 'react';
 
-type ExtraProps = {
-  children: ReactNode;
-};
-
-export const Link = <TLinkOptions extends string = '.'>({
-  ...props
-}: TLinkProps<TLinkOptions> & ExtraProps) => (
-  <RouterLink
-    className="text-sm font-medium text-blue-600 hover:underline"
+const LinkWrapper = ({ ...props }: { children?: ReactNode }) => (
+  <span
+    className="cursor-pointer text-sm font-medium text-blue-600 hover:underline"
     {...props}
   />
 );
+
+export const Link = createLink(LinkWrapper);

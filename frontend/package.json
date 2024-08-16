@@ -21,7 +21,7 @@
     "@radix-ui/react-radio-group": "^1.1.3",
     "@t3-oss/env-core": "^0.7.1",
     "@tanstack/react-query": "^5.4.3",
-    "@tanstack/react-router": "1.26.7",
+    "@tanstack/react-router": "1.48.1",
     "class-variance-authority": "^0.7.0",
     "pretty-bytes": "^6.1.1",
     "react": "^18.2.0",
