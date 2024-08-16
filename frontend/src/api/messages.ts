@@ -1,4 +1,5 @@
 import { env } from '@/env';
+import { useQuery } from '@tanstack/react-query';
 
 export type ChatMessage = {
   messageID: string;
@@ -11,14 +12,26 @@ export type ChatMessage = {
   deliveryStatus: string;
 };
 
-export const getMessagesByChat = async (chatId: string) => {
-  const res = await fetch(`${env.VITE_BACKEND_HOST}/chatMessages/${chatId}`, {
-    credentials: 'include',
+export const useChatMessages = (chatId?: string) => {
+  return useQuery({
+    queryKey: ['chatMessages', chatId],
+    queryFn: async () => {
+      if (!chatId) {
+        return [];
+      }
+
+      const res = await fetch(
+        `${env.VITE_BACKEND_HOST}/chatMessages/${chatId}`,
+        {
+          credentials: 'include',
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+
+      return (await res.json()) as ChatMessage[];
+    },
   });
-
-  if (!res.ok) {
-    throw new Error(await res.text());
-  }
-
-  return (await res.json()) as ChatMessage[];
 };

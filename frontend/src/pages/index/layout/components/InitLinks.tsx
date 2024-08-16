@@ -1,15 +1,12 @@
+import { useContactRequests } from '@/api/contacts';
 import { Badge } from '@/components/ui/Bagde';
 import { ButtonLink } from '@/components/ui/ButtonLink';
-import { queryKeys } from '@/configs/queryKeys';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { UsersIcon } from '@heroicons/react/24/solid';
-import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
 
 export const InitLinks: FC = () => {
-  const { data: contactRequests } = useQuery(
-    queryKeys.contacts.incomingRequests
-  );
+  const { data: contactRequests } = useContactRequests();
 
   const hasContactRequests = !!contactRequests && contactRequests.length > 0;
 

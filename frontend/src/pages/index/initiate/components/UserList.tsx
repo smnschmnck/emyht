@@ -1,10 +1,9 @@
+import { useContacts } from '@/api/contacts';
 import { CheckMarkIcon } from '@/assets/icons/CheckmarkIcon';
 import { Avatar } from '@/components/ui/Avatar';
 import { Input } from '@/components/ui/Input';
 import { Spinner } from '@/components/ui/Spinner';
-import { queryKeys } from '@/configs/queryKeys';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { useQuery } from '@tanstack/react-query';
 import { FC, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
@@ -28,7 +27,7 @@ export const UserList: FC<UserListProps> = ({
   selectedUsers,
   setSelectedUsers,
 }) => {
-  const { data: contacts, isLoading } = useQuery(queryKeys.contacts.all);
+  const { data: contacts, isLoading } = useContacts();
   const [searchQuery, setSearchQuery] = useState('');
   const changeUser = (id: string) => {
     if (selectedUsers.includes(id)) {

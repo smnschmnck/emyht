@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/Button';
 import { FormInput } from '@/components/ui/FormInput';
 import { Link } from '@/components/ui/Link';
 import { SimpleErrorMessage } from '@/components/ui/SimpleErrorMessage';
-import { queryKeys } from '@/configs/queryKeys';
 import { env } from '@/env';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
@@ -39,7 +38,6 @@ export const SignInPage: FC = () => {
   };
 
   const loginMutation = useMutation({
-    mutationKey: queryKeys.users.details.queryKey,
     mutationFn: login,
     onSuccess: ({ emailActive }) => {
       if (!emailActive) {

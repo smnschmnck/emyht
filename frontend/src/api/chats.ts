@@ -1,5 +1,5 @@
 import { env } from '@/env';
-import { HttpError } from '@/errors/httpError/httpError';
+import { useQuery } from '@tanstack/react-query';
 
 export type Chat = {
   chatID: string;
@@ -16,35 +16,20 @@ export type Chat = {
   senderUsername?: string;
 };
 
-export const getChats = async () => {
-  const res = await fetch(`${env.VITE_BACKEND_HOST}/chats`, {
-    credentials: 'include',
+export const useChats = () => {
+  return useQuery({
+    queryKey: ['allChats'],
+    queryFn: async () => {
+      const res = await fetch(`${env.VITE_BACKEND_HOST}/chats`, {
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        return [];
+      }
+      const json = (await res.json()) as Chat[];
+
+      return json;
+    },
   });
-
-  if (!res.ok) {
-    return [];
-  }
-  const json = (await res.json()) as Chat[];
-
-  return json;
-};
-
-type ChatInfo = {
-  info: string;
-};
-
-export const getChatInfo = async (chatId: string) => {
-  const res = await fetch(`${env.VITE_BACKEND_HOST}/chatInfo/${chatId}`, {
-    credentials: 'include',
-  });
-
-  if (!res.ok) {
-    throw new HttpError({
-      message: await res.text(),
-      statusCode: res.status,
-    });
-  }
-  const json = (await res.json()) as ChatInfo;
-
-  return json;
 };

@@ -1,9 +1,10 @@
+import { useChats } from '@/api/chats';
+import { useChatMessages } from '@/api/messages';
 import { IconButton } from '@/components/ui/IconButton';
-import { queryKeys } from '@/configs/queryKeys';
 import { env } from '@/env';
 import { HttpError } from '@/errors/httpError/httpError';
 import { PaperAirplaneIcon, PaperClipIcon } from '@heroicons/react/24/solid';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { FC, FormEvent, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -13,7 +14,8 @@ export const MessageInput: FC<{
   setShowFilePicker: (showFilePicker: boolean) => void;
 }> = ({ chatId, setShowFilePicker, showFilePicker }) => {
   const [textContent, setTextContent] = useState('');
-  const queryClient = useQueryClient();
+  const { refetch: refetchChats } = useChats();
+  const { refetch: refetchChatMessages } = useChatMessages(chatId);
 
   const { mutate: sendMessage } = useMutation({
     mutationFn: async (event: FormEvent) => {
@@ -44,8 +46,8 @@ export const MessageInput: FC<{
     },
     onSuccess: () => {
       setTextContent('');
-      queryClient.refetchQueries(queryKeys.messages.chat(chatId));
-      queryClient.refetchQueries(queryKeys.chats.all);
+      refetchChatMessages();
+      refetchChats();
     },
     onError: (err) => {
       toast.error(err.message);

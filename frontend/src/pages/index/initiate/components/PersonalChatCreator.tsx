@@ -1,8 +1,8 @@
+import { useChats } from '@/api/chats';
 import { Button } from '@/components/ui/Button';
-import { queryKeys } from '@/configs/queryKeys';
 import { env } from '@/env';
 import { HttpError } from '@/errors/httpError/httpError';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { FC } from 'react';
 import { toast } from 'sonner';
 
@@ -13,7 +13,7 @@ type PersonalChatCreatorProps = {
 export const PersonalChatCreator: FC<PersonalChatCreatorProps> = ({
   selectedUsers,
 }) => {
-  const queryClient = useQueryClient();
+  const { refetch: refetchChats } = useChats();
   const { mutate: createChat } = useMutation({
     mutationFn: async () => {
       const res = await fetch(`${env.VITE_BACKEND_HOST}/startOneOnOneChat`, {
@@ -36,9 +36,7 @@ export const PersonalChatCreator: FC<PersonalChatCreatorProps> = ({
     },
     onSuccess: () => {
       toast.success('Chat created successfully');
-      queryClient.refetchQueries({
-        queryKey: queryKeys.chats.all.queryKey,
-      });
+      refetchChats();
     },
     onError: (e) => {
       toast.error(e.message);

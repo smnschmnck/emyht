@@ -1,15 +1,15 @@
+import { useSentContactRequests } from '@/api/contacts';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { FC, FormEvent, useState } from 'react';
-import { ContactRequestsTable } from './ContactRequestsTable';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { env } from '@/env';
+import { useMutation } from '@tanstack/react-query';
+import { FC, FormEvent, useState } from 'react';
 import { toast } from 'sonner';
-import { queryKeys } from '@/configs/queryKeys';
+import { ContactRequestsTable } from './ContactRequestsTable';
 
 export const ContactRequests: FC = () => {
   const [recepientEmail, setRecepientEmail] = useState('');
-  const queryClient = useQueryClient();
+  const { refetch: refetchSentContactRequests } = useSentContactRequests();
 
   const { mutate: sendRequest } = useMutation({
     mutationFn: async (event: FormEvent) => {
@@ -31,7 +31,7 @@ export const ContactRequests: FC = () => {
       }
     },
     onSuccess: () => {
-      queryClient.refetchQueries(queryKeys.contacts.sentRequests);
+      refetchSentContactRequests();
       toast.success('Contact request sent successfully');
     },
     onError: (e) => {

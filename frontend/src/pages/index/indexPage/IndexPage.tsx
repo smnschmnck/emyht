@@ -1,8 +1,7 @@
+import { useContactRequests } from '@/api/contacts';
 import { Badge } from '@/components/ui/Bagde';
-import { queryKeys } from '@/configs/queryKeys';
 import { TLinkProps } from '@/router/config';
 import emyhtLogo from '@assets/images/emyht-logo.svg';
-import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { FC, ReactNode } from 'react';
 import ballonIllustration from './assets/balloon_illustration.svg';
@@ -17,7 +16,7 @@ const CtaLink = <TLinkOptions extends string = '.'>(
 );
 
 export const IndexPage: FC = () => {
-  const { data } = useQuery(queryKeys.contacts.incomingRequests);
+  const { data } = useContactRequests();
   const hasContactRequests = !!data && data.length > 0;
 
   return (

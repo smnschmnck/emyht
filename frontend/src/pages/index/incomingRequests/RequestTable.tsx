@@ -1,11 +1,10 @@
-import { FC } from 'react';
+import { useContactRequests } from '@/api/contacts';
+import { CheckMarkIcon } from '@/assets/icons/CheckmarkIcon';
 import { Avatar } from '@/components/ui/Avatar';
 import { IconButton } from '@/components/ui/IconButton';
 import { Spinner } from '@/components/ui/Spinner';
-import { queryKeys } from '@/configs/queryKeys';
-import { useQuery } from '@tanstack/react-query';
-import { CheckMarkIcon } from '@/assets/icons/CheckmarkIcon';
 import { NoSymbolIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { FC } from 'react';
 
 export type ContactRequestActions = 'accept' | 'decline' | 'block';
 
@@ -17,7 +16,7 @@ type RequestTableProps = {
 };
 
 export const RequestTable: FC<RequestTableProps> = ({ handleRequest }) => {
-  const { data, isLoading } = useQuery(queryKeys.contacts.incomingRequests);
+  const { data, isLoading } = useContactRequests();
 
   return (
     <div className="max-h-72 w-full overflow-scroll pr-4">

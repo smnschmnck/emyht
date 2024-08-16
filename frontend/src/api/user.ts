@@ -1,5 +1,6 @@
 import { env } from '@/env';
 import { HttpError } from '@/errors/httpError/httpError';
+import { useQuery } from '@tanstack/react-query';
 
 export type UserData = {
   uuid: string;
@@ -22,4 +23,8 @@ export const getUserData = async () => {
   }
 
   return (await res.json()) as UserData;
+};
+
+export const useUserData = () => {
+  return useQuery({ queryKey: ['userDetails'], queryFn: getUserData });
 };

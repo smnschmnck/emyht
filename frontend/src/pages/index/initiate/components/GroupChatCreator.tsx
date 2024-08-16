@@ -1,10 +1,10 @@
+import { useChats } from '@/api/chats';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { queryKeys } from '@/configs/queryKeys';
 import { env } from '@/env';
 import { HttpError } from '@/errors/httpError/httpError';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { FC, FormEvent, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -16,7 +16,7 @@ export const GroupChatCreator: FC<GroupChatCreatorProps> = ({
   selectedUsers,
 }) => {
   const [chatName, setChatName] = useState('');
-  const queryClient = useQueryClient();
+  const { refetch: refetchChats } = useChats();
   const { mutate: createChat } = useMutation({
     mutationFn: async (event: FormEvent) => {
       event.preventDefault();
@@ -46,9 +46,7 @@ export const GroupChatCreator: FC<GroupChatCreatorProps> = ({
     },
     onSuccess: () => {
       toast.success('Chat created successfully');
-      queryClient.refetchQueries({
-        queryKey: queryKeys.chats.all.queryKey,
-      });
+      refetchChats();
     },
     onError: (e) => {
       toast.error(e.message);

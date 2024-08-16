@@ -1,16 +1,14 @@
-import { Chat } from '@/api/chats';
+import { Chat, useChats } from '@/api/chats';
 import { Avatar } from '@/components/ui/Avatar';
 import { Input } from '@/components/ui/Input';
 import { Link } from '@/components/ui/Link';
-import { queryKeys } from '@/configs/queryKeys';
+import { Spinner } from '@/components/ui/Spinner';
 import { useDataChangeDetector } from '@/hooks/api/useDataChangeDetector';
+import { formatTimestamp } from '@/utils/dateUtils';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { useQuery } from '@tanstack/react-query';
-import { FC, useState } from 'react';
 import { Link as RouterLink } from '@tanstack/react-router';
-import { Spinner } from '@/components/ui/Spinner';
-import { formatTimestamp } from '@/utils/dateUtils';
+import { FC, useState } from 'react';
 
 type SingleChatProps = {
   chat: Chat;
@@ -47,9 +45,7 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => (
 );
 
 export const ChatList: FC = () => {
-  const { data: chats, isLoading: isLoadingChats } = useQuery(
-    queryKeys.chats.all
-  );
+  const { data: chats, isLoading: isLoadingChats } = useChats();
   const [chatSearchQuery, setChatSearchQuery] = useState('');
   const [animationParent, enable] = useAutoAnimate();
 

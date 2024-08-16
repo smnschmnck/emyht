@@ -1,11 +1,10 @@
 import { ChatMessage as ChatMessageType } from '@/api/messages';
-import { queryKeys } from '@/configs/queryKeys';
+import { useUserData } from '@/api/user';
 import { formatTimestamp } from '@/utils/dateUtils';
-import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
 
 export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
-  const { data } = useQuery(queryKeys.users.details);
+  const { data } = useUserData();
 
   if (!data) {
     return <></>;

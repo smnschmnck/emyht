@@ -1,7 +1,6 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { ButtonLink } from '@/components/ui/ButtonLink';
 import { IconButton } from '@/components/ui/IconButton';
-import { queryKeys } from '@/configs/queryKeys';
 import {
   ChevronLeftIcon,
   EllipsisHorizontalIcon,
@@ -9,6 +8,9 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { FC } from 'react';
+import { useChats } from '@/api/chats';
+import { HttpError } from '@/errors/httpError/httpError';
+import { env } from '@/env';
 
 const DropdownOptions: FC = () => {
   return (
@@ -36,8 +38,27 @@ const DropdownOptions: FC = () => {
 };
 
 export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
-  const { data: allChats } = useQuery(queryKeys.chats.all);
-  const { data: chatInfo } = useQuery(queryKeys.chats.info(chatId));
+  const { data: allChats } = useChats();
+  const { data: chatInfo } = useQuery({
+    queryKey: ['chatInfo', chatId],
+    queryFn: async () => {
+      const res = await fetch(`${env.VITE_BACKEND_HOST}/chatInfo/${chatId}`, {
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        throw new HttpError({
+          message: await res.text(),
+          statusCode: res.status,
+        });
+      }
+      const json = (await res.json()) as {
+        info: string;
+      };
+
+      return json;
+    },
+  });
 
   const curChat = allChats?.find((c) => c.chatID === chatId);
 

@@ -1,6 +1,4 @@
-import { queryKeys } from '@/configs/queryKeys';
 import { env } from '@/env';
-import { QueryClient } from '@tanstack/react-query';
 
 const sendSocketAuthRequest = async (id: string) => {
   const body = {
@@ -31,27 +29,38 @@ type WebSocketData = {
   payload?: { id: string };
 };
 
-export const handleWebsocketMessage = async (
-  msg: MessageEvent<string>,
-  queryClient: QueryClient,
-  setIsAuthenticated: ((isAuthenticated: boolean) => void) | null,
-  chatId?: string
-) => {
+type HandleWebsocketMessageArgs = {
+  msg: MessageEvent<string>;
+  refetchChats: () => void;
+  refetchChatMessages: () => void;
+  refetchContactRequests: () => void;
+  setIsAuthenticated: ((isAuthenticated: boolean) => void) | null;
+  chatId?: string;
+};
+
+export const handleWebsocketMessage = async ({
+  msg,
+  refetchChats,
+  setIsAuthenticated,
+  chatId,
+  refetchChatMessages,
+  refetchContactRequests,
+}: HandleWebsocketMessageArgs) => {
   const json: WebSocketData = JSON.parse(msg.data);
   const event = json.event;
   const payload = json.payload;
 
   if (event === 'message') {
-    queryClient.refetchQueries(queryKeys.chats.all);
+    refetchChats();
     if (chatId) {
-      queryClient.refetchQueries(queryKeys.messages.chat(chatId));
+      refetchChatMessages();
     }
   }
   if (event === 'chat') {
-    queryClient.refetchQueries(queryKeys.chats.all);
+    refetchChats();
   }
   if (event === 'contactRequest') {
-    queryClient.refetchQueries(queryKeys.contacts.incomingRequests);
+    refetchContactRequests();
   }
   if (event === 'auth') {
     if (!payload?.id) {

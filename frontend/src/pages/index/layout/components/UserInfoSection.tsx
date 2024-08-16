@@ -1,12 +1,11 @@
+import { useUserData } from '@/api/user';
 import { IconButton } from '@/components/ui/IconButton';
-import { queryKeys } from '@/configs/queryKeys';
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
-import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
 import { LogOutButton } from './LogOutButton';
 
 export const UserInfoSection: FC = () => {
-  const { data: userData } = useQuery(queryKeys.users.details);
+  const { data: userData } = useUserData();
 
   return (
     <div className="flex h-24 w-full items-center justify-between bg-blue-600 px-6 text-white">

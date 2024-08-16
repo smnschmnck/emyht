@@ -2,13 +2,14 @@ import { FC } from 'react';
 import { ContactRequestActions, RequestTable } from './RequestTable';
 import { env } from '@/env';
 import { HttpError } from '@/errors/httpError/httpError';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { queryKeys } from '@/configs/queryKeys';
+import { useMutation } from '@tanstack/react-query';
 import { ButtonLink } from '@/components/ui/ButtonLink';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
+import { useContactRequests, useContacts } from '@/api/contacts';
 
 export const IncomingRequests: FC = () => {
-  const queryClient = useQueryClient();
+  const { refetch: refetchContacts } = useContacts();
+  const { refetch: refetchContactRequests } = useContactRequests();
 
   const handleContactRequest = useMutation({
     mutationFn: async (opts: {
@@ -32,8 +33,8 @@ export const IncomingRequests: FC = () => {
       }
     },
     onSuccess: () => {
-      queryClient.refetchQueries(queryKeys.contacts.all);
-      queryClient.refetchQueries(queryKeys.contacts.incomingRequests);
+      refetchContacts();
+      refetchContactRequests();
     },
   });
 

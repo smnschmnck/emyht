@@ -1,16 +1,20 @@
 import { WebSocketContext } from '@/App';
 import { handleWebsocketMessage } from '@/utils/websocket/handleWebsocketMessage';
-import { useQueryClient } from '@tanstack/react-query';
 import { Outlet } from '@tanstack/react-router';
 import { FC, useContext } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Sidebar } from './components/Sidebar';
 import { useChatId, useIsSidebarHidden } from './hooks';
+import { useChats } from '@/api/chats';
+import { useChatMessages } from '@/api/messages';
+import { useContactRequests } from '@/api/contacts';
 
 export const IndexLayout: FC = () => {
   const isSidebarHidden = useIsSidebarHidden();
   const chatId = useChatId();
-  const queryClient = useQueryClient();
+  const { refetch: refetchChats } = useChats();
+  const { refetch: refetchChatMessages } = useChatMessages(chatId);
+  const { refetch: refetchContactRequests } = useContactRequests();
 
   const { webSocket, isAuthenticated, setIsAuthenticated, isReady } =
     useContext(WebSocketContext);
@@ -20,7 +24,14 @@ export const IndexLayout: FC = () => {
       webSocket.send('AUTH');
     }
     webSocket.onmessage = (msg) => {
-      handleWebsocketMessage(msg, queryClient, setIsAuthenticated, chatId);
+      handleWebsocketMessage({
+        msg,
+        setIsAuthenticated,
+        refetchChatMessages,
+        chatId,
+        refetchChats,
+        refetchContactRequests,
+      });
     };
   }
 
