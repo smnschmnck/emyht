@@ -3,7 +3,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Input } from '@/components/ui/Input';
 import { Link } from '@/components/ui/Link';
 import { Spinner } from '@/components/ui/Spinner';
-import { useDataChangeDetector } from '@/hooks/api/useDataChangeDetector';
+import { useDataChangeDetector } from '@/hooks/useDataChangeDetector';
 import { formatTimestamp } from '@/utils/dateUtils';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
