@@ -1,14 +1,13 @@
-import { Chat, useChats } from '@/api/chats';
 import { Avatar } from '@/components/ui/Avatar';
 import { Input } from '@/components/ui/Input';
 import { Link } from '@/components/ui/Link';
 import { Spinner } from '@/components/ui/Spinner';
-import { useDataChangeDetector } from '@/hooks/useDataChangeDetector';
+import { Chat, useChats } from '@/hooks/api/chats';
 import { formatTimestamp } from '@/utils/dateUtils';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { Link as RouterLink } from '@tanstack/react-router';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 
 type SingleChatProps = {
   chat: Chat;
@@ -43,6 +42,32 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => (
     </RouterLink>
   </li>
 );
+
+const useDataChangeDetector = <T,>({
+  data,
+  onChange,
+  onNoChange,
+}: {
+  data: T;
+  onChange: () => void;
+  onNoChange?: () => void;
+}) => {
+  const [prevData, setPrevData] = useState(data);
+
+  useEffect(() => {
+    if (
+      prevData !== null &&
+      prevData !== undefined &&
+      JSON.stringify(prevData) !== JSON.stringify(data)
+    ) {
+      onChange();
+    } else {
+      onNoChange?.();
+    }
+
+    setPrevData(data);
+  }, [data, prevData, onChange, onNoChange]);
+};
 
 export const ChatList: FC = () => {
   const { data: chats, isLoading: isLoadingChats } = useChats();
