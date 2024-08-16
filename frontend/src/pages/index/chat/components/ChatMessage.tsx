@@ -1,5 +1,5 @@
-import { ChatMessage as ChatMessageType } from '@/api/messages';
-import { useUserData } from '@/api/user';
+import { ChatMessage as ChatMessageType } from '@/hooks/api/messages';
+import { useUserData } from '@/hooks/api/user';
 import { formatTimestamp } from '@/utils/dateUtils';
 import { FC } from 'react';
 

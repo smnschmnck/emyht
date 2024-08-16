@@ -1,6 +1,6 @@
-import { useContactRequests } from '@/api/contacts';
 import { Badge } from '@/components/ui/Bagde';
 import { ButtonLink } from '@/components/ui/ButtonLink';
+import { useContactRequests } from '@/hooks/api/contacts';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { UsersIcon } from '@heroicons/react/24/solid';
 import { FC } from 'react';

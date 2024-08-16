@@ -1,6 +1,6 @@
-import { useSentContactRequests } from '@/api/contacts';
 import { IconButton } from '@/components/ui/IconButton';
 import { Spinner } from '@/components/ui/Spinner';
+import { useSentContactRequests } from '@/hooks/api/contacts';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { FC } from 'react';
 

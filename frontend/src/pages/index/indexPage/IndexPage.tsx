@@ -1,10 +1,10 @@
-import { useContactRequests } from '@/api/contacts';
 import { Badge } from '@/components/ui/Bagde';
 import { TLinkProps } from '@/router/config';
 import emyhtLogo from '@assets/images/emyht-logo.svg';
 import { Link } from '@tanstack/react-router';
 import { FC, ReactNode } from 'react';
 import ballonIllustration from './assets/balloon_illustration.svg';
+import { useContactRequests } from '@/hooks/api/contacts';
 
 const CtaLink = <TLinkOptions extends string = '.'>(
   props: TLinkProps<TLinkOptions> & { children: ReactNode }

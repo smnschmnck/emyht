@@ -1,8 +1,8 @@
-import { useUserData } from '@/api/user';
 import { IconButton } from '@/components/ui/IconButton';
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { FC } from 'react';
 import { LogOutButton } from './LogOutButton';
+import { useUserData } from '@/hooks/api/user';
 
 export const UserInfoSection: FC = () => {
   const { data: userData } = useUserData();

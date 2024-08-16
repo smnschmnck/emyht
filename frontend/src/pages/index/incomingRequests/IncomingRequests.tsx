@@ -5,7 +5,7 @@ import { HttpError } from '@/errors/httpError/httpError';
 import { useMutation } from '@tanstack/react-query';
 import { ButtonLink } from '@/components/ui/ButtonLink';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
-import { useContactRequests, useContacts } from '@/api/contacts';
+import { useContactRequests, useContacts } from '@/hooks/api/contacts';
 
 export const IncomingRequests: FC = () => {
   const { refetch: refetchContacts } = useContacts();

@@ -1,5 +1,3 @@
-import { useChats } from '@/api/chats';
-import { useChatMessages } from '@/api/messages';
 import { Button } from '@/components/ui/Button';
 import { FilePickerButton } from '@/components/ui/FilePickerButton';
 import { useQueryClient } from '@tanstack/react-query';
@@ -10,6 +8,8 @@ import { ChatHeader } from './components/ChatHeader';
 import { ChatMessage } from './components/ChatMessage';
 import { MessageInput } from './components/MessageInput';
 import { chatRoute } from './route';
+import { useChatMessages } from '@/hooks/api/messages';
+import { useChats } from '@/hooks/api/chats';
 
 const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
   const { data: messages } = useChatMessages(chatId);

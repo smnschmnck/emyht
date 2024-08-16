@@ -1,4 +1,3 @@
-import { useSentContactRequests } from '@/api/contacts';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { env } from '@/env';
@@ -6,6 +5,7 @@ import { useMutation } from '@tanstack/react-query';
 import { FC, FormEvent, useState } from 'react';
 import { toast } from 'sonner';
 import { ContactRequestsTable } from './ContactRequestsTable';
+import { useSentContactRequests } from '@/hooks/api/contacts';
 
 export const ContactRequests: FC = () => {
   const [recepientEmail, setRecepientEmail] = useState('');

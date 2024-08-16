@@ -1,9 +1,9 @@
-import { useChats } from '@/api/chats';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { env } from '@/env';
 import { HttpError } from '@/errors/httpError/httpError';
+import { useChats } from '@/hooks/api/chats';
 import { useMutation } from '@tanstack/react-query';
 import { FC, FormEvent, useState } from 'react';
 import { toast } from 'sonner';

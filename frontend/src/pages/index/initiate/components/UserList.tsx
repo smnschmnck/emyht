@@ -1,8 +1,8 @@
-import { useContacts } from '@/api/contacts';
 import { CheckMarkIcon } from '@/assets/icons/CheckmarkIcon';
 import { Avatar } from '@/components/ui/Avatar';
 import { Input } from '@/components/ui/Input';
 import { Spinner } from '@/components/ui/Spinner';
+import { useContacts } from '@/hooks/api/contacts';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { FC, useState } from 'react';
 import { twMerge } from 'tailwind-merge';

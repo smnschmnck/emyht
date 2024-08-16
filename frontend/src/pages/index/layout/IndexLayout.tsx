@@ -5,9 +5,9 @@ import { FC, useContext } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Sidebar } from './components/Sidebar';
 import { useChatId, useIsSidebarHidden } from './hooks';
-import { useChats } from '@/api/chats';
-import { useChatMessages } from '@/api/messages';
-import { useContactRequests } from '@/api/contacts';
+import { useChats } from '@/hooks/api/chats';
+import { useChatMessages } from '@/hooks/api/messages';
+import { useContactRequests } from '@/hooks/api/contacts';
 
 export const IndexLayout: FC = () => {
   const isSidebarHidden = useIsSidebarHidden();

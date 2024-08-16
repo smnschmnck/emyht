@@ -1,8 +1,8 @@
-import { useContactRequests } from '@/api/contacts';
 import { CheckMarkIcon } from '@/assets/icons/CheckmarkIcon';
 import { Avatar } from '@/components/ui/Avatar';
 import { IconButton } from '@/components/ui/IconButton';
 import { Spinner } from '@/components/ui/Spinner';
+import { useContactRequests } from '@/hooks/api/contacts';
 import { NoSymbolIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { FC } from 'react';
 

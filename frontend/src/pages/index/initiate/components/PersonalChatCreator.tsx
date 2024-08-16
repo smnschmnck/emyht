@@ -1,7 +1,7 @@
-import { useChats } from '@/api/chats';
 import { Button } from '@/components/ui/Button';
 import { env } from '@/env';
 import { HttpError } from '@/errors/httpError/httpError';
+import { useChats } from '@/hooks/api/chats';
 import { useMutation } from '@tanstack/react-query';
 import { FC } from 'react';
 import { toast } from 'sonner';

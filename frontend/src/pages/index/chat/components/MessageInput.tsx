@@ -1,8 +1,8 @@
-import { useChats } from '@/api/chats';
-import { useChatMessages } from '@/api/messages';
 import { IconButton } from '@/components/ui/IconButton';
 import { env } from '@/env';
 import { HttpError } from '@/errors/httpError/httpError';
+import { useChats } from '@/hooks/api/chats';
+import { useChatMessages } from '@/hooks/api/messages';
 import { PaperAirplaneIcon, PaperClipIcon } from '@heroicons/react/24/solid';
 import { useMutation } from '@tanstack/react-query';
 import { FC, FormEvent, useState } from 'react';

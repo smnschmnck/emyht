@@ -8,9 +8,9 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { FC } from 'react';
-import { useChats } from '@/api/chats';
 import { HttpError } from '@/errors/httpError/httpError';
 import { env } from '@/env';
+import { useChats } from '@/hooks/api/chats';
 
 const DropdownOptions: FC = () => {
   return (
