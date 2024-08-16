@@ -20,7 +20,7 @@ export const useChatMessages = (chatId?: string) => {
         return [];
       }
 
-      const res = await fetchWithDefaults('/chatMessages/${chatId}');
+      const res = await fetchWithDefaults(`/chatMessages/${chatId}`);
 
       if (!res.ok) {
         throw new Error(await res.text());

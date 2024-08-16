@@ -42,7 +42,7 @@ export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
   const { data: chatInfo } = useQuery({
     queryKey: ['chatInfo', chatId],
     queryFn: async () => {
-      const res = await fetchWithDefaults('/chatInfo/${chatId}');
+      const res = await fetchWithDefaults(`/chatInfo/${chatId}`);
 
       if (!res.ok) {
         throw new HttpError({
