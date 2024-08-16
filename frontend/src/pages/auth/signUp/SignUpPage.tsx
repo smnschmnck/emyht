@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/Button';
 import { FormInput } from '@/components/ui/FormInput';
 import { Link } from '@/components/ui/Link';
 import { SimpleErrorMessage } from '@/components/ui/SimpleErrorMessage';
-import { env } from '@/env';
+import { fetchWithDefaults } from '@/utils/fetch';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { FC, FormEvent, useState } from 'react';
@@ -19,7 +19,7 @@ export const SignUpPage: FC = () => {
   const signUp = async (event: FormEvent) => {
     event.preventDefault();
 
-    const res = await fetch(`${env.VITE_BACKEND_HOST}/register`, {
+    const res = await fetchWithDefaults('/register', {
       method: 'POST',
       body: JSON.stringify({
         username,
@@ -27,10 +27,6 @@ export const SignUpPage: FC = () => {
         password,
         authMethod: 'cookie',
       }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
     });
 
     if (!res.ok) {

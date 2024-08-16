@@ -1,4 +1,4 @@
-import { env } from '@/env';
+import { fetchWithDefaults } from '@/utils/fetch';
 import { useQuery } from '@tanstack/react-query';
 
 export type Contact = {
@@ -11,9 +11,7 @@ export const useContacts = () => {
   return useQuery({
     queryKey: ['allContacts'],
     queryFn: async () => {
-      const res = await fetch(`${env.VITE_BACKEND_HOST}/contacts`, {
-        credentials: 'include',
-      });
+      const res = await fetchWithDefaults('/contacts');
 
       if (!res.ok) {
         throw new Error(await res.text());
@@ -33,9 +31,7 @@ export const useSentContactRequests = () => {
   return useQuery({
     queryKey: ['contactRequests', 'sent'],
     queryFn: async () => {
-      const res = await fetch(`${env.VITE_BACKEND_HOST}/sentContactRequests`, {
-        credentials: 'include',
-      });
+      const res = await fetchWithDefaults('/sentContactRequests');
 
       if (!res.ok) {
         throw new Error(await res.text());
@@ -57,12 +53,7 @@ export const useContactRequests = () => {
   return useQuery({
     queryKey: ['contactRequests', 'incoming'],
     queryFn: async () => {
-      const res = await fetch(
-        `${env.VITE_BACKEND_HOST}/pendingContactRequests`,
-        {
-          credentials: 'include',
-        }
-      );
+      const res = await fetchWithDefaults('/pendingContactRequests');
 
       if (!res.ok) {
         throw new Error(await res.text());

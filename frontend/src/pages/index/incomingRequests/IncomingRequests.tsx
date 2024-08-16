@@ -1,11 +1,11 @@
+import { ButtonLink } from '@/components/ui/ButtonLink';
+import { HttpError } from '@/errors/httpError/httpError';
+import { useContactRequests, useContacts } from '@/hooks/api/contacts';
+import { fetchWithDefaults } from '@/utils/fetch';
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
+import { useMutation } from '@tanstack/react-query';
 import { FC } from 'react';
 import { ContactRequestActions, RequestTable } from './RequestTable';
-import { env } from '@/env';
-import { HttpError } from '@/errors/httpError/httpError';
-import { useMutation } from '@tanstack/react-query';
-import { ButtonLink } from '@/components/ui/ButtonLink';
-import { ChevronLeftIcon } from '@heroicons/react/24/outline';
-import { useContactRequests, useContacts } from '@/hooks/api/contacts';
 
 export const IncomingRequests: FC = () => {
   const { refetch: refetchContacts } = useContacts();
@@ -16,13 +16,9 @@ export const IncomingRequests: FC = () => {
       senderID: string;
       action: ContactRequestActions;
     }) => {
-      const res = await fetch(`${env.VITE_BACKEND_HOST}/handleContactRequest`, {
+      const res = await fetchWithDefaults('/handleContactRequest', {
         method: 'post',
         body: JSON.stringify(opts),
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
 
       if (!res.ok) {

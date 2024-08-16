@@ -1,20 +1,13 @@
-import { env } from '@/env';
+import { fetchWithDefaults } from '../fetch';
 
 const sendSocketAuthRequest = async (id: string) => {
   const body = {
     id: id,
   };
-  const res = await fetch(
-    `${env.VITE_BACKEND_HOST}/authenticateSocketConnection`,
-    {
-      method: 'post',
-      body: JSON.stringify(body),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    }
-  );
+  const res = await fetchWithDefaults('/authenticateSocketConnection', {
+    method: 'post',
+    body: JSON.stringify(body),
+  });
   if (!res.ok) {
     return { success: false };
   }

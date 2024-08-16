@@ -1,8 +1,8 @@
 import { IconButton } from '@/components/ui/IconButton';
-import { env } from '@/env';
 import { HttpError } from '@/errors/httpError/httpError';
 import { useChats } from '@/hooks/api/chats';
 import { useChatMessages } from '@/hooks/api/messages';
+import { fetchWithDefaults } from '@/utils/fetch';
 import { PaperAirplaneIcon, PaperClipIcon } from '@heroicons/react/24/solid';
 import { useMutation } from '@tanstack/react-query';
 import { FC, FormEvent, useState } from 'react';
@@ -28,13 +28,9 @@ export const MessageInput: FC<{
         //fileID: string
       };
 
-      const res = await fetch(`${env.VITE_BACKEND_HOST}/message`, {
+      const res = await fetchWithDefaults('/message', {
         method: 'post',
-        credentials: 'include',
         body: JSON.stringify(message),
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
 
       if (!res.ok) {

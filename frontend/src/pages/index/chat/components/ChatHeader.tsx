@@ -1,16 +1,16 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { ButtonLink } from '@/components/ui/ButtonLink';
 import { IconButton } from '@/components/ui/IconButton';
+import { HttpError } from '@/errors/httpError/httpError';
+import { useChats } from '@/hooks/api/chats';
+import { fetchWithDefaults } from '@/utils/fetch';
 import {
   ChevronLeftIcon,
   EllipsisHorizontalIcon,
 } from '@heroicons/react/24/outline';
-import { useQuery } from '@tanstack/react-query';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
-import { HttpError } from '@/errors/httpError/httpError';
-import { env } from '@/env';
-import { useChats } from '@/hooks/api/chats';
 
 const DropdownOptions: FC = () => {
   return (
@@ -42,9 +42,7 @@ export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
   const { data: chatInfo } = useQuery({
     queryKey: ['chatInfo', chatId],
     queryFn: async () => {
-      const res = await fetch(`${env.VITE_BACKEND_HOST}/chatInfo/${chatId}`, {
-        credentials: 'include',
-      });
+      const res = await fetchWithDefaults('/chatInfo/${chatId}');
 
       if (!res.ok) {
         throw new HttpError({

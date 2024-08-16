@@ -1,21 +1,18 @@
-import { env } from '@/env';
+import { Link } from '@/components/ui/Link';
+import { SimpleErrorMessage } from '@/components/ui/SimpleErrorMessage';
+import { Spinner } from '@/components/ui/Spinner';
+import { fetchWithDefaults } from '@/utils/fetch';
 import { useQuery } from '@tanstack/react-query';
 import { useSearch } from '@tanstack/react-router';
 import { FC } from 'react';
 import { verifyEmailRoute } from './route';
-import { SimpleErrorMessage } from '@/components/ui/SimpleErrorMessage';
-import { Link } from '@/components/ui/Link';
-import { Spinner } from '@/components/ui/Spinner';
 
 export const VerifyEmailPage: FC = () => {
   const { token } = useSearch({ from: verifyEmailRoute.id });
 
   const verifyEmail = async () => {
-    const res = await fetch(`${env.VITE_BACKEND_HOST}/verifyEmail`, {
+    const res = await fetchWithDefaults('/verifyEmail', {
       method: 'post',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({
         emailToken: token,
       }),

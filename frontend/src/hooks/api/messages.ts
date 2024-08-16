@@ -1,4 +1,4 @@
-import { env } from '@/env';
+import { fetchWithDefaults } from '@/utils/fetch';
 import { useQuery } from '@tanstack/react-query';
 
 export type ChatMessage = {
@@ -20,12 +20,7 @@ export const useChatMessages = (chatId?: string) => {
         return [];
       }
 
-      const res = await fetch(
-        `${env.VITE_BACKEND_HOST}/chatMessages/${chatId}`,
-        {
-          credentials: 'include',
-        }
-      );
+      const res = await fetchWithDefaults('/chatMessages/${chatId}');
 
       if (!res.ok) {
         throw new Error(await res.text());

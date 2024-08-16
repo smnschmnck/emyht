@@ -1,5 +1,5 @@
 import { IconButton } from '@/components/ui/IconButton';
-import { env } from '@/env';
+import { fetchWithDefaults } from '@/utils/fetch';
 import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { useNavigate, useRouter } from '@tanstack/react-router';
 import { FC } from 'react';
@@ -9,9 +9,7 @@ export const LogOutButton: FC = () => {
   const router = useRouter();
 
   const logOut = async () => {
-    const res = await fetch(`${env.VITE_BACKEND_HOST}/logout`, {
-      credentials: 'include',
-    });
+    const res = await fetchWithDefaults('/logout');
 
     if (res.ok) {
       await router.invalidate();

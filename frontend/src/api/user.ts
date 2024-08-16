@@ -1,5 +1,5 @@
-import { env } from '@/env';
 import { HttpError } from '@/errors/httpError/httpError';
+import { fetchWithDefaults } from '@/utils/fetch';
 
 export type UserData = {
   uuid: string;
@@ -11,9 +11,7 @@ export type UserData = {
 };
 
 export const getUserData = async () => {
-  const res = await fetch(`${env.VITE_BACKEND_HOST}/user`, {
-    credentials: 'include',
-  });
+  const res = await fetchWithDefaults('/user');
   if (!res.ok) {
     throw new HttpError({
       message: await res.text(),

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/Button';
 import { FormInput } from '@/components/ui/FormInput';
 import { Link } from '@/components/ui/Link';
 import { SimpleErrorMessage } from '@/components/ui/SimpleErrorMessage';
-import { env } from '@/env';
+import { fetchWithDefaults } from '@/utils/fetch';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { FC, FormEvent, useState } from 'react';
@@ -17,17 +17,13 @@ export const SignInPage: FC = () => {
   const login = async (event: FormEvent) => {
     event.preventDefault();
 
-    const res = await fetch(`${env.VITE_BACKEND_HOST}/login`, {
+    const res = await fetchWithDefaults('/login', {
       method: 'POST',
       body: JSON.stringify({
         email,
         password,
         authMethod: 'cookie',
       }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
     });
 
     if (!res.ok) {

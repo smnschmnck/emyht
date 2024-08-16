@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { env } from '@/env';
+import { useSentContactRequests } from '@/hooks/api/contacts';
+import { fetchWithDefaults } from '@/utils/fetch';
 import { useMutation } from '@tanstack/react-query';
 import { FC, FormEvent, useState } from 'react';
 import { toast } from 'sonner';
 import { ContactRequestsTable } from './ContactRequestsTable';
-import { useSentContactRequests } from '@/hooks/api/contacts';
 
 export const ContactRequests: FC = () => {
   const [recepientEmail, setRecepientEmail] = useState('');
@@ -15,15 +15,11 @@ export const ContactRequests: FC = () => {
     mutationFn: async (event: FormEvent) => {
       event.preventDefault();
 
-      const res = await fetch(`${env.VITE_BACKEND_HOST}/contactRequest`, {
+      const res = await fetchWithDefaults('/contactRequest', {
         method: 'post',
         body: JSON.stringify({
           contactEmail: recepientEmail,
         }),
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
 
       if (!res.ok) {

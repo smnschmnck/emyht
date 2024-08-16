@@ -1,4 +1,4 @@
-import { env } from '@/env';
+import { fetchWithDefaults } from '@/utils/fetch';
 import { useQuery } from '@tanstack/react-query';
 
 export type Chat = {
@@ -20,9 +20,7 @@ export const useChats = () => {
   return useQuery({
     queryKey: ['allChats'],
     queryFn: async () => {
-      const res = await fetch(`${env.VITE_BACKEND_HOST}/chats`, {
-        credentials: 'include',
-      });
+      const res = await fetchWithDefaults('/chats');
 
       if (!res.ok) {
         return [];

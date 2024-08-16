@@ -1,9 +1,9 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { env } from '@/env';
 import { HttpError } from '@/errors/httpError/httpError';
 import { useChats } from '@/hooks/api/chats';
+import { fetchWithDefaults } from '@/utils/fetch';
 import { useMutation } from '@tanstack/react-query';
 import { FC, FormEvent, useState } from 'react';
 import { toast } from 'sonner';
@@ -25,16 +25,12 @@ export const GroupChatCreator: FC<GroupChatCreatorProps> = ({
         return;
       }
 
-      const res = await fetch(`${env.VITE_BACKEND_HOST}/startGroupChat`, {
+      const res = await fetchWithDefaults('/startGroupChat', {
         method: 'post',
         body: JSON.stringify({
           participantUUIDs: selectedUsers,
           chatName: chatName,
         }),
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
 
       if (!res.ok) {
