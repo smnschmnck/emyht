@@ -33,8 +33,8 @@ importers:
         specifier: ^0.11.0
         version: 0.11.0(typescript@5.4.3)(zod@3.22.4)
       '@tanstack/react-query':
-        specifier: ^5.4.3
-        version: 5.4.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^5.51.23
+        version: 5.51.23(react@18.2.0)
       '@tanstack/react-router':
         specifier: 1.48.1
         version: 1.48.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -733,20 +733,13 @@ packages:
     resolution: {integrity: sha512-n4XXInV9irIq0obRvINIkESkGk280Q+xkIIbswmM0z9nAu2wsIRZNvlmPrtYh6bgNWtItOWWoihFUjLTW8g6Jg==}
     engines: {node: '>=12'}
 
-  '@tanstack/query-core@5.4.3':
-    resolution: {integrity: sha512-fnI9ORjcuLGm1sNrKatKIosRQUpuqcD4SV7RqRSVmj8JSicX2aoMyKryHEBpVQvf6N4PaBVgBxQomjsbsGPssQ==}
+  '@tanstack/query-core@5.51.21':
+    resolution: {integrity: sha512-POQxm42IUp6n89kKWF4IZi18v3fxQWFRolvBA6phNVmA8psdfB1MvDnGacCJdS+EOX12w/CyHM62z//rHmYmvw==}
 
-  '@tanstack/react-query@5.4.3':
-    resolution: {integrity: sha512-4aSOrRNa6yEmf7mws5QPTVMn8Lp7L38tFoTZ0c1ZmhIvbr8GIA0WT7X5N3yz/nuK8hUtjw9cAzBr4BPDZZ+tzA==}
+  '@tanstack/react-query@5.51.23':
+    resolution: {integrity: sha512-CfJCfX45nnVIZjQBRYYtvVMIsGgWLKLYC4xcUiYEey671n1alvTZoCBaU9B85O8mF/tx9LPyrI04A6Bs2THv4A==}
     peerDependencies:
       react: ^18.0.0
-      react-dom: ^18.0.0
-      react-native: '*'
-    peerDependenciesMeta:
-      react-dom:
-        optional: true
-      react-native:
-        optional: true
 
   '@tanstack/react-router@1.48.1':
     resolution: {integrity: sha512-ThEYm8zg1AD1A1ZSuOrWVDG8Lq3g2/jIggN8FpQm5zZ98PQxabR8M9pE0ioVqlYsAXEAXvjfVqLal2FL8XTzag==}
@@ -2239,14 +2232,12 @@ snapshots:
 
   '@tanstack/history@1.45.3': {}
 
-  '@tanstack/query-core@5.4.3': {}
+  '@tanstack/query-core@5.51.21': {}
 
-  '@tanstack/react-query@5.4.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@tanstack/react-query@5.51.23(react@18.2.0)':
     dependencies:
-      '@tanstack/query-core': 5.4.3
+      '@tanstack/query-core': 5.51.21
       react: 18.2.0
-    optionalDependencies:
-      react-dom: 18.2.0(react@18.2.0)
 
   '@tanstack/react-router@1.48.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
