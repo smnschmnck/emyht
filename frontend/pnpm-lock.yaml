@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@fontsource-variable/plus-jakarta-sans':
-        specifier: ^5.0.18
-        version: 5.0.18
+        specifier: ^5.0.21
+        version: 5.0.21
       '@formkit/auto-animate':
-        specifier: ^0.8.1
-        version: 0.8.1
+        specifier: ^0.8.2
+        version: 0.8.2
       '@heroicons/react':
         specifier: ^2.0.18
         version: 2.0.18(react@18.2.0)
@@ -288,11 +288,11 @@ packages:
   '@floating-ui/utils@0.2.2':
     resolution: {integrity: sha512-J4yDIIthosAsRZ5CPYP/jQvUAQtlZTTD/4suA08/FEnlxqW3sKS9iAhgsa9VYLZ6vDHn/ixJgIqRQPotoBjxIw==}
 
-  '@fontsource-variable/plus-jakarta-sans@5.0.18':
-    resolution: {integrity: sha512-VSBjZU3gTaMmz2bVgcyw8xU2oyrLvLlDV4zSZFBLOrO1AvrG20RHW85VKUdRCwbM5Ih2fmRlXkWhdIIUs45bmA==}
+  '@fontsource-variable/plus-jakarta-sans@5.0.21':
+    resolution: {integrity: sha512-VTQB+MnaYbjLNmfxQJ/Fc2rayLGlqTiZa6nZTpplS0lJF3XKcWPPItilGFMZW4lfwIiroo+FIfBewBOF3MrMPQ==}
 
-  '@formkit/auto-animate@0.8.1':
-    resolution: {integrity: sha512-0/Z2cuNXWVVIG/l0SpcHAWFhGdvLJ8DRvEfRWvmojtmRWfEy+LWNwgDazbZqY0qQYtkHcoEK3jBLkhiZaB/4Ig==}
+  '@formkit/auto-animate@0.8.2':
+    resolution: {integrity: sha512-SwPWfeRa5veb1hOIBMdzI+73te5puUBHmqqaF1Bu7FjvxlYSz/kJcZKSa9Cg60zL0uRNeJL2SbRxV6Jp6Q1nFQ==}
 
   '@heroicons/react@2.0.18':
     resolution: {integrity: sha512-7TyMjRrZZMBPa+/5Y8lN0iyvUU/01PeMGX2+RE7cQWpEUIcb4QotzUObFkJDejj/HUH4qjP/eQ0gzzKs2f+6Yw==}
@@ -1842,9 +1842,9 @@ snapshots:
 
   '@floating-ui/utils@0.2.2': {}
 
-  '@fontsource-variable/plus-jakarta-sans@5.0.18': {}
+  '@fontsource-variable/plus-jakarta-sans@5.0.21': {}
 
-  '@formkit/auto-animate@0.8.1': {}
+  '@formkit/auto-animate@0.8.2': {}
 
   '@heroicons/react@2.0.18(react@18.2.0)':
     dependencies:

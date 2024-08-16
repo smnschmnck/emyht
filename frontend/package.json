@@ -12,8 +12,8 @@
     "preview": "doppler run -- vite preview"
   },
   "dependencies": {
-    "@fontsource-variable/plus-jakarta-sans": "^5.0.18",
-    "@formkit/auto-animate": "^0.8.1",
+    "@fontsource-variable/plus-jakarta-sans": "^5.0.21",
+    "@formkit/auto-animate": "^0.8.2",
     "@heroicons/react": "^2.0.18",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
