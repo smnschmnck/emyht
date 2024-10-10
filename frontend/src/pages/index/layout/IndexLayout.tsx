@@ -1,11 +1,21 @@
 import { Outlet } from '@tanstack/react-router';
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Sidebar } from './components/Sidebar';
 import { useIsSidebarHidden } from './hooks';
+import { usePusher } from '@/App';
+import { useChats } from '@/hooks/api/chats';
 
 export const IndexLayout: FC = () => {
   const isSidebarHidden = useIsSidebarHidden();
+  const { data: chats } = useChats();
+  const { pusher } = usePusher();
+
+  useEffect(() => {
+    chats?.forEach((chat) => {
+      pusher.subscribe(chat.chatID);
+    });
+  }, [pusher, chats]);
 
   return (
     <div className="flex h-full">
