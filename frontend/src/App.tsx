@@ -4,6 +4,7 @@ import { RouterProvider } from '@tanstack/react-router';
 import { Toaster } from 'sonner';
 import Pusher from 'pusher-js';
 import { createContext, useContext } from 'react';
+import { env } from './env';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -15,6 +16,7 @@ const queryClient = new QueryClient({
 
 const pusher = new Pusher('fee65361c492db024af1', {
   cluster: 'us3',
+  authEndpoint: `${env.VITE_BACKEND_HOST}/pusher/auth`,
 });
 
 const PusherContext = createContext({

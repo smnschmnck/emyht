@@ -10,6 +10,7 @@ require (
 	github.com/jackc/pgx/v4 v4.16.1
 	github.com/joho/godotenv v1.4.0
 	github.com/labstack/echo/v4 v4.9.0
+	github.com/pusher/pusher-http-go/v5 v5.1.1
 )
 
 require (

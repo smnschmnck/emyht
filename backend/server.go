@@ -6,9 +6,12 @@ import (
 	"chat/contactService"
 	"chat/dbHelpers/postgresHelper"
 	"chat/dbHelpers/redisHelper"
+	"chat/pusher"
 	"chat/userSettingsService"
 	"chat/utils"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"strconv"
 
@@ -20,11 +23,31 @@ import (
 
 var PORT string
 
+func pusherAuth(c echo.Context) error {
+	// Read the request body
+	params, err := io.ReadAll(c.Request().Body)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to read request body")
+	}
+
+	// This authenticates every user. Don't do this in production!
+	response, err := pusher.PusherClient.AuthorizePrivateChannel(params)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	fmt.Println("DOING SOME STUFF")
+	// Send the response back as a string
+	return c.String(http.StatusOK, string(response))
+}
+
 // TODO Check if email is active for most requests!
 func handleRequest() {
 	e := echo.New()
 	//TODO: Use Redis for distributed rate limiting
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
+	// Pusher
+	e.POST("/pusher/auth", pusherAuth)
 	//CORS
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     utils.GetAllowedCorsOrigins(),
