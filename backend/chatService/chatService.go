@@ -6,7 +6,6 @@ import (
 	"chat/dbHelpers/postgresHelper"
 	"chat/s3Helpers"
 	"chat/userService"
-	"chat/wsService"
 	"context"
 	"errors"
 	"fmt"
@@ -129,7 +128,7 @@ func StartOneOnOneChat(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	wsService.WriteEventToSingleUUID(req.ParticipantUUID, "chat")
+	//TODO Sent websocket event
 
 	chats, err := getChatsByUUID(reqUUID)
 	if err != nil {
@@ -235,7 +234,7 @@ func StartGroupChat(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	wsService.WriteEventToMultipleUUIDs(req.ParticipantUUIDs, "chat")
+	//TODO Sent websocket event
 
 	return c.JSON(http.StatusOK, chats)
 }
@@ -309,7 +308,7 @@ func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) 
 		return make([]singleChat, 0), errors.New("INTERNAL ERROR")
 	}
 
-	wsService.WriteEventToMultipleUUIDs(participantUUIDs, "chat")
+	//TODO Sent websocket event
 
 	return chats, nil
 }
@@ -754,22 +753,22 @@ func getChatMembers(chatId string) ([]string, error) {
 }
 
 func sendNewMessageNotification(chatId string) error {
-	chatmembers, err := getChatMembers(chatId)
-	if err != nil {
-		return err
-	}
+	// chatmembers, err := getChatMembers(chatId)
+	// if err != nil {
+	// 	return err
+	// }
 
-	type newMessageNotification struct {
-		ChatID string `json:"chatID"`
-	}
+	// type newMessageNotification struct {
+	// 	ChatID string `json:"chatID"`
+	// }
 
-	body := newMessageNotification{
-		ChatID: chatId,
-	}
+	// body := newMessageNotification{
+	// 	ChatID: chatId,
+	// }
 
-	err = wsService.WriteStructToMultipleUUIDs(chatmembers, "message", body)
+	//TODO Sent websocket event
 
-	return err
+	return nil
 }
 
 func GetChatInfo(c echo.Context) error {
@@ -1144,7 +1143,7 @@ func AddSingleUserToGroupChats(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	wsService.WriteEventToSingleUUID(req.ParticipantUUID, "chat")
+	//TODO Sent websocket event
 
 	return c.String(http.StatusOK, "SUCCESS")
 }
