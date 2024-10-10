@@ -5,7 +5,6 @@ import (
 	"chat/dbHelpers/postgresHelper"
 	"chat/s3Helpers"
 	"chat/userService"
-	"chat/wsService"
 	"context"
 	"errors"
 	"fmt"
@@ -94,13 +93,14 @@ func SendContactRequest(c echo.Context) error {
 }
 
 func sendNewContactReqNotification(email string) error {
-	user, err := userService.GetUserByEmail(email)
-	if err != nil {
-		return err
-	}
-	uuid := user.Uuid
+	// user, err := userService.GetUserByEmail(email)
+	// if err != nil {
+	// 	return err
+	// }
+	// uuid := user.Uuid
 
-	return wsService.WriteEventToSingleUUID(uuid, "contactRequest")
+	//TODO Sent websocket event
+	return nil
 }
 
 type Contact struct {
@@ -321,7 +321,7 @@ func blockUser(uuidToBeBlocked string, uuid string, chatID string) error {
 		return errors.New("INTERNAL ERROR")
 	}
 
-	wsService.WriteEventToSingleUUID(uuidToBeBlocked, "chat")
+	//TODO Sent websocket event
 
 	return nil
 }

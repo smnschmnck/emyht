@@ -8,7 +8,6 @@ import (
 	"chat/dbHelpers/redisHelper"
 	"chat/userSettingsService"
 	"chat/utils"
-	"chat/wsService"
 	"fmt"
 	"os"
 	"strconv"
@@ -31,9 +30,6 @@ func handleRequest() {
 		AllowOrigins:     utils.GetAllowedCorsOrigins(),
 		AllowCredentials: true,
 	}))
-	//Websocket
-	e.Any("/ws", wsService.InitializeNewSocketConnection)
-	e.POST("/authenticateSocketConnection", wsService.AuthenticateSocketConnection)
 	//auth
 	e.GET("/user", authService.GetUserBySession)
 	e.POST("/register", authService.Register)
