@@ -1,8 +1,16 @@
 package pusher
 
 import (
+	"chat/authService"
+	"chat/chatService"
+	"chat/userService"
 	"chat/utils"
+	"io"
+	"net/http"
+	"net/url"
+	"strings"
 
+	"github.com/labstack/echo/v4"
 	"github.com/pusher/pusher-http-go/v5"
 )
 
@@ -12,4 +20,45 @@ var PusherClient = pusher.Client{
 	Secret:  utils.GetEnv("PUSHER_SECRET"),
 	Cluster: utils.GetEnv("PUSHER_CLUSTER"),
 	Secure:  true,
+}
+
+func PusherAuth(c echo.Context) error {
+	sessionID, responseErr := authService.GetSessionToken(c)
+	if responseErr != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	params, err := io.ReadAll(c.Request().Body)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to read request body")
+	}
+
+	values, err := url.ParseQuery(string(params))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid form data")
+	}
+
+	privateChannelName := values.Get("channel_name")
+	channelName := strings.Replace(privateChannelName, "private-", "", 1)
+
+	inChat, err := chatService.IsUserInChat(reqUUID, channelName)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, err.Error())
+	}
+
+	if !inChat {
+		return c.String(http.StatusUnauthorized, "User not in chat")
+	}
+
+	response, err := PusherClient.AuthorizePrivateChannel(params)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.String(http.StatusOK, string(response))
 }

@@ -3,8 +3,8 @@ import { FC, useEffect } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Sidebar } from './components/Sidebar';
 import { useIsSidebarHidden } from './hooks';
-import { usePusher } from '@/App';
 import { useChats } from '@/hooks/api/chats';
+import { usePusher } from '@/hooks/pusher/usePusher';
 
 export const IndexLayout: FC = () => {
   const isSidebarHidden = useIsSidebarHidden();

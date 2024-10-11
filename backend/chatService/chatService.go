@@ -277,7 +277,7 @@ func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) 
 	}
 
 	//CHECK IF USER IS IN CHAT
-	userInChat, err := isUserInChat(uuid, dbChatID)
+	userInChat, err := IsUserInChat(uuid, dbChatID)
 	if err != nil {
 		return make([]singleChat, 0), errors.New("INTERNAL ERROR")
 	}
@@ -510,7 +510,7 @@ func GetChats(c echo.Context) error {
 	return c.JSON(http.StatusOK, chats)
 }
 
-func isUserInChat(uuid string, chatID string) (bool, error) {
+func IsUserInChat(uuid string, chatID string) (bool, error) {
 	chats, err := getChatsByUUID(uuid)
 	if err != nil {
 		return false, err
@@ -570,7 +570,7 @@ func SendMessage(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "MESSAGE TOO SHORT")
 	}
 
-	inChat, err := isUserInChat(reqUUID, req.ChatID)
+	inChat, err := IsUserInChat(reqUUID, req.ChatID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -644,7 +644,7 @@ type singleMessage struct {
 }
 
 func getMessagesByChatID(chatID string, uuid string) ([]singleMessage, error) {
-	inChat, err := isUserInChat(uuid, chatID)
+	inChat, err := IsUserInChat(uuid, chatID)
 	if err != nil {
 		return make([]singleMessage, 0), err
 	}
@@ -788,7 +788,7 @@ func GetChatInfo(c echo.Context) error {
 	if len(chatID) <= 0 {
 		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
 	}
-	userInChat, err := isUserInChat(reqUUID, chatID)
+	userInChat, err := IsUserInChat(reqUUID, chatID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
@@ -952,7 +952,7 @@ func LeaveGroupChat(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	inChat, err := isUserInChat(reqUUID, req.ChatID)
+	inChat, err := IsUserInChat(reqUUID, req.ChatID)
 	if err != nil {
 		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -1164,7 +1164,7 @@ func GetOneOnOneChatParticipant(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
 	}
 
-	userInChat, err := isUserInChat(reqUUID, chatID)
+	userInChat, err := IsUserInChat(reqUUID, chatID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
