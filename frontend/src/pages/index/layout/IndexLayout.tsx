@@ -1,11 +1,44 @@
 import { Outlet } from '@tanstack/react-router';
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Sidebar } from './components/Sidebar';
-import { useIsSidebarHidden } from './hooks';
+import { useChatId, useIsSidebarHidden } from './hooks';
+import { useChats } from '@/hooks/api/chats';
+import { usePusher } from '@/hooks/pusher/usePusher';
+import { useUserData } from '@/hooks/api/user';
+import { useContactRequests } from '@/hooks/api/contacts';
+import { useChatMessages } from '@/hooks/api/messages';
 
 export const IndexLayout: FC = () => {
   const isSidebarHidden = useIsSidebarHidden();
+  const { data: chats, refetch: refetchChats } = useChats();
+  const { data: userData } = useUserData();
+  const { refetch: refetchContactRequests } = useContactRequests();
+  const { pusher } = usePusher();
+  const chatId = useChatId();
+  const { refetch: refetchChatMessages } = useChatMessages(chatId);
+
+  useEffect(() => {
+    if (userData?.uuid) {
+      pusher
+        .subscribe(`private-user_feed.${userData.uuid}`)
+        .bind('chat', () => {
+          refetchChats();
+        })
+        .bind('contact_request', () => {
+          refetchContactRequests();
+        });
+    }
+
+    chats?.forEach((chat) => {
+      pusher.subscribe(`private-chat.${chat.chatID}`).bind('message', () => {
+        if (chat.chatID === chatId) {
+          refetchChatMessages();
+        }
+        refetchChats();
+      });
+    });
+  }, [pusher, chats, userData, chatId]);
 
   return (
     <div className="flex h-full">

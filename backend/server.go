@@ -6,6 +6,7 @@ import (
 	"chat/contactService"
 	"chat/dbHelpers/postgresHelper"
 	"chat/dbHelpers/redisHelper"
+	"chat/pusher"
 	"chat/userSettingsService"
 	"chat/utils"
 	"fmt"
@@ -25,6 +26,8 @@ func handleRequest() {
 	e := echo.New()
 	//TODO: Use Redis for distributed rate limiting
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
+	// Pusher
+	e.POST("/pusher/auth", pusher.PusherAuth)
 	//CORS
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     utils.GetAllowedCorsOrigins(),

@@ -2,8 +2,10 @@ package chatService
 
 import (
 	"chat/authService"
+	"chat/chatHelpers"
 	"chat/contactService"
 	"chat/dbHelpers/postgresHelper"
+	"chat/pusher"
 	"chat/s3Helpers"
 	"chat/userService"
 	"context"
@@ -12,7 +14,6 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"sort"
 	"strconv"
 	"time"
 
@@ -128,9 +129,12 @@ func StartOneOnOneChat(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	//TODO Sent websocket event
+	err = pusher.PusherClient.Trigger(pusher.USER_FEED_PREFIX+req.ParticipantUUID, pusher.CHAT_EVENT, nil)
+	if err != nil {
+		fmt.Println(err)
+	}
 
-	chats, err := getChatsByUUID(reqUUID)
+	chats, err := chatHelpers.GetChatsByUUID(reqUUID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
@@ -229,30 +233,31 @@ func StartGroupChat(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	chats, err := getChatsByUUID(reqUUID)
+	chats, err := chatHelpers.GetChatsByUUID(reqUUID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	//TODO Sent websocket event
+	pusherEvents := pusher.MakePusherEventArray(pusher.USER_FEED_PREFIX, req.ParticipantUUIDs, pusher.CHAT_EVENT, nil)
+	pusher.PusherClient.TriggerBatch(pusherEvents)
 
 	return c.JSON(http.StatusOK, chats)
 }
 
-func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) ([]singleChat, error) {
+func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) ([]chatHelpers.SingleChat, error) {
 	isInContacts, err := contactService.AreUsersInContacts(participantUUIDs, uuid)
 	if err != nil {
-		return make([]singleChat, 0), errors.New("INTERNAL ERROR")
+		return make([]chatHelpers.SingleChat, 0), errors.New("INTERNAL ERROR")
 	}
 
 	if !isInContacts {
-		return make([]singleChat, 0), errors.New("NOT ALL USERS IN CONTACTS")
+		return make([]chatHelpers.SingleChat, 0), errors.New("NOT ALL USERS IN CONTACTS")
 	}
 
 	ctx := context.Background()
 	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
 	if err != nil {
-		return make([]singleChat, 0), errors.New("INTERNAL ERROR")
+		return make([]chatHelpers.SingleChat, 0), errors.New("INTERNAL ERROR")
 	}
 	defer conn.Close()
 
@@ -261,7 +266,7 @@ func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) 
 	checkChatQuery := "SELECT chat_id FROM chats WHERE chat_id = $1"
 	err = conn.QueryRow(ctx, checkChatQuery, chatId).Scan(&dbChatID)
 	if err != nil {
-		return make([]singleChat, 0), errors.New("CHAT NOT FOUND")
+		return make([]chatHelpers.SingleChat, 0), errors.New("CHAT NOT FOUND")
 	}
 
 	//CHECK IF CHAT IS GROUP CHAT
@@ -269,21 +274,21 @@ func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) 
 	checkChatTypeQuery := "SELECT chat_type FROM chats WHERE chat_id = $1"
 	err = conn.QueryRow(ctx, checkChatTypeQuery, dbChatID).Scan(&chatType)
 	if err != nil {
-		return make([]singleChat, 0), errors.New("INTERNAL ERROR")
+		return make([]chatHelpers.SingleChat, 0), errors.New("INTERNAL ERROR")
 	}
 
 	if chatType != "group" {
-		return make([]singleChat, 0), errors.New("CHAT IS NOT GROUP CHAT")
+		return make([]chatHelpers.SingleChat, 0), errors.New("CHAT IS NOT GROUP CHAT")
 	}
 
 	//CHECK IF USER IS IN CHAT
-	userInChat, err := isUserInChat(uuid, dbChatID)
+	userInChat, err := chatHelpers.IsUserInChat(uuid, dbChatID)
 	if err != nil {
-		return make([]singleChat, 0), errors.New("INTERNAL ERROR")
+		return make([]chatHelpers.SingleChat, 0), errors.New("INTERNAL ERROR")
 	}
 
 	if !userInChat {
-		return make([]singleChat, 0), errors.New("NO AUTH")
+		return make([]chatHelpers.SingleChat, 0), errors.New("NO AUTH")
 	}
 
 	//INSERT ALL PARTICIPANTS INTO CHAT
@@ -300,15 +305,16 @@ func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) 
 	)
 
 	if err != nil || int(copyCount) != len(participantUUIDs) {
-		return make([]singleChat, 0), errors.New("INTERNAL ERROR")
+		return make([]chatHelpers.SingleChat, 0), errors.New("INTERNAL ERROR")
 	}
 
-	chats, err := getChatsByUUID(uuid)
+	chats, err := chatHelpers.GetChatsByUUID(uuid)
 	if err != nil {
-		return make([]singleChat, 0), errors.New("INTERNAL ERROR")
+		return make([]chatHelpers.SingleChat, 0), errors.New("INTERNAL ERROR")
 	}
 
-	//TODO Sent websocket event
+	pusherEvents := pusher.MakePusherEventArray(pusher.USER_FEED_PREFIX, participantUUIDs, "NEW_CHAT", nil)
+	pusher.PusherClient.TriggerBatch(pusherEvents)
 
 	return chats, nil
 }
@@ -399,94 +405,6 @@ func GetChatParticipantsExceptUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, participantsExceptUser)
 }
 
-type singleChat struct {
-	ChatID            string  `json:"chatID"`
-	ChatType          string  `json:"chatType"`
-	CreationTimestamp int     `json:"creationTimestamp"`
-	Name              string  `json:"chatName"`
-	PictureUrl        string  `json:"pictureUrl"`
-	UnreadMessages    int     `json:"unreadMessages"`
-	MessageType       *string `json:"messageType"`
-	TextContent       *string `json:"textContent"`
-	Timestamp         *int    `json:"timestamp"`
-	DeliveryStatus    *string `json:"deliveryStatus"`
-	SenderID          *string `json:"senderID"`
-	SenderUsername    *string `json:"senderUsername"`
-}
-
-func getChatsByUUID(uuid string) ([]singleChat, error) {
-	ctx := context.Background()
-	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
-	if err != nil {
-		return []singleChat{}, errors.New("INTERNAL ERROR")
-	}
-	defer conn.Close()
-
-	getChatsQuery := "SELECT c.chat_id, " +
-		"c.chat_type, " +
-		"c.creation_timestamp, " +
-		"(CASE c.chat_type " +
-		"WHEN 'one_on_one' THEN (SELECT users.username AS name " +
-		"FROM users " +
-		"JOIN user_chat uc on users.uuid = uc.uuid " +
-		"WHERE c.chat_id = uc.chat_id " +
-		"AND uc.uuid != $1) " +
-		"ELSE c.name END " +
-		"), " +
-		"( " +
-		"CASE c.chat_type " +
-		"WHEN 'one_on_one' THEN (SELECT users.picture_url AS picture_url " +
-		"FROM users " +
-		"JOIN user_chat uc on users.uuid = uc.uuid " +
-		"WHERE c.chat_id = uc.chat_id " +
-		"AND uc.uuid != $1) " +
-		"ELSE c.picture_url END " +
-		"), " +
-		"u.unread_messages, " +
-		"m.message_type, " +
-		"m.text_content, " +
-		"m.timestamp, " +
-		"m.delivery_status, " +
-		"m.sender_id, " +
-		"(SELECT username AS sender_username FROM users WHERE users.uuid = m.sender_id) " +
-		"FROM user_chat u " +
-		"JOIN chats c ON u.chat_id = c.chat_id " +
-		"LEFT JOIN chatmessages m ON m.message_id = c.last_message_id " +
-		"WHERE u.uuid = $1"
-	var chats []singleChat
-	err = pgxscan.Select(ctx, conn, &chats, getChatsQuery, uuid)
-	if err != nil {
-		fmt.Println(err)
-		return []singleChat{}, errors.New("INTERNAL ERROR")
-	}
-
-	if chats == nil {
-		return make([]singleChat, 0), nil
-	}
-
-	sort.SliceStable(chats, func(i, j int) bool {
-		var a int
-		var b int
-		c1 := chats[i]
-		c2 := chats[j]
-		t1 := c1.Timestamp
-		t2 := c2.Timestamp
-		if t1 != nil {
-			a = *t1
-		} else {
-			a = c1.CreationTimestamp
-		}
-		if t2 != nil {
-			b = *t2
-		} else {
-			b = c2.CreationTimestamp
-		}
-		return a > b
-	})
-
-	return chats, nil
-}
-
 func GetChats(c echo.Context) error {
 	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
@@ -498,7 +416,7 @@ func GetChats(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	chats, err := getChatsByUUID(reqUUID)
+	chats, err := chatHelpers.GetChatsByUUID(reqUUID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -508,19 +426,6 @@ func GetChats(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, chats)
-}
-
-func isUserInChat(uuid string, chatID string) (bool, error) {
-	chats, err := getChatsByUUID(uuid)
-	if err != nil {
-		return false, err
-	}
-	for _, chat := range chats {
-		if chat.ChatID == chatID {
-			return true, nil
-		}
-	}
-	return false, nil
 }
 
 func SendMessage(c echo.Context) error {
@@ -570,7 +475,7 @@ func SendMessage(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "MESSAGE TOO SHORT")
 	}
 
-	inChat, err := isUserInChat(reqUUID, req.ChatID)
+	inChat, err := chatHelpers.IsUserInChat(reqUUID, req.ChatID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -644,7 +549,7 @@ type singleMessage struct {
 }
 
 func getMessagesByChatID(chatID string, uuid string) ([]singleMessage, error) {
-	inChat, err := isUserInChat(uuid, chatID)
+	inChat, err := chatHelpers.IsUserInChat(uuid, chatID)
 	if err != nil {
 		return make([]singleMessage, 0), err
 	}
@@ -753,22 +658,8 @@ func getChatMembers(chatId string) ([]string, error) {
 }
 
 func sendNewMessageNotification(chatId string) error {
-	// chatmembers, err := getChatMembers(chatId)
-	// if err != nil {
-	// 	return err
-	// }
 
-	// type newMessageNotification struct {
-	// 	ChatID string `json:"chatID"`
-	// }
-
-	// body := newMessageNotification{
-	// 	ChatID: chatId,
-	// }
-
-	//TODO Sent websocket event
-
-	return nil
+	return pusher.PusherClient.Trigger(pusher.CHAT_PREFIX+chatId, pusher.MESSAGE_EVENT, nil)
 }
 
 func GetChatInfo(c echo.Context) error {
@@ -788,7 +679,7 @@ func GetChatInfo(c echo.Context) error {
 	if len(chatID) <= 0 {
 		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
 	}
-	userInChat, err := isUserInChat(reqUUID, chatID)
+	userInChat, err := chatHelpers.IsUserInChat(reqUUID, chatID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
@@ -952,7 +843,7 @@ func LeaveGroupChat(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	inChat, err := isUserInChat(reqUUID, req.ChatID)
+	inChat, err := chatHelpers.IsUserInChat(reqUUID, req.ChatID)
 	if err != nil {
 		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -991,7 +882,7 @@ func LeaveGroupChat(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	chats, err := getChatsByUUID(reqUUID)
+	chats, err := chatHelpers.GetChatsByUUID(reqUUID)
 	if err != nil {
 		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -1143,7 +1034,7 @@ func AddSingleUserToGroupChats(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	//TODO Sent websocket event
+	pusher.PusherClient.Trigger(pusher.USER_FEED_PREFIX+req.ParticipantUUID, pusher.CHAT_EVENT, nil)
 
 	return c.String(http.StatusOK, "SUCCESS")
 }
@@ -1164,7 +1055,7 @@ func GetOneOnOneChatParticipant(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
 	}
 
-	userInChat, err := isUserInChat(reqUUID, chatID)
+	userInChat, err := chatHelpers.IsUserInChat(reqUUID, chatID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
