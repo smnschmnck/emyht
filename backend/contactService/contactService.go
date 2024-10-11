@@ -3,6 +3,7 @@ package contactService
 import (
 	"chat/authService"
 	"chat/dbHelpers/postgresHelper"
+	"chat/pusher"
 	"chat/s3Helpers"
 	"chat/userService"
 	"context"
@@ -93,13 +94,14 @@ func SendContactRequest(c echo.Context) error {
 }
 
 func sendNewContactReqNotification(email string) error {
-	// user, err := userService.GetUserByEmail(email)
-	// if err != nil {
-	// 	return err
-	// }
-	// uuid := user.Uuid
+	user, err := userService.GetUserByEmail(email)
+	if err != nil {
+		return err
+	}
+	uuid := user.Uuid
 
-	//TODO Sent websocket event
+	pusher.PusherClient.Trigger(pusher.USER_FEED_PREFIX+uuid, pusher.CONTACT_REQUEST_EVENT, nil)
+
 	return nil
 }
 
@@ -321,7 +323,7 @@ func blockUser(uuidToBeBlocked string, uuid string, chatID string) error {
 		return errors.New("INTERNAL ERROR")
 	}
 
-	//TODO Sent websocket event
+	pusher.PusherClient.Trigger(pusher.USER_FEED_PREFIX+uuidToBeBlocked, pusher.CHAT_EVENT, nil)
 
 	return nil
 }

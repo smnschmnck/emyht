@@ -6,24 +6,31 @@ import { useIsSidebarHidden } from './hooks';
 import { useChats } from '@/hooks/api/chats';
 import { usePusher } from '@/hooks/pusher/usePusher';
 import { useUserData } from '@/hooks/api/user';
+import { useContactRequests } from '@/hooks/api/contacts';
 
 export const IndexLayout: FC = () => {
   const isSidebarHidden = useIsSidebarHidden();
   const { data: chats, refetch: refetchChats } = useChats();
   const { data: userData } = useUserData();
+  const { refetch: refetchContactRequests } = useContactRequests();
   const { pusher } = usePusher();
 
   useEffect(() => {
     if (userData?.uuid) {
       pusher
         .subscribe(`private-user_feed.${userData.uuid}`)
-        .bind('new_chat', () => {
+        .bind('chat', () => {
           refetchChats();
+        })
+        .bind('contact_request', () => {
+          refetchContactRequests();
         });
     }
 
     chats?.forEach((chat) => {
-      pusher.subscribe(`private-chat.${chat.chatID}`);
+      pusher.subscribe(`private-chat.${chat.chatID}`).bind('message', () => {
+        refetchChats();
+      });
     });
   }, [pusher, chats, userData]);
 

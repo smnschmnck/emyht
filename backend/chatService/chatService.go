@@ -22,7 +22,6 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/labstack/echo/v4"
-	pusherLib "github.com/pusher/pusher-http-go/v5"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -130,7 +129,7 @@ func StartOneOnOneChat(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	err = pusher.PusherClient.Trigger(pusher.MakeUserFeedName(req.ParticipantUUID), pusher.NEW_CHAT, nil)
+	err = pusher.PusherClient.Trigger(pusher.USER_FEED_PREFIX+req.ParticipantUUID, pusher.CHAT_EVENT, nil)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -239,15 +238,7 @@ func StartGroupChat(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	pusherEvents := make([]pusherLib.Event, 0)
-	for _, uuid := range req.ParticipantUUIDs {
-		event := pusherLib.Event{
-			Channel: pusher.MakeUserFeedName(uuid),
-			Name:    pusher.NEW_CHAT,
-			Data:    nil,
-		}
-		pusherEvents = append(pusherEvents, event)
-	}
+	pusherEvents := pusher.MakePusherEventArray(pusher.USER_FEED_PREFIX, req.ParticipantUUIDs, pusher.CHAT_EVENT, nil)
 	pusher.PusherClient.TriggerBatch(pusherEvents)
 
 	return c.JSON(http.StatusOK, chats)
@@ -322,7 +313,8 @@ func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) 
 		return make([]chatHelpers.SingleChat, 0), errors.New("INTERNAL ERROR")
 	}
 
-	//TODO Sent websocket event
+	pusherEvents := pusher.MakePusherEventArray(pusher.USER_FEED_PREFIX, participantUUIDs, "NEW_CHAT", nil)
+	pusher.PusherClient.TriggerBatch(pusherEvents)
 
 	return chats, nil
 }
@@ -666,22 +658,8 @@ func getChatMembers(chatId string) ([]string, error) {
 }
 
 func sendNewMessageNotification(chatId string) error {
-	// chatmembers, err := getChatMembers(chatId)
-	// if err != nil {
-	// 	return err
-	// }
 
-	// type newMessageNotification struct {
-	// 	ChatID string `json:"chatID"`
-	// }
-
-	// body := newMessageNotification{
-	// 	ChatID: chatId,
-	// }
-
-	//TODO Sent websocket event
-
-	return nil
+	return pusher.PusherClient.Trigger(pusher.CHAT_PREFIX+chatId, pusher.MESSAGE_EVENT, nil)
 }
 
 func GetChatInfo(c echo.Context) error {
@@ -1056,7 +1034,7 @@ func AddSingleUserToGroupChats(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	//TODO Sent websocket event
+	pusher.PusherClient.Trigger(pusher.USER_FEED_PREFIX+req.ParticipantUUID, pusher.CHAT_EVENT, nil)
 
 	return c.String(http.StatusOK, "SUCCESS")
 }

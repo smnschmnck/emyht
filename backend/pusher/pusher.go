@@ -76,9 +76,23 @@ func PusherAuth(c echo.Context) error {
 }
 
 const (
-	NEW_CHAT = "new_chat"
+	CHAT_EVENT            = "chat"
+	MESSAGE_EVENT         = "message"
+	CONTACT_REQUEST_EVENT = "contact_request"
+	USER_FEED_PREFIX      = "private-user_feed."
+	CHAT_PREFIX           = "private-chat."
 )
 
-func MakeUserFeedName(uuid string) string {
-	return "private-user_feed." + uuid
+func MakePusherEventArray(channelPrefix string, channelSuffixes []string, eventName string, data any) []pusher.Event {
+	pusherEvents := make([]pusher.Event, 0)
+	for _, channelSuffix := range channelSuffixes {
+		event := pusher.Event{
+			Channel: channelPrefix + channelSuffix,
+			Name:    eventName,
+			Data:    data,
+		}
+		pusherEvents = append(pusherEvents, event)
+	}
+
+	return pusherEvents
 }
