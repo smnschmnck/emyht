@@ -9,17 +9,21 @@ import { useUserData } from '@/hooks/api/user';
 
 export const IndexLayout: FC = () => {
   const isSidebarHidden = useIsSidebarHidden();
-  const { data: chats } = useChats();
+  const { data: chats, refetch: refetchChats } = useChats();
   const { data: userData } = useUserData();
   const { pusher } = usePusher();
 
   useEffect(() => {
     if (userData?.uuid) {
-      pusher.subscribe(`private-user_feed:${userData.uuid}`);
+      pusher
+        .subscribe(`private-user_feed.${userData.uuid}`)
+        .bind('new_chat', () => {
+          refetchChats();
+        });
     }
 
     chats?.forEach((chat) => {
-      pusher.subscribe(`private-chat:${chat.chatID}`);
+      pusher.subscribe(`private-chat.${chat.chatID}`);
     });
   }, [pusher, chats, userData]);
 

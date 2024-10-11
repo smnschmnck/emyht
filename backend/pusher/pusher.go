@@ -2,7 +2,7 @@ package pusher
 
 import (
 	"chat/authService"
-	"chat/chatService"
+	"chat/chatHelpers"
 	"chat/userService"
 	"chat/utils"
 	"io"
@@ -45,13 +45,13 @@ func PusherAuth(c echo.Context) error {
 
 	privateChannelName := values.Get("channel_name")
 	fullChannelName := strings.Replace(privateChannelName, "private-", "", 1)
-	splitChannelName := strings.Split(fullChannelName, ":")
+	splitChannelName := strings.Split(fullChannelName, ".")
 	channelType := splitChannelName[0]
 	channelName := splitChannelName[1]
 
 	switch channelType {
 	case "chat":
-		inChat, err := chatService.IsUserInChat(reqUUID, channelName)
+		inChat, err := chatHelpers.IsUserInChat(reqUUID, channelName)
 		if err != nil {
 			return c.String(http.StatusUnauthorized, err.Error())
 		}
@@ -73,4 +73,12 @@ func PusherAuth(c echo.Context) error {
 	}
 
 	return c.String(http.StatusOK, string(response))
+}
+
+const (
+	NEW_CHAT = "new_chat"
+)
+
+func MakeUserFeedName(uuid string) string {
+	return "private-user_feed." + uuid
 }

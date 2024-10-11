@@ -26,24 +26,26 @@ const getPusherToken = async ({
     throw new Error(await res.text());
   }
 
-  const json = (await res.json()) as { channelToken?: string };
-  const { channelToken } = json;
+  const json = (await res.json()) as { auth?: string };
+  const { auth } = json;
 
-  if (!channelToken) {
+  if (!auth) {
     throw new Error('Could not authorize');
   }
 
-  return channelToken;
+  return auth;
 };
 
 export const pusher = new Pusher(env.VITE_PUSHER_KEY, {
   cluster: 'us3',
+  authEndpoint: `${env.VITE_BACKEND_HOST}/pusher/auth`,
   authorizer: ({ name }) => ({
     authorize: async (socketId, callback) => {
       try {
         const channelToken = await getPusherToken({ socketId, name });
         callback(null, { auth: channelToken });
       } catch (e) {
+        console.log('e', e);
         if (e instanceof Error) {
           callback(e, null);
         } else {
