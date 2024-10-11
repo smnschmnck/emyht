@@ -44,15 +44,23 @@ func PusherAuth(c echo.Context) error {
 	}
 
 	privateChannelName := values.Get("channel_name")
-	channelName := strings.Replace(privateChannelName, "private-", "", 1)
+	fullChannelName := strings.Replace(privateChannelName, "private-", "", 1)
+	splitChannelName := strings.Split(fullChannelName, ":")
+	channelType := splitChannelName[0]
+	channelName := splitChannelName[1]
 
-	inChat, err := chatService.IsUserInChat(reqUUID, channelName)
-	if err != nil {
-		return c.String(http.StatusUnauthorized, err.Error())
-	}
+	switch channelType {
+	case "chat":
+		inChat, err := chatService.IsUserInChat(reqUUID, channelName)
+		if err != nil {
+			return c.String(http.StatusUnauthorized, err.Error())
+		}
 
-	if !inChat {
-		return c.String(http.StatusUnauthorized, "User not in chat")
+		if !inChat {
+			return c.String(http.StatusUnauthorized, "User not in chat")
+		}
+	default:
+		return c.String(http.StatusBadRequest, "Unknown channel type")
 	}
 
 	response, err := PusherClient.AuthorizePrivateChannel(params)

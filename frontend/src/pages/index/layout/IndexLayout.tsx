@@ -13,7 +13,7 @@ export const IndexLayout: FC = () => {
 
   useEffect(() => {
     chats?.forEach((chat) => {
-      pusher.subscribe(`private-${chat.chatID}`);
+      pusher.subscribe(`private-chat:${chat.chatID}`);
     });
   }, [pusher, chats]);
 
