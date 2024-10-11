@@ -59,6 +59,10 @@ func PusherAuth(c echo.Context) error {
 		if !inChat {
 			return c.String(http.StatusUnauthorized, "User not in chat")
 		}
+	case "user_feed":
+		if reqUUID != channelName {
+			return c.String(http.StatusUnauthorized, "NO AUTH")
+		}
 	default:
 		return c.String(http.StatusBadRequest, "Unknown channel type")
 	}

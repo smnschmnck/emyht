@@ -5,17 +5,23 @@ import { Sidebar } from './components/Sidebar';
 import { useIsSidebarHidden } from './hooks';
 import { useChats } from '@/hooks/api/chats';
 import { usePusher } from '@/hooks/pusher/usePusher';
+import { useUserData } from '@/hooks/api/user';
 
 export const IndexLayout: FC = () => {
   const isSidebarHidden = useIsSidebarHidden();
   const { data: chats } = useChats();
+  const { data: userData } = useUserData();
   const { pusher } = usePusher();
 
   useEffect(() => {
+    if (userData?.uuid) {
+      pusher.subscribe(`private-user_feed:${userData.uuid}`);
+    }
+
     chats?.forEach((chat) => {
       pusher.subscribe(`private-chat:${chat.chatID}`);
     });
-  }, [pusher, chats]);
+  }, [pusher, chats, userData]);
 
   return (
     <div className="flex h-full">
