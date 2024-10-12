@@ -1,14 +1,13 @@
 package chatHelpers
 
 import (
-	"chat/dbHelpers/postgresHelper"
+	"chat/db"
 	"context"
 	"errors"
 	"fmt"
 	"sort"
 
-	"github.com/georgysavva/scany/pgxscan"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/georgysavva/scany/v2/pgxscan"
 )
 
 type SingleChat struct {
@@ -27,12 +26,7 @@ type SingleChat struct {
 }
 
 func GetChatsByUUID(uuid string) ([]SingleChat, error) {
-	ctx := context.Background()
-	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
-	if err != nil {
-		return []SingleChat{}, errors.New("INTERNAL ERROR")
-	}
-	defer conn.Close()
+	conn := db.GetDB()
 
 	getChatsQuery := "SELECT c.chat_id, " +
 		"c.chat_type, " +
@@ -66,7 +60,7 @@ func GetChatsByUUID(uuid string) ([]SingleChat, error) {
 		"LEFT JOIN chatmessages m ON m.message_id = c.last_message_id " +
 		"WHERE u.uuid = $1"
 	var chats []SingleChat
-	err = pgxscan.Select(ctx, conn, &chats, getChatsQuery, uuid)
+	err := pgxscan.Select(context.Background(), conn, &chats, getChatsQuery, uuid)
 	if err != nil {
 		fmt.Println(err)
 		return []SingleChat{}, errors.New("INTERNAL ERROR")

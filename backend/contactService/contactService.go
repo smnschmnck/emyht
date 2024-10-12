@@ -2,7 +2,7 @@ package contactService
 
 import (
 	"chat/authService"
-	"chat/dbHelpers/postgresHelper"
+	"chat/db"
 	"chat/pusher"
 	"chat/s3Helpers"
 	"chat/userService"
@@ -12,10 +12,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/georgysavva/scany/pgxscan"
+	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/go-playground/validator/v10"
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/labstack/echo/v4"
 )
 
@@ -50,19 +48,14 @@ func SendContactRequest(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "YOU CAN'T SEND A CONTACT REQUEST TO YOURSELF")
 	}
 
-	ctx := context.Background()
-	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
-	}
-	defer conn.Close()
+	conn := db.GetDB()
 
 	checkDuplicateQuery := "SELECT EXISTS( " +
 		"SELECT 1 " +
 		"FROM friends " +
 		"WHERE reciever = $1 AND sender = (SELECT uuid FROM users WHERE email=$2) " +
 		") "
-	checkDuplicateRows := conn.QueryRow(ctx, checkDuplicateQuery, user.Uuid, lowerCaseEmail)
+	checkDuplicateRows := conn.QueryRow(context.Background(), checkDuplicateQuery, user.Uuid, lowerCaseEmail)
 	var duplicateExists bool
 	err = checkDuplicateRows.Scan(&duplicateExists)
 	if err != nil {
@@ -75,7 +68,7 @@ func SendContactRequest(c echo.Context) error {
 	contactReqQuery := "INSERT INTO friends(sender, reciever, status) " +
 		"VALUES ($1, (SELECT uuid FROM users WHERE email=$2), 'pending') " +
 		"RETURNING status"
-	contactReqRows := conn.QueryRow(ctx, contactReqQuery, user.Uuid, lowerCaseEmail)
+	contactReqRows := conn.QueryRow(context.Background(), contactReqQuery, user.Uuid, lowerCaseEmail)
 	var status string
 	err = contactReqRows.Scan(&status)
 	if err != nil {
@@ -112,19 +105,14 @@ type Contact struct {
 }
 
 func GetUserContactsbyUUID(uuid string) ([]Contact, error) {
-	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
-	if err != nil {
-		return []Contact{}, errors.New("INTERNAL ERROR")
-	}
-	defer conn.Close(ctx)
+	conn := db.GetDB()
 
 	query := "SELECT u.username, u.uuid, u.picture_url " +
 		"FROM friends " +
 		"JOIN users u ON u.uuid = friends.sender OR friends.reciever = u.uuid " +
 		"WHERE (reciever=$1 OR sender=$1) AND status='accepted' AND u.uuid != $1"
 	var contacts []Contact
-	err = pgxscan.Select(ctx, conn, &contacts, query, uuid)
+	err := pgxscan.Select(context.Background(), conn, &contacts, query, uuid)
 	if err != nil {
 		fmt.Println(err)
 		return []Contact{}, errors.New("INTERNAL ERROR")
@@ -189,18 +177,13 @@ type singleContactRequest struct {
 }
 
 func GetPendingContactRequestsByUUID(uuid string) ([]singleContactRequest, error) {
-	ctx := context.Background()
-	conn, err := pgxpool.Connect(ctx, postgresHelper.PGConnString)
-	if err != nil {
-		return make([]singleContactRequest, 0), errors.New("INTERNAL ERROR")
-	}
-	defer conn.Close()
+	conn := db.GetDB()
 	pendingRequestQuery := "SELECT sender AS sender_id, u.username AS sender_username, u.picture_url AS sender_profile_picture, u.email AS sender_email " +
 		"FROM friends " +
 		"JOIN users u on friends.sender = u.uuid " +
 		"WHERE reciever=$1 AND status='pending' "
 	var contactRequests []singleContactRequest
-	err = pgxscan.Select(ctx, conn, &contactRequests, pendingRequestQuery, uuid)
+	err := pgxscan.Select(context.Background(), conn, &contactRequests, pendingRequestQuery, uuid)
 	if err != nil {
 		return make([]singleContactRequest, 0), errors.New("INTERNAL ERROR")
 	}
@@ -270,13 +253,8 @@ func HandleContactRequest(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
-	}
-	defer conn.Close(ctx)
-	_, err = conn.Query(ctx, query, contactReqResolution.SenderID, uuid)
+	conn := db.GetDB()
+	_, err = conn.Query(context.Background(), query, contactReqResolution.SenderID, uuid)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
@@ -284,12 +262,7 @@ func HandleContactRequest(c echo.Context) error {
 }
 
 func blockUser(uuidToBeBlocked string, uuid string, chatID string) error {
-	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
-	if err != nil {
-		return errors.New("INTERNAL ERROR")
-	}
-	defer conn.Close(ctx)
+	conn := db.GetDB()
 
 	//check if user is in contacts
 	uuidToBeBlockedAsArray := []string{uuidToBeBlocked}
@@ -306,7 +279,7 @@ func blockUser(uuidToBeBlocked string, uuid string, chatID string) error {
 		"SET status = 'blocked' " +
 		"WHERE (sender = $1 AND reciever = $2) OR (sender = $2 AND reciever = $1) " +
 		"RETURNING status"
-	err = conn.QueryRow(ctx, query, uuidToBeBlocked, uuid).Scan(&dbStatus)
+	err = conn.QueryRow(context.Background(), query, uuidToBeBlocked, uuid).Scan(&dbStatus)
 	if err != nil {
 		fmt.Println(err)
 		return errors.New("INTERNAL ERROR")
@@ -317,7 +290,7 @@ func blockUser(uuidToBeBlocked string, uuid string, chatID string) error {
 		"SET blocked = true " +
 		"WHERE chat_id = $1 " +
 		"RETURNING blocked"
-	err = conn.QueryRow(ctx, query, chatID).Scan(&chatStatus)
+	err = conn.QueryRow(context.Background(), query, chatID).Scan(&chatStatus)
 	if err != nil {
 		fmt.Println(err)
 		return errors.New("INTERNAL ERROR")
@@ -370,12 +343,7 @@ func GetSentContactRequests(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
 
-	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
-	if err != nil {
-		return errors.New("INTERNAL ERROR")
-	}
-	defer conn.Close(ctx)
+	conn := db.GetDB()
 
 	type contactRequest struct {
 		Email string `json:"email"`
@@ -386,7 +354,7 @@ func GetSentContactRequests(c echo.Context) error {
 		"JOIN users u on u.uuid = friends.reciever " +
 		"WHERE sender = $1 AND status='pending'"
 	var contactRequests []contactRequest
-	err = pgxscan.Select(ctx, conn, &contactRequests, query, uuid)
+	err = pgxscan.Select(context.Background(), conn, &contactRequests, query, uuid)
 	if err != nil {
 		fmt.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")

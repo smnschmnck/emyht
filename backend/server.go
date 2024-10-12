@@ -4,9 +4,9 @@ import (
 	"chat/authService"
 	"chat/chatService"
 	"chat/contactService"
-	"chat/dbHelpers/postgresHelper"
-	"chat/dbHelpers/redisHelper"
+	"chat/db"
 	"chat/pusher"
+	"chat/redisdb"
 	"chat/userSettingsService"
 	"chat/utils"
 	"fmt"
@@ -91,13 +91,14 @@ func loadDotEnv() {
 
 func initGlobals() {
 	loadDotEnv()
-	postgresHelper.LoadEnv()
-	redisHelper.LoadUserSessionsRedisEnv()
-	redisHelper.LoadPresignedURLsRedisEnv()
+	redisdb.InitializePresignedUrlsRedis()
+	redisdb.InitializeSessionsRedis()
 	setPort(3001)
 }
 
 func main() {
+	db.InitDB()
+	defer db.GetDB().Close()
 	initGlobals()
 	handleRequest()
 }
