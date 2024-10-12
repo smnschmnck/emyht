@@ -1,9 +1,12 @@
-import { CheckMarkIcon } from '@/assets/icons/CheckmarkIcon';
 import { Avatar } from '@/components/ui/Avatar';
 import { IconButton } from '@/components/ui/IconButton';
 import { Spinner } from '@/components/ui/Spinner';
 import { useContactRequests } from '@/hooks/api/contacts';
-import { NoSymbolIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import {
+  CheckIcon,
+  NoSymbolIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline';
 import { FC } from 'react';
 
 export type ContactRequestActions = 'accept' | 'decline' | 'block';
@@ -56,7 +59,7 @@ export const RequestTable: FC<RequestTableProps> = ({ handleRequest }) => {
                       })
                     }
                   >
-                    <CheckMarkIcon className="h-4 w-4" />
+                    <CheckIcon />
                   </IconButton>
                 </td>
                 <td className="py-3 text-red-500">
@@ -70,7 +73,7 @@ export const RequestTable: FC<RequestTableProps> = ({ handleRequest }) => {
                       })
                     }
                   >
-                    <XMarkIcon className="h-6 w-6" />
+                    <XMarkIcon />
                   </IconButton>
                 </td>
                 <td className="py-3 text-red-500">
@@ -84,7 +87,7 @@ export const RequestTable: FC<RequestTableProps> = ({ handleRequest }) => {
                       })
                     }
                   >
-                    <NoSymbolIcon className="h-6 w-6" />
+                    <NoSymbolIcon />
                   </IconButton>
                 </td>
               </tr>

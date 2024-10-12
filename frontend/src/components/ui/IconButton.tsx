@@ -21,7 +21,9 @@ export const IconButton = forwardRef<RefType, IconButtonProps>((props, ref) => {
       aria-label={ariaLabel}
       {...restProps}
     >
-      <div className="h-full w-full">{children}</div>
+      <div className="flex h-full w-full items-center justify-center">
+        {children}
+      </div>
     </button>
   );
 });
