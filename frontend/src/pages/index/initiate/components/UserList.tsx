@@ -59,7 +59,7 @@ export const UserList: FC<UserListProps> = ({
         />
       </div>
       <div className="h-full overflow-scroll">
-        <ul className="pr-4">
+        <ul>
           {!!filteredUsers &&
             filteredUsers.map((user) => (
               <li key={user.id}>
