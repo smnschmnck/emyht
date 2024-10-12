@@ -52,10 +52,7 @@ export const GroupChatCreator: FC<GroupChatCreatorProps> = ({
   const hasSelectedUsers = selectedUsers.length >= 1;
 
   return (
-    <form
-      onSubmit={createChat}
-      className="flex h-full w-full flex-col justify-between"
-    >
+    <form onSubmit={createChat} className="flex h-full w-full flex-col gap-4">
       <div className="flex w-full items-center justify-center gap-4">
         <Avatar className="h-14 min-h-[3.5rem] w-14 min-w-[3.5rem]" />
         <Button className="w-full" variant="secondary">
