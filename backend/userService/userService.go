@@ -1,8 +1,8 @@
 package userService
 
 import (
-	"chat/dbHelpers/postgresHelper"
-	"chat/dbHelpers/redisHelper"
+	"chat/db"
+	redisHelper "chat/redis"
 	"context"
 	"crypto/sha512"
 	"encoding/hex"
@@ -16,7 +16,6 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 )
 
 type User struct {
@@ -40,12 +39,7 @@ func getPepper() string {
 }
 
 func GetUserByUUID(uuid string) (User, error) {
-	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
-	if err != nil {
-		return User{}, errors.New("INTERNAL ERROR")
-	}
-	defer conn.Close(ctx)
+	conn := db.GetDB()
 
 	var dbUUID string
 	var dbEmail string
@@ -57,8 +51,8 @@ func GetUserByUUID(uuid string) (User, error) {
 	var dbProfilePictureUrl string
 
 	q := "select uuid, email, username, password, salt, is_admin, email_active, picture_url from users where uuid=$1"
-	rows := conn.QueryRow(ctx, q, uuid)
-	err = rows.Scan(
+	rows := conn.QueryRow(context.Background(), q, uuid)
+	err := rows.Scan(
 		&dbUUID,
 		&dbEmail,
 		&dbUsername,
@@ -84,12 +78,7 @@ func GetUserByUUID(uuid string) (User, error) {
 }
 
 func GetUserByEmail(email string) (User, error) {
-	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
-	if err != nil {
-		return User{}, errors.New("INTERNAL ERROR")
-	}
-	defer conn.Close(ctx)
+	conn := db.GetDB()
 
 	var dbUUID string
 	var dbEmail string
@@ -100,8 +89,8 @@ func GetUserByEmail(email string) (User, error) {
 	var dbUserEmailActive bool
 
 	q := "select uuid, email, username, password, salt, is_admin, email_active from users where email=$1"
-	rows := conn.QueryRow(ctx, q, email)
-	err = rows.Scan(
+	rows := conn.QueryRow(context.Background(), q, email)
+	err := rows.Scan(
 		&dbUUID,
 		&dbEmail,
 		&dbUsername,
@@ -190,17 +179,11 @@ func AddUser(email string, username string, password string) (User, error) {
 	userID := uuid.New().String()
 	randPictureInt := rand.Intn(10)
 	defaultPicture := "default_" + strconv.Itoa(randPictureInt)
-	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
-	if err != nil {
-		fmt.Println(err.Error())
-		return User{}, errors.New("INTERNAL ERROR")
-	}
-	defer conn.Close(ctx)
+	conn := db.GetDB()
 	q := "INSERT INTO users(uuid, email, username, password, salt, is_admin, email_active, email_token, picture_url) " +
 		"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) " +
 		"RETURNING uuid, email, username, password, salt, is_admin, email_active, email_token, picture_url;"
-	rows := conn.QueryRow(ctx, q, userID, email, username, hashedPW, salt, false, false, emailToken, defaultPicture)
+	rows := conn.QueryRow(context.Background(), q, userID, email, username, hashedPW, salt, false, false, emailToken, defaultPicture)
 	err = rows.Scan(
 		&dbUUID,
 		&dbEmail,
@@ -234,18 +217,13 @@ func AddUser(email string, username string, password string) (User, error) {
 }
 
 func RenewEmailToken(email string) (string, error) {
-	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
-	if err != nil {
-		return "", err
-	}
-	defer conn.Close(ctx)
+	conn := db.GetDB()
 
 	emailToken := uuid.New().String()
 	var dbEmailToken string
 	q := "UPDATE users SET email_token=$1 WHERE email=$2 RETURNING email_token"
-	rows := conn.QueryRow(ctx, q, emailToken, email)
-	err = rows.Scan(&dbEmailToken)
+	rows := conn.QueryRow(context.Background(), q, emailToken, email)
+	err := rows.Scan(&dbEmailToken)
 	if err != nil {
 		return "", err
 	}
@@ -259,16 +237,11 @@ func CheckPW(user User, email string, password string) bool {
 }
 
 func ChangeProfilePicture(uuid string, newPicture string) error {
-	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
-	if err != nil {
-		return err
-	}
-	defer conn.Close(ctx)
+	conn := db.GetDB()
 	q := "UPDATE users SET picture_url=$1 WHERE uuid=$2 RETURNING picture_url"
-	rows := conn.QueryRow(ctx, q, newPicture, uuid)
+	rows := conn.QueryRow(context.Background(), q, newPicture, uuid)
 	var newPictureUrl string
-	err = rows.Scan(&newPictureUrl)
+	err := rows.Scan(&newPictureUrl)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-package redisHelper
+package redis
 
 import (
 	"os"

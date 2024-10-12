@@ -1,9 +1,9 @@
 package authService
 
 import (
-	"chat/dbHelpers/postgresHelper"
-	"chat/dbHelpers/redisHelper"
+	"chat/db"
 	"chat/emailService"
+	redisHelper "chat/redis"
 	"chat/s3Helpers"
 	"chat/userService"
 	"context"
@@ -17,7 +17,6 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo/v4"
 
 	"github.com/go-playground/validator/v10"
@@ -214,15 +213,9 @@ func VerifyEmail(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
-	}
-	defer conn.Close(ctx)
-
+	conn := db.GetDB()
 	selectQuery := "SELECT email_active FROM users WHERE email_token=$1"
-	rows := conn.QueryRow(ctx, selectQuery, emailToken.Token)
+	rows := conn.QueryRow(context.Background(), selectQuery, emailToken.Token)
 	var dbUserEmailActive bool
 	err = rows.Scan(&dbUserEmailActive)
 	if err != nil {
@@ -230,7 +223,7 @@ func VerifyEmail(c echo.Context) error {
 	}
 
 	insertQuery := "UPDATE users SET email_active=true, email_token=$1 WHERE email_token=$2 RETURNING email_active"
-	insertedRows := conn.QueryRow(ctx, insertQuery, nil, emailToken.Token)
+	insertedRows := conn.QueryRow(context.Background(), insertQuery, nil, emailToken.Token)
 	var active bool
 	err = insertedRows.Scan(&active)
 	if err != nil || !active {
@@ -320,12 +313,7 @@ func ChangeEmail(c echo.Context) error {
 		return c.String(respErr.StatusCode, respErr.Msg)
 	}
 
-	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
-	}
-	defer conn.Close(ctx)
+	conn := db.GetDB()
 
 	trimmedEmail := strings.TrimSpace(changeReq.NewEmail)
 	lowerCaseEmail := strings.ToLower(trimmedEmail)
@@ -333,7 +321,7 @@ func ChangeEmail(c echo.Context) error {
 	checkQuery := "SELECT count(1) > 0 " +
 		"FROM users " +
 		"WHERE email=$1"
-	rows := conn.QueryRow(ctx, checkQuery, lowerCaseEmail)
+	rows := conn.QueryRow(context.Background(), checkQuery, lowerCaseEmail)
 	err = rows.Scan(&emailExists)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -347,7 +335,7 @@ func ChangeEmail(c echo.Context) error {
 		"ON CONFLICT(uuid) DO UPDATE SET new_email=$2, confirmation_token=$3 " +
 		"RETURNING confirmation_token, new_email"
 	confirmationToken := uuid.New().String()
-	insertedRows := conn.QueryRow(ctx, insertQuery, user.Uuid, lowerCaseEmail, confirmationToken)
+	insertedRows := conn.QueryRow(context.Background(), insertQuery, user.Uuid, lowerCaseEmail, confirmationToken)
 	var dbConfirmationToken string
 	var dbNewEmail string
 	err = insertedRows.Scan(&dbConfirmationToken, &dbNewEmail)
@@ -378,12 +366,7 @@ func ConfirmChangedEmail(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
-	}
-	defer conn.Close(ctx)
+	conn := db.GetDB()
 	updateQuery := "UPDATE users u " +
 		"SET email_active=true, email_token=$1, email=( " +
 		"SELECT c.new_email " +
@@ -396,14 +379,14 @@ func ConfirmChangedEmail(c echo.Context) error {
 		"WHERE c.confirmation_token=$2 " +
 		") " +
 		"RETURNING u.email;"
-	updatedRows := conn.QueryRow(ctx, updateQuery, nil, confirmToken.Token)
+	updatedRows := conn.QueryRow(context.Background(), updateQuery, nil, confirmToken.Token)
 	var dbNewEmail string
 	err = updatedRows.Scan(&dbNewEmail)
 	if err != nil || dbNewEmail == "" {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 	deleteQuery := "DELETE FROM change_email WHERE confirmation_token=$1"
-	_, err = conn.Query(ctx, deleteQuery, confirmToken.Token)
+	_, err = conn.Query(context.Background(), deleteQuery, confirmToken.Token)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
@@ -434,18 +417,13 @@ func ChangeUsername(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, postgresHelper.PGConnString)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
-	}
-	defer conn.Close(ctx)
+	conn := db.GetDB()
 	query := "UPDATE users " +
 		"SET username=$1 " +
 		"WHERE uuid=$2 " +
 		"RETURNING username"
 	var newUsername string
-	rows := conn.QueryRow(ctx, query, changeReq.NewUsername, reqUUID)
+	rows := conn.QueryRow(context.Background(), query, changeReq.NewUsername, reqUUID)
 	err = rows.Scan(&newUsername)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "COULD NOT CHANGE USERNAME")

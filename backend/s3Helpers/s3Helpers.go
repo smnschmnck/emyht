@@ -1,7 +1,6 @@
 package s3Helpers
 
 import (
-	"chat/dbHelpers/redisHelper"
 	"context"
 	"errors"
 	"net/http"
@@ -15,6 +14,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/go-redis/redis/v8"
+
+	redisHelper "chat/redis"
 )
 
 func getCachedPresignedGetURL(objectUrl string) (string, error) {
@@ -111,7 +112,7 @@ func PresignPutObject(objectName string, expiration time.Duration, maxSize int64
 	return presignResult.URL, nil
 }
 
-//Presigns URL if picture is saved in cloud bucket
+// Presigns URL if picture is saved in cloud bucket
 func FormatPictureUrl(url string) string {
 	if !strings.HasPrefix(url, "storage.emyht.com/") {
 		return url
