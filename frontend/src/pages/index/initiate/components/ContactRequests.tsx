@@ -45,10 +45,10 @@ export const ContactRequests: FC = () => {
       </div>
       <div className="flex w-full flex-col gap-12 xl:flex-row">
         <ContactRequestsTable />
-        <div className="flex h-fit flex-col gap-4 rounded-xl bg-zinc-50 p-6 lg:p-8">
-          <div className="pr-20">
+        <div className="flex h-fit w-full max-w-full flex-col gap-4 rounded-xl bg-zinc-50 p-6 lg:p-8 xl:max-w-96">
+          <div className="w-full pr-8">
             <h3 className="text-sm font-semibold">Send request</h3>
-            <p className="w-max text-sm text-zinc-500">
+            <p className="flex w-full text-sm text-zinc-500">
               Send a new contact request
             </p>
           </div>
