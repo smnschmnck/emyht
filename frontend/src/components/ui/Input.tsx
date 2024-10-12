@@ -1,6 +1,6 @@
 import { FC, InputHTMLAttributes, ReactNode } from 'react';
 
-type InputProps = InputHTMLAttributes<HTMLInputElement> & {
+export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   startAdornment?: ReactNode;
   endAdornment?: ReactNode;
 };

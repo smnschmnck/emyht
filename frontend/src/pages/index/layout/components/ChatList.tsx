@@ -1,11 +1,10 @@
 import { Avatar } from '@/components/ui/Avatar';
-import { Input } from '@/components/ui/Input';
 import { Link } from '@/components/ui/Link';
+import { SearchInput } from '@/components/ui/SearchInput';
 import { Spinner } from '@/components/ui/Spinner';
 import { Chat, useChats } from '@/hooks/api/chats';
 import { formatTimestamp } from '@/utils/dateUtils';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { Link as RouterLink } from '@tanstack/react-router';
 import { FC, useEffect, useState } from 'react';
 
@@ -96,15 +95,10 @@ export const ChatList: FC = () => {
   return (
     <div className="flex h-full w-full flex-col gap-4">
       <div>
-        <Input
+        <SearchInput
           onChange={(e) => setChatSearchQuery(e.target.value)}
           value={chatSearchQuery}
           placeholder="Search chats"
-          startAdornment={
-            <div className="text-zinc-500">
-              <MagnifyingGlassIcon className="h-4 w-4" />
-            </div>
-          }
         />
       </div>
       <div className="flex h-full w-full justify-center overflow-y-scroll">

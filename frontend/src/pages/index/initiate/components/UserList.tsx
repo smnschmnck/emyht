@@ -1,8 +1,8 @@
 import { Avatar } from '@/components/ui/Avatar';
-import { Input } from '@/components/ui/Input';
+import { SearchInput } from '@/components/ui/SearchInput';
 import { Spinner } from '@/components/ui/Spinner';
 import { useContacts } from '@/hooks/api/contacts';
-import { CheckIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { CheckIcon } from '@heroicons/react/24/outline';
 import { FC, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 
@@ -52,15 +52,10 @@ export const UserList: FC<UserListProps> = ({
   return (
     <div className="flex h-full flex-col gap-2">
       <div>
-        <Input
+        <SearchInput
           placeholder="Search contacts"
           value={searchQuery}
           onChange={(e) => onSearchQueryChange(e.target.value)}
-          startAdornment={
-            <div className="text-zinc-500">
-              <MagnifyingGlassIcon className="h-4 w-4" />
-            </div>
-          }
         />
       </div>
       <div className="h-full overflow-scroll">
