@@ -69,7 +69,7 @@ export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
         <div className="flex w-1/2 items-center justify-end px-1">
           <Avatar imgUrl={curChat?.pictureUrl} alt={curChat?.chatName} />
         </div>
-        <div className="flex flex-col justify-center px-1 text-sm">
+        <div className="flex w-1/2 flex-col justify-center px-1 text-sm">
           <h1 className="font-semibold">{curChat?.chatName}</h1>
           <p className="text-zinc-500">{chatInfo?.info}</p>
         </div>
