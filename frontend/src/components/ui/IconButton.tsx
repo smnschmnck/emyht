@@ -15,15 +15,13 @@ export const IconButton = forwardRef<RefType, IconButtonProps>((props, ref) => {
     <button
       ref={ref}
       className={twMerge(
-        'flex h-9 w-9 items-center justify-center rounded-md p-1.5 text-blue-600 transition hover:bg-blue-300/25',
+        'grid h-9 w-9 place-items-center rounded-md p-1.5 text-blue-600 transition hover:bg-blue-300/25',
         className
       )}
       aria-label={ariaLabel}
       {...restProps}
     >
-      <div className="flex h-full w-full items-center justify-center">
-        {children}
-      </div>
+      {children}
     </button>
   );
 });
