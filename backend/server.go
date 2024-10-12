@@ -6,7 +6,7 @@ import (
 	"chat/contactService"
 	"chat/db"
 	"chat/pusher"
-	redisHelper "chat/redis"
+	"chat/redisdb"
 	"chat/userSettingsService"
 	"chat/utils"
 	"fmt"
@@ -91,8 +91,8 @@ func loadDotEnv() {
 
 func initGlobals() {
 	loadDotEnv()
-	redisHelper.LoadUserSessionsRedisEnv()
-	redisHelper.LoadPresignedURLsRedisEnv()
+	redisdb.InitializePresignedUrlsRedis()
+	redisdb.InitializeSessionsRedis()
 	setPort(3001)
 }
 

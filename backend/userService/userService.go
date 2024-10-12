@@ -2,7 +2,7 @@ package userService
 
 import (
 	"chat/db"
-	redisHelper "chat/redis"
+	"chat/redisdb"
 	"context"
 	"crypto/sha512"
 	"encoding/hex"
@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 )
 
@@ -119,13 +118,12 @@ type ResponseError struct {
 }
 
 func GetUUIDBySessionID(sessionID string) (string, error) {
-	ctx := context.Background()
-	rdb := redis.NewClient(&redisHelper.UserSessionsRedisConfig)
-	uuid, err := rdb.Get(ctx, sessionID).Result()
+	rdb := redisdb.GetSessionsRedisClient()
+	uuid, err := rdb.Get(redisdb.SessionsCtx, sessionID).Result()
 	if err != nil {
 		return "", err
 	}
-	rdb.Set(ctx, sessionID, uuid, 24*time.Hour)
+	rdb.Set(redisdb.SessionsCtx, sessionID, uuid, 24*time.Hour)
 	return uuid, nil
 }
 

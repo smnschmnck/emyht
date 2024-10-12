@@ -3,7 +3,7 @@ package authService
 import (
 	"chat/db"
 	"chat/emailService"
-	redisHelper "chat/redis"
+	"chat/redisdb"
 	"chat/s3Helpers"
 	"chat/userService"
 	"context"
@@ -15,7 +15,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
@@ -110,9 +109,8 @@ func startSession(uuid string) (Session, error) {
 		return Session{}, err
 	}
 
-	rdb := redis.NewClient(&redisHelper.UserSessionsRedisConfig)
-	ctx := context.Background()
-	err = rdb.Set(ctx, token, uuid, SESSION_DURATION).Err()
+	rdb := redisdb.GetSessionsRedisClient()
+	err = rdb.Set(redisdb.SessionsCtx, token, uuid, SESSION_DURATION).Err()
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -437,9 +435,8 @@ func Logout(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
-	rdb := redis.NewClient(&redisHelper.UserSessionsRedisConfig)
-	ctx := context.Background()
-	_, err = rdb.Del(ctx, sessionID).Result()
+	rdb := redisdb.GetSessionsRedisClient()
+	_, err = rdb.Del(redisdb.SessionsCtx, sessionID).Result()
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}

@@ -1,6 +1,7 @@
 package s3Helpers
 
 import (
+	"chat/redisdb"
 	"context"
 	"errors"
 	"net/http"
@@ -13,15 +14,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/go-redis/redis/v8"
-
-	redisHelper "chat/redis"
 )
 
 func getCachedPresignedGetURL(objectUrl string) (string, error) {
-	ctx := context.Background()
-	rdb := redis.NewClient(&redisHelper.PresignedURLsRedisConfig)
-	presignedURL, err := rdb.Get(ctx, objectUrl).Result()
+	rdb := redisdb.GetPresignedUrlsRedisClient()
+	presignedURL, err := rdb.Get(redisdb.PresignedUrlsCtx, objectUrl).Result()
 	if err != nil {
 		return "", err
 	}
@@ -29,9 +26,8 @@ func getCachedPresignedGetURL(objectUrl string) (string, error) {
 }
 
 func cachePresignedGetURL(objectUrl string, presignedUrl string, expiration time.Duration) error {
-	ctx := context.Background()
-	rdb := redis.NewClient(&redisHelper.PresignedURLsRedisConfig)
-	_, err := rdb.Set(ctx, objectUrl, presignedUrl, expiration).Result()
+	rdb := redisdb.GetPresignedUrlsRedisClient()
+	_, err := rdb.Set(redisdb.PresignedUrlsCtx, objectUrl, presignedUrl, expiration).Result()
 	if err != nil {
 		return err
 	}
