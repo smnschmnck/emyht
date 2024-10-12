@@ -270,9 +270,6 @@ func Authenticate(c echo.Context) error {
 	if !pwCorrect {
 		return c.String(http.StatusUnauthorized, "WRONG CREDENTIALS")
 	}
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
-	}
 	session, err := startSession(user.Uuid)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE AUTHENTICATING")
