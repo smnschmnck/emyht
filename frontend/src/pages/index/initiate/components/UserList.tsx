@@ -9,7 +9,7 @@ import { twMerge } from 'tailwind-merge';
 const SelectedIndicator: FC<{ selected: boolean }> = ({ selected }) => (
   <div
     className={twMerge(
-      'flex h-4 w-4 items-center justify-center rounded-full p-[0.2rem] text-white',
+      'flex h-4 w-4 items-center justify-center rounded-md p-[0.2rem] text-white',
       selected ? 'bg-blue-500' : 'border border-zinc-300'
     )}
   >
