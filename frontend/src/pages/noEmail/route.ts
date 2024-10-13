@@ -2,6 +2,7 @@ import { getUserData } from '@/api/user';
 import { createRoute, redirect } from '@tanstack/react-router';
 import { mainLayoutRoute } from '../mainLayout/route';
 import { NoEmailPage } from './NoEmailPage';
+import { FullPageLoader } from '@/components/FullPageLoader';
 
 export const noEmailRoute = createRoute({
   getParentRoute: () => mainLayoutRoute,
@@ -21,4 +22,5 @@ export const noEmailRoute = createRoute({
 
     return userData;
   },
+  pendingComponent: FullPageLoader,
 });
