@@ -30,9 +30,13 @@ export const IndexLayout: FC = () => {
     subscribeToAllChats({
       chats,
       refetchChats,
-      refetchMessages,
+      onNewMessage: (channelChatId: string) => {
+        if (channelChatId === chatId) {
+          refetchMessages();
+        }
+      },
     });
-  }, [chats, userData]);
+  }, [chats, userData, chatId]);
 
   return (
     <div className="flex h-full">

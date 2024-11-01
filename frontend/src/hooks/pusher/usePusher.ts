@@ -31,11 +31,11 @@ export const usePusher = () => {
   const subscribeToAllChats = ({
     chats = [],
     refetchChats,
-    refetchMessages,
+    onNewMessage,
   }: {
     chats?: Chat[];
     refetchChats: () => void;
-    refetchMessages: () => void;
+    onNewMessage: (chatId: string) => void;
   }) => {
     chats.forEach(({ chatID }) => {
       pusher
@@ -43,7 +43,7 @@ export const usePusher = () => {
         .unbind('message')
         .bind('message', () => {
           refetchChats();
-          refetchMessages();
+          onNewMessage(chatID);
         });
     });
   };
