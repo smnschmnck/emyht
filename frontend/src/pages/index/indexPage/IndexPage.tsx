@@ -19,7 +19,7 @@ export const IndexPage: FC = () => {
   const hasContactRequests = !!data && data.length > 0;
 
   return (
-    <div className="flex h-full w-full flex-col items-center justify-around px-32">
+    <div className="hidden h-full w-full flex-col items-center justify-around px-32 lg:flex">
       <div className="flex flex-col items-center gap-4">
         <img className="pointer-events-none w-24" src={emyhtLogo} alt="emyht" />
         <div className="text-center">
