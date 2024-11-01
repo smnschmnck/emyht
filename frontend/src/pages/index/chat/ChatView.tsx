@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/Button';
 import { FilePickerButton } from '@/components/ui/FilePickerButton';
-import { useChats } from '@/hooks/api/chats';
 import { useChatMessages } from '@/hooks/api/messages';
 import { useParams } from '@tanstack/react-router';
 import prettyBytes from 'pretty-bytes';
@@ -11,13 +10,11 @@ import { MessageInput } from './components/MessageInput';
 
 const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
   const { data: messages } = useChatMessages(chatId);
-  const { refetch: refetchChats } = useChats();
   const lastMessage = useRef<null | HTMLLIElement>(null);
 
   useEffect(() => {
     lastMessage.current?.scrollIntoView();
-    refetchChats();
-  }, [messages, refetchChats]);
+  }, [messages]);
 
   return (
     <ul className="flex h-20 w-full max-w-3xl grow flex-col gap-5 overflow-y-scroll pt-4">
