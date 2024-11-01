@@ -1,4 +1,8 @@
-import { useRouter, useRouterState } from '@tanstack/react-router';
+import {
+  useMatchRoute,
+  useRouter,
+  useRouterState,
+} from '@tanstack/react-router';
 
 const CHAT_SUBROUTE = '/chat/';
 
@@ -18,13 +22,11 @@ export const useIsSidebarHidden = () => {
 };
 
 export const useChatId = () => {
-  const { location } = useRouterState();
-  const currentPath = location.pathname;
-
-  if (!currentPath.startsWith(CHAT_SUBROUTE)) {
+  const matchRoute = useMatchRoute();
+  const chatRoute = matchRoute({ to: '/chat/$chatId' });
+  if (!chatRoute) {
     return;
   }
 
-  const chatId = currentPath.split(CHAT_SUBROUTE).at(1);
-  return chatId;
+  return chatRoute.chatId;
 };
