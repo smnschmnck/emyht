@@ -16,6 +16,10 @@ const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
 
   useEffect(() => {
     lastMessage.current?.scrollIntoView();
+  }, [chatId]);
+
+  useEffect(() => {
+    lastMessage.current?.scrollIntoView();
     refetchChats();
   }, [messages]);
 
