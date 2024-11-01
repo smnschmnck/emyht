@@ -7,13 +7,22 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { ChatHeader } from './components/ChatHeader';
 import { ChatMessage } from './components/ChatMessage';
 import { MessageInput } from './components/MessageInput';
+import { usePusher } from '@/hooks/pusher/usePusher';
+import { useChats } from '@/hooks/api/chats';
 
 const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
-  const { data: messages } = useChatMessages(chatId);
+  const { data: messages, refetch: refetchMessages } = useChatMessages(chatId);
+  const { refetch: refetchChats } = useChats();
+  const { subscribeToChatMessages } = usePusher();
   const lastMessage = useRef<null | HTMLLIElement>(null);
 
   useEffect(() => {
+    subscribeToChatMessages({ chatId, refetchMessages });
+  }, [chatId]);
+
+  useEffect(() => {
     lastMessage.current?.scrollIntoView();
+    refetchChats();
   }, [messages]);
 
   return (

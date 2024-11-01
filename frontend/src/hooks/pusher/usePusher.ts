@@ -57,5 +57,22 @@ export const usePusher = () => {
     setSubscribedChats(updatedSubscribedChats);
   };
 
-  return { pusher, subscribeToUserFeed, subscribeToAllChats };
+  const subscribeToChatMessages = ({
+    chatId,
+    refetchMessages,
+  }: {
+    chatId: String;
+    refetchMessages: () => void;
+  }) => {
+    pusher.subscribe(`private-chat.${chatId}`).bind('message', () => {
+      refetchMessages();
+    });
+  };
+
+  return {
+    pusher,
+    subscribeToUserFeed,
+    subscribeToAllChats,
+    subscribeToChatMessages,
+  };
 };
