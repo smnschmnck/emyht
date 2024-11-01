@@ -11,3 +11,13 @@ export const useIsSidebarHidden = () => {
 
   return hideRoutes.some((isRouteMatch) => Boolean(isRouteMatch));
 };
+
+export const useChatId = () => {
+  const matchRoute = useMatchRoute();
+
+  const chatRoute = matchRoute({ to: '/chat/$chatId' });
+
+  if (chatRoute) {
+    return chatRoute.chatId;
+  }
+};

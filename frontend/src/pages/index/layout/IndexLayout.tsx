@@ -6,14 +6,17 @@ import { Outlet } from '@tanstack/react-router';
 import { FC, useEffect } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Sidebar } from './components/Sidebar';
-import { useIsSidebarHidden } from './hooks';
+import { useChatId, useIsSidebarHidden } from './hooks';
 import { indexLayoutRoute } from './route';
+import { useChatMessages } from '@/hooks/api/messages';
 
 export const IndexLayout: FC = () => {
   const loaderUserData = indexLayoutRoute.useLoaderData();
   const { data: userData } = useUserData({ initialData: loaderUserData });
   const isSidebarHidden = useIsSidebarHidden();
   const { data: chats, refetch: refetchChats } = useChats();
+  const chatId = useChatId();
+  const { refetch: refetchMessages } = useChatMessages(chatId);
   const { refetch: refetchContactRequests } = useContactRequests();
   const { subscribeToUserFeed, subscribeToAllChats } = usePusher();
 
@@ -27,6 +30,7 @@ export const IndexLayout: FC = () => {
     subscribeToAllChats({
       chats,
       refetchChats,
+      refetchMessages,
     });
   }, [chats, userData]);
 

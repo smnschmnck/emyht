@@ -1,11 +1,9 @@
 import { PusherContext } from '@/utils/pusher';
-import { useContext, useState } from 'react';
-import { Chat } from '../api/chats';
+import { useContext } from 'react';
+import type { Chat } from '../api/chats';
 
 export const usePusher = () => {
   const { pusher } = useContext(PusherContext);
-  const [isSubscribedToUserFeed, setIsSubscribedToUserFeed] = useState(false);
-  const [subscribedChats, setSubscribedChats] = useState<string[]>([]);
 
   const subscribeToUserFeed = ({
     uuid,
@@ -16,56 +14,37 @@ export const usePusher = () => {
     refetchChats: () => void;
     refetchContactRequests: () => void;
   }) => {
-    if (isSubscribedToUserFeed) {
-      return;
-    }
-
     if (uuid) {
       pusher
         .subscribe(`private-user_feed.${uuid}`)
+        .unbind('chat')
         .bind('chat', () => {
           refetchChats();
         })
+        .unbind('contact_request')
         .bind('contact_request', () => {
           refetchContactRequests();
         });
-
-      setIsSubscribedToUserFeed(true);
     }
   };
 
   const subscribeToAllChats = ({
     chats = [],
     refetchChats,
+    refetchMessages,
   }: {
     chats?: Chat[];
     refetchChats: () => void;
-  }) => {
-    const newChatIds = chats.map((chat) => chat.chatID);
-    const unsubscribedChats = newChatIds.filter(
-      (chatId) => !subscribedChats.includes(chatId)
-    );
-
-    unsubscribedChats.forEach((chatId) => {
-      pusher.subscribe(`private-chat.${chatId}`).bind('message', () => {
-        refetchChats();
-      });
-    });
-
-    const subscribedChatsSet = new Set([...subscribedChats, ...newChatIds]);
-    const updatedSubscribedChats = Array.from(subscribedChatsSet.keys());
-    setSubscribedChats(updatedSubscribedChats);
-  };
-
-  const subscribeToChatMessages = ({
-    chatId,
-    refetchMessages,
-  }: {
-    chatId: String;
     refetchMessages: () => void;
   }) => {
-    pusher.subscribe(`private-chat.${chatId}`).bind('message', () => {
-      refetchMessages();
+    chats.forEach(({ chatID }) => {
+      pusher
+        .subscribe(`private-chat.${chatID}`)
+        .unbind('message')
+        .bind('message', () => {
+          refetchChats();
+          refetchMessages();
+        });
     });
   };
 
@@ -73,6 +52,5 @@ export const usePusher = () => {
     pusher,
     subscribeToUserFeed,
     subscribeToAllChats,
-    subscribeToChatMessages,
   };
 };
