@@ -6,9 +6,4 @@ export const chatRoute = createRoute({
   getParentRoute: () => indexLayoutRoute,
   path: '/chat/$chatId',
   component: ChatView,
-  loader: (ctx) => {
-    return {
-      chatId: ctx.params.chatId,
-    };
-  },
 });

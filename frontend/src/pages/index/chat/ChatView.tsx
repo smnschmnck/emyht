@@ -1,14 +1,13 @@
 import { Button } from '@/components/ui/Button';
 import { FilePickerButton } from '@/components/ui/FilePickerButton';
-import { useLoaderData } from '@tanstack/react-router';
+import { useChats } from '@/hooks/api/chats';
+import { useChatMessages } from '@/hooks/api/messages';
+import { useParams } from '@tanstack/react-router';
 import prettyBytes from 'pretty-bytes';
 import { FC, useEffect, useRef, useState } from 'react';
 import { ChatHeader } from './components/ChatHeader';
 import { ChatMessage } from './components/ChatMessage';
 import { MessageInput } from './components/MessageInput';
-import { chatRoute } from './route';
-import { useChatMessages } from '@/hooks/api/messages';
-import { useChats } from '@/hooks/api/chats';
 
 const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
   const { data: messages } = useChatMessages(chatId);
@@ -90,7 +89,7 @@ const FilePicker: FC = () => {
 
 export const ChatView: FC = () => {
   const [showFilePicker, setShowFilePicker] = useState(false);
-  const { chatId } = useLoaderData({ from: chatRoute.id });
+  const { chatId } = useParams({ from: '/indexLayoutRoute/chat/$chatId' });
 
   useEffect(() => {
     setShowFilePicker(false);
