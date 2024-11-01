@@ -15,7 +15,7 @@ type SingleChatProps = {
 const SingleChat: FC<SingleChatProps> = ({ chat }) => (
   <li>
     <RouterLink
-      className="flex w-full items-center gap-3 border-b border-b-zinc-100 px-2 py-3 transition hover:bg-zinc-100"
+      className="flex w-full items-center gap-3 rounded-lg p-3 transition hover:bg-zinc-100 data-[status=active]:bg-zinc-100"
       to="/chat/$chatId"
       params={{ chatId: chat.chatID }}
     >
@@ -114,7 +114,10 @@ export const ChatList: FC = () => {
           </div>
         )}
         {hasChats && (
-          <ul className="flex h-1 w-full grow flex-col" ref={animationParent}>
+          <ul
+            className="flex h-1 w-full grow flex-col gap-1"
+            ref={animationParent}
+          >
             {filteredChats.map((c) => (
               <SingleChat key={c.chatID} chat={c} />
             ))}
