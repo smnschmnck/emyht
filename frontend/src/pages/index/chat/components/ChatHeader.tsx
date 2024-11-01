@@ -65,13 +65,15 @@ export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
       <ButtonLink to="/" aria-label={'back'} className="h-8 w-8">
         <ChevronLeftIcon className="text-zinc-400" />
       </ButtonLink>
-      <div className="flex h-full w-full">
-        <div className="flex w-1/2 items-center justify-end px-1">
-          <Avatar imgUrl={curChat?.pictureUrl} alt={curChat?.chatName} />
-        </div>
-        <div className="flex w-1/2 flex-col justify-center px-1 text-sm">
-          <h1 className="font-semibold">{curChat?.chatName}</h1>
-          <p className="text-zinc-500">{chatInfo?.info}</p>
+      <div className="flex h-full w-full items-center gap-3 px-4 lg:px-8">
+        <Avatar imgUrl={curChat?.pictureUrl} alt={curChat?.chatName} />
+        <div className="flex flex-col justify-center gap-0.5 text-sm">
+          <div className="flex h-5 min-w-24 items-center">
+            <h1 className="font-semibold">{curChat?.chatName}</h1>
+          </div>
+          <div className="flex h-5 min-w-24 items-center">
+            <p className="text-zinc-500">{chatInfo?.info}</p>
+          </div>
         </div>
       </div>
       <DropdownOptions />
