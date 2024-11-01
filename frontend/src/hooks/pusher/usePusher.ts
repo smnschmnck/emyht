@@ -5,6 +5,15 @@ import type { Chat } from '../api/chats';
 export const usePusher = () => {
   const { pusher } = useContext(PusherContext);
 
+  const subscribe = (type: 'USER_FEED' | 'CHAT', id: string) => {
+    const prefixes = {
+      USER_FEED: 'private-user_feed',
+      CHAT: 'private-chat',
+    };
+
+    return pusher.subscribe(`${prefixes[type]}.${id}`);
+  };
+
   const subscribeToUserFeed = ({
     uuid,
     refetchChats,
@@ -15,8 +24,7 @@ export const usePusher = () => {
     refetchContactRequests: () => void;
   }) => {
     if (uuid) {
-      pusher
-        .subscribe(`private-user_feed.${uuid}`)
+      subscribe('USER_FEED', uuid)
         .unbind('chat')
         .bind('chat', () => {
           refetchChats();
@@ -38,8 +46,7 @@ export const usePusher = () => {
     onNewMessage: (chatId: string) => void;
   }) => {
     chats.forEach(({ chatID }) => {
-      pusher
-        .subscribe(`private-chat.${chatID}`)
+      subscribe('CHAT', chatID)
         .unbind('message')
         .bind('message', () => {
           refetchChats();
