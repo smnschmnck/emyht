@@ -8,11 +8,13 @@ import { usePusher } from '@/hooks/pusher/usePusher';
 import { useUserData } from '@/hooks/api/user';
 import { useContactRequests } from '@/hooks/api/contacts';
 import { useChatMessages } from '@/hooks/api/messages';
+import { indexLayoutRoute } from './route';
 
 export const IndexLayout: FC = () => {
+  const loaderUserData = indexLayoutRoute.useLoaderData();
+  const { data: userData } = useUserData({ initialData: loaderUserData });
   const isSidebarHidden = useIsSidebarHidden();
   const { data: chats, refetch: refetchChats } = useChats();
-  const { data: userData } = useUserData();
   const { refetch: refetchContactRequests } = useContactRequests();
   const { pusher } = usePusher();
   const chatId = useChatId();

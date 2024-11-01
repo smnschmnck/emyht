@@ -18,6 +18,8 @@ export const indexLayoutRoute = createRoute({
     if (!userData.emailActive) {
       throw redirect({ to: '/no-email' });
     }
+
+    return userData;
   },
   pendingComponent: FullPageLoader,
   component: IndexLayout,
