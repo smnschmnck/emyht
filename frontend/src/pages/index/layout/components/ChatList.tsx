@@ -1,4 +1,5 @@
 import { Avatar } from '@/components/ui/Avatar';
+import { Badge } from '@/components/ui/Bagde';
 import { Link } from '@/components/ui/Link';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Spinner } from '@/components/ui/Spinner';
@@ -20,11 +21,7 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => (
       params={{ chatId: chat.chatID }}
     >
       <div className="relative">
-        {chat.unreadMessages > 0 && (
-          <div className="absolute -left-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-xs font-medium text-white">
-            {chat.unreadMessages}
-          </div>
-        )}
+        {chat.unreadMessages > 0 && <Badge>{''}</Badge>}
         <Avatar imgUrl={chat.pictureUrl} />
       </div>
       <div className="w-full truncate text-sm">
