@@ -60,7 +60,9 @@ const FilePreview: FC<FilePreviewProps> = ({ file }) => {
   );
 };
 
-const FilePicker: FC = () => {
+const FilePicker: FC<{
+  setShowFilePicker: (showFilePicker: boolean) => void;
+}> = ({ setShowFilePicker }) => {
   const [files, setFiles] = useState<File[]>([]);
 
   const handleFileChange = (fileList: FileList) => {
@@ -73,7 +75,12 @@ const FilePicker: FC = () => {
     <div className="flex h-20 w-full grow flex-col p-8">
       <div className="flex w-full justify-between border-b px-2 pb-3">
         <div className="flex gap-2">
-          <Button variant="secondaryDestructive">Cancel</Button>
+          <Button
+            variant="secondaryDestructive"
+            onClick={() => setShowFilePicker(false)}
+          >
+            Cancel
+          </Button>
           <Button variant="text">Deselect X files</Button>
           <Button variant="text">Remove X files</Button>
         </div>
@@ -82,7 +89,7 @@ const FilePicker: FC = () => {
           handleFileChange={handleFileChange}
         />
       </div>
-      <div className="pt-12">
+      <div className="flex flex-wrap gap-2 overflow-y-scroll pt-12">
         {files.map((file) => (
           <FilePreview file={file} />
         ))}
@@ -104,7 +111,7 @@ export const ChatView: FC = () => {
       <ChatHeader chatId={chatId} />
       <div className="flex h-full w-full flex-col items-center px-6">
         {!showFilePicker && <MessageList chatId={chatId} />}
-        {showFilePicker && <FilePicker />}
+        {showFilePicker && <FilePicker setShowFilePicker={setShowFilePicker} />}
         <div className="flex h-24 w-full max-w-3xl items-center justify-center">
           <MessageInput
             chatId={chatId}
