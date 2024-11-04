@@ -24,7 +24,9 @@
     "paths": {
       "@/*": ["./*"],
       "@assets/*": ["assets/*"]
-    }
+    },
+
+    "types": ["vite-plugin-pwa/client"]
   },
   "include": ["src", "src/env.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]

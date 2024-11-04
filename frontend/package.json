@@ -49,6 +49,7 @@
     "typescript": "^5.5.4",
     "unplugin-fonts": "^1.1.1",
     "vite": "^5.4.1",
-    "vite-plugin-pwa": "^0.20.5"
+    "vite-plugin-pwa": "^0.20.5",
+    "workbox-window": "^7.3.0"
   }
 }
