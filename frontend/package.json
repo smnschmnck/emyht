@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "doppler run -- vite",
-    "localbuild": "tsc && doppler run vite build",
     "build": "tsc && vite build",
+    "build:local": "tsc && doppler run vite build",
     "check": "tsc",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "doppler run -- vite preview"
