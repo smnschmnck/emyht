@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import path from 'path';
 import Unfonts from 'unplugin-fonts/vite';
+import { VitePWA } from 'vite-plugin-pwa';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
 import './src/env';
@@ -10,6 +11,12 @@ import './src/env';
 export default defineConfig({
   plugins: [
     react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      workbox: {
+        globPatterns: ['**/*.{js,jsx,css,html,png,svg,woff2,ico,json,webp}'],
+      },
+    }),
     Unfonts({
       fontsource: {
         families: [
