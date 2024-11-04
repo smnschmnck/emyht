@@ -26,7 +26,7 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => (
       </div>
       <div className="w-full truncate text-sm">
         <div className="flex w-full items-center justify-between">
-          <p className="font-semibold">{chat.chatName}</p>
+          <p className="font-semibold">{chat.chatName} :D</p>
           <p className="text-xs text-zinc-400">
             {formatTimestamp(Number(chat.timestamp))}
           </p>
