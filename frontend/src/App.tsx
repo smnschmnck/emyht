@@ -1,5 +1,7 @@
 import { router } from '@/router/config';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
+import { QueryClient } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { RouterProvider } from '@tanstack/react-router';
 import { Toaster } from 'sonner';
 import { pusher, PusherContext } from './utils/pusher';
@@ -8,17 +10,25 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: true,
+      gcTime: 1000 * 60 * 60 * 24, // 24 hours
     },
   },
+});
+
+const persister = createSyncStoragePersister({
+  storage: window.localStorage,
 });
 
 const App = () => {
   return (
     <PusherContext.Provider value={{ pusher }}>
-      <QueryClientProvider client={queryClient}>
+      <PersistQueryClientProvider
+        persistOptions={{ persister }}
+        client={queryClient}
+      >
         <Toaster richColors position="top-right" />
         <RouterProvider router={router} />
-      </QueryClientProvider>
+      </PersistQueryClientProvider>
     </PusherContext.Provider>
   );
 };
