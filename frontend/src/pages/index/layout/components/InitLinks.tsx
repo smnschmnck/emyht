@@ -11,7 +11,7 @@ export const InitLinks: FC = () => {
   const hasContactRequests = !!contactRequests && contactRequests.length > 0;
 
   return (
-    <div className="flex items-center gap-2 rounded-lg bg-zinc-100 p-1">
+    <div className="flex items-center gap-2 rounded-xl bg-zinc-100 p-1">
       <div className="relative">
         {hasContactRequests && (
           <Badge size="sm">{contactRequests.length}</Badge>

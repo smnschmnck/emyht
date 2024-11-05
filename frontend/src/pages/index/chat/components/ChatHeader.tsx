@@ -22,7 +22,7 @@ const DropdownOptions: FC = () => {
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content
-          className="rounded-md border bg-white p-1 shadow-sm"
+          className="rounded-lg border bg-white p-1 shadow-sm"
           align="end"
         >
           <DropdownMenu.Item className="flex h-8 w-32 cursor-pointer items-center rounded-sm pl-3 text-sm font-medium outline-none data-[highlighted]:bg-blue-50">

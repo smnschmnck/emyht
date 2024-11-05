@@ -13,7 +13,7 @@ const ButtonLinkWrapper = forwardRef<HTMLDivElement, ExtraProps>(
     <div
       ref={ref}
       className={twMerge(
-        'inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-md bg-white p-2 text-blue-600 transition hover:bg-blue-100',
+        'inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg bg-white p-2 text-blue-600 transition hover:bg-blue-100',
         className
       )}
       {...props}
