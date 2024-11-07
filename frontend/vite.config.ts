@@ -40,6 +40,9 @@ export default defineConfig({
             purpose: 'maskable',
           },
         ],
+        theme_color: '#ffffff',
+        background_color: '#ffffff',
+        display: 'standalone',
       },
       workbox: {
         globPatterns: ['**/*.{js,jsx,css,html,png,svg,woff2,ico,json,webp}'],
