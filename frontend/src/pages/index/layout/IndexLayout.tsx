@@ -36,7 +36,16 @@ export const IndexLayout: FC = () => {
         }
       },
     });
-  }, [chats, userData, chatId]);
+  }, [
+    chats,
+    userData,
+    chatId,
+    subscribeToUserFeed,
+    refetchChats,
+    refetchContactRequests,
+    subscribeToAllChats,
+    refetchMessages,
+  ]);
 
   return (
     <div className="flex h-full">

@@ -21,7 +21,7 @@ const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
   useEffect(() => {
     lastMessage.current?.scrollIntoView();
     refetchChats();
-  }, [messages]);
+  }, [messages, refetchChats]);
 
   return (
     <ul className="flex h-20 w-full max-w-3xl grow flex-col gap-5 overflow-y-scroll pt-4">

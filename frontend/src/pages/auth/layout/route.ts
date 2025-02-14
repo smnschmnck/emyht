@@ -12,7 +12,7 @@ export const authLayoutRoute = createRoute({
     let userData;
     try {
       userData = await getUserData();
-    } catch (e) {
+    } catch {
       return;
     }
     if (userData.emailActive) {

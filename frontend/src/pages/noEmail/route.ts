@@ -12,7 +12,7 @@ export const noEmailRoute = createRoute({
     let userData;
     try {
       userData = await getUserData();
-    } catch (e) {
+    } catch {
       throw redirect({ to: '/sign-in' });
     }
 
