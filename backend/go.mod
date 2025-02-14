@@ -5,7 +5,7 @@ go 1.22.5
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.17.7
 	github.com/aws/aws-sdk-go-v2/credentials v1.12.20
-	github.com/go-redis/redis/v8 v8.11.5
+	github.com/go-redis/redis/v9 v9.7.0
 	github.com/google/uuid v1.3.0
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/joho/godotenv v1.4.0
