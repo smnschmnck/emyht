@@ -1,12 +1,12 @@
 import { Badge } from '@/components/ui/Bagde';
+import { useContactRequests } from '@/hooks/api/contacts';
 import emyhtLogo from '@assets/images/emyht-logo.svg';
-import { Link, createLink } from '@tanstack/react-router';
+import { createLink } from '@tanstack/react-router';
 import { FC, ReactNode } from 'react';
 import ballonIllustration from './assets/balloon_illustration.svg';
-import { useContactRequests } from '@/hooks/api/contacts';
 
 const CtaLinkWrapper = (props: { children: ReactNode }) => (
-  <Link
+  <div
     className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl border border-zinc-100 bg-white px-12 text-sm font-semibold shadow-sm transition hover:bg-zinc-100"
     {...props}
   />
