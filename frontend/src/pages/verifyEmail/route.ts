@@ -4,7 +4,7 @@ import { mainLayoutRoute } from '../mainLayout/route';
 import { VerifyEmailPage } from './VerifyEmailPage';
 
 const searchParamSchema = z.object({
-  token: z.string().uuid(),
+  token: z.string(),
 });
 
 export type SearchParamSchema = z.infer<typeof searchParamSchema>;

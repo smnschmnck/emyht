@@ -3,12 +3,11 @@ import { SimpleErrorMessage } from '@/components/ui/SimpleErrorMessage';
 import { Spinner } from '@/components/ui/Spinner';
 import { fetchWithDefaults } from '@/utils/fetch';
 import { useQuery } from '@tanstack/react-query';
-import { useSearch } from '@tanstack/react-router';
 import { FC } from 'react';
 import { verifyEmailRoute } from './route';
 
 export const VerifyEmailPage: FC = () => {
-  const { token } = useSearch({ from: verifyEmailRoute.id });
+  const { token } = verifyEmailRoute.useSearch();
 
   const verifyEmail = async () => {
     const res = await fetchWithDefaults('/verifyEmail', {
