@@ -9,14 +9,12 @@ import (
 	"chat/redisdb"
 	"chat/userSettingsService"
 	"chat/utils"
-	"fmt"
 	"os"
 	"strconv"
 
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-
-	"github.com/joho/godotenv"
 )
 
 var PORT string
@@ -81,16 +79,7 @@ func setPort(defaultPort int) {
 	}
 }
 
-func loadDotEnv() {
-	godotenv.Load()
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println(string("\033[31m"), "No .env file. Using default or runtime vars")
-	}
-}
-
 func initGlobals() {
-	loadDotEnv()
 	redisdb.InitializePresignedUrlsRedis()
 	redisdb.InitializeSessionsRedis()
 	setPort(3001)
