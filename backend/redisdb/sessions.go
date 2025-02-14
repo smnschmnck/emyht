@@ -28,6 +28,7 @@ func InitializeSessionsRedis() {
 	}
 
 	opts.DB = dbNum
+	opts.DialTimeout = 10_000_000_000
 
 	sessionsDb = redis.NewClient(opts)
 

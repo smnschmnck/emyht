@@ -28,6 +28,7 @@ func InitializePresignedUrlsRedis() {
 	}
 
 	opts.DB = dbNum
+	opts.DialTimeout = 10_000_000_000
 
 	presignedUrlsDb = redis.NewClient(opts)
 
