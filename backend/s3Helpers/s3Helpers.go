@@ -100,7 +100,7 @@ func PresignPutObject(objectName string, expiration time.Duration, maxSize int64
 	presignResult, err := presignClient.PresignPutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket:        aws.String(os.Getenv("S3_BUCKET_NAME")),
 		Key:           aws.String(objectName),
-		ContentLength: *aws.Int64(maxSize),
+		ContentLength: aws.Int64(maxSize),
 	})
 	if err != nil {
 		return "", err

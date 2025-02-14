@@ -47,7 +47,7 @@ export const IncomingRequests: FC = () => {
           </p>
         </div>
       </div>
-      <div className="flex w-full flex-col gap-8 rounded-xl border border-zinc-100 bg-white p-10 shadow-sm">
+      <div className="flex w-full flex-col gap-8 rounded-xl border border-zinc-100 bg-white p-10 shadow-xs">
         <div className="w-full overflow-x-scroll">
           <div className="min-w-[32rem] pb-8">
             <RequestTable handleRequest={handleContactRequest.mutate} />
