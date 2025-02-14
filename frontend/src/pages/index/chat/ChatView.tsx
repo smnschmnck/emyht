@@ -43,7 +43,7 @@ const FilePreview: FC<FilePreviewProps> = ({ file }) => {
   const previewUrl = URL.createObjectURL(file);
 
   return (
-    <div className="h-48 w-64 overflow-hidden rounded-xl border border-zinc-100 shadow-sm">
+    <div className="h-48 w-64 overflow-hidden rounded-xl border border-zinc-100 shadow-xs">
       <img
         src={previewUrl}
         alt={file.name}

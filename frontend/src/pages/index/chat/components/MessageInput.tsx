@@ -66,7 +66,7 @@ export const MessageInput: FC<{
       </div>
       <input
         onChange={(e) => setTextContent(e.target.value)}
-        className="w-full bg-transparent outline-none placeholder:text-sm placeholder:text-zinc-500"
+        className="w-full bg-transparent outline-hidden placeholder:text-sm placeholder:text-zinc-500"
         placeholder="Send a message"
         value={textContent}
       />
