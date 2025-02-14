@@ -9,6 +9,7 @@ import (
 	"chat/redisdb"
 	"chat/userSettingsService"
 	"chat/utils"
+	"fmt"
 	"os"
 	"strconv"
 
@@ -86,6 +87,7 @@ func initGlobals() {
 }
 
 func main() {
+	fmt.Println("REDIS_URL:", os.Getenv("REDIS_PRIVATE_URL"))
 	db.InitDB()
 	defer db.GetDB().Close()
 	initGlobals()
