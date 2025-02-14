@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.59
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.2
-	github.com/joho/godotenv v1.4.0
+	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.9.0
 	github.com/pusher/pusher-http-go/v5 v5.1.1
 	github.com/redis/go-redis/v9 v9.7.0
