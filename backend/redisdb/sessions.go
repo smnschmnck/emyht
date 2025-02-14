@@ -5,6 +5,7 @@ import (
 	"context"
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -28,7 +29,7 @@ func InitializeSessionsRedis() {
 	}
 
 	opts.DB = dbNum
-	opts.DialTimeout = 10_000_000_000
+	opts.DialTimeout = 10 * time.Second
 
 	sessionsDb = redis.NewClient(opts)
 
