@@ -37,7 +37,7 @@ const getPusherToken = async ({
 };
 
 export const pusher = new Pusher(env.VITE_PUSHER_KEY, {
-  cluster: 'us3',
+  cluster: env.VITE_PUSHER_CLUSTER,
   authEndpoint: `${env.VITE_BACKEND_HOST}/pusher/auth`,
   authorizer: ({ name }) => ({
     authorize: async (socketId, callback) => {
