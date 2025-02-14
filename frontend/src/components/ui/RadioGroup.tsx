@@ -41,13 +41,13 @@ export const RadioGroupItem = <T extends string>({
   <div className="flex w-fit items-center justify-center gap-2">
     <RadioGroupPrimitive.Item
       disabled={disabled}
-      className="peer h-4 w-4 rounded-full border border-zinc-300 bg-white data-[state=checked]:border-none data-[disabled]:border-zinc-100 data-[state=checked]:bg-blue-500"
+      className="peer h-4 w-4 rounded-full border border-zinc-300 bg-white data-[state=checked]:border-none data-disabled:border-zinc-100 data-[state=checked]:bg-blue-500"
       value={value}
       id={id}
     >
       <RadioGroupPrimitive.Indicator className="relative flex h-full w-full items-center justify-center after:block after:h-1 after:w-1 after:rounded-[50%] after:bg-white after:content-['']" />
     </RadioGroupPrimitive.Item>
-    <label className="text-sm peer-data-[disabled]:text-zinc-400" htmlFor={id}>
+    <label className="text-sm peer-data-disabled:text-zinc-400" htmlFor={id}>
       {label}
     </label>
   </div>

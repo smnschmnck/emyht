@@ -18,7 +18,7 @@ export const ChatCreator: FC = () => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-8 rounded-xl border border-zinc-100 bg-white p-6 shadow-sm lg:p-10">
+    <div className="flex w-full flex-col gap-8 rounded-xl border border-zinc-100 bg-white p-6 shadow-xs lg:p-10">
       <div>
         <h2 className="text-sm font-semibold">New chat</h2>
         <p className="text-sm text-zinc-500">

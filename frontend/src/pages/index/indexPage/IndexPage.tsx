@@ -7,7 +7,7 @@ import ballonIllustration from './assets/balloon_illustration.svg';
 
 const CtaLinkWrapper = (props: { children: ReactNode }) => (
   <div
-    className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl border border-zinc-100 bg-white px-12 text-sm font-semibold shadow-sm transition hover:bg-zinc-100"
+    className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl border border-zinc-100 bg-white px-12 text-sm font-semibold shadow-xs transition hover:bg-zinc-100"
     {...props}
   />
 );

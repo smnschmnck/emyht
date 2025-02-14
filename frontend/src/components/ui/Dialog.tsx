@@ -14,7 +14,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={twMerge(
-      'fixed inset-0 z-50 bg-white/80 backdrop-blur-sm',
+      'fixed inset-0 z-50 bg-white/80 backdrop-blur-xs',
       className
     )}
     {...props}
