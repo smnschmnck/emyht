@@ -50,7 +50,7 @@
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.24.0",
     "unplugin-fonts": "^1.1.1",
-    "vite": "^5.4.1",
+    "vite": "^6.0.0",
     "vite-plugin-pwa": "^0.21.0",
     "workbox-window": "^7.3.0"
   }
