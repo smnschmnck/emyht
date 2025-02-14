@@ -8,7 +8,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/google/uuid v1.3.0
 	github.com/jackc/pgx/v5 v5.7.2
-	github.com/joho/godotenv v1.4.0
+	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.9.0
 	github.com/pusher/pusher-http-go/v5 v5.1.1
 )
