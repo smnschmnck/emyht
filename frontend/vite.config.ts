@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react-swc';
 import path from 'path';
 import Unfonts from 'unplugin-fonts/vite';
 import { VitePWA } from 'vite-plugin-pwa';
-import dotenv from 'dotenv/config';
+import 'dotenv/config';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
 import './src/env';
