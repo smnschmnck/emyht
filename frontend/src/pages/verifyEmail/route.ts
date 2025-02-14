@@ -11,7 +11,7 @@ export type SearchParamSchema = z.infer<typeof searchParamSchema>;
 
 export const verifyEmailRoute = createRoute({
   getParentRoute: () => mainLayoutRoute,
-  validateSearch: searchParamSchema,
+  validateSearch: (search) => searchParamSchema.parse(search),
   path: '/verify-email',
   component: VerifyEmailPage,
 });
