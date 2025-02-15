@@ -27,6 +27,7 @@ const App = () => {
         client={queryClient}
       >
         <Toaster richColors position="top-right" />
+        <pre>{JSON.stringify(import.meta.env, null, 2)}</pre>
         <RouterProvider router={router} />
       </PersistQueryClientProvider>
     </PusherContext.Provider>
