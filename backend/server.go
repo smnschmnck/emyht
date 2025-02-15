@@ -87,7 +87,10 @@ func initGlobals() {
 }
 
 func main() {
-	fmt.Println("REDIS_URL:", os.Getenv("REDIS_PRIVATE_URL"))
+	env := os.Environ()
+	for _, y := range env {
+		fmt.Println(y)
+	}
 	db.InitDB()
 	defer db.GetDB().Close()
 	initGlobals()
