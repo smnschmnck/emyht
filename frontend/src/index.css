@@ -28,4 +28,5 @@
 
 * {
   -webkit-tap-highlight-color: transparent;
+  font-variant-ligatures: none;
 }

@@ -1,3 +1,4 @@
+import { PlusIcon } from '@heroicons/react/24/outline';
 import { FC } from 'react';
 
 type FilePickerButtonProps = {
@@ -27,9 +28,10 @@ export const FilePickerButton: FC<FilePickerButtonProps> = ({
       />
       <label
         htmlFor={id}
-        className="flex h-9 cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white ring-offset-2 transition hover:bg-blue-500 peer-focus:ring-2 peer-focus:ring-blue-600"
+        className="flex h-9 cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white ring-offset-2 transition peer-focus:ring-2 peer-focus:ring-blue-600 hover:bg-blue-500"
       >
-        Add file
+        <PlusIcon className="h-6 w-6" />
+        <span>Add file</span>
       </label>
     </div>
   );
