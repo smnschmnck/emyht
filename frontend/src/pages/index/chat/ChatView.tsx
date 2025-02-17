@@ -85,7 +85,7 @@ const FilePicker: FC<{
     const fileArr = Array.from(fileList).map((f) => ({
       id: nanoid(),
       file: f,
-      selected: true,
+      selected: false,
     }));
 
     const updatedFileArr = [...files, ...fileArr];
@@ -140,20 +140,34 @@ const FilePicker: FC<{
           </Button>
         </div>
         <FilePickerButton
-          id="chatFilePicker"
+          id="chatFilePickerTop"
           handleFileChange={handleFileChange}
         />
       </div>
-      <div className="flex flex-wrap gap-2 overflow-y-scroll pt-12">
-        {files.map(({ file, id, selected }) => (
-          <FilePreview
-            file={file}
-            selected={selected}
-            id={id}
-            handleFileSelect={handleFileSelect}
+      {files.length <= 0 && (
+        <div className="flex h-full flex-col items-center justify-center gap-4">
+          <div className="flex flex-col items-center">
+            <span className="text-2xl font-medium">No files to upload</span>
+            <span className="text-sm text-zinc-500">Please select a file</span>
+          </div>
+          <FilePickerButton
+            id="chatFilePickerCenter"
+            handleFileChange={handleFileChange}
           />
-        ))}
-      </div>
+        </div>
+      )}
+      {files.length > 0 && (
+        <div className="flex flex-wrap gap-2 overflow-y-scroll pt-12">
+          {files.map(({ file, id, selected }) => (
+            <FilePreview
+              file={file}
+              selected={selected}
+              id={id}
+              handleFileSelect={handleFileSelect}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
