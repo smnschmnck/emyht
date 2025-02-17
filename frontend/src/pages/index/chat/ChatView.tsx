@@ -8,6 +8,8 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { ChatHeader } from './components/ChatHeader';
 import { ChatMessage } from './components/ChatMessage';
 import { MessageInput } from './components/MessageInput';
+import { nanoid } from 'nanoid';
+import { twMerge } from 'tailwind-merge';
 
 const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
   const { data: messages } = useChatMessages(chatId);
@@ -35,15 +37,27 @@ const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
   );
 };
 
-type FilePreviewProps = {
+const FilePreview = ({
+  file,
+  id,
+  selected,
+  handleFileSelect,
+}: {
   file: File;
-};
-
-const FilePreview: FC<FilePreviewProps> = ({ file }) => {
+  id: string;
+  selected: boolean;
+  handleFileSelect: (id: string) => void;
+}) => {
   const previewUrl = URL.createObjectURL(file);
 
   return (
-    <div className="h-48 w-64 overflow-hidden rounded-xl border border-zinc-100 shadow-xs">
+    <button
+      className={twMerge(
+        'flex h-48 w-64 cursor-pointer flex-col overflow-hidden rounded-xl border border-zinc-100 text-left shadow-xs transition hover:border-blue-300',
+        selected ? 'border-2 border-blue-500 hover:border-blue-500' : ''
+      )}
+      onClick={() => handleFileSelect(id)}
+    >
       <img
         src={previewUrl}
         alt={file.name}
@@ -56,20 +70,57 @@ const FilePreview: FC<FilePreviewProps> = ({ file }) => {
         </div>
         <p className="text-zinc-500">{file.type}</p>
       </div>
-    </div>
+    </button>
   );
 };
 
 const FilePicker: FC<{
   setShowFilePicker: (showFilePicker: boolean) => void;
 }> = ({ setShowFilePicker }) => {
-  const [files, setFiles] = useState<File[]>([]);
+  const [files, setFiles] = useState<
+    { id: string; selected: boolean; file: File }[]
+  >([]);
 
   const handleFileChange = (fileList: FileList) => {
-    const fileArr = [...files, ...Array.from(fileList)];
+    const fileArr = Array.from(fileList).map((f) => ({
+      id: nanoid(),
+      file: f,
+      selected: true,
+    }));
 
-    setFiles(fileArr);
+    const updatedFileArr = [...files, ...fileArr];
+
+    setFiles(updatedFileArr);
   };
+
+  const handleFileSelect = (id: string) => {
+    const newFileArr = files.map((f) => {
+      if (f.id !== id) {
+        return f;
+      }
+
+      return { ...f, selected: !f.selected };
+    });
+
+    setFiles(newFileArr);
+  };
+
+  const handleDeselectAll = () => {
+    const newFileArr = files.map((f) => ({
+      ...f,
+      selected: false,
+    }));
+
+    setFiles(newFileArr);
+  };
+
+  const handleRemoveSelected = () => {
+    const newFileArr = files.filter((f) => !f.selected);
+
+    setFiles(newFileArr);
+  };
+
+  const selectedCount = files.filter((f) => f.selected).length;
 
   return (
     <div className="flex h-20 w-full grow flex-col p-8">
@@ -81,8 +132,12 @@ const FilePicker: FC<{
           >
             Cancel
           </Button>
-          <Button variant="text">Deselect X files</Button>
-          <Button variant="text">Remove X files</Button>
+          <Button variant="text" onClick={handleDeselectAll}>
+            Deselect {selectedCount} files
+          </Button>
+          <Button variant="text" onClick={handleRemoveSelected}>
+            Remove {selectedCount} files
+          </Button>
         </div>
         <FilePickerButton
           id="chatFilePicker"
@@ -90,8 +145,13 @@ const FilePicker: FC<{
         />
       </div>
       <div className="flex flex-wrap gap-2 overflow-y-scroll pt-12">
-        {files.map((file) => (
-          <FilePreview file={file} />
+        {files.map(({ file, id, selected }) => (
+          <FilePreview
+            file={file}
+            selected={selected}
+            id={id}
+            handleFileSelect={handleFileSelect}
+          />
         ))}
       </div>
     </div>
