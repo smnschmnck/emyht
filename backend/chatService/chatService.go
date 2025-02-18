@@ -723,7 +723,8 @@ func GetMediaPutURL(c echo.Context) error {
 
 	presignedPutUrl, err := s3Helpers.PresignPutObject(fileName, time.Hour, req.ContentLength)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+		fmt.Println(err.Error())
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	type res struct {

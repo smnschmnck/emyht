@@ -5,7 +5,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { ChatHeader } from './components/ChatHeader';
 import { ChatMessage } from './components/ChatMessage';
 import { MessageInput } from './components/MessageInput';
-import { FilePicker } from './components/FilePicker';
+import { FilePicker, FilePickerFile } from './components/FilePicker';
 
 const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
   const { data: messages } = useChatMessages(chatId);
@@ -35,20 +35,30 @@ const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
 
 export const ChatView: FC = () => {
   const [showFilePicker, setShowFilePicker] = useState(false);
+  const [files, setFiles] = useState<FilePickerFile[]>([]);
   const { chatId } = useParams({ from: '/indexLayoutRoute/chat/$chatId' });
 
   useEffect(() => {
     setShowFilePicker(false);
   }, [chatId]);
 
+  const rawFiles = files.map((f) => f.file);
+
   return (
     <div className="flex h-full w-full flex-col items-center bg-white">
       <ChatHeader chatId={chatId} />
       <div className="flex h-full w-full flex-col items-center px-6">
         {!showFilePicker && <MessageList chatId={chatId} />}
-        {showFilePicker && <FilePicker setShowFilePicker={setShowFilePicker} />}
+        {showFilePicker && (
+          <FilePicker
+            setFiles={setFiles}
+            files={files}
+            setShowFilePicker={setShowFilePicker}
+          />
+        )}
         <div className="flex h-24 w-full max-w-3xl items-center justify-center">
           <MessageInput
+            files={rawFiles}
             chatId={chatId}
             showFilePicker={showFilePicker}
             setShowFilePicker={setShowFilePicker}

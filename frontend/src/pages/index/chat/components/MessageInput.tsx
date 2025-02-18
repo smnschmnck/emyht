@@ -8,17 +8,37 @@ import { useMutation } from '@tanstack/react-query';
 import { FC, FormEvent, useState } from 'react';
 import { toast } from 'sonner';
 
+const getFilePutUrl = async (file: File) => {
+  const contentLength = file.size;
+  const fileExtension = file.name.split('.').at(-1);
+
+  const res = await fetchWithDefaults('/messageMediaPutURL', {
+    method: 'post',
+    body: JSON.stringify({ contentLength, fileExtension }),
+  });
+
+  if (!res.ok) {
+    console.log(await res.text());
+  }
+
+  const json = await res.json();
+
+  return json as { fileID: string; presignedPutURL: string };
+};
+
 export const MessageInput: FC<{
+  files: File[];
   chatId: string;
   showFilePicker: boolean;
   setShowFilePicker: (showFilePicker: boolean) => void;
-}> = ({ chatId, setShowFilePicker, showFilePicker }) => {
+}> = ({ chatId, setShowFilePicker, showFilePicker, files }) => {
   const [textContent, setTextContent] = useState('');
   const { refetch: refetchChats } = useChats();
   const { refetch: refetchChatMessages } = useChatMessages(chatId);
 
   const { mutate: sendMessage } = useMutation({
     mutationFn: async (event: FormEvent) => {
+      files.forEach(async (f) => console.log(await getFilePutUrl(f)));
       event.preventDefault();
 
       const message = {

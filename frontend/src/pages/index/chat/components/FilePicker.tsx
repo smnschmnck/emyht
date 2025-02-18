@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/Button';
 import { FilePickerButton } from '@/components/ui/FilePickerButton';
 import { nanoid } from 'nanoid';
 import prettyBytes from 'pretty-bytes';
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 const FilePreview = ({
@@ -42,13 +42,17 @@ const FilePreview = ({
   );
 };
 
-export const FilePicker: FC<{
-  setShowFilePicker: (showFilePicker: boolean) => void;
-}> = ({ setShowFilePicker }) => {
-  const [files, setFiles] = useState<
-    { id: string; selected: boolean; file: File }[]
-  >([]);
+export type FilePickerFile = {
+  id: string;
+  selected: boolean;
+  file: File;
+};
 
+export const FilePicker: FC<{
+  files: FilePickerFile[];
+  setFiles: (files: FilePickerFile[]) => void;
+  setShowFilePicker: (showFilePicker: boolean) => void;
+}> = ({ files, setFiles, setShowFilePicker }) => {
   const handleFileChange = (fileList: FileList) => {
     const fileArr = Array.from(fileList).map((f) => ({
       id: nanoid(),
