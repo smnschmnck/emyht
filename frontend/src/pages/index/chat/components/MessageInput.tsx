@@ -26,6 +26,15 @@ const getFilePutUrl = async (file: File) => {
   return json as { fileID: string; presignedPutURL: string };
 };
 
+const uploadFile = async (file: File) => {
+  const { presignedPutURL } = await getFilePutUrl(file);
+  const res = await fetch(presignedPutURL, { method: 'PUT', body: file });
+
+  if (res.ok) {
+    console.log(await res.text());
+  }
+};
+
 export const MessageInput: FC<{
   files: File[];
   chatId: string;
@@ -38,13 +47,13 @@ export const MessageInput: FC<{
 
   const { mutate: sendMessage } = useMutation({
     mutationFn: async (event: FormEvent) => {
-      files.forEach(async (f) => console.log(await getFilePutUrl(f)));
+      files.forEach(async (f) => await uploadFile(f));
       event.preventDefault();
 
       const message = {
         chatID: chatId,
         textContent: textContent,
-        messageType: 'plaintext',
+        messageType: '',
         //fileID: string
       };
 
