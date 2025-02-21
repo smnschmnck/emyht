@@ -29,6 +29,13 @@ const MessageContent = ({ message }: { message: ChatMessageType }) => (
     {message.messageType === 'audio' && (
       <audio controls src={message.mediaUrl} />
     )}
+    {message.messageType === 'video' && (
+      <div className="max-w-48 p-1">
+        <a target="_blank" rel="noopener noreferrer" href={message.mediaUrl}>
+          <video src={message.mediaUrl} />
+        </a>
+      </div>
+    )}
     {!!message.textContent && (
       <span className="px-3 py-1.5 text-sm">{message.textContent}</span>
     )}
