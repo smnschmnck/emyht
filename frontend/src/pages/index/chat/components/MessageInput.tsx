@@ -102,10 +102,11 @@ const postMessage = async ({
 
 export const MessageInput: FC<{
   files: File[];
+  resetFiles: () => void;
   chatId: string;
   showFilePicker: boolean;
   setShowFilePicker: (showFilePicker: boolean) => void;
-}> = ({ chatId, setShowFilePicker, showFilePicker, files }) => {
+}> = ({ chatId, setShowFilePicker, showFilePicker, files, resetFiles }) => {
   const [textContent, setTextContent] = useState('');
   const { refetch: refetchChats } = useChats();
   const { refetch: refetchChatMessages } = useChatMessages(chatId);
@@ -154,6 +155,8 @@ export const MessageInput: FC<{
       setTextContent('');
       refetchChatMessages();
       refetchChats();
+      resetFiles();
+      setShowFilePicker(false);
     },
     onError: (err) => {
       toast.error(err.message);

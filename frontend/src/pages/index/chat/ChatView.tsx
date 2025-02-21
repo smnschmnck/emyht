@@ -58,6 +58,7 @@ export const ChatView: FC = () => {
         )}
         <div className="flex h-24 w-full max-w-3xl items-center justify-center">
           <MessageInput
+            resetFiles={() => setFiles([])}
             files={rawFiles}
             chatId={chatId}
             showFilePicker={showFilePicker}
