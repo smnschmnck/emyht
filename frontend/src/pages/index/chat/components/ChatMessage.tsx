@@ -3,6 +3,19 @@ import { useUserData } from '@/hooks/api/user';
 import { formatTimestamp } from '@/utils/dateUtils';
 import { FC } from 'react';
 
+const MessageContent = ({ message }: { message: ChatMessageType }) => (
+  <span className="flex w-fit max-w-40 flex-col">
+    {message.messageType === 'image' && (
+      <span className="p-1">
+        <img className="overflow-clip rounded-xl" src={message.mediaUrl} />
+      </span>
+    )}
+    {!!message.textContent && (
+      <span className="px-3 py-1.5 text-sm">{message.textContent}</span>
+    )}
+  </span>
+);
+
 export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
   const { data } = useUserData();
 
@@ -13,8 +26,8 @@ export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
   if (data.uuid === message.senderID) {
     return (
       <li className="flex w-full flex-col items-end gap-1">
-        <span className="w-fit rounded-2xl bg-blue-600 px-3 py-1.5 text-sm text-white">
-          {message.textContent}
+        <span className="w-fit rounded-2xl bg-blue-600 text-white">
+          <MessageContent message={message} />
         </span>
         <span className="text-xs text-zinc-400">
           {formatTimestamp(message.timestamp)}
@@ -31,8 +44,8 @@ export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
           {formatTimestamp(message.timestamp)}
         </span>
       </div>
-      <span className="w-fit rounded-2xl bg-zinc-100 px-3 py-1.5 text-sm text-black">
-        {message.textContent}
+      <span className="w-fit rounded-2xl bg-zinc-100 text-black">
+        <MessageContent message={message} />
       </span>
     </li>
   );
