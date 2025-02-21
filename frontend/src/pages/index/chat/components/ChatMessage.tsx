@@ -5,9 +5,9 @@ import { DocumentIcon } from '@heroicons/react/24/outline';
 import { FC } from 'react';
 
 const MessageContent = ({ message }: { message: ChatMessageType }) => (
-  <span className="flex w-fit max-w-40 flex-col">
+  <span className="flex w-fit flex-col">
     {message.messageType === 'image' && (
-      <div className="p-1">
+      <div className="max-w-48 p-1">
         <a target="_blank" rel="noopener noreferrer" href={message.mediaUrl}>
           <img className="overflow-clip rounded-xl" src={message.mediaUrl} />
         </a>
@@ -25,6 +25,9 @@ const MessageContent = ({ message }: { message: ChatMessageType }) => (
           </a>
         </div>
       </div>
+    )}
+    {message.messageType === 'audio' && (
+      <audio controls src={message.mediaUrl} />
     )}
     {!!message.textContent && (
       <span className="px-3 py-1.5 text-sm">{message.textContent}</span>
