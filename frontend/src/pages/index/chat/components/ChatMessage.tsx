@@ -1,7 +1,46 @@
 import { ChatMessage as ChatMessageType } from '@/hooks/api/messages';
 import { useUserData } from '@/hooks/api/user';
 import { formatTimestamp } from '@/utils/dateUtils';
+import { DocumentIcon } from '@heroicons/react/24/outline';
 import { FC } from 'react';
+
+const MessageContent = ({ message }: { message: ChatMessageType }) => (
+  <span className="flex w-fit flex-col">
+    {message.messageType === 'image' && (
+      <div className="max-w-48 p-1">
+        <a target="_blank" rel="noopener noreferrer" href={message.mediaUrl}>
+          <img className="overflow-clip rounded-xl" src={message.mediaUrl} />
+        </a>
+      </div>
+    )}
+    {message.messageType === 'data' && (
+      <div className="h-24 w-40 p-1">
+        <div className="flex h-full w-full flex-col items-center justify-center rounded-xl bg-white text-black">
+          <DocumentIcon className="h-10 w-10" />
+          <a
+            className="text-sm text-blue-600 hover:underline"
+            href={message.mediaUrl}
+          >
+            Download File
+          </a>
+        </div>
+      </div>
+    )}
+    {message.messageType === 'audio' && (
+      <audio controls src={message.mediaUrl} />
+    )}
+    {message.messageType === 'video' && (
+      <div className="max-w-48 p-1">
+        <a target="_blank" rel="noopener noreferrer" href={message.mediaUrl}>
+          <video src={message.mediaUrl} />
+        </a>
+      </div>
+    )}
+    {!!message.textContent && (
+      <span className="px-3 py-1.5 text-sm">{message.textContent}</span>
+    )}
+  </span>
+);
 
 export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
   const { data } = useUserData();
@@ -13,8 +52,8 @@ export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
   if (data.uuid === message.senderID) {
     return (
       <li className="flex w-full flex-col items-end gap-1">
-        <span className="w-fit rounded-2xl bg-blue-600 px-3 py-1.5 text-sm text-white">
-          {message.textContent}
+        <span className="w-fit rounded-2xl bg-blue-600 text-white">
+          <MessageContent message={message} />
         </span>
         <span className="text-xs text-zinc-400">
           {formatTimestamp(message.timestamp)}
@@ -31,8 +70,8 @@ export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
           {formatTimestamp(message.timestamp)}
         </span>
       </div>
-      <span className="w-fit rounded-2xl bg-zinc-100 px-3 py-1.5 text-sm text-black">
-        {message.textContent}
+      <span className="w-fit rounded-2xl bg-zinc-100 text-black">
+        <MessageContent message={message} />
       </span>
     </li>
   );

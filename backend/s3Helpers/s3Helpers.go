@@ -48,6 +48,7 @@ func getClient(context context.Context) (*s3.Client, error) {
 	cfg, err := config.LoadDefaultConfig(context,
 		config.WithEndpointResolverWithOptions(r2Resolver),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKeyId, accessKeySecret, "")),
+		config.WithRegion("auto"),
 	)
 	if err != nil {
 		return &s3.Client{}, err
