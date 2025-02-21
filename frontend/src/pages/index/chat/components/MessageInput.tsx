@@ -26,13 +26,78 @@ const getFilePutUrl = async (file: File) => {
   return json as { fileID: string; presignedPutURL: string };
 };
 
-const uploadFile = async (file: File) => {
-  const { presignedPutURL } = await getFilePutUrl(file);
-  const res = await fetch(presignedPutURL, { method: 'PUT', body: file });
+const getFileType = (file: File) => {
+  const fileType = file.type.split('/').at(0);
 
-  if (res.ok) {
-    console.log(await res.text());
+  console.log('FILE TYPE', fileType);
+
+  switch (fileType) {
+    case 'image':
+      return fileType;
+
+    case 'audio':
+      return fileType;
+
+    case 'video':
+      return fileType;
+
+    default:
+      return 'data';
   }
+};
+
+const sendMediaMessage = async ({
+  file,
+  chatId,
+  textContent,
+}: {
+  file: File;
+  chatId: string;
+  textContent?: string;
+}) => {
+  const { presignedPutURL, fileID } = await getFilePutUrl(file);
+  const { ok: uploadSucess } = await fetch(presignedPutURL, {
+    method: 'PUT',
+    body: file,
+  });
+  if (!uploadSucess) {
+    throw new Error('Upload failed');
+  }
+
+  const fileType = getFileType(file);
+
+  return await postMessage({
+    fileId: fileID,
+    chatId,
+    messageType: fileType,
+    textContent,
+  });
+};
+
+const postMessage = async ({
+  fileId,
+  chatId,
+  textContent,
+  messageType,
+}: {
+  fileId?: string;
+  chatId: string;
+  textContent?: string;
+  messageType: 'plaintext' | 'image' | 'video' | 'audio' | 'data';
+}) => {
+  const message = {
+    chatID: chatId,
+    textContent,
+    messageType,
+    fileID: fileId,
+  };
+
+  const res = await fetchWithDefaults('/message', {
+    method: 'post',
+    body: JSON.stringify(message),
+  });
+
+  return res;
 };
 
 export const MessageInput: FC<{
@@ -47,25 +112,41 @@ export const MessageInput: FC<{
 
   const { mutate: sendMessage } = useMutation({
     mutationFn: async (event: FormEvent) => {
-      files.forEach(async (f) => await uploadFile(f));
       event.preventDefault();
 
-      const message = {
-        chatID: chatId,
-        textContent: textContent,
-        messageType: '',
-        //fileID: string
-      };
+      if (files.length <= 0) {
+        const res = await postMessage({
+          chatId,
+          textContent,
+          messageType: 'plaintext',
+        });
 
-      const res = await fetchWithDefaults('/message', {
-        method: 'post',
-        body: JSON.stringify(message),
-      });
+        if (!res.ok) {
+          throw new HttpError({
+            message: await res.text(),
+            statusCode: res.status,
+          });
+        }
 
-      if (!res.ok) {
-        throw new HttpError({
-          message: await res.text(),
-          statusCode: res.status,
+        return;
+      }
+
+      if (files.length > 0) {
+        const res = await Promise.all(
+          files.map((file, i) => {
+            const isLastMessage = i + 1 === files.length;
+            const messageText = isLastMessage ? textContent : '';
+            return sendMediaMessage({ file, chatId, textContent: messageText });
+          })
+        );
+
+        res.forEach(async (r) => {
+          if (!r.ok) {
+            throw new HttpError({
+              message: await r.text(),
+              statusCode: r.status,
+            });
+          }
         });
       }
     },
