@@ -121,7 +121,10 @@ export const FilePicker: FC<{
         <div className="flex gap-2">
           <Button
             variant="secondaryDestructive"
-            onClick={() => setShowFilePicker(false)}
+            onClick={() => {
+              setShowFilePicker(false);
+              setFiles([]);
+            }}
           >
             Cancel
           </Button>
