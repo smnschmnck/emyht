@@ -1,5 +1,7 @@
 import { Button } from '@/components/ui/Button';
 import { FilePickerButton } from '@/components/ui/FilePickerButton';
+import { getFileType } from '@/utils/fileType';
+import { DocumentIcon, MusicalNoteIcon } from '@heroicons/react/24/outline';
 import { nanoid } from 'nanoid';
 import prettyBytes from 'pretty-bytes';
 import { FC } from 'react';
@@ -16,6 +18,7 @@ const FilePreview = ({
   selected: boolean;
   handleFileSelect: (id: string) => void;
 }) => {
+  const fileType = getFileType(file);
   const previewUrl = URL.createObjectURL(file);
 
   return (
@@ -26,15 +29,33 @@ const FilePreview = ({
       )}
       onClick={() => handleFileSelect(id)}
     >
-      <img
-        src={previewUrl}
-        alt={file.name}
-        className="h-3/5 w-full bg-gray-300 object-cover"
-      />
+      {fileType === 'image' && (
+        <img
+          src={previewUrl}
+          alt={file.name}
+          className="h-3/5 w-full bg-gray-300 object-cover"
+        />
+      )}
+      {fileType === 'video' && (
+        <video
+          src={previewUrl}
+          className="h-3/5 w-full bg-gray-300 object-cover"
+        />
+      )}
+      {fileType === 'audio' && (
+        <div className="flex h-3/5 w-full items-center justify-center bg-zinc-50">
+          <MusicalNoteIcon className="h-8 w-8" />
+        </div>
+      )}
+      {fileType === 'data' && (
+        <div className="flex h-3/5 w-full items-center justify-center bg-zinc-50">
+          <DocumentIcon className="h-8 w-8" />
+        </div>
+      )}
       <div className="flex flex-col gap-1 p-3 text-sm">
-        <div className="flex items-center justify-between font-semibold">
-          <p>{file.name}</p>
-          <p>{prettyBytes(file.size)}</p>
+        <div className="flex items-center justify-between gap-2 font-semibold">
+          <p className="truncate">{file.name}</p>
+          <p className="min-w-fit">{prettyBytes(file.size)}</p>
         </div>
         <p className="text-zinc-500">{file.type}</p>
       </div>

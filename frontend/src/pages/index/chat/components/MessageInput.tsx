@@ -3,6 +3,7 @@ import { HttpError } from '@/errors/httpError/httpError';
 import { useChats } from '@/hooks/api/chats';
 import { useChatMessages } from '@/hooks/api/messages';
 import { fetchWithDefaults } from '@/utils/fetch';
+import { getFileType } from '@/utils/fileType';
 import { PaperAirplaneIcon, PaperClipIcon } from '@heroicons/react/24/solid';
 import { useMutation } from '@tanstack/react-query';
 import { FC, FormEvent, useState } from 'react';
@@ -24,26 +25,6 @@ const getFilePutUrl = async (file: File) => {
   const json = await res.json();
 
   return json as { fileID: string; presignedPutURL: string };
-};
-
-const getFileType = (file: File) => {
-  const fileType = file.type.split('/').at(0);
-
-  console.log('FILE TYPE', fileType);
-
-  switch (fileType) {
-    case 'image':
-      return fileType;
-
-    case 'audio':
-      return fileType;
-
-    case 'video':
-      return fileType;
-
-    default:
-      return 'data';
-  }
 };
 
 const sendMediaMessage = async ({
