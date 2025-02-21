@@ -6,6 +6,12 @@ import { Spinner } from '@/components/ui/Spinner';
 import { Chat, useChats } from '@/hooks/api/chats';
 import { formatTimestamp } from '@/utils/dateUtils';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
+import {
+  DocumentIcon,
+  MusicalNoteIcon,
+  PhotoIcon,
+  PlayCircleIcon,
+} from '@heroicons/react/24/outline';
 import { Link as RouterLink } from '@tanstack/react-router';
 import { FC, useEffect, useState } from 'react';
 
@@ -31,9 +37,23 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => (
             {formatTimestamp(Number(chat.timestamp))}
           </p>
         </div>
-        <p className="truncate text-zinc-500">
-          {chat.textContent ?? `Send a message to ${chat.chatName}`}
-        </p>
+        <div className="flex items-center gap-1 text-zinc-500">
+          {chat.messageType === 'audio' && (
+            <MusicalNoteIcon className="h-4 w-4" />
+          )}
+          {chat.messageType === 'image' && <PhotoIcon className="h-4 w-4" />}
+          {chat.messageType === 'data' && <DocumentIcon className="h-4 w-4" />}
+          {chat.messageType === 'video' && (
+            <PlayCircleIcon className="h-4 w-4" />
+          )}
+          {!!chat.textContent && <p className="truncate">{chat.textContent}</p>}
+          {!chat.textContent && !chat.messageType && (
+            <span>{`Send a message to ${chat.chatName}`}</span>
+          )}
+          {chat.textContent === '' && chat.messageType !== 'plaintext' && (
+            <span className="capitalize">{chat.messageType}</span>
+          )}
+        </div>
       </div>
     </RouterLink>
   </li>

@@ -8,7 +8,7 @@ export type Chat = {
   chatType: 'group' | 'one_on_one' | 'contactRequest' | 'other';
   pictureUrl?: string;
   unreadMessages: number;
-  messageType?: string;
+  messageType?: 'plaintext' | 'image' | 'video' | 'audio' | 'data';
   textContent?: string;
   timestamp?: string;
   deliveryStatus?: string;
