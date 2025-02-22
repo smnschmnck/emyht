@@ -55,7 +55,7 @@ const FilePreview = ({
       <div className="flex flex-col gap-1 p-3 text-sm">
         <div className="flex items-center justify-between gap-2 font-semibold">
           <p className="truncate">{file.name}</p>
-          <p className="min-w-fit">{prettyBytes(file.size)}</p>
+          <p className="min-w-fit text-right">{prettyBytes(file.size)}</p>
         </div>
         <p className="text-zinc-500">{file.type}</p>
       </div>
