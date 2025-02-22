@@ -478,6 +478,7 @@ func SendMessage(c echo.Context) error {
 	var messageID string
 	err = rows.Scan(&messageID)
 	if err != nil {
+		fmt.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
@@ -490,6 +491,7 @@ func SendMessage(c echo.Context) error {
 	rows = conn.QueryRow(context.Background(), lastChatMessageQuery, messageID, req.ChatID)
 	err = rows.Scan(&chatID)
 	if err != nil {
+		fmt.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
@@ -501,6 +503,7 @@ func SendMessage(c echo.Context) error {
 	rows = conn.QueryRow(context.Background(), incrementUnreadMessagesQuery, chatID, reqUUID)
 	err = rows.Scan(&querySuccess)
 	if err != nil || !querySuccess {
+		fmt.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
@@ -702,8 +705,8 @@ func GetMediaPutURL(c echo.Context) error {
 	const MEGABYTE int64 = 1000000
 	const MAX_SIZE = 64 * MEGABYTE
 	type reqBody struct {
+		FileName      string `json:"fileName" validate:"required"`
 		ContentLength int64  `json:"contentLength" validate:"required"`
-		FileExtension string `json:"fileExtension" validate:"required"`
 	}
 	req := new(reqBody)
 	err = c.Bind(req)
@@ -718,7 +721,7 @@ func GetMediaPutURL(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "FILE TOO BIG")
 	}
 
-	fileID := uuid.New().String() + "." + req.FileExtension
+	fileID := uuid.New().String() + "_" + req.FileName
 	fileName := reqUUID + "/userData/" + fileID
 
 	presignedPutUrl, err := s3Helpers.PresignPutObject(fileName, time.Hour, req.ContentLength)

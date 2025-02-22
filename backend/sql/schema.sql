@@ -40,7 +40,7 @@ create table chatmessages (
     sender_id varchar(64) not null references users,
     text_content varchar(4096),
     message_type message_type not null,
-    media_url varchar(128),
+    media_url varchar(512),
     timestamp bigint not null,
     delivery_status delivery_status not null
 );

@@ -11,11 +11,10 @@ import { toast } from 'sonner';
 
 const getFilePutUrl = async (file: File) => {
   const contentLength = file.size;
-  const fileExtension = file.name.split('.').at(-1);
 
   const res = await fetchWithDefaults('/messageMediaPutURL', {
     method: 'post',
-    body: JSON.stringify({ contentLength, fileExtension }),
+    body: JSON.stringify({ contentLength, fileName: file.name }),
   });
 
   if (!res.ok) {
