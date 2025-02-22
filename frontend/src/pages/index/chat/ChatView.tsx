@@ -10,26 +10,33 @@ import { FilePicker, FilePickerFile } from './components/FilePicker';
 const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
   const { data: messages } = useChatMessages(chatId);
   const { refetch: refetchChats } = useChats();
-  const lastMessage = useRef<null | HTMLLIElement>(null);
+  const scrollContainer = useRef<null | HTMLDivElement>(null);
 
   useEffect(() => {
-    lastMessage.current?.scrollIntoView();
+    if (scrollContainer.current) {
+      scrollContainer.current.scrollTop = scrollContainer.current?.scrollHeight;
+    }
   }, [chatId]);
 
   useEffect(() => {
-    lastMessage.current?.scrollIntoView();
+    if (scrollContainer.current) {
+      scrollContainer.current.scrollTop = scrollContainer.current?.scrollHeight;
+    }
     refetchChats();
   }, [messages, refetchChats]);
 
   return (
-    <ul className="flex h-20 w-full max-w-3xl grow flex-col gap-5 overflow-y-scroll pt-4">
-      {messages?.map((message) => (
-        <ChatMessage key={message.messageID} message={message} />
-      ))}
-      <li className="h-0 w-0 overflow-hidden opacity-0" ref={lastMessage}>
-        end of messages
-      </li>
-    </ul>
+    <div
+      ref={scrollContainer}
+      className="flex w-full grow justify-center overflow-y-scroll pt-4"
+    >
+      <ul className="flex h-20 w-full max-w-3xl flex-col gap-5">
+        {messages?.map((message) => (
+          <ChatMessage key={message.messageID} message={message} />
+        ))}
+        <li className="h-0 w-0 overflow-hidden opacity-0">end of messages</li>
+      </ul>
+    </div>
   );
 };
 
