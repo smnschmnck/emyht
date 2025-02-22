@@ -116,8 +116,8 @@ export const FilePicker: FC<{
   const selectedCount = files.filter((f) => f.selected).length;
 
   return (
-    <div className="flex h-20 w-full grow flex-col p-8">
-      <div className="flex w-full justify-between border-b px-2 pb-3">
+    <div className="flex h-20 w-full grow flex-col py-8 md:px-8">
+      <div className="flex w-full justify-between border-b pb-3 md:px-2">
         <div className="flex gap-2">
           <Button
             variant="secondaryDestructive"
