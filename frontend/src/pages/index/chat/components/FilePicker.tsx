@@ -63,6 +63,86 @@ const FilePreview = ({
   );
 };
 
+type ActionButtonsProps = {
+  setShowFilePicker: (showFilePicker: boolean) => void;
+  setFiles: (files: FilePickerFile[]) => void;
+  handleRemoveSelected: () => void;
+  selectedCount: number;
+  handleDeselectAll: () => void;
+  handleFileChange: (fileList: FileList) => void;
+};
+
+const ActionButtonsDesktop = ({
+  setShowFilePicker,
+  setFiles,
+  handleRemoveSelected,
+  selectedCount,
+  handleDeselectAll,
+  handleFileChange,
+}: ActionButtonsProps) => (
+  <div className="flex w-full justify-between">
+    <div className="flex gap-2">
+      <Button
+        variant="secondaryDestructive"
+        onClick={() => {
+          setShowFilePicker(false);
+          setFiles([]);
+        }}
+      >
+        Cancel
+      </Button>
+      <Button variant="text" onClick={handleDeselectAll}>
+        Deselect {selectedCount} files
+      </Button>
+      <Button variant="text" onClick={handleRemoveSelected}>
+        Remove {selectedCount} files
+      </Button>
+    </div>
+    <div>
+      <FilePickerButton
+        id="chatFilePickerTop"
+        handleFileChange={handleFileChange}
+      />
+    </div>
+  </div>
+);
+
+const ActionButtonsMobile = ({
+  setShowFilePicker,
+  setFiles,
+  handleRemoveSelected,
+  selectedCount,
+  handleDeselectAll,
+  handleFileChange,
+}: ActionButtonsProps) => (
+  <div className="flex w-full flex-col">
+    <div className="flex gap-2">
+      <Button
+        className="w-full"
+        variant="secondaryDestructive"
+        onClick={() => {
+          setShowFilePicker(false);
+          setFiles([]);
+        }}
+      >
+        Cancel
+      </Button>
+      <FilePickerButton
+        id="chatFilePickerTop"
+        handleFileChange={handleFileChange}
+      />
+    </div>
+    <div className="flex">
+      <Button className="w-full" variant="text" onClick={handleDeselectAll}>
+        Deselect {selectedCount} files
+      </Button>
+      <Button className="w-full" variant="text" onClick={handleRemoveSelected}>
+        Remove {selectedCount} files
+      </Button>
+    </div>
+  </div>
+);
+
 export type FilePickerFile = {
   id: string;
   selected: boolean;
@@ -116,29 +196,28 @@ export const FilePicker: FC<{
   const selectedCount = files.filter((f) => f.selected).length;
 
   return (
-    <div className="flex h-20 w-full grow flex-col py-8 md:px-8">
-      <div className="flex w-full justify-between border-b pb-3 md:px-2">
-        <div className="flex gap-2">
-          <Button
-            variant="secondaryDestructive"
-            onClick={() => {
-              setShowFilePicker(false);
-              setFiles([]);
-            }}
-          >
-            Cancel
-          </Button>
-          <Button variant="text" onClick={handleDeselectAll}>
-            Deselect {selectedCount} files
-          </Button>
-          <Button variant="text" onClick={handleRemoveSelected}>
-            Remove {selectedCount} files
-          </Button>
+    <div className="flex h-20 w-full grow flex-col py-4 md:px-8 md:py-8">
+      <div className="flex w-full border-b md:px-2 md:pb-3">
+        <div className="hidden w-full md:flex">
+          <ActionButtonsDesktop
+            setShowFilePicker={setShowFilePicker}
+            setFiles={setFiles}
+            handleRemoveSelected={handleRemoveSelected}
+            selectedCount={selectedCount}
+            handleDeselectAll={handleDeselectAll}
+            handleFileChange={handleFileChange}
+          />
         </div>
-        <FilePickerButton
-          id="chatFilePickerTop"
-          handleFileChange={handleFileChange}
-        />
+        <div className="flex w-full md:hidden">
+          <ActionButtonsMobile
+            setShowFilePicker={setShowFilePicker}
+            setFiles={setFiles}
+            handleRemoveSelected={handleRemoveSelected}
+            selectedCount={selectedCount}
+            handleDeselectAll={handleDeselectAll}
+            handleFileChange={handleFileChange}
+          />
+        </div>
       </div>
       {files.length <= 0 && (
         <div className="flex h-full flex-col items-center justify-center gap-4">
@@ -146,10 +225,12 @@ export const FilePicker: FC<{
             <span className="text-2xl font-medium">No files to upload</span>
             <span className="text-sm text-zinc-500">Please select a file</span>
           </div>
-          <FilePickerButton
-            id="chatFilePickerCenter"
-            handleFileChange={handleFileChange}
-          />
+          <div>
+            <FilePickerButton
+              id="chatFilePickerCenter"
+              handleFileChange={handleFileChange}
+            />
+          </div>
         </div>
       )}
       {files.length > 0 && (

@@ -18,7 +18,7 @@ export const FilePickerButton: FC<FilePickerButtonProps> = ({
   };
 
   return (
-    <div>
+    <div className="w-full">
       <input
         onChange={handleChange}
         id={id}
