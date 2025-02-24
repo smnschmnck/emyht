@@ -52,10 +52,10 @@ export const ChatSettingsView = () => {
 
   return (
     <div className="flex h-full w-full flex-col gap-8 overflow-scroll px-6 py-10 md:px-8 lg:px-10 xl:px-14">
-      <div className="flex items-center justify-between gap-6">
+      <div className="flex justify-between">
         <Header chatType={curChat?.chatType} chatName={curChat?.chatName} />
         <ButtonLink to="/" aria-label={'back'} className="h-8 w-8">
-          <XMarkIcon className="text-zinc-400" />
+          <XMarkIcon strokeWidth={2} className="text-zinc-500" />
         </ButtonLink>
       </div>
     </div>

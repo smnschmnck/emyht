@@ -2,7 +2,7 @@ import { ButtonLink } from '@/components/ui/ButtonLink';
 import { HttpError } from '@/errors/httpError/httpError';
 import { useContactRequests, useContacts } from '@/hooks/api/contacts';
 import { fetchWithDefaults } from '@/utils/fetch';
-import { ChevronLeftIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useMutation } from '@tanstack/react-query';
 import { FC } from 'react';
 import { ContactRequestActions, RequestTable } from './RequestTable';
@@ -36,16 +36,16 @@ export const IncomingRequests: FC = () => {
 
   return (
     <div className="flex h-full w-full flex-col gap-8 overflow-scroll px-6 py-10 md:px-8 lg:px-10 xl:px-14">
-      <div className="flex items-center gap-6">
-        <ButtonLink to="/" aria-label={'back'} className="h-8 w-8 lg:hidden">
-          <ChevronLeftIcon className="text-zinc-400" />
-        </ButtonLink>
+      <div className="flex justify-between">
         <div>
           <h1 className="text-xl font-semibold">Contact requests</h1>
           <p className="text-sm text-zinc-500">
             These users would like to contact you
           </p>
         </div>
+        <ButtonLink to="/" aria-label={'back'} className="h-8 w-8">
+          <XMarkIcon strokeWidth={2} className="text-zinc-500" />
+        </ButtonLink>
       </div>
       <div className="flex w-full flex-col gap-8 rounded-xl border border-zinc-100 bg-white p-10 shadow-xs">
         <div className="w-full overflow-x-scroll">
