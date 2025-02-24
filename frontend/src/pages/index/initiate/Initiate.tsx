@@ -1,4 +1,4 @@
-import { ButtonLink } from '@/components/ui/ButtonLink';
+import { IconLink } from '@/components/ui/IconLink';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { FC } from 'react';
 import { ChatCreator } from './components/ChatCreator';
@@ -14,9 +14,9 @@ export const InitiationView: FC = () => {
             Start a new chat or send a contact request
           </p>
         </div>
-        <ButtonLink to="/" aria-label={'back'} className="h-8 w-8">
+        <IconLink to="/" aria-label={'back'} className="h-8 w-8">
           <XMarkIcon strokeWidth={2} className="text-zinc-500" />
-        </ButtonLink>
+        </IconLink>
       </div>
       <ContactRequests />
       <ChatCreator />

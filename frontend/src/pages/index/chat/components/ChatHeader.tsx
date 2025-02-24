@@ -1,5 +1,4 @@
 import { Avatar } from '@/components/ui/Avatar';
-import { ButtonLink } from '@/components/ui/ButtonLink';
 import { IconLink } from '@/components/ui/IconLink';
 import { HttpError } from '@/errors/httpError/httpError';
 import { useChats } from '@/hooks/api/chats';
@@ -37,9 +36,9 @@ export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
 
   return (
     <div className="flex h-24 w-full items-center justify-between border-b border-b-zinc-100 bg-white px-8">
-      <ButtonLink to="/" aria-label={'back'} className="h-8 w-8">
+      <IconLink to="/" aria-label={'back'}>
         <ChevronLeftIcon className="text-zinc-400" />
-      </ButtonLink>
+      </IconLink>
       <div className="flex h-full w-full items-center px-1 lg:px-4">
         <Link
           to="/chat/$chatId/settings"
@@ -62,8 +61,7 @@ export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
       <IconLink
         to="/chat/$chatId/settings"
         params={{ chatId }}
-        ariaLabel={'Chat settings'}
-        className="h-8 w-8"
+        aria-label={'Chat settings'}
       >
         <EllipsisHorizontalIcon className="text-zinc-400" />
       </IconLink>

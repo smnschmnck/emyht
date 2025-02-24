@@ -1,4 +1,4 @@
-import { ButtonLink } from '@/components/ui/ButtonLink';
+import { IconLink } from '@/components/ui/IconLink';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { chatSettingsRoute } from './route';
 import { Chat, useChats } from '@/hooks/api/chats';
@@ -54,9 +54,9 @@ export const ChatSettingsView = () => {
     <div className="flex h-full w-full flex-col gap-8 overflow-scroll px-6 py-10 md:px-8 lg:px-10 xl:px-14">
       <div className="flex justify-between">
         <Header chatType={curChat?.chatType} chatName={curChat?.chatName} />
-        <ButtonLink to="/" aria-label={'back'} className="h-8 w-8">
+        <IconLink to="/" aria-label={'back'} className="h-8 w-8">
           <XMarkIcon strokeWidth={2} className="text-zinc-500" />
-        </ButtonLink>
+        </IconLink>
       </div>
     </div>
   );

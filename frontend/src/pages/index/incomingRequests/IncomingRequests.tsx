@@ -1,4 +1,4 @@
-import { ButtonLink } from '@/components/ui/ButtonLink';
+import { IconLink } from '@/components/ui/IconLink';
 import { HttpError } from '@/errors/httpError/httpError';
 import { useContactRequests, useContacts } from '@/hooks/api/contacts';
 import { fetchWithDefaults } from '@/utils/fetch';
@@ -43,9 +43,9 @@ export const IncomingRequests: FC = () => {
             These users would like to contact you
           </p>
         </div>
-        <ButtonLink to="/" aria-label={'back'} className="h-8 w-8">
+        <IconLink to="/" aria-label={'back'} className="h-8 w-8">
           <XMarkIcon strokeWidth={2} className="text-zinc-500" />
-        </ButtonLink>
+        </IconLink>
       </div>
       <div className="flex w-full flex-col gap-8 rounded-xl border border-zinc-100 bg-white p-10 shadow-xs">
         <div className="w-full overflow-x-scroll">
