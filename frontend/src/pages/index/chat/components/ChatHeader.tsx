@@ -39,7 +39,7 @@ export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
       <IconLink to="/" aria-label={'back'}>
         <ChevronLeftIcon className="text-zinc-400" />
       </IconLink>
-      <div className="flex h-full w-full items-center px-1 lg:px-4">
+      <div className="flex h-full w-full items-center">
         <Link
           to="/chat/$chatId/settings"
           params={{ chatId }}
