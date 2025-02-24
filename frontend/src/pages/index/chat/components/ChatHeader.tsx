@@ -1,6 +1,6 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { ButtonLink } from '@/components/ui/ButtonLink';
-import { IconButton } from '@/components/ui/IconButton';
+import { IconLink } from '@/components/ui/IconLink';
 import { HttpError } from '@/errors/httpError/httpError';
 import { useChats } from '@/hooks/api/chats';
 import { fetchWithDefaults } from '@/utils/fetch';
@@ -8,34 +8,9 @@ import {
   ChevronLeftIcon,
   EllipsisHorizontalIcon,
 } from '@heroicons/react/24/outline';
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
 import { FC } from 'react';
-
-const DropdownOptions: FC = () => {
-  return (
-    <DropdownMenu.Root>
-      <DropdownMenu.Trigger asChild>
-        <IconButton ariaLabel={'Chat settings'} className="h-8 w-8">
-          <EllipsisHorizontalIcon className="text-zinc-400" />
-        </IconButton>
-      </DropdownMenu.Trigger>
-      <DropdownMenu.Portal>
-        <DropdownMenu.Content
-          className="rounded-lg border bg-white p-1 shadow-xs"
-          align="end"
-        >
-          <DropdownMenu.Item className="flex h-8 w-32 cursor-pointer items-center rounded-xs pl-3 text-sm font-medium outline-hidden data-highlighted:bg-blue-50">
-            Leave
-          </DropdownMenu.Item>
-          <DropdownMenu.Item className="flex h-8 w-32 cursor-pointer items-center rounded-xs pl-3 text-sm font-medium outline-hidden data-highlighted:bg-blue-50">
-            Invite
-          </DropdownMenu.Item>
-        </DropdownMenu.Content>
-      </DropdownMenu.Portal>
-    </DropdownMenu.Root>
-  );
-};
 
 export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
   const { data: allChats } = useChats();
@@ -65,18 +40,33 @@ export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
       <ButtonLink to="/" aria-label={'back'} className="h-8 w-8">
         <ChevronLeftIcon className="text-zinc-400" />
       </ButtonLink>
-      <div className="flex h-full w-full items-center gap-3 px-4 lg:px-8">
-        <Avatar imgUrl={curChat?.pictureUrl} alt={curChat?.chatName} />
-        <div className="flex flex-col justify-center gap-0.5 text-sm">
-          <div className="flex h-5 min-w-24 items-center">
-            <h1 className="font-semibold">{curChat?.chatName}</h1>
+      <div className="flex h-full w-full items-center px-1 lg:px-4">
+        <Link
+          to="/chat/$chatId/settings"
+          params={{ chatId }}
+          title="Chat settings"
+          aria-label="Chat settings"
+          className="flex gap-3 rounded-xl px-4 py-3 transition hover:bg-zinc-100"
+        >
+          <Avatar imgUrl={curChat?.pictureUrl} alt={curChat?.chatName} />
+          <div className="flex flex-col justify-center gap-0.5 text-sm">
+            <div className="flex h-5 min-w-24 items-center">
+              <h1 className="font-semibold">{curChat?.chatName}</h1>
+            </div>
+            <div className="flex h-5 min-w-24 items-center">
+              <p className="text-zinc-500">{chatInfo?.info}</p>
+            </div>
           </div>
-          <div className="flex h-5 min-w-24 items-center">
-            <p className="text-zinc-500">{chatInfo?.info}</p>
-          </div>
-        </div>
+        </Link>
       </div>
-      <DropdownOptions />
+      <IconLink
+        to="/chat/$chatId/settings"
+        params={{ chatId }}
+        ariaLabel={'Chat settings'}
+        className="h-8 w-8"
+      >
+        <EllipsisHorizontalIcon className="text-zinc-400" />
+      </IconLink>
     </div>
   );
 };
