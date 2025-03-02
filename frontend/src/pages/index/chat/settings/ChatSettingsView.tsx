@@ -82,8 +82,36 @@ const GroupPropertiesSettings = () => {
 const GroupMemberRemove = () => {
   const { chatId } = chatSettingsRoute.useParams();
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const { data: groupMembers, isLoading: isLoadingUsers } = useGroupMembers({
+  const { refetch: refetchUsersNotInChat } = useMembersNotInGroup({ chatId });
+  const {
+    data: groupMembers,
+    isLoading: isLoadingUsers,
+    refetch: refetchGroupMembers,
+  } = useGroupMembers({
     chatId,
+  });
+
+  const { mutate: removeUsers } = useMutation({
+    mutationFn: async () => {
+      const body = {
+        uuidsToRemove: selectedUsers,
+      };
+      const res = await fetchWithDefaults(`/removeGroupMembers/${chatId}`, {
+        method: 'put',
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+    },
+    onSuccess: () => {
+      refetchUsersNotInChat();
+      refetchGroupMembers();
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
   });
 
   return (
@@ -103,7 +131,11 @@ const GroupMemberRemove = () => {
           emptyMessage="No users to remove"
         />
       </div>
-      <Button variant="primary" disabled={selectedUsers.length <= 0}>
+      <Button
+        variant="primary"
+        disabled={selectedUsers.length <= 0}
+        onClick={() => removeUsers()}
+      >
         Remove users
       </Button>
     </Card>

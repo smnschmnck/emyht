@@ -338,6 +338,69 @@ func AddUsersToGroupChat(c echo.Context) error {
 	return c.JSON(http.StatusOK, chats)
 }
 
+func RemoveUsersFromGroupChat(c echo.Context) error {
+	sessionID, responseErr := authService.GetSessionToken(c)
+	if responseErr != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	chatID := c.Param("chatID")
+	if len(chatID) <= 0 {
+		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
+	}
+
+	type request struct {
+		UuidsToRemove []string `json:"uuidsToRemove"`
+	}
+
+	req := new(request)
+	if err := c.Bind(req); err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	err = validate.Struct(req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	isInChat, err := chatHelpers.IsUserInChat(reqUUID, chatID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
+	}
+	if !isInChat {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	conn := db.GetDB()
+
+	query := `
+        DELETE FROM user_chat
+        WHERE chat_id = $1 AND uuid = ANY($2)
+    `
+
+	// Execute the query
+	_, err = conn.Exec(
+		context.Background(),
+		query,
+		chatID,            // $1: The chat ID
+		req.UuidsToRemove, // $2: The list of participant UUIDs
+	)
+	if err != nil {
+		fmt.Println(err.Error())
+		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
+	}
+
+	pusherEvents := pusher.MakePusherEventArray(pusher.USER_FEED_PREFIX, req.UuidsToRemove, "REMOVE_CHAT", nil)
+	pusher.PusherClient.TriggerBatch(pusherEvents)
+
+	return c.String(http.StatusOK, "SUCCESS")
+}
+
 func GetChatParticipantsExceptUser(c echo.Context) error {
 	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
