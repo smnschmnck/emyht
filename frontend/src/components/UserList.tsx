@@ -22,6 +22,7 @@ type UserListProps = {
   isLoading: boolean;
   selectedUsers: string[];
   setSelectedUsers: (selectedUsers: string[]) => void;
+  emptyMessage?: string;
 };
 
 export const UserList: FC<UserListProps> = ({
@@ -29,6 +30,7 @@ export const UserList: FC<UserListProps> = ({
   selectedUsers,
   isLoading,
   setSelectedUsers,
+  emptyMessage,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const changeUser = (id: string) => {
@@ -88,9 +90,16 @@ export const UserList: FC<UserListProps> = ({
             <Spinner />
           </div>
         )}
-        {!!filteredUsers && filteredUsers.length <= 0 && (
+        {((!!filteredUsers && filteredUsers.length <= 0) || !filteredUsers) && (
           <div className="flex h-full w-full items-center justify-center py-8">
-            <span className="font-semibold text-zinc-500">No contacts</span>
+            {!!emptyMessage && (
+              <span className="font-semibold text-zinc-500">
+                {emptyMessage}
+              </span>
+            )}
+            {!emptyMessage && (
+              <span className="font-semibold text-zinc-500">No contacts</span>
+            )}
           </div>
         )}
       </div>

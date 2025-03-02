@@ -97,6 +97,7 @@ const GroupMemberRemove = () => {
           isLoading={isLoadingUsers}
           selectedUsers={selectedUsers}
           setSelectedUsers={setSelectedUsers}
+          emptyMessage="No users to remove"
         />
       </div>
       <Button variant="primary" disabled={selectedUsers.length <= 0}>
@@ -122,6 +123,7 @@ const GroupMemberAdd = () => {
       </div>
       <div className="h-72">
         <UserList
+          emptyMessage="No users to add"
           users={usersNotInChat}
           isLoading={isLoadingUsers}
           selectedUsers={selectedUsers}
