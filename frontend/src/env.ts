@@ -13,5 +13,5 @@ export const env = createEnv({
 
   emptyStringAsUndefined: true,
 
-  skipValidation: import.meta.env.CI === true,
+  skipValidation: import.meta.env.CI === 'true',
 });
