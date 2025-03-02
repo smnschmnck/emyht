@@ -1,4 +1,4 @@
-name: Compile Check
+name: Lint
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   backend:
-    name: Backend Compile Check
+    name: Backend
     runs-on: ubuntu-latest
 
     steps:
@@ -31,7 +31,7 @@ jobs:
         working-directory: ./backend
 
   frontend:
-    name: Frontend Compile Check
+    name: Frontend
     runs-on: ubuntu-latest
 
     steps:
@@ -43,10 +43,21 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
         working-directory: ./frontend
 
       - name: Compile frontend
-        run: npx tsc --noEmit
+        run: pnpm tsc --noEmit
+        working-directory: ./frontend
+
+      - name: Run lint
+        run: pnpm lint
+        working-directory: ./frontend
+
+      - name: Run knip
+        run: pnpm knip
         working-directory: ./frontend

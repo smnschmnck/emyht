@@ -7,9 +7,11 @@ export const env = createEnv({
   client: {
     VITE_BACKEND_HOST: z.string().url(),
     VITE_PUSHER_KEY: z.string().min(4),
-    VITE_PUSHER_CLUSTER: z.string().min(1)
+    VITE_PUSHER_CLUSTER: z.string().min(1),
   },
   runtimeEnv: import.meta.env,
 
   emptyStringAsUndefined: true,
+
+  skipValidation: import.meta.env?.CI === 'true',
 });

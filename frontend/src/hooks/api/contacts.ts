@@ -1,7 +1,7 @@
 import { fetchWithDefaults } from '@/utils/fetch';
 import { useQuery } from '@tanstack/react-query';
 
-export type Contact = {
+type Contact = {
   name: string;
   id: string;
   profilePictureUrl: string;
@@ -22,7 +22,7 @@ export const useContacts = () => {
   });
 };
 
-export type SentContactRequest = {
+type SentContactRequest = {
   email: string;
   date: string;
 };
@@ -42,7 +42,7 @@ export const useSentContactRequests = () => {
   });
 };
 
-export type ContactRequest = {
+type ContactRequest = {
   senderID: string;
   senderUsername: string;
   senderProfilePicture?: string;
