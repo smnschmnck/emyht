@@ -349,21 +349,12 @@ func GetChatParticipantsExceptUser(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	type request struct {
-		ChatID string `json:"chatID"`
+	chatID := c.Param("chatID")
+	if len(chatID) <= 0 {
+		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
 	}
 
-	req := new(request)
-	if err := c.Bind(req); err != nil {
-		return c.String(http.StatusBadRequest, "BAD REQUEST")
-	}
-
-	err = validate.Struct(req)
-	if err != nil {
-		return c.String(http.StatusBadRequest, "BAD REQUEST")
-	}
-
-	chatParticipants, err := getChatMembers(req.ChatID)
+	chatParticipants, err := getChatMembers(chatID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}

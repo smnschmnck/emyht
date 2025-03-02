@@ -50,6 +50,7 @@ func handleRequest() {
 	e.POST("/message", chatService.SendMessage)
 	e.GET("/chatMessages/:chatID", chatService.GetMessages)
 	e.GET("/chatInfo/:chatID", chatService.GetChatInfo)
+	e.GET("/groupMembers/:chatID", chatService.GetChatParticipantsExceptUser)
 	e.POST("/messageMediaPutURL", chatService.GetMediaPutURL)
 	e.POST("/groupChatPicturePutURL", chatService.GetGroupPicturePutURL)
 	e.POST("/leaveGroupChat", chatService.LeaveGroupChat)
