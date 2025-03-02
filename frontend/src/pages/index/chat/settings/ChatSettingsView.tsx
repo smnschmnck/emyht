@@ -8,7 +8,7 @@ import { Chat, useChats } from '@/hooks/api/chats';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
-import { useMembersNotInGroup } from './hooks/useMembers';
+import { useGroupMembers, useMembersNotInGroup } from './hooks/useMembers';
 import { chatSettingsRoute } from './route';
 
 const Header = ({
@@ -76,6 +76,36 @@ const GroupPropertiesSettings = () => {
   );
 };
 
+const GroupMemberRemove = () => {
+  const { chatId } = chatSettingsRoute.useParams();
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const { data: groupMembers, isLoading: isLoadingUsers } = useGroupMembers({
+    chatId,
+  });
+
+  return (
+    <Card>
+      <div>
+        <h3 className="text-sm font-semibold">Remove members from group</h3>
+        <p className="text-sm text-zinc-500">
+          Select the contacts you want to remove
+        </p>
+      </div>
+      <div className="h-72">
+        <UserList
+          users={groupMembers}
+          isLoading={isLoadingUsers}
+          selectedUsers={selectedUsers}
+          setSelectedUsers={setSelectedUsers}
+        />
+      </div>
+      <Button variant="primary" disabled={selectedUsers.length <= 0}>
+        Remove users
+      </Button>
+    </Card>
+  );
+};
+
 const GroupMemberAdd = () => {
   const { chatId } = chatSettingsRoute.useParams();
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
@@ -98,7 +128,7 @@ const GroupMemberAdd = () => {
           setSelectedUsers={setSelectedUsers}
         />
       </div>
-      <Button>Add users</Button>
+      <Button disabled={selectedUsers.length <= 0}>Add users</Button>
     </Card>
   );
 };
@@ -108,7 +138,7 @@ const GroupSettings = () => {
     <div className="flex w-full gap-2">
       <GroupPropertiesSettings />
       <GroupMemberAdd />
-      <GroupMemberAdd />
+      <GroupMemberRemove />
     </div>
   );
 };

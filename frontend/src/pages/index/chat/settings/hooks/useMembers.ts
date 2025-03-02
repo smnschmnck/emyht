@@ -16,3 +16,18 @@ export const useMembersNotInGroup = ({ chatId }: { chatId: string }) => {
     },
   });
 };
+
+export const useGroupMembers = ({ chatId }: { chatId: string }) => {
+  return useQuery({
+    queryKey: ['groupMembers', { chatId }],
+    queryFn: async () => {
+      const res = await fetchWithDefaults(`/groupMembers/${chatId}`);
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+
+      return (await res.json()) as Contact[];
+    },
+  });
+};
