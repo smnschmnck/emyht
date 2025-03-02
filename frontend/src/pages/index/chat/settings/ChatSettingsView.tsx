@@ -106,6 +106,7 @@ const GroupMemberRemove = () => {
       }
     },
     onSuccess: () => {
+      setSelectedUsers([]);
       refetchUsersNotInChat();
       refetchGroupMembers();
     },
@@ -168,6 +169,7 @@ const GroupMemberAdd = () => {
       }
     },
     onSuccess: () => {
+      setSelectedUsers([]);
       refetchUsersNotInChat();
       refetchGroupMembers();
     },
