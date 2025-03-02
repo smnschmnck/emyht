@@ -59,6 +59,7 @@ export const UserList: FC<UserListProps> = ({
           placeholder="Search contacts"
           value={searchQuery}
           onChange={(e) => onSearchQueryChange(e.target.value)}
+          handleClickClear={() => onSearchQueryChange('')}
         />
       </div>
       <div className="h-full overflow-scroll">
