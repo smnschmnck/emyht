@@ -127,7 +127,7 @@ export const ChatSettingsView = () => {
           <XMarkIcon strokeWidth={3} className="text-zinc-500" />
         </IconLink>
       </div>
-      <GroupSettings />
+      {curChat?.chatType === 'group' && <GroupSettings />}
     </div>
   );
 };
