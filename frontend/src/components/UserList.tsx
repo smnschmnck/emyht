@@ -13,7 +13,7 @@ const SelectedIndicator: FC<{ selected: boolean }> = ({ selected }) => (
       selected ? 'bg-blue-500' : 'border border-zinc-300'
     )}
   >
-    {selected && <CheckIcon />}
+    {selected && <CheckIcon strokeWidth={4} />}
   </div>
 );
 
@@ -69,7 +69,7 @@ export const UserList: FC<UserListProps> = ({
                 <button
                   onClick={() => changeUser(user.id)}
                   aria-label={`Add ${user.name} to chat`}
-                  className="flex w-full items-center justify-between rounded-lg p-2 transition hover:bg-zinc-100"
+                  className="flex w-full cursor-pointer items-center justify-between rounded-lg p-2 transition hover:bg-zinc-100"
                 >
                   <div className="flex items-center gap-4">
                     <Avatar imgUrl={user.profilePictureUrl} />

@@ -45,7 +45,7 @@ export const IncomingRequests: FC = () => {
           </p>
         </div>
         <IconLink to="/" aria-label={'back'} className="h-8 w-8">
-          <XMarkIcon strokeWidth={2} className="text-zinc-500" />
+          <XMarkIcon strokeWidth={3} className="text-zinc-500" />
         </IconLink>
       </div>
       <Card>
