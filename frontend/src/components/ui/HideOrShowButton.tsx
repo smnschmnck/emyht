@@ -11,7 +11,7 @@ export const HideOrShowButton: FC<HideOrShowButtonProps> = ({
   setShowPassword: setShow,
 }) => (
   <button
-    className="h-6 w-6 text-zinc-400 transition hover:text-black"
+    className="h-6 w-6 cursor-pointer text-zinc-400 transition hover:text-black"
     type="button"
     onClick={() => setShow(!show)}
     aria-label={`${show ? 'Hide' : 'Show'} field content`}
