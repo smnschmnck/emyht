@@ -3,6 +3,7 @@ import { FC, useState } from 'react';
 import { GroupChatCreator } from './GroupChatCreator';
 import { UserList } from './UserList';
 import { PersonalChatCreator } from './PersonalChatCreator';
+import { Card } from '@/components/ui/Card';
 
 type ChatModes = 'personal' | 'group';
 
@@ -18,7 +19,7 @@ export const ChatCreator: FC = () => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-8 rounded-xl border border-zinc-100 bg-white p-6 shadow-xs lg:p-10">
+    <Card>
       <div>
         <h2 className="text-sm font-semibold">New chat</h2>
         <p className="text-sm text-zinc-500">
@@ -62,6 +63,6 @@ export const ChatCreator: FC = () => {
           )}
         </div>
       </div>
-    </div>
+    </Card>
   );
 };

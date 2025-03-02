@@ -6,6 +6,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useMutation } from '@tanstack/react-query';
 import { FC } from 'react';
 import { ContactRequestActions, RequestTable } from './RequestTable';
+import { Card } from '@/components/ui/Card';
 
 export const IncomingRequests: FC = () => {
   const { refetch: refetchContacts } = useContacts();
@@ -47,13 +48,13 @@ export const IncomingRequests: FC = () => {
           <XMarkIcon strokeWidth={2} className="text-zinc-500" />
         </IconLink>
       </div>
-      <div className="flex w-full flex-col gap-8 rounded-xl border border-zinc-100 bg-white p-10 shadow-xs">
+      <Card>
         <div className="w-full overflow-x-scroll">
           <div className="min-w-[32rem] pb-8">
             <RequestTable handleRequest={handleContactRequest.mutate} />
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };
