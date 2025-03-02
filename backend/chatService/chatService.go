@@ -361,7 +361,7 @@ func GetChatParticipantsExceptUser(c echo.Context) error {
 
 	inChat := false
 	for _, p := range chatParticipants {
-		if p != reqUUID {
+		if p.Uuid != reqUUID {
 			inChat = true
 			break
 		}
@@ -371,9 +371,9 @@ func GetChatParticipantsExceptUser(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	var participantsExceptUser []string
+	var participantsExceptUser []contactService.Contact
 	for _, p := range chatParticipants {
-		if p != reqUUID {
+		if p.Uuid != reqUUID {
 			participantsExceptUser = append(participantsExceptUser, p)
 		}
 	}
@@ -602,18 +602,19 @@ func markChatAsRead(uuid string, chatID string) error {
 	return nil
 }
 
-func getChatMembers(chatId string) ([]string, error) {
+func getChatMembers(chatId string) ([]contactService.Contact, error) {
 	conn := db.GetDB()
 
-	query := "SELECT uuid " +
-		"FROM user_chat " +
+	query := "SELECT uc.uuid, u.username, u.picture_url " +
+		"FROM user_chat AS uc " +
+		"JOIN users AS u ON u.uuid = uc.uuid " +
 		"WHERE chat_id = $1"
-	var uuids []string
-	err := pgxscan.Select(context.Background(), conn, &uuids, query, chatId)
+	var contacts []contactService.Contact
+	err := pgxscan.Select(context.Background(), conn, &contacts, query, chatId)
 	if err != nil {
 		return nil, err
 	}
-	return uuids, nil
+	return contacts, nil
 }
 
 func sendNewMessageNotification(chatId string) error {
@@ -1050,7 +1051,7 @@ func GetContactsNotInChat(c echo.Context) error {
 	}
 
 	for _, chatMember := range chatMembers {
-		delete(contactsAsMap, chatMember)
+		delete(contactsAsMap, chatMember.Uuid)
 	}
 
 	usersNotInChat := make([]contactService.Contact, len(contactsAsMap))
