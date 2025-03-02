@@ -1,12 +1,15 @@
-import { IconLink } from '@/components/ui/IconLink';
-import { XMarkIcon } from '@heroicons/react/24/outline';
-import { chatSettingsRoute } from './route';
-import { Chat, useChats } from '@/hooks/api/chats';
-import { Link } from '@tanstack/react-router';
+import { Avatar } from '@/components/ui/Avatar';
+import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { FormInput } from '@/components/ui/FormInput';
-import { Button } from '@/components/ui/Button';
-import { Avatar } from '@/components/ui/Avatar';
+import { IconLink } from '@/components/ui/IconLink';
+import { UserList } from '@/components/UserList';
+import { Chat, useChats } from '@/hooks/api/chats';
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import { Link } from '@tanstack/react-router';
+import { useState } from 'react';
+import { useMembersNotInGroup } from './hooks/useMembers';
+import { chatSettingsRoute } from './route';
 
 const Header = ({
   chatType,
@@ -48,29 +51,64 @@ const Header = ({
   }
 };
 
+const GroupPropertiesSettings = () => {
+  return (
+    <Card>
+      <div>
+        <h3 className="text-sm font-semibold">Group Settings</h3>
+        <p className="text-sm text-zinc-500">Adjust group properties </p>
+      </div>
+      <div className="flex flex-col gap-3">
+        <FormInput label="Name" placeholder="New group name" />
+        <Button>Change name</Button>
+      </div>
+      <div className="flex flex-col gap-3">
+        <h4 className="text-sm font-semibold">Picture</h4>
+        <div className="flex w-full items-center justify-center gap-4">
+          <Avatar className="h-14 min-h-14 w-14 min-w-14" />
+          <Button className="w-full" variant="secondary">
+            Pick new picture
+          </Button>
+        </div>
+        <Button>Update Picture</Button>
+      </div>
+    </Card>
+  );
+};
+
+const GroupMemberAdd = () => {
+  const { chatId } = chatSettingsRoute.useParams();
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const { data: usersNotInChat, isLoading: isLoadingUsers } =
+    useMembersNotInGroup({ chatId });
+
+  return (
+    <Card>
+      <div>
+        <h3 className="text-sm font-semibold">Add members to group</h3>
+        <p className="text-sm text-zinc-500">
+          Select the contacts you want to add
+        </p>
+      </div>
+      <div className="h-72">
+        <UserList
+          users={usersNotInChat}
+          isLoading={isLoadingUsers}
+          selectedUsers={selectedUsers}
+          setSelectedUsers={setSelectedUsers}
+        />
+      </div>
+      <Button>Add users</Button>
+    </Card>
+  );
+};
+
 const GroupSettings = () => {
   return (
-    <div className="flex w-full">
-      <Card>
-        <div>
-          <h3 className="text-sm font-semibold">Group Settings</h3>
-          <p className="text-sm text-zinc-500">Adjust group properties </p>
-        </div>
-        <div className="flex flex-col gap-3">
-          <FormInput label="Name" placeholder="New group name" />
-          <Button>Change name</Button>
-        </div>
-        <div className="flex flex-col gap-3">
-          <h4 className="text-sm font-semibold">Picture</h4>
-          <div className="flex w-full items-center justify-center gap-4">
-            <Avatar className="h-14 min-h-[3.5rem] w-14 min-w-[3.5rem]" />
-            <Button className="w-full" variant="secondary">
-              Pick new picture
-            </Button>
-          </div>
-          <Button>Update Picture</Button>
-        </div>
-      </Card>
+    <div className="flex w-full gap-2">
+      <GroupPropertiesSettings />
+      <GroupMemberAdd />
+      <GroupMemberAdd />
     </div>
   );
 };

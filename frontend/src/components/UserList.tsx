@@ -1,7 +1,7 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Spinner } from '@/components/ui/Spinner';
-import { useContacts } from '@/hooks/api/contacts';
+import { Contact } from '@/hooks/api/contacts';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import { FC, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
@@ -18,15 +18,18 @@ const SelectedIndicator: FC<{ selected: boolean }> = ({ selected }) => (
 );
 
 type UserListProps = {
+  users?: Contact[];
+  isLoading: boolean;
   selectedUsers: string[];
   setSelectedUsers: (selectedUsers: string[]) => void;
 };
 
 export const UserList: FC<UserListProps> = ({
+  users,
   selectedUsers,
+  isLoading,
   setSelectedUsers,
 }) => {
-  const { data: contacts, isLoading } = useContacts();
   const [searchQuery, setSearchQuery] = useState('');
   const changeUser = (id: string) => {
     if (selectedUsers.includes(id)) {
@@ -42,7 +45,7 @@ export const UserList: FC<UserListProps> = ({
     setSearchQuery(query);
   };
 
-  const filteredUsers = contacts?.filter((user) => {
+  const filteredUsers = users?.filter((user) => {
     const curUsernameLowerCase = user.name.toLowerCase();
     const queryLowerCase = searchQuery.toLowerCase();
 
@@ -66,7 +69,7 @@ export const UserList: FC<UserListProps> = ({
                 <button
                   onClick={() => changeUser(user.id)}
                   aria-label={`Add ${user.name} to chat`}
-                  className="flex w-full items-center justify-between border-b border-b-zinc-100 p-2 transition hover:bg-zinc-100"
+                  className="flex w-full items-center justify-between rounded-lg p-2 transition hover:bg-zinc-100"
                 >
                   <div className="flex items-center gap-4">
                     <Avatar imgUrl={user.profilePictureUrl} />

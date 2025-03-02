@@ -1,13 +1,15 @@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/RadioGroup';
 import { FC, useState } from 'react';
 import { GroupChatCreator } from './GroupChatCreator';
-import { UserList } from './UserList';
 import { PersonalChatCreator } from './PersonalChatCreator';
 import { Card } from '@/components/ui/Card';
+import { UserList } from '@/components/UserList';
+import { useContacts } from '@/hooks/api/contacts';
 
 type ChatModes = 'personal' | 'group';
 
 export const ChatCreator: FC = () => {
+  const { data: contacts, isLoading: isLoadingContacts } = useContacts();
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [chatMode, setChatMode] = useState<ChatModes>('personal');
 
@@ -29,6 +31,8 @@ export const ChatCreator: FC = () => {
       <div className="flex flex-col gap-10 xl:flex-row">
         <div className="h-96 max-h-60 w-full">
           <UserList
+            users={contacts}
+            isLoading={isLoadingContacts}
             selectedUsers={selectedUsers}
             setSelectedUsers={onUserChange}
           />
