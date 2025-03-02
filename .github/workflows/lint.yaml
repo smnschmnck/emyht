@@ -50,3 +50,11 @@ jobs:
       - name: Compile frontend
         run: npx tsc --noEmit
         working-directory: ./frontend
+
+      - name: Run lint
+        run: npm run lint
+        working-directory: ./frontend
+
+      - name: Run knip
+        run: npm run knip
+        working-directory: ./frontend
