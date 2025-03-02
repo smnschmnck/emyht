@@ -44,7 +44,6 @@ func handleRequest() {
 	//chats
 	e.POST("/startOneOnOneChat", chatService.StartOneOnOneChat)
 	e.POST("/startGroupChat", chatService.StartGroupChat)
-	e.POST("/addUsersToGroupChat", chatService.AddUsersToGroupChat)
 	e.POST("/addSingleUserToGroupChats", chatService.AddSingleUserToGroupChats)
 	e.POST("/addUsersToGroupchat", chatService.AddUsersToGroupChat)
 	e.GET("/chats", chatService.GetChats)

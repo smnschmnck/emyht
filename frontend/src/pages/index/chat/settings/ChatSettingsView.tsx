@@ -10,6 +10,9 @@ import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useGroupMembers, useMembersNotInGroup } from './hooks/useMembers';
 import { chatSettingsRoute } from './route';
+import { useMutation } from '@tanstack/react-query';
+import { fetchWithDefaults } from '@/utils/fetch';
+import { toast } from 'sonner';
 
 const Header = ({
   chatType,
@@ -110,8 +113,36 @@ const GroupMemberRemove = () => {
 const GroupMemberAdd = () => {
   const { chatId } = chatSettingsRoute.useParams();
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const { data: usersNotInChat, isLoading: isLoadingUsers } =
-    useMembersNotInGroup({ chatId });
+  const {
+    data: usersNotInChat,
+    isLoading: isLoadingUsers,
+    refetch: refetchUsersNotInChat,
+  } = useMembersNotInGroup({ chatId });
+  const { refetch: refetchGroupMembers } = useGroupMembers({ chatId });
+
+  const { mutate: addUsers } = useMutation({
+    mutationFn: async () => {
+      const body = {
+        chatID: chatId,
+        participantUUIDs: selectedUsers,
+      };
+      const res = await fetchWithDefaults('/addUsersToGroupchat', {
+        method: 'post',
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+    },
+    onSuccess: () => {
+      refetchUsersNotInChat();
+      refetchGroupMembers();
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
 
   return (
     <Card>
@@ -130,7 +161,9 @@ const GroupMemberAdd = () => {
           setSelectedUsers={setSelectedUsers}
         />
       </div>
-      <Button disabled={selectedUsers.length <= 0}>Add users</Button>
+      <Button disabled={selectedUsers.length <= 0} onClick={() => addUsers()}>
+        Add users
+      </Button>
     </Card>
   );
 };
