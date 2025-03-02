@@ -424,7 +424,7 @@ func GetChatParticipantsExceptUser(c echo.Context) error {
 
 	inChat := false
 	for _, p := range chatParticipants {
-		if p.Uuid != reqUUID {
+		if p.Uuid == reqUUID {
 			inChat = true
 			break
 		}
