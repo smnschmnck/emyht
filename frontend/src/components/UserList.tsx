@@ -1,7 +1,7 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Spinner } from '@/components/ui/Spinner';
-import { useContacts } from '@/hooks/api/contacts';
+import { Contact } from '@/hooks/api/contacts';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import { FC, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
@@ -13,20 +13,25 @@ const SelectedIndicator: FC<{ selected: boolean }> = ({ selected }) => (
       selected ? 'bg-blue-500' : 'border border-zinc-300'
     )}
   >
-    {selected && <CheckIcon />}
+    {selected && <CheckIcon strokeWidth={4} />}
   </div>
 );
 
 type UserListProps = {
+  users?: Contact[];
+  isLoading: boolean;
   selectedUsers: string[];
   setSelectedUsers: (selectedUsers: string[]) => void;
+  emptyMessage?: string;
 };
 
 export const UserList: FC<UserListProps> = ({
+  users,
   selectedUsers,
+  isLoading,
   setSelectedUsers,
+  emptyMessage,
 }) => {
-  const { data: contacts, isLoading } = useContacts();
   const [searchQuery, setSearchQuery] = useState('');
   const changeUser = (id: string) => {
     if (selectedUsers.includes(id)) {
@@ -42,7 +47,7 @@ export const UserList: FC<UserListProps> = ({
     setSearchQuery(query);
   };
 
-  const filteredUsers = contacts?.filter((user) => {
+  const filteredUsers = users?.filter((user) => {
     const curUsernameLowerCase = user.name.toLowerCase();
     const queryLowerCase = searchQuery.toLowerCase();
 
@@ -56,6 +61,7 @@ export const UserList: FC<UserListProps> = ({
           placeholder="Search contacts"
           value={searchQuery}
           onChange={(e) => onSearchQueryChange(e.target.value)}
+          handleClickClear={() => onSearchQueryChange('')}
         />
       </div>
       <div className="h-full overflow-scroll">
@@ -66,7 +72,7 @@ export const UserList: FC<UserListProps> = ({
                 <button
                   onClick={() => changeUser(user.id)}
                   aria-label={`Add ${user.name} to chat`}
-                  className="flex w-full items-center justify-between border-b border-b-zinc-100 p-2 transition hover:bg-zinc-100"
+                  className="flex w-full cursor-pointer items-center justify-between rounded-lg p-2 transition hover:bg-zinc-100"
                 >
                   <div className="flex items-center gap-4">
                     <Avatar imgUrl={user.profilePictureUrl} />
@@ -84,9 +90,16 @@ export const UserList: FC<UserListProps> = ({
             <Spinner />
           </div>
         )}
-        {!!filteredUsers && filteredUsers.length <= 0 && (
+        {((!!filteredUsers && filteredUsers.length <= 0) || !filteredUsers) && (
           <div className="flex h-full w-full items-center justify-center py-8">
-            <span className="font-semibold text-zinc-500">No contacts</span>
+            {!!emptyMessage && (
+              <span className="font-semibold text-zinc-500">
+                {emptyMessage}
+              </span>
+            )}
+            {!emptyMessage && (
+              <span className="font-semibold text-zinc-500">No contacts</span>
+            )}
           </div>
         )}
       </div>

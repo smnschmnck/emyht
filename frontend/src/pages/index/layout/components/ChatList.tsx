@@ -116,6 +116,7 @@ export const ChatList: FC = () => {
           onChange={(e) => setChatSearchQuery(e.target.value)}
           value={chatSearchQuery}
           placeholder="Search chats"
+          handleClickClear={() => setChatSearchQuery('')}
         />
       </div>
       <div className="flex h-full w-full justify-center overflow-y-scroll">

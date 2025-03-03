@@ -338,7 +338,7 @@ func AddUsersToGroupChat(c echo.Context) error {
 	return c.JSON(http.StatusOK, chats)
 }
 
-func GetChatParticipantsExceptUser(c echo.Context) error {
+func RemoveUsersFromGroupChat(c echo.Context) error {
 	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
@@ -349,8 +349,13 @@ func GetChatParticipantsExceptUser(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
+	chatID := c.Param("chatID")
+	if len(chatID) <= 0 {
+		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
+	}
+
 	type request struct {
-		ChatID string `json:"chatID"`
+		UuidsToRemove []string `json:"uuidsToRemove"`
 	}
 
 	req := new(request)
@@ -363,14 +368,63 @@ func GetChatParticipantsExceptUser(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	chatParticipants, err := getChatMembers(req.ChatID)
+	isInChat, err := chatHelpers.IsUserInChat(reqUUID, chatID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
+	}
+	if !isInChat {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	conn := db.GetDB()
+
+	query := `
+        DELETE FROM user_chat
+        WHERE chat_id = $1 AND uuid = ANY($2)
+    `
+
+	// Execute the query
+	_, err = conn.Exec(
+		context.Background(),
+		query,
+		chatID,            // $1: The chat ID
+		req.UuidsToRemove, // $2: The list of participant UUIDs
+	)
+	if err != nil {
+		fmt.Println(err.Error())
+		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
+	}
+
+	pusherEvents := pusher.MakePusherEventArray(pusher.USER_FEED_PREFIX, req.UuidsToRemove, "REMOVE_CHAT", nil)
+	pusher.PusherClient.TriggerBatch(pusherEvents)
+
+	return c.String(http.StatusOK, "SUCCESS")
+}
+
+func GetChatParticipantsExceptUser(c echo.Context) error {
+	sessionID, responseErr := authService.GetSessionToken(c)
+	if responseErr != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	chatID := c.Param("chatID")
+	if len(chatID) <= 0 {
+		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
+	}
+
+	chatParticipants, err := getChatMembers(chatID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	inChat := false
 	for _, p := range chatParticipants {
-		if p != reqUUID {
+		if p.Uuid == reqUUID {
 			inChat = true
 			break
 		}
@@ -380,9 +434,9 @@ func GetChatParticipantsExceptUser(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	var participantsExceptUser []string
+	var participantsExceptUser []contactService.Contact
 	for _, p := range chatParticipants {
-		if p != reqUUID {
+		if p.Uuid != reqUUID {
 			participantsExceptUser = append(participantsExceptUser, p)
 		}
 	}
@@ -611,18 +665,19 @@ func markChatAsRead(uuid string, chatID string) error {
 	return nil
 }
 
-func getChatMembers(chatId string) ([]string, error) {
+func getChatMembers(chatId string) ([]contactService.Contact, error) {
 	conn := db.GetDB()
 
-	query := "SELECT uuid " +
-		"FROM user_chat " +
+	query := "SELECT uc.uuid, u.username, u.picture_url " +
+		"FROM user_chat AS uc " +
+		"JOIN users AS u ON u.uuid = uc.uuid " +
 		"WHERE chat_id = $1"
-	var uuids []string
-	err := pgxscan.Select(context.Background(), conn, &uuids, query, chatId)
+	var contacts []contactService.Contact
+	err := pgxscan.Select(context.Background(), conn, &contacts, query, chatId)
 	if err != nil {
 		return nil, err
 	}
-	return uuids, nil
+	return contacts, nil
 }
 
 func sendNewMessageNotification(chatId string) error {
@@ -1059,7 +1114,7 @@ func GetContactsNotInChat(c echo.Context) error {
 	}
 
 	for _, chatMember := range chatMembers {
-		delete(contactsAsMap, chatMember)
+		delete(contactsAsMap, chatMember.Uuid)
 	}
 
 	usersNotInChat := make([]contactService.Contact, len(contactsAsMap))
