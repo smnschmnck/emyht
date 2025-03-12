@@ -36,8 +36,8 @@ importers:
         specifier: ^5.59.19
         version: 5.67.2(@tanstack/react-query@5.67.2(react@19.0.0))(react@19.0.0)
       '@tanstack/react-router':
-        specifier: 1.112.18
-        version: 1.112.18(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+        specifier: 1.114.17
+        version: 1.114.17(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.1
@@ -1509,8 +1509,8 @@ packages:
   '@tailwindcss/postcss@4.0.12':
     resolution: {integrity: sha512-r59Sdr8djCW4dL3kvc4aWU8PHdUAVM3O3te2nbYzXsWwKLlHPCuUoZAc9FafXb/YyNDZOMI7sTbKTKFmwOrMjw==}
 
-  '@tanstack/history@1.112.18':
-    resolution: {integrity: sha512-57QWQ0DWkhJGwUxFqzHD51tfCZmU5Bnl7KY7x3yaKvk/+uU7i0Pz7d4HFTFMl+pxq/Q/zmV8TyQSctM5MIZWvw==}
+  '@tanstack/history@1.114.12':
+    resolution: {integrity: sha512-br0AiFLCdTqqgPoZ6V35k1VoDmli1gGVM/YI1YbLZSA1kUnqFlY+Fx5NOgbRfxa7+oYyHUXkmkp3lJ5LueTrhQ==}
     engines: {node: '>=12'}
 
   '@tanstack/query-core@5.67.2':
@@ -1533,8 +1533,8 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
-  '@tanstack/react-router@1.112.18':
-    resolution: {integrity: sha512-eOoCD1DDWOxHaG1kTaY6dJ5EfpKO8JZKWQ+o6txvAmQhe/qk9eKkb26D0YXcOgOmnltjRXPN/7JRwK4mpJPQzw==}
+  '@tanstack/react-router@1.114.17':
+    resolution: {integrity: sha512-Dzp0wdiQDlOrORf2kwfgX+r6GH3eoC+xK+wjrBhAg3MVciE6+b5/oDHHNrM0WHb3+Lqa0slbsmbHL7/HHU4dwg==}
     engines: {node: '>=12'}
     peerDependencies:
       react: '>=18.0.0 || >=19.0.0'
@@ -1546,8 +1546,8 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  '@tanstack/router-core@1.112.18':
-    resolution: {integrity: sha512-OQ7qxpK6l0727LUzaDBNj6Wg4yBtYyIgTqThMFN2a5Tl7nNAFfjh4xfSljmXEMRmrcZTprdDpbD8NHq1wgLVvA==}
+  '@tanstack/router-core@1.114.17':
+    resolution: {integrity: sha512-t7ww8LZR0LH96TD9OEupuloyWGDmLGEG20rW1Adve/a5b+u4yap/Vf+aznzrMT+GZ/zyTWLJy2zQg+DjEEUMPA==}
     engines: {node: '>=12'}
 
   '@tanstack/store@0.7.0':
@@ -4570,7 +4570,7 @@ snapshots:
       postcss: 8.5.3
       tailwindcss: 4.0.12
 
-  '@tanstack/history@1.112.18': {}
+  '@tanstack/history@1.114.12': {}
 
   '@tanstack/query-core@5.67.2': {}
 
@@ -4594,11 +4594,11 @@ snapshots:
       '@tanstack/query-core': 5.67.2
       react: 19.0.0
 
-  '@tanstack/react-router@1.112.18(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+  '@tanstack/react-router@1.114.17(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
-      '@tanstack/history': 1.112.18
+      '@tanstack/history': 1.114.12
       '@tanstack/react-store': 0.7.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@tanstack/router-core': 1.112.18
+      '@tanstack/router-core': 1.114.17
       jsesc: 3.1.0
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
@@ -4612,9 +4612,9 @@ snapshots:
       react-dom: 19.0.0(react@19.0.0)
       use-sync-external-store: 1.4.0(react@19.0.0)
 
-  '@tanstack/router-core@1.112.18':
+  '@tanstack/router-core@1.114.17':
     dependencies:
-      '@tanstack/history': 1.112.18
+      '@tanstack/history': 1.114.12
       '@tanstack/store': 0.7.0
 
   '@tanstack/store@0.7.0': {}
