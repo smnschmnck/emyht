@@ -520,7 +520,7 @@ func (q *Queries) GetChatType(ctx context.Context, chatID string) (ChatType, err
 }
 
 const getChatsForUser = `-- name: GetChatsForUser :many
-SELECT c.chat_id,
+SELECT DISTINCT c.chat_id,
     c.chat_type,
     c.creation_timestamp,
     CASE
@@ -540,11 +540,12 @@ SELECT c.chat_id,
     su.username AS sender_username
 FROM user_chat u
     JOIN chats c ON u.chat_id = c.chat_id
-    LEFT JOIN chatmessages m ON m.message_id = c.last_message_id
+    LEFT JOIN chatmessages m ON m.message_id = c.last_message_id -- Only join for one_on_one chats
     LEFT JOIN user_chat ouc ON c.chat_id = ouc.chat_id
-    AND ouc.uuid != $1 -- Other User in Chat
-    LEFT JOIN users ou ON ouc.uuid = ou.uuid -- Other User Details
-    LEFT JOIN users su ON m.sender_id = su.uuid -- Sender User Details
+    AND ouc.uuid != $1
+    AND c.chat_type = 'one_on_one'
+    LEFT JOIN users ou ON ouc.uuid = ou.uuid
+    LEFT JOIN users su ON m.sender_id = su.uuid
 WHERE u.uuid = $1
 `
 
