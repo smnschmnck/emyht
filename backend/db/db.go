@@ -25,6 +25,10 @@ func InitDB() {
 	fmt.Println("Successfully connected to the database")
 }
 
+func GetRawConn() *pgxpool.Pool {
+	return dbPool
+}
+
 func GetDB() *queries.Queries {
 	return queries.New(dbPool)
 }

@@ -102,6 +102,32 @@ func (q *Queries) BlockUser(ctx context.Context, arg BlockUserParams) error {
 	return err
 }
 
+const checkChatExists = `-- name: CheckChatExists :one
+SELECT count(user_chat.chat_id) >= 2 AS chatcount
+FROM user_chat
+    JOIN chats c ON user_chat.chat_id = c.chat_id
+WHERE chat_type = 'one_on_one'
+    AND (
+        uuid = $1
+        OR uuid = $2
+    )
+GROUP BY c.chat_id
+ORDER BY chatcount DESC
+LIMIT 1
+`
+
+type CheckChatExistsParams struct {
+	Uuid   string
+	Uuid_2 string
+}
+
+func (q *Queries) CheckChatExists(ctx context.Context, arg CheckChatExistsParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkChatExists, arg.Uuid, arg.Uuid_2)
+	var chatcount bool
+	err := row.Scan(&chatcount)
+	return chatcount, err
+}
+
 const checkDuplicateFriendRequest = `-- name: CheckDuplicateFriendRequest :one
 SELECT EXISTS(
         SELECT 1
@@ -125,6 +151,46 @@ func (q *Queries) CheckDuplicateFriendRequest(ctx context.Context, arg CheckDupl
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
+}
+
+const createChatMessage = `-- name: CreateChatMessage :one
+INSERT INTO chatmessages (
+        message_id,
+        chat_id,
+        sender_id,
+        text_content,
+        message_type,
+        media_url,
+        timestamp,
+        delivery_status
+    )
+VALUES ($1, $2, $3, $4, $5, $6, $7, 'sent')
+RETURNING message_id
+`
+
+type CreateChatMessageParams struct {
+	MessageID   string
+	ChatID      string
+	SenderID    string
+	TextContent pgtype.Text
+	MessageType MessageType
+	MediaUrl    pgtype.Text
+	Timestamp   int64
+}
+
+func (q *Queries) CreateChatMessage(ctx context.Context, arg CreateChatMessageParams) (string, error) {
+	row := q.db.QueryRow(ctx, createChatMessage,
+		arg.MessageID,
+		arg.ChatID,
+		arg.SenderID,
+		arg.TextContent,
+		arg.MessageType,
+		arg.MediaUrl,
+		arg.Timestamp,
+	)
+	var message_id string
+	err := row.Scan(&message_id)
+	return message_id, err
 }
 
 const createFriendRequest = `-- name: CreateFriendRequest :one
@@ -151,6 +217,61 @@ func (q *Queries) CreateFriendRequest(ctx context.Context, arg CreateFriendReque
 	var status FriendshipStatus
 	err := row.Scan(&status)
 	return status, err
+}
+
+const createGroupChat = `-- name: CreateGroupChat :one
+INSERT INTO chats (
+        chat_id,
+        name,
+        picture_url,
+        chat_type,
+        creation_timestamp
+    )
+VALUES ($1, $2, $3, 'group', $4)
+RETURNING chat_id
+`
+
+type CreateGroupChatParams struct {
+	ChatID            string
+	Name              string
+	PictureUrl        string
+	CreationTimestamp int64
+}
+
+func (q *Queries) CreateGroupChat(ctx context.Context, arg CreateGroupChatParams) (string, error) {
+	row := q.db.QueryRow(ctx, createGroupChat,
+		arg.ChatID,
+		arg.Name,
+		arg.PictureUrl,
+		arg.CreationTimestamp,
+	)
+	var chat_id string
+	err := row.Scan(&chat_id)
+	return chat_id, err
+}
+
+const createOneOnOneChat = `-- name: CreateOneOnOneChat :one
+INSERT INTO chats (
+        chat_id,
+        name,
+        picture_url,
+        chat_type,
+        creation_timestamp
+    )
+VALUES ($1, '', '', 'one_on_one', $2)
+RETURNING chat_id
+`
+
+type CreateOneOnOneChatParams struct {
+	ChatID            string
+	CreationTimestamp int64
+}
+
+func (q *Queries) CreateOneOnOneChat(ctx context.Context, arg CreateOneOnOneChatParams) (string, error) {
+	row := q.db.QueryRow(ctx, createOneOnOneChat, arg.ChatID, arg.CreationTimestamp)
+	var chat_id string
+	err := row.Scan(&chat_id)
+	return chat_id, err
 }
 
 const declineFriendRequest = `-- name: DeclineFriendRequest :exec
@@ -190,6 +311,149 @@ func (q *Queries) EmailExists(ctx context.Context, email string) (bool, error) {
 	var column_1 bool
 	err := row.Scan(&column_1)
 	return column_1, err
+}
+
+const getAvailableGroupChats = `-- name: GetAvailableGroupChats :many
+SELECT c.chat_id,
+    c.name AS chat_name,
+    c.picture_url
+FROM user_chat uc
+    JOIN chats c ON c.chat_id = uc.chat_id
+WHERE uc.uuid = $1
+    AND c.chat_type = 'group'
+EXCEPT
+SELECT c.chat_id,
+    c.name AS chat_name,
+    c.picture_url
+FROM user_chat uc
+    JOIN chats c ON c.chat_id = uc.chat_id
+WHERE uc.uuid = $2
+    AND c.chat_type = 'group'
+`
+
+type GetAvailableGroupChatsParams struct {
+	Uuid   string
+	Uuid_2 string
+}
+
+type GetAvailableGroupChatsRow struct {
+	ChatID     string
+	ChatName   string
+	PictureUrl string
+}
+
+func (q *Queries) GetAvailableGroupChats(ctx context.Context, arg GetAvailableGroupChatsParams) ([]GetAvailableGroupChatsRow, error) {
+	rows, err := q.db.Query(ctx, getAvailableGroupChats, arg.Uuid, arg.Uuid_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAvailableGroupChatsRow
+	for rows.Next() {
+		var i GetAvailableGroupChatsRow
+		if err := rows.Scan(&i.ChatID, &i.ChatName, &i.PictureUrl); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getChatMembers = `-- name: GetChatMembers :many
+SELECT uuid
+FROM user_chat
+WHERE chat_id = $1
+`
+
+func (q *Queries) GetChatMembers(ctx context.Context, chatID string) ([]string, error) {
+	rows, err := q.db.Query(ctx, getChatMembers, chatID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var uuid string
+		if err := rows.Scan(&uuid); err != nil {
+			return nil, err
+		}
+		items = append(items, uuid)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getChatMessages = `-- name: GetChatMessages :many
+SELECT message_id,
+    sender_id,
+    username AS sender_username,
+    text_content,
+    message_type,
+    media_url,
+    timestamp,
+    delivery_status
+FROM chatmessages
+    JOIN users u ON u.uuid = chatmessages.sender_id
+WHERE chat_id = $1
+ORDER BY timestamp ASC
+`
+
+type GetChatMessagesRow struct {
+	MessageID      string
+	SenderID       string
+	SenderUsername string
+	TextContent    pgtype.Text
+	MessageType    MessageType
+	MediaUrl       pgtype.Text
+	Timestamp      int64
+	DeliveryStatus DeliveryStatus
+}
+
+func (q *Queries) GetChatMessages(ctx context.Context, chatID string) ([]GetChatMessagesRow, error) {
+	rows, err := q.db.Query(ctx, getChatMessages, chatID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetChatMessagesRow
+	for rows.Next() {
+		var i GetChatMessagesRow
+		if err := rows.Scan(
+			&i.MessageID,
+			&i.SenderID,
+			&i.SenderUsername,
+			&i.TextContent,
+			&i.MessageType,
+			&i.MediaUrl,
+			&i.Timestamp,
+			&i.DeliveryStatus,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getChatType = `-- name: GetChatType :one
+SELECT chat_type
+FROM chats
+WHERE chat_id = $1
+`
+
+func (q *Queries) GetChatType(ctx context.Context, chatID string) (ChatType, error) {
+	row := q.db.QueryRow(ctx, getChatType, chatID)
+	var chat_type ChatType
+	err := row.Scan(&chat_type)
+	return chat_type, err
 }
 
 const getChatsForUser = `-- name: GetChatsForUser :many
@@ -280,6 +544,39 @@ func (q *Queries) GetEmailActiveByToken(ctx context.Context, emailToken pgtype.T
 	var email_active bool
 	err := row.Scan(&email_active)
 	return email_active, err
+}
+
+const getGroupChatUserCount = `-- name: GetGroupChatUserCount :one
+SELECT count(uuid)
+FROM user_chat
+WHERE chat_id = $1
+GROUP BY chat_id
+`
+
+func (q *Queries) GetGroupChatUserCount(ctx context.Context, chatID string) (int64, error) {
+	row := q.db.QueryRow(ctx, getGroupChatUserCount, chatID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getOneOnOneChatParticipant = `-- name: GetOneOnOneChatParticipant :one
+SELECT uuid
+FROM user_chat
+WHERE chat_id = $1
+    AND uuid != $2
+`
+
+type GetOneOnOneChatParticipantParams struct {
+	ChatID string
+	Uuid   string
+}
+
+func (q *Queries) GetOneOnOneChatParticipant(ctx context.Context, arg GetOneOnOneChatParticipantParams) (string, error) {
+	row := q.db.QueryRow(ctx, getOneOnOneChatParticipant, arg.ChatID, arg.Uuid)
+	var uuid string
+	err := row.Scan(&uuid)
+	return uuid, err
 }
 
 const getPendingContactRequests = `-- name: GetPendingContactRequests :many
@@ -400,6 +697,108 @@ func (q *Queries) GetUserContacts(ctx context.Context, reciever string) ([]GetUs
 	return items, nil
 }
 
+const incrementUnreadMessages = `-- name: IncrementUnreadMessages :one
+UPDATE user_chat
+SET unread_messages = (unread_messages + 1)
+WHERE chat_id = $1
+    AND uuid != $2
+RETURNING true
+`
+
+type IncrementUnreadMessagesParams struct {
+	ChatID string
+	Uuid   string
+}
+
+func (q *Queries) IncrementUnreadMessages(ctx context.Context, arg IncrementUnreadMessagesParams) (bool, error) {
+	row := q.db.QueryRow(ctx, incrementUnreadMessages, arg.ChatID, arg.Uuid)
+	var column_1 bool
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
+const insertParticipantChat = `-- name: InsertParticipantChat :one
+INSERT INTO user_chat (uuid, chat_id, unread_messages)
+VALUES ($1, $2, 0)
+RETURNING chat_id
+`
+
+type InsertParticipantChatParams struct {
+	Uuid   string
+	ChatID string
+}
+
+func (q *Queries) InsertParticipantChat(ctx context.Context, arg InsertParticipantChatParams) (string, error) {
+	row := q.db.QueryRow(ctx, insertParticipantChat, arg.Uuid, arg.ChatID)
+	var chat_id string
+	err := row.Scan(&chat_id)
+	return chat_id, err
+}
+
+const insertUserChat = `-- name: InsertUserChat :one
+INSERT INTO user_chat (uuid, chat_id, unread_messages)
+VALUES ($1, $2, 0)
+RETURNING chat_id
+`
+
+type InsertUserChatParams struct {
+	Uuid   string
+	ChatID string
+}
+
+func (q *Queries) InsertUserChat(ctx context.Context, arg InsertUserChatParams) (string, error) {
+	row := q.db.QueryRow(ctx, insertUserChat, arg.Uuid, arg.ChatID)
+	var chat_id string
+	err := row.Scan(&chat_id)
+	return chat_id, err
+}
+
+const isGroupChat = `-- name: IsGroupChat :one
+SELECT chat_type = 'group'
+FROM chats
+WHERE chat_id = $1
+`
+
+func (q *Queries) IsGroupChat(ctx context.Context, chatID string) (bool, error) {
+	row := q.db.QueryRow(ctx, isGroupChat, chatID)
+	var column_1 bool
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
+const leaveGroupChat = `-- name: LeaveGroupChat :exec
+DELETE FROM user_chat
+WHERE chat_id = $1
+    AND uuid = $2
+`
+
+type LeaveGroupChatParams struct {
+	ChatID string
+	Uuid   string
+}
+
+func (q *Queries) LeaveGroupChat(ctx context.Context, arg LeaveGroupChatParams) error {
+	_, err := q.db.Exec(ctx, leaveGroupChat, arg.ChatID, arg.Uuid)
+	return err
+}
+
+const resetUnreadMessages = `-- name: ResetUnreadMessages :exec
+UPDATE user_chat
+SET unread_messages = 0
+WHERE chat_id = $1
+    AND uuid = $2
+`
+
+type ResetUnreadMessagesParams struct {
+	ChatID string
+	Uuid   string
+}
+
+func (q *Queries) ResetUnreadMessages(ctx context.Context, arg ResetUnreadMessagesParams) error {
+	_, err := q.db.Exec(ctx, resetUnreadMessages, arg.ChatID, arg.Uuid)
+	return err
+}
+
 const updateEmailFromChangeEmail = `-- name: UpdateEmailFromChangeEmail :one
 UPDATE users u
 SET email_active = true,
@@ -427,6 +826,25 @@ func (q *Queries) UpdateEmailFromChangeEmail(ctx context.Context, arg UpdateEmai
 	var email string
 	err := row.Scan(&email)
 	return email, err
+}
+
+const updateLastMessageID = `-- name: UpdateLastMessageID :one
+UPDATE chats
+SET last_message_id = $1
+WHERE chat_id = $2
+RETURNING chat_id
+`
+
+type UpdateLastMessageIDParams struct {
+	LastMessageID pgtype.Text
+	ChatID        string
+}
+
+func (q *Queries) UpdateLastMessageID(ctx context.Context, arg UpdateLastMessageIDParams) (string, error) {
+	row := q.db.QueryRow(ctx, updateLastMessageID, arg.LastMessageID, arg.ChatID)
+	var chat_id string
+	err := row.Scan(&chat_id)
+	return chat_id, err
 }
 
 const updateUsername = `-- name: UpdateUsername :one
@@ -474,4 +892,17 @@ func (q *Queries) UpsertChangeEmail(ctx context.Context, arg UpsertChangeEmailPa
 	var i UpsertChangeEmailRow
 	err := row.Scan(&i.ConfirmationToken, &i.NewEmail)
 	return i, err
+}
+
+const validateChatID = `-- name: ValidateChatID :one
+SELECT chat_id
+FROM chats
+WHERE chat_id = $1
+`
+
+func (q *Queries) ValidateChatID(ctx context.Context, chatID string) (string, error) {
+	row := q.db.QueryRow(ctx, validateChatID, chatID)
+	var chat_id string
+	err := row.Scan(&chat_id)
+	return chat_id, err
 }

@@ -152,3 +152,131 @@ FROM friends
     JOIN users u ON u.uuid = friends.reciever
 WHERE sender = $1
     AND status = 'pending';
+-- name: CheckChatExists :one
+SELECT count(user_chat.chat_id) >= 2 AS chatcount
+FROM user_chat
+    JOIN chats c ON user_chat.chat_id = c.chat_id
+WHERE chat_type = 'one_on_one'
+    AND (
+        uuid = $1
+        OR uuid = $2
+    )
+GROUP BY c.chat_id
+ORDER BY chatcount DESC
+LIMIT 1;
+-- name: CreateOneOnOneChat :one
+INSERT INTO chats (
+        chat_id,
+        name,
+        picture_url,
+        chat_type,
+        creation_timestamp
+    )
+VALUES ($1, '', '', 'one_on_one', $2)
+RETURNING chat_id;
+-- name: InsertUserChat :one
+INSERT INTO user_chat (uuid, chat_id, unread_messages)
+VALUES ($1, $2, 0)
+RETURNING chat_id;
+-- name: InsertParticipantChat :one
+INSERT INTO user_chat (uuid, chat_id, unread_messages)
+VALUES ($1, $2, 0)
+RETURNING chat_id;
+-- name: CreateGroupChat :one
+INSERT INTO chats (
+        chat_id,
+        name,
+        picture_url,
+        chat_type,
+        creation_timestamp
+    )
+VALUES ($1, $2, $3, 'group', $4)
+RETURNING chat_id;
+-- name: ValidateChatID :one
+SELECT chat_id
+FROM chats
+WHERE chat_id = $1;
+-- name: GetChatType :one
+SELECT chat_type
+FROM chats
+WHERE chat_id = $1;
+-- name: CreateChatMessage :one
+INSERT INTO chatmessages (
+        message_id,
+        chat_id,
+        sender_id,
+        text_content,
+        message_type,
+        media_url,
+        timestamp,
+        delivery_status
+    )
+VALUES ($1, $2, $3, $4, $5, $6, $7, 'sent')
+RETURNING message_id;
+-- name: UpdateLastMessageID :one
+UPDATE chats
+SET last_message_id = $1
+WHERE chat_id = $2
+RETURNING chat_id;
+-- name: IncrementUnreadMessages :one
+UPDATE user_chat
+SET unread_messages = (unread_messages + 1)
+WHERE chat_id = $1
+    AND uuid != $2
+RETURNING true;
+-- name: GetChatMessages :many
+SELECT message_id,
+    sender_id,
+    username AS sender_username,
+    text_content,
+    message_type,
+    media_url,
+    timestamp,
+    delivery_status
+FROM chatmessages
+    JOIN users u ON u.uuid = chatmessages.sender_id
+WHERE chat_id = $1
+ORDER BY timestamp ASC;
+-- name: ResetUnreadMessages :exec
+UPDATE user_chat
+SET unread_messages = 0
+WHERE chat_id = $1
+    AND uuid = $2;
+-- name: GetChatMembers :many
+SELECT uuid
+FROM user_chat
+WHERE chat_id = $1;
+-- name: IsGroupChat :one
+SELECT chat_type = 'group'
+FROM chats
+WHERE chat_id = $1;
+-- name: GetGroupChatUserCount :one
+SELECT count(uuid)
+FROM user_chat
+WHERE chat_id = $1
+GROUP BY chat_id;
+-- name: LeaveGroupChat :exec
+DELETE FROM user_chat
+WHERE chat_id = $1
+    AND uuid = $2;
+-- name: GetAvailableGroupChats :many
+SELECT c.chat_id,
+    c.name AS chat_name,
+    c.picture_url
+FROM user_chat uc
+    JOIN chats c ON c.chat_id = uc.chat_id
+WHERE uc.uuid = $1
+    AND c.chat_type = 'group'
+EXCEPT
+SELECT c.chat_id,
+    c.name AS chat_name,
+    c.picture_url
+FROM user_chat uc
+    JOIN chats c ON c.chat_id = uc.chat_id
+WHERE uc.uuid = $2
+    AND c.chat_type = 'group';
+-- name: GetOneOnOneChatParticipant :one
+SELECT uuid
+FROM user_chat
+WHERE chat_id = $1
+    AND uuid != $2;
