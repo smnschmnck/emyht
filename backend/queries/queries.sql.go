@@ -274,6 +274,69 @@ func (q *Queries) CreateOneOnOneChat(ctx context.Context, arg CreateOneOnOneChat
 	return chat_id, err
 }
 
+const createUser = `-- name: CreateUser :one
+INSERT INTO users (
+        uuid,
+        email,
+        username,
+        password,
+        salt,
+        is_admin,
+        email_active,
+        email_token,
+        picture_url
+    )
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+RETURNING uuid,
+    email,
+    username,
+    password,
+    salt,
+    is_admin,
+    email_active,
+    email_token,
+    picture_url
+`
+
+type CreateUserParams struct {
+	Uuid        string
+	Email       string
+	Username    string
+	Password    string
+	Salt        string
+	IsAdmin     bool
+	EmailActive bool
+	EmailToken  pgtype.Text
+	PictureUrl  string
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, createUser,
+		arg.Uuid,
+		arg.Email,
+		arg.Username,
+		arg.Password,
+		arg.Salt,
+		arg.IsAdmin,
+		arg.EmailActive,
+		arg.EmailToken,
+		arg.PictureUrl,
+	)
+	var i User
+	err := row.Scan(
+		&i.Uuid,
+		&i.Email,
+		&i.Username,
+		&i.Password,
+		&i.Salt,
+		&i.IsAdmin,
+		&i.EmailActive,
+		&i.EmailToken,
+		&i.PictureUrl,
+	)
+	return i, err
+}
+
 const declineFriendRequest = `-- name: DeclineFriendRequest :exec
 DELETE FROM friends
 WHERE sender = $1
@@ -656,6 +719,83 @@ func (q *Queries) GetPendingFriendRequests(ctx context.Context, reciever string)
 	return items, nil
 }
 
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT uuid,
+    email,
+    username,
+    password,
+    salt,
+    is_admin,
+    email_active
+FROM users
+WHERE email = $1
+`
+
+type GetUserByEmailRow struct {
+	Uuid        string
+	Email       string
+	Username    string
+	Password    string
+	Salt        string
+	IsAdmin     bool
+	EmailActive bool
+}
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
+	var i GetUserByEmailRow
+	err := row.Scan(
+		&i.Uuid,
+		&i.Email,
+		&i.Username,
+		&i.Password,
+		&i.Salt,
+		&i.IsAdmin,
+		&i.EmailActive,
+	)
+	return i, err
+}
+
+const getUserByUUID = `-- name: GetUserByUUID :one
+SELECT uuid,
+    email,
+    username,
+    password,
+    salt,
+    is_admin,
+    email_active,
+    picture_url
+FROM users
+WHERE uuid = $1
+`
+
+type GetUserByUUIDRow struct {
+	Uuid        string
+	Email       string
+	Username    string
+	Password    string
+	Salt        string
+	IsAdmin     bool
+	EmailActive bool
+	PictureUrl  string
+}
+
+func (q *Queries) GetUserByUUID(ctx context.Context, uuid string) (GetUserByUUIDRow, error) {
+	row := q.db.QueryRow(ctx, getUserByUUID, uuid)
+	var i GetUserByUUIDRow
+	err := row.Scan(
+		&i.Uuid,
+		&i.Email,
+		&i.Username,
+		&i.Password,
+		&i.Salt,
+		&i.IsAdmin,
+		&i.EmailActive,
+		&i.PictureUrl,
+	)
+	return i, err
+}
+
 const getUserContacts = `-- name: GetUserContacts :many
 SELECT u.username,
     u.uuid,
@@ -828,6 +968,25 @@ func (q *Queries) UpdateEmailFromChangeEmail(ctx context.Context, arg UpdateEmai
 	return email, err
 }
 
+const updateEmailToken = `-- name: UpdateEmailToken :one
+UPDATE users
+SET email_token = $1
+WHERE email = $2
+RETURNING email_token
+`
+
+type UpdateEmailTokenParams struct {
+	EmailToken pgtype.Text
+	Email      string
+}
+
+func (q *Queries) UpdateEmailToken(ctx context.Context, arg UpdateEmailTokenParams) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, updateEmailToken, arg.EmailToken, arg.Email)
+	var email_token pgtype.Text
+	err := row.Scan(&email_token)
+	return email_token, err
+}
+
 const updateLastMessageID = `-- name: UpdateLastMessageID :one
 UPDATE chats
 SET last_message_id = $1
@@ -845,6 +1004,22 @@ func (q *Queries) UpdateLastMessageID(ctx context.Context, arg UpdateLastMessage
 	var chat_id string
 	err := row.Scan(&chat_id)
 	return chat_id, err
+}
+
+const updatePictureURL = `-- name: UpdatePictureURL :exec
+UPDATE users
+SET picture_url = $1
+WHERE uuid = $2
+`
+
+type UpdatePictureURLParams struct {
+	PictureUrl string
+	Uuid       string
+}
+
+func (q *Queries) UpdatePictureURL(ctx context.Context, arg UpdatePictureURLParams) error {
+	_, err := q.db.Exec(ctx, updatePictureURL, arg.PictureUrl, arg.Uuid)
+	return err
 }
 
 const updateUsername = `-- name: UpdateUsername :one

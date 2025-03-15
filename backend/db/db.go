@@ -32,3 +32,7 @@ func GetRawConn() *pgxpool.Pool {
 func GetDB() *queries.Queries {
 	return queries.New(dbPool)
 }
+
+func Close() {
+	dbPool.Close()
+}

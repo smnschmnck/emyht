@@ -87,7 +87,7 @@ func initGlobals() {
 
 func main() {
 	db.InitDB()
-	defer db.GetDB().Close()
+	defer db.Close()
 	initGlobals()
 	handleRequest()
 }

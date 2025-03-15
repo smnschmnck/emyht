@@ -83,7 +83,7 @@ func GetUserBySession(c echo.Context) error {
 		return c.String(respErr.StatusCode, respErr.Msg)
 	}
 
-	formattedProfilePic := s3Helpers.FormatPictureUrl(user.ProfilePictureUrl)
+	formattedProfilePic := s3Helpers.FormatPictureUrl(user.PictureUrl)
 
 	res := UserRes{
 		UUID:              user.Uuid,
@@ -161,7 +161,7 @@ func Register(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
 	}
 
-	err = emailService.SendVerificationEmail(reqUser.Username, reqUser.Email, user.EmailToken)
+	err = emailService.SendVerificationEmail(reqUser.Username, reqUser.Email, user.EmailToken.String)
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -261,7 +261,7 @@ func Authenticate(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	pwCorrect := userService.CheckPW(user, lowerCaseEmail, credentials.Password)
+	pwCorrect := userService.CheckPW(credentials.Password, user.Password, user.Salt)
 	if !pwCorrect {
 		return c.String(http.StatusUnauthorized, "WRONG CREDENTIALS")
 	}
