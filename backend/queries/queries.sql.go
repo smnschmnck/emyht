@@ -19,8 +19,8 @@ WHERE sender = $1
 `
 
 type AcceptFriendRequestParams struct {
-	Sender   string
-	Reciever string
+	Sender   string `json:"sender"`
+	Reciever string `json:"reciever"`
 }
 
 func (q *Queries) AcceptFriendRequest(ctx context.Context, arg AcceptFriendRequestParams) error {
@@ -37,8 +37,8 @@ RETURNING email_active
 `
 
 type ActivateEmailParams struct {
-	EmailToken   pgtype.Text
-	EmailToken_2 pgtype.Text
+	EmailToken   pgtype.Text `json:"email_token"`
+	EmailToken_2 pgtype.Text `json:"email_token_2"`
 }
 
 func (q *Queries) ActivateEmail(ctx context.Context, arg ActivateEmailParams) (bool, error) {
@@ -70,8 +70,8 @@ WHERE sender = $1
 `
 
 type BlockFriendRequestParams struct {
-	Sender   string
-	Reciever string
+	Sender   string `json:"sender"`
+	Reciever string `json:"reciever"`
 }
 
 func (q *Queries) BlockFriendRequest(ctx context.Context, arg BlockFriendRequestParams) error {
@@ -93,8 +93,8 @@ WHERE (
 `
 
 type BlockUserParams struct {
-	Sender   string
-	Reciever string
+	Sender   string `json:"sender"`
+	Reciever string `json:"reciever"`
 }
 
 func (q *Queries) BlockUser(ctx context.Context, arg BlockUserParams) error {
@@ -117,8 +117,8 @@ LIMIT 1
 `
 
 type CheckChatExistsParams struct {
-	Uuid   string
-	Uuid_2 string
+	Uuid   string `json:"uuid"`
+	Uuid_2 string `json:"uuid_2"`
 }
 
 func (q *Queries) CheckChatExists(ctx context.Context, arg CheckChatExistsParams) (bool, error) {
@@ -142,8 +142,8 @@ SELECT EXISTS(
 `
 
 type CheckDuplicateFriendRequestParams struct {
-	Reciever string
-	Email    string
+	Reciever string `json:"reciever"`
+	Email    string `json:"email"`
 }
 
 func (q *Queries) CheckDuplicateFriendRequest(ctx context.Context, arg CheckDuplicateFriendRequestParams) (bool, error) {
@@ -169,13 +169,13 @@ RETURNING message_id
 `
 
 type CreateChatMessageParams struct {
-	MessageID   string
-	ChatID      string
-	SenderID    string
-	TextContent pgtype.Text
-	MessageType MessageType
-	MediaUrl    pgtype.Text
-	Timestamp   int64
+	MessageID   string      `json:"message_id"`
+	ChatID      string      `json:"chat_id"`
+	SenderID    string      `json:"sender_id"`
+	TextContent pgtype.Text `json:"text_content"`
+	MessageType MessageType `json:"message_type"`
+	MediaUrl    pgtype.Text `json:"media_url"`
+	Timestamp   int64       `json:"timestamp"`
 }
 
 func (q *Queries) CreateChatMessage(ctx context.Context, arg CreateChatMessageParams) (string, error) {
@@ -208,8 +208,8 @@ RETURNING status
 `
 
 type CreateFriendRequestParams struct {
-	Sender string
-	Email  string
+	Sender string `json:"sender"`
+	Email  string `json:"email"`
 }
 
 func (q *Queries) CreateFriendRequest(ctx context.Context, arg CreateFriendRequestParams) (FriendshipStatus, error) {
@@ -232,10 +232,10 @@ RETURNING chat_id
 `
 
 type CreateGroupChatParams struct {
-	ChatID            string
-	Name              string
-	PictureUrl        string
-	CreationTimestamp int64
+	ChatID            string `json:"chat_id"`
+	Name              string `json:"name"`
+	PictureUrl        string `json:"picture_url"`
+	CreationTimestamp int64  `json:"creation_timestamp"`
 }
 
 func (q *Queries) CreateGroupChat(ctx context.Context, arg CreateGroupChatParams) (string, error) {
@@ -263,8 +263,8 @@ RETURNING chat_id
 `
 
 type CreateOneOnOneChatParams struct {
-	ChatID            string
-	CreationTimestamp int64
+	ChatID            string `json:"chat_id"`
+	CreationTimestamp int64  `json:"creation_timestamp"`
 }
 
 func (q *Queries) CreateOneOnOneChat(ctx context.Context, arg CreateOneOnOneChatParams) (string, error) {
@@ -299,15 +299,15 @@ RETURNING uuid,
 `
 
 type CreateUserParams struct {
-	Uuid        string
-	Email       string
-	Username    string
-	Password    string
-	Salt        string
-	IsAdmin     bool
-	EmailActive bool
-	EmailToken  pgtype.Text
-	PictureUrl  string
+	Uuid        string      `json:"uuid"`
+	Email       string      `json:"email"`
+	Username    string      `json:"username"`
+	Password    string      `json:"password"`
+	Salt        string      `json:"salt"`
+	IsAdmin     bool        `json:"is_admin"`
+	EmailActive bool        `json:"email_active"`
+	EmailToken  pgtype.Text `json:"email_token"`
+	PictureUrl  string      `json:"picture_url"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -344,8 +344,8 @@ WHERE sender = $1
 `
 
 type DeclineFriendRequestParams struct {
-	Sender   string
-	Reciever string
+	Sender   string `json:"sender"`
+	Reciever string `json:"reciever"`
 }
 
 func (q *Queries) DeclineFriendRequest(ctx context.Context, arg DeclineFriendRequestParams) error {
@@ -395,14 +395,14 @@ WHERE uc.uuid = $2
 `
 
 type GetAvailableGroupChatsParams struct {
-	Uuid   string
-	Uuid_2 string
+	Uuid   string `json:"uuid"`
+	Uuid_2 string `json:"uuid_2"`
 }
 
 type GetAvailableGroupChatsRow struct {
-	ChatID     string
-	ChatName   string
-	PictureUrl string
+	ChatID     string `json:"chat_id"`
+	ChatName   string `json:"chat_name"`
+	PictureUrl string `json:"picture_url"`
 }
 
 func (q *Queries) GetAvailableGroupChats(ctx context.Context, arg GetAvailableGroupChatsParams) ([]GetAvailableGroupChatsRow, error) {
@@ -467,14 +467,14 @@ ORDER BY timestamp ASC
 `
 
 type GetChatMessagesRow struct {
-	MessageID      string
-	SenderID       string
-	SenderUsername string
-	TextContent    pgtype.Text
-	MessageType    MessageType
-	MediaUrl       pgtype.Text
-	Timestamp      int64
-	DeliveryStatus DeliveryStatus
+	MessageID      string         `json:"message_id"`
+	SenderID       string         `json:"sender_id"`
+	SenderUsername string         `json:"sender_username"`
+	TextContent    pgtype.Text    `json:"text_content"`
+	MessageType    MessageType    `json:"message_type"`
+	MediaUrl       pgtype.Text    `json:"media_url"`
+	Timestamp      int64          `json:"timestamp"`
+	DeliveryStatus DeliveryStatus `json:"delivery_status"`
 }
 
 func (q *Queries) GetChatMessages(ctx context.Context, chatID string) ([]GetChatMessagesRow, error) {
@@ -549,18 +549,18 @@ WHERE u.uuid = $1
 `
 
 type GetChatsForUserRow struct {
-	ChatID            string
-	ChatType          ChatType
-	CreationTimestamp int64
-	ChatName          string
-	ChatPictureUrl    string
-	UnreadMessages    int64
-	MessageType       NullMessageType
-	TextContent       pgtype.Text
-	Timestamp         pgtype.Int8
-	DeliveryStatus    NullDeliveryStatus
-	SenderID          pgtype.Text
-	SenderUsername    pgtype.Text
+	ChatID            string             `json:"chat_id"`
+	ChatType          ChatType           `json:"chat_type"`
+	CreationTimestamp int64              `json:"creation_timestamp"`
+	ChatName          string             `json:"chat_name"`
+	ChatPictureUrl    string             `json:"chat_picture_url"`
+	UnreadMessages    int64              `json:"unread_messages"`
+	MessageType       NullMessageType    `json:"message_type"`
+	TextContent       pgtype.Text        `json:"text_content"`
+	Timestamp         pgtype.Int8        `json:"timestamp"`
+	DeliveryStatus    NullDeliveryStatus `json:"delivery_status"`
+	SenderID          pgtype.Text        `json:"sender_id"`
+	SenderUsername    pgtype.Text        `json:"sender_username"`
 }
 
 func (q *Queries) GetChatsForUser(ctx context.Context, uuid string) ([]GetChatsForUserRow, error) {
@@ -631,8 +631,8 @@ WHERE chat_id = $1
 `
 
 type GetOneOnOneChatParticipantParams struct {
-	ChatID string
-	Uuid   string
+	ChatID string `json:"chat_id"`
+	Uuid   string `json:"uuid"`
 }
 
 func (q *Queries) GetOneOnOneChatParticipant(ctx context.Context, arg GetOneOnOneChatParticipantParams) (string, error) {
@@ -652,8 +652,8 @@ WHERE sender = $1
 `
 
 type GetPendingContactRequestsRow struct {
-	Email string
-	Date  string
+	Email string `json:"email"`
+	Date  string `json:"date"`
 }
 
 func (q *Queries) GetPendingContactRequests(ctx context.Context, sender string) ([]GetPendingContactRequestsRow, error) {
@@ -688,10 +688,10 @@ WHERE reciever = $1
 `
 
 type GetPendingFriendRequestsRow struct {
-	SenderID             string
-	SenderUsername       string
-	SenderProfilePicture string
-	SenderEmail          string
+	SenderID             string `json:"sender_id"`
+	SenderUsername       string `json:"sender_username"`
+	SenderProfilePicture string `json:"sender_profile_picture"`
+	SenderEmail          string `json:"sender_email"`
 }
 
 func (q *Queries) GetPendingFriendRequests(ctx context.Context, reciever string) ([]GetPendingFriendRequestsRow, error) {
@@ -732,13 +732,13 @@ WHERE email = $1
 `
 
 type GetUserByEmailRow struct {
-	Uuid        string
-	Email       string
-	Username    string
-	Password    string
-	Salt        string
-	IsAdmin     bool
-	EmailActive bool
+	Uuid        string `json:"uuid"`
+	Email       string `json:"email"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	Salt        string `json:"salt"`
+	IsAdmin     bool   `json:"is_admin"`
+	EmailActive bool   `json:"email_active"`
 }
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
@@ -770,14 +770,14 @@ WHERE uuid = $1
 `
 
 type GetUserByUUIDRow struct {
-	Uuid        string
-	Email       string
-	Username    string
-	Password    string
-	Salt        string
-	IsAdmin     bool
-	EmailActive bool
-	PictureUrl  string
+	Uuid        string `json:"uuid"`
+	Email       string `json:"email"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	Salt        string `json:"salt"`
+	IsAdmin     bool   `json:"is_admin"`
+	EmailActive bool   `json:"email_active"`
+	PictureUrl  string `json:"picture_url"`
 }
 
 func (q *Queries) GetUserByUUID(ctx context.Context, uuid string) (GetUserByUUIDRow, error) {
@@ -812,9 +812,9 @@ WHERE (
 `
 
 type GetUserContactsRow struct {
-	Username   string
-	Uuid       string
-	PictureUrl string
+	Username   string `json:"username"`
+	Uuid       string `json:"uuid"`
+	PictureUrl string `json:"picture_url"`
 }
 
 func (q *Queries) GetUserContacts(ctx context.Context, reciever string) ([]GetUserContactsRow, error) {
@@ -846,8 +846,8 @@ RETURNING true
 `
 
 type IncrementUnreadMessagesParams struct {
-	ChatID string
-	Uuid   string
+	ChatID string `json:"chat_id"`
+	Uuid   string `json:"uuid"`
 }
 
 func (q *Queries) IncrementUnreadMessages(ctx context.Context, arg IncrementUnreadMessagesParams) (bool, error) {
@@ -864,8 +864,8 @@ RETURNING chat_id
 `
 
 type InsertParticipantChatParams struct {
-	Uuid   string
-	ChatID string
+	Uuid   string `json:"uuid"`
+	ChatID string `json:"chat_id"`
 }
 
 func (q *Queries) InsertParticipantChat(ctx context.Context, arg InsertParticipantChatParams) (string, error) {
@@ -882,8 +882,8 @@ RETURNING chat_id
 `
 
 type InsertUserChatParams struct {
-	Uuid   string
-	ChatID string
+	Uuid   string `json:"uuid"`
+	ChatID string `json:"chat_id"`
 }
 
 func (q *Queries) InsertUserChat(ctx context.Context, arg InsertUserChatParams) (string, error) {
@@ -913,8 +913,8 @@ WHERE chat_id = $1
 `
 
 type LeaveGroupChatParams struct {
-	ChatID string
-	Uuid   string
+	ChatID string `json:"chat_id"`
+	Uuid   string `json:"uuid"`
 }
 
 func (q *Queries) LeaveGroupChat(ctx context.Context, arg LeaveGroupChatParams) error {
@@ -930,8 +930,8 @@ WHERE chat_id = $1
 `
 
 type ResetUnreadMessagesParams struct {
-	ChatID string
-	Uuid   string
+	ChatID string `json:"chat_id"`
+	Uuid   string `json:"uuid"`
 }
 
 func (q *Queries) ResetUnreadMessages(ctx context.Context, arg ResetUnreadMessagesParams) error {
@@ -957,8 +957,8 @@ RETURNING u.email
 `
 
 type UpdateEmailFromChangeEmailParams struct {
-	EmailToken        pgtype.Text
-	ConfirmationToken string
+	EmailToken        pgtype.Text `json:"email_token"`
+	ConfirmationToken string      `json:"confirmation_token"`
 }
 
 func (q *Queries) UpdateEmailFromChangeEmail(ctx context.Context, arg UpdateEmailFromChangeEmailParams) (string, error) {
@@ -976,8 +976,8 @@ RETURNING email_token
 `
 
 type UpdateEmailTokenParams struct {
-	EmailToken pgtype.Text
-	Email      string
+	EmailToken pgtype.Text `json:"email_token"`
+	Email      string      `json:"email"`
 }
 
 func (q *Queries) UpdateEmailToken(ctx context.Context, arg UpdateEmailTokenParams) (pgtype.Text, error) {
@@ -995,8 +995,8 @@ RETURNING chat_id
 `
 
 type UpdateLastMessageIDParams struct {
-	LastMessageID pgtype.Text
-	ChatID        string
+	LastMessageID pgtype.Text `json:"last_message_id"`
+	ChatID        string      `json:"chat_id"`
 }
 
 func (q *Queries) UpdateLastMessageID(ctx context.Context, arg UpdateLastMessageIDParams) (string, error) {
@@ -1013,8 +1013,8 @@ WHERE uuid = $2
 `
 
 type UpdatePictureURLParams struct {
-	PictureUrl string
-	Uuid       string
+	PictureUrl string `json:"picture_url"`
+	Uuid       string `json:"uuid"`
 }
 
 func (q *Queries) UpdatePictureURL(ctx context.Context, arg UpdatePictureURLParams) error {
@@ -1030,8 +1030,8 @@ RETURNING username
 `
 
 type UpdateUsernameParams struct {
-	Username string
-	Uuid     string
+	Username string `json:"username"`
+	Uuid     string `json:"uuid"`
 }
 
 func (q *Queries) UpdateUsername(ctx context.Context, arg UpdateUsernameParams) (string, error) {
@@ -1052,14 +1052,14 @@ RETURNING confirmation_token,
 `
 
 type UpsertChangeEmailParams struct {
-	Uuid              string
-	NewEmail          string
-	ConfirmationToken string
+	Uuid              string `json:"uuid"`
+	NewEmail          string `json:"new_email"`
+	ConfirmationToken string `json:"confirmation_token"`
 }
 
 type UpsertChangeEmailRow struct {
-	ConfirmationToken string
-	NewEmail          string
+	ConfirmationToken string `json:"confirmation_token"`
+	NewEmail          string `json:"new_email"`
 }
 
 func (q *Queries) UpsertChangeEmail(ctx context.Context, arg UpsertChangeEmailParams) (UpsertChangeEmailRow, error) {

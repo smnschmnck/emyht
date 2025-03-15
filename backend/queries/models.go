@@ -31,8 +31,8 @@ func (e *ChatType) Scan(src interface{}) error {
 }
 
 type NullChatType struct {
-	ChatType ChatType
-	Valid    bool // Valid is true if ChatType is not NULL
+	ChatType ChatType `json:"chat_type"`
+	Valid    bool     `json:"valid"` // Valid is true if ChatType is not NULL
 }
 
 // Scan implements the Scanner interface.
@@ -74,8 +74,8 @@ func (e *DeliveryStatus) Scan(src interface{}) error {
 }
 
 type NullDeliveryStatus struct {
-	DeliveryStatus DeliveryStatus
-	Valid          bool // Valid is true if DeliveryStatus is not NULL
+	DeliveryStatus DeliveryStatus `json:"delivery_status"`
+	Valid          bool           `json:"valid"` // Valid is true if DeliveryStatus is not NULL
 }
 
 // Scan implements the Scanner interface.
@@ -118,8 +118,8 @@ func (e *FriendshipStatus) Scan(src interface{}) error {
 }
 
 type NullFriendshipStatus struct {
-	FriendshipStatus FriendshipStatus
-	Valid            bool // Valid is true if FriendshipStatus is not NULL
+	FriendshipStatus FriendshipStatus `json:"friendship_status"`
+	Valid            bool             `json:"valid"` // Valid is true if FriendshipStatus is not NULL
 }
 
 // Scan implements the Scanner interface.
@@ -163,8 +163,8 @@ func (e *MessageType) Scan(src interface{}) error {
 }
 
 type NullMessageType struct {
-	MessageType MessageType
-	Valid       bool // Valid is true if MessageType is not NULL
+	MessageType MessageType `json:"message_type"`
+	Valid       bool        `json:"valid"` // Valid is true if MessageType is not NULL
 }
 
 // Scan implements the Scanner interface.
@@ -186,53 +186,53 @@ func (ns NullMessageType) Value() (driver.Value, error) {
 }
 
 type ChangeEmail struct {
-	Uuid              string
-	NewEmail          string
-	ConfirmationToken string
+	Uuid              string `json:"uuid"`
+	NewEmail          string `json:"new_email"`
+	ConfirmationToken string `json:"confirmation_token"`
 }
 
 type Chat struct {
-	ChatID            string
-	Name              string
-	LastMessageID     pgtype.Text
-	PictureUrl        string
-	ChatType          ChatType
-	CreationTimestamp int64
-	Blocked           pgtype.Bool
+	ChatID            string      `json:"chat_id"`
+	Name              string      `json:"name"`
+	LastMessageID     pgtype.Text `json:"last_message_id"`
+	PictureUrl        string      `json:"picture_url"`
+	ChatType          ChatType    `json:"chat_type"`
+	CreationTimestamp int64       `json:"creation_timestamp"`
+	Blocked           pgtype.Bool `json:"blocked"`
 }
 
 type Chatmessage struct {
-	MessageID      string
-	ChatID         string
-	SenderID       string
-	TextContent    pgtype.Text
-	MessageType    MessageType
-	MediaUrl       pgtype.Text
-	Timestamp      int64
-	DeliveryStatus DeliveryStatus
+	MessageID      string         `json:"message_id"`
+	ChatID         string         `json:"chat_id"`
+	SenderID       string         `json:"sender_id"`
+	TextContent    pgtype.Text    `json:"text_content"`
+	MessageType    MessageType    `json:"message_type"`
+	MediaUrl       pgtype.Text    `json:"media_url"`
+	Timestamp      int64          `json:"timestamp"`
+	DeliveryStatus DeliveryStatus `json:"delivery_status"`
 }
 
 type Friend struct {
-	Sender    string
-	Reciever  string
-	Status    FriendshipStatus
-	CreatedAt pgtype.Timestamp
+	Sender    string           `json:"sender"`
+	Reciever  string           `json:"reciever"`
+	Status    FriendshipStatus `json:"status"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
 }
 
 type User struct {
-	Uuid        string
-	Email       string
-	Username    string
-	Password    string
-	Salt        string
-	IsAdmin     bool
-	EmailActive bool
-	EmailToken  pgtype.Text
-	PictureUrl  string
+	Uuid        string      `json:"uuid"`
+	Email       string      `json:"email"`
+	Username    string      `json:"username"`
+	Password    string      `json:"password"`
+	Salt        string      `json:"salt"`
+	IsAdmin     bool        `json:"is_admin"`
+	EmailActive bool        `json:"email_active"`
+	EmailToken  pgtype.Text `json:"email_token"`
+	PictureUrl  string      `json:"picture_url"`
 }
 
 type UserChat struct {
-	Uuid           string
-	ChatID         string
-	UnreadMessages int64
+	Uuid           string `json:"uuid"`
+	ChatID         string `json:"chat_id"`
+	UnreadMessages int64  `json:"unread_messages"`
 }
