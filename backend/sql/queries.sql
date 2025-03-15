@@ -70,3 +70,85 @@ FROM user_chat u
     LEFT JOIN users ou ON ouc.uuid = ou.uuid -- Other User Details
     LEFT JOIN users su ON m.sender_id = su.uuid -- Sender User Details
 WHERE u.uuid = $1;
+-- name: CheckDuplicateFriendRequest :one
+SELECT EXISTS(
+        SELECT 1
+        FROM friends
+        WHERE reciever = $1
+            AND sender = (
+                SELECT uuid
+                FROM users
+                WHERE email = $2
+            )
+    );
+-- name: CreateFriendRequest :one
+INSERT INTO friends (sender, reciever, status)
+VALUES (
+        $1,
+        (
+            SELECT uuid
+            FROM users
+            WHERE email = $2
+        ),
+        'pending'
+    )
+RETURNING status;
+-- name: GetUserContacts :many
+SELECT u.username,
+    u.uuid,
+    u.picture_url
+FROM friends
+    JOIN users u ON u.uuid = friends.sender
+    OR friends.reciever = u.uuid
+WHERE (
+        reciever = $1
+        OR sender = $1
+    )
+    AND status = 'accepted'
+    AND u.uuid != $1;
+-- name: GetPendingFriendRequests :many
+SELECT sender AS sender_id,
+    u.username AS sender_username,
+    u.picture_url AS sender_profile_picture,
+    u.email AS sender_email
+FROM friends
+    JOIN users u ON friends.sender = u.uuid
+WHERE reciever = $1
+    AND status = 'pending';
+-- name: AcceptFriendRequest :exec
+UPDATE friends
+SET status = 'accepted'
+WHERE sender = $1
+    AND reciever = $2;
+-- name: DeclineFriendRequest :exec
+DELETE FROM friends
+WHERE sender = $1
+    AND reciever = $2;
+-- name: BlockFriendRequest :exec
+UPDATE friends
+SET status = 'blocked'
+WHERE sender = $1
+    AND reciever = $2;
+-- name: BlockUser :exec
+UPDATE friends
+SET status = 'blocked'
+WHERE (
+        sender = $1
+        AND reciever = $2
+    )
+    OR (
+        sender = $2
+        AND reciever = $1
+    );
+-- name: BlockChat :one
+UPDATE chats
+SET blocked = true
+WHERE chat_id = $1
+RETURNING blocked;
+-- name: GetPendingContactRequests :many
+SELECT u.email AS email,
+    TO_CHAR(created_at, 'DD.MM.YYYY') AS date
+FROM friends
+    JOIN users u ON u.uuid = friends.reciever
+WHERE sender = $1
+    AND status = 'pending';

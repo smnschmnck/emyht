@@ -11,6 +11,23 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const acceptFriendRequest = `-- name: AcceptFriendRequest :exec
+UPDATE friends
+SET status = 'accepted'
+WHERE sender = $1
+    AND reciever = $2
+`
+
+type AcceptFriendRequestParams struct {
+	Sender   string
+	Reciever string
+}
+
+func (q *Queries) AcceptFriendRequest(ctx context.Context, arg AcceptFriendRequestParams) error {
+	_, err := q.db.Exec(ctx, acceptFriendRequest, arg.Sender, arg.Reciever)
+	return err
+}
+
 const activateEmail = `-- name: ActivateEmail :one
 UPDATE users
 SET email_active = true,
@@ -29,6 +46,127 @@ func (q *Queries) ActivateEmail(ctx context.Context, arg ActivateEmailParams) (b
 	var email_active bool
 	err := row.Scan(&email_active)
 	return email_active, err
+}
+
+const blockChat = `-- name: BlockChat :one
+UPDATE chats
+SET blocked = true
+WHERE chat_id = $1
+RETURNING blocked
+`
+
+func (q *Queries) BlockChat(ctx context.Context, chatID string) (pgtype.Bool, error) {
+	row := q.db.QueryRow(ctx, blockChat, chatID)
+	var blocked pgtype.Bool
+	err := row.Scan(&blocked)
+	return blocked, err
+}
+
+const blockFriendRequest = `-- name: BlockFriendRequest :exec
+UPDATE friends
+SET status = 'blocked'
+WHERE sender = $1
+    AND reciever = $2
+`
+
+type BlockFriendRequestParams struct {
+	Sender   string
+	Reciever string
+}
+
+func (q *Queries) BlockFriendRequest(ctx context.Context, arg BlockFriendRequestParams) error {
+	_, err := q.db.Exec(ctx, blockFriendRequest, arg.Sender, arg.Reciever)
+	return err
+}
+
+const blockUser = `-- name: BlockUser :exec
+UPDATE friends
+SET status = 'blocked'
+WHERE (
+        sender = $1
+        AND reciever = $2
+    )
+    OR (
+        sender = $2
+        AND reciever = $1
+    )
+`
+
+type BlockUserParams struct {
+	Sender   string
+	Reciever string
+}
+
+func (q *Queries) BlockUser(ctx context.Context, arg BlockUserParams) error {
+	_, err := q.db.Exec(ctx, blockUser, arg.Sender, arg.Reciever)
+	return err
+}
+
+const checkDuplicateFriendRequest = `-- name: CheckDuplicateFriendRequest :one
+SELECT EXISTS(
+        SELECT 1
+        FROM friends
+        WHERE reciever = $1
+            AND sender = (
+                SELECT uuid
+                FROM users
+                WHERE email = $2
+            )
+    )
+`
+
+type CheckDuplicateFriendRequestParams struct {
+	Reciever string
+	Email    string
+}
+
+func (q *Queries) CheckDuplicateFriendRequest(ctx context.Context, arg CheckDuplicateFriendRequestParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkDuplicateFriendRequest, arg.Reciever, arg.Email)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const createFriendRequest = `-- name: CreateFriendRequest :one
+INSERT INTO friends (sender, reciever, status)
+VALUES (
+        $1,
+        (
+            SELECT uuid
+            FROM users
+            WHERE email = $2
+        ),
+        'pending'
+    )
+RETURNING status
+`
+
+type CreateFriendRequestParams struct {
+	Sender string
+	Email  string
+}
+
+func (q *Queries) CreateFriendRequest(ctx context.Context, arg CreateFriendRequestParams) (FriendshipStatus, error) {
+	row := q.db.QueryRow(ctx, createFriendRequest, arg.Sender, arg.Email)
+	var status FriendshipStatus
+	err := row.Scan(&status)
+	return status, err
+}
+
+const declineFriendRequest = `-- name: DeclineFriendRequest :exec
+DELETE FROM friends
+WHERE sender = $1
+    AND reciever = $2
+`
+
+type DeclineFriendRequestParams struct {
+	Sender   string
+	Reciever string
+}
+
+func (q *Queries) DeclineFriendRequest(ctx context.Context, arg DeclineFriendRequestParams) error {
+	_, err := q.db.Exec(ctx, declineFriendRequest, arg.Sender, arg.Reciever)
+	return err
 }
 
 const deleteChangeEmail = `-- name: DeleteChangeEmail :exec
@@ -142,6 +280,124 @@ func (q *Queries) GetEmailActiveByToken(ctx context.Context, emailToken pgtype.T
 	var email_active bool
 	err := row.Scan(&email_active)
 	return email_active, err
+}
+
+const getPendingContactRequests = `-- name: GetPendingContactRequests :many
+SELECT u.email AS email,
+    TO_CHAR(created_at, 'DD.MM.YYYY') AS date
+FROM friends
+    JOIN users u ON u.uuid = friends.reciever
+WHERE sender = $1
+    AND status = 'pending'
+`
+
+type GetPendingContactRequestsRow struct {
+	Email string
+	Date  string
+}
+
+func (q *Queries) GetPendingContactRequests(ctx context.Context, sender string) ([]GetPendingContactRequestsRow, error) {
+	rows, err := q.db.Query(ctx, getPendingContactRequests, sender)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPendingContactRequestsRow
+	for rows.Next() {
+		var i GetPendingContactRequestsRow
+		if err := rows.Scan(&i.Email, &i.Date); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPendingFriendRequests = `-- name: GetPendingFriendRequests :many
+SELECT sender AS sender_id,
+    u.username AS sender_username,
+    u.picture_url AS sender_profile_picture,
+    u.email AS sender_email
+FROM friends
+    JOIN users u ON friends.sender = u.uuid
+WHERE reciever = $1
+    AND status = 'pending'
+`
+
+type GetPendingFriendRequestsRow struct {
+	SenderID             string
+	SenderUsername       string
+	SenderProfilePicture string
+	SenderEmail          string
+}
+
+func (q *Queries) GetPendingFriendRequests(ctx context.Context, reciever string) ([]GetPendingFriendRequestsRow, error) {
+	rows, err := q.db.Query(ctx, getPendingFriendRequests, reciever)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPendingFriendRequestsRow
+	for rows.Next() {
+		var i GetPendingFriendRequestsRow
+		if err := rows.Scan(
+			&i.SenderID,
+			&i.SenderUsername,
+			&i.SenderProfilePicture,
+			&i.SenderEmail,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUserContacts = `-- name: GetUserContacts :many
+SELECT u.username,
+    u.uuid,
+    u.picture_url
+FROM friends
+    JOIN users u ON u.uuid = friends.sender
+    OR friends.reciever = u.uuid
+WHERE (
+        reciever = $1
+        OR sender = $1
+    )
+    AND status = 'accepted'
+    AND u.uuid != $1
+`
+
+type GetUserContactsRow struct {
+	Username   string
+	Uuid       string
+	PictureUrl string
+}
+
+func (q *Queries) GetUserContacts(ctx context.Context, reciever string) ([]GetUserContactsRow, error) {
+	rows, err := q.db.Query(ctx, getUserContacts, reciever)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUserContactsRow
+	for rows.Next() {
+		var i GetUserContactsRow
+		if err := rows.Scan(&i.Username, &i.Uuid, &i.PictureUrl); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateEmailFromChangeEmail = `-- name: UpdateEmailFromChangeEmail :one
