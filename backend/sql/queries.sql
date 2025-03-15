@@ -280,3 +280,55 @@ SELECT uuid
 FROM user_chat
 WHERE chat_id = $1
     AND uuid != $2;
+-- name: GetUserByUUID :one
+SELECT uuid,
+    email,
+    username,
+    password,
+    salt,
+    is_admin,
+    email_active,
+    picture_url
+FROM users
+WHERE uuid = $1;
+-- name: GetUserByEmail :one
+SELECT uuid,
+    email,
+    username,
+    password,
+    salt,
+    is_admin,
+    email_active
+FROM users
+WHERE email = $1;
+-- name: CreateUser :one
+INSERT INTO users (
+        uuid,
+        email,
+        username,
+        password,
+        salt,
+        is_admin,
+        email_active,
+        email_token,
+        picture_url
+    )
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+RETURNING uuid,
+    email,
+    username,
+    password,
+    salt,
+    is_admin,
+    email_active,
+    email_token,
+    picture_url;
+-- name: UpdateEmailToken :one
+UPDATE users
+SET email_token = $1
+WHERE email = $2
+RETURNING email_token;
+-- name: UpdatePictureURL :exec
+UPDATE users
+SET picture_url = $1
+WHERE uuid = $2;
