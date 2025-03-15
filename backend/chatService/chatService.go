@@ -372,6 +372,21 @@ func GetChatParticipantsExceptUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, participantsExceptUser)
 }
 
+type singleChat struct {
+	ChatID            string  `json:"chatID"`
+	ChatType          string  `json:"chatType"`
+	CreationTimestamp int     `json:"creationTimestamp"`
+	Name              string  `json:"chatName"`
+	PictureUrl        string  `json:"pictureUrl"`
+	UnreadMessages    int     `json:"unreadMessages"`
+	MessageType       *string `json:"messageType"`
+	TextContent       *string `json:"textContent"`
+	Timestamp         int     `json:"timestamp"`
+	DeliveryStatus    *string `json:"deliveryStatus"`
+	SenderID          *string `json:"senderID"`
+	SenderUsername    *string `json:"senderUsername"`
+}
+
 func GetChats(c echo.Context) error {
 	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
@@ -383,13 +398,32 @@ func GetChats(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	chats, err := chatHelpers.GetChatsByUUID(reqUUID)
+	dbChats, err := chatHelpers.GetChatsByUUID(reqUUID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
+	chats := make([]singleChat, 0)
+
+	for _, chat := range dbChats {
+		chats = append(chats, singleChat{
+			ChatID:            chat.ChatID,
+			ChatType:          string(chat.ChatType),
+			CreationTimestamp: int(chat.CreationTimestamp),
+			Name:              chat.ChatName,
+			PictureUrl:        chat.ChatPictureUrl,
+			UnreadMessages:    int(chat.UnreadMessages),
+			MessageType:       (*string)(&chat.MessageType.MessageType),
+			TextContent:       &chat.TextContent.String,
+			Timestamp:         int(chat.Timestamp.Int64),
+			DeliveryStatus:    (*string)(&chat.DeliveryStatus.DeliveryStatus),
+			SenderID:          &chat.SenderID.String,
+			SenderUsername:    &chat.SenderUsername.String,
+		})
+	}
+
 	for i, chat := range chats {
-		chats[i].ChatPictureUrl = s3Helpers.FormatPictureUrl(chat.ChatPictureUrl)
+		chats[i].PictureUrl = s3Helpers.FormatPictureUrl(chat.PictureUrl)
 	}
 
 	return c.JSON(http.StatusOK, chats)
@@ -779,6 +813,10 @@ func LeaveGroupChat(c echo.Context) error {
 	conn := db.GetDB()
 
 	isGroupChat, err := conn.IsGroupChat(context.Background(), req.ChatID)
+	if err != nil {
+		log.Println(err)
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
 
 	if !isGroupChat {
 		return c.String(http.StatusBadRequest, "NOT A GROUP CHAT")
@@ -797,12 +835,6 @@ func LeaveGroupChat(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, chats)
-}
-
-type simpleChat struct {
-	ChatID     string `json:"chatID"`
-	ChatName   string `json:"chatName"`
-	PictureUrl string `json:"pictureUrl"`
 }
 
 func getGroupchatsNewUserIsNotPartOf(uuid string, newUserUUID string) ([]queries.GetAvailableGroupChatsRow, error) {
