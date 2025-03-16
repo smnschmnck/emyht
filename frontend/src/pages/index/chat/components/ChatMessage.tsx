@@ -64,7 +64,7 @@ export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
     return <></>;
   }
 
-  if (data.uuid === message.senderID) {
+  if (data.uuid === message.senderId) {
     return (
       <li className="flex w-full flex-col items-end gap-1">
         {message.messageType !== 'plaintext' && (

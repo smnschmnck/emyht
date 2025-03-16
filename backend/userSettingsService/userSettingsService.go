@@ -97,7 +97,7 @@ func ConfirmChangedProfilePic(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
-	oldProfilePicUrl := user.ProfilePictureUrl
+	oldProfilePicUrl := user.PictureUrl
 
 	newUrl := "storage.emyht.com/" + imageKey
 	err = userService.ChangeProfilePicture(reqUUID, newUrl)

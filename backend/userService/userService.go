@@ -2,6 +2,7 @@ package userService
 
 import (
 	"chat/db"
+	"chat/queries"
 	"chat/redisdb"
 	"context"
 	"crypto/sha512"
@@ -17,18 +18,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type User struct {
-	Uuid              string `json:"uuid"`
-	Email             string `json:"email"`
-	Username          string `json:"username"`
-	Password          string `json:"password"`
-	Salt              string `json:"salt"`
-	IsAdmin           bool   `json:"isAdmin"`
-	EmailActive       bool   `json:"emailActive"`
-	EmailToken        string `json:"emailToken"`
-	ProfilePictureUrl string `json:"profilePictureUrl"`
-}
-
 func getPepper() string {
 	pepper := os.Getenv("PEPPER")
 	if pepper == "" {
@@ -37,79 +26,26 @@ func getPepper() string {
 	return pepper
 }
 
-func GetUserByUUID(uuid string) (User, error) {
+func GetUserByUUID(uuid string) (queries.GetUserByUUIDRow, error) {
 	conn := db.GetDB()
 
-	var dbUUID string
-	var dbEmail string
-	var dbUsername string
-	var dbUserPassword string
-	var dbUserSalt string
-	var dbUserIsAdmin bool
-	var dbUserEmailActive bool
-	var dbProfilePictureUrl string
-
-	q := "select uuid, email, username, password, salt, is_admin, email_active, picture_url from users where uuid=$1"
-	rows := conn.QueryRow(context.Background(), q, uuid)
-	err := rows.Scan(
-		&dbUUID,
-		&dbEmail,
-		&dbUsername,
-		&dbUserPassword,
-		&dbUserSalt,
-		&dbUserIsAdmin,
-		&dbUserEmailActive,
-		&dbProfilePictureUrl)
+	user, err := conn.GetUserByUUID(context.Background(), uuid)
 	if err != nil {
-		return User{}, errors.New("USER NOT FOUND")
+		return queries.GetUserByUUIDRow{}, errors.New("USER NOT FOUND")
 	}
 
-	return User{
-		Uuid:              dbUUID,
-		Email:             dbEmail,
-		Username:          dbUsername,
-		Password:          dbUserPassword,
-		Salt:              dbUserSalt,
-		IsAdmin:           dbUserIsAdmin,
-		EmailActive:       dbUserEmailActive,
-		ProfilePictureUrl: dbProfilePictureUrl,
-	}, nil
+	return user, nil
 }
 
-func GetUserByEmail(email string) (User, error) {
+func GetUserByEmail(email string) (queries.GetUserByEmailRow, error) {
 	conn := db.GetDB()
 
-	var dbUUID string
-	var dbEmail string
-	var dbUsername string
-	var dbUserPassword string
-	var dbUserSalt string
-	var dbUserIsAdmin bool
-	var dbUserEmailActive bool
-
-	q := "select uuid, email, username, password, salt, is_admin, email_active from users where email=$1"
-	rows := conn.QueryRow(context.Background(), q, email)
-	err := rows.Scan(
-		&dbUUID,
-		&dbEmail,
-		&dbUsername,
-		&dbUserPassword,
-		&dbUserSalt,
-		&dbUserIsAdmin,
-		&dbUserEmailActive)
+	user, err := conn.GetUserByEmail(context.Background(), email)
 	if err != nil {
-		return User{}, errors.New("USER NOT FOUND")
+		return queries.GetUserByEmailRow{}, errors.New("USER NOT FOUND")
 	}
 
-	return User{
-		Uuid:        dbUUID,
-		Email:       dbEmail,
-		Username:    dbUsername,
-		Password:    dbUserPassword,
-		Salt:        dbUserSalt,
-		IsAdmin:     dbUserIsAdmin,
-		EmailActive: dbUserEmailActive,
-	}, nil
+	return user, nil
 }
 
 type ResponseError struct {
@@ -127,14 +63,14 @@ func GetUUIDBySessionID(sessionID string) (string, error) {
 	return uuid, nil
 }
 
-func GetUserBySessionID(sessionID string) (User, ResponseError) {
+func GetUserBySessionID(sessionID string) (queries.GetUserByUUIDRow, ResponseError) {
 	uuid, err := GetUUIDBySessionID(sessionID)
 	if err != nil {
-		return User{}, ResponseError{Msg: "USER NOT FOUND", StatusCode: 404}
+		return queries.GetUserByUUIDRow{}, ResponseError{Msg: "USER NOT FOUND", StatusCode: 404}
 	}
 	user, err := GetUserByUUID(uuid)
 	if err != nil {
-		return User{}, ResponseError{Msg: "INTERNAL ERROR", StatusCode: 500}
+		return queries.GetUserByUUIDRow{}, ResponseError{Msg: "INTERNAL ERROR", StatusCode: 500}
 	}
 
 	return user, ResponseError{StatusCode: 200}
@@ -155,21 +91,11 @@ func makeSalt() (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
-func AddUser(email string, username string, password string) (User, error) {
+func AddUser(email string, username string, password string) (queries.User, error) {
 	salt, err := makeSalt()
 	if err != nil {
-		return User{}, errors.New("UNEXPECTED ERROR")
+		return queries.User{}, errors.New("UNEXPECTED ERROR")
 	}
-
-	var dbUUID string
-	var dbEmail string
-	var dbUsername string
-	var dbUserPassword string
-	var dbUserSalt string
-	var dbUserIsAdmin bool
-	var dbUserEmailActive bool
-	var dbUserEmailToken string
-	var dbUserPictureUrl string
 
 	pepper := getPepper()
 	emailToken := uuid.New().String()
@@ -178,68 +104,55 @@ func AddUser(email string, username string, password string) (User, error) {
 	randPictureInt := rand.Intn(10)
 	defaultPicture := "default_" + strconv.Itoa(randPictureInt)
 	conn := db.GetDB()
-	q := "INSERT INTO users(uuid, email, username, password, salt, is_admin, email_active, email_token, picture_url) " +
-		"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) " +
-		"RETURNING uuid, email, username, password, salt, is_admin, email_active, email_token, picture_url;"
-	rows := conn.QueryRow(context.Background(), q, userID, email, username, hashedPW, salt, false, false, emailToken, defaultPicture)
-	err = rows.Scan(
-		&dbUUID,
-		&dbEmail,
-		&dbUsername,
-		&dbUserPassword,
-		&dbUserSalt,
-		&dbUserIsAdmin,
-		&dbUserEmailActive,
-		&dbUserEmailToken,
-		&dbUserPictureUrl)
+	user, err := conn.CreateUser(context.Background(), queries.CreateUserParams{
+		Uuid:        userID,
+		Email:       email,
+		Username:    username,
+		Password:    hashedPW,
+		Salt:        salt,
+		IsAdmin:     false,
+		EmailActive: false,
+		EmailToken:  &emailToken,
+		PictureUrl:  defaultPicture,
+	})
 
 	if err != nil {
 		errString := err.Error()
 		if strings.Contains(errString, `duplicate key value violates unique constraint`) {
-			return User{}, errors.New("USER EXISTS ALREADY")
+			return queries.User{}, errors.New("USER EXISTS ALREADY")
 		}
 		fmt.Println(err.Error())
-		return User{}, errors.New("INTERNAL ERROR")
+		return queries.User{}, errors.New("INTERNAL ERROR")
 	}
 
-	return User{
-		Uuid:        dbUUID,
-		Email:       dbEmail,
-		Username:    dbUsername,
-		Password:    dbUserPassword,
-		Salt:        dbUserSalt,
-		IsAdmin:     dbUserIsAdmin,
-		EmailActive: dbUserEmailActive,
-		EmailToken:  dbUserEmailToken,
-	}, nil
+	return user, nil
 }
 
-func RenewEmailToken(email string) (string, error) {
+func RenewEmailToken(email string) (*string, error) {
 	conn := db.GetDB()
 
 	emailToken := uuid.New().String()
-	var dbEmailToken string
-	q := "UPDATE users SET email_token=$1 WHERE email=$2 RETURNING email_token"
-	rows := conn.QueryRow(context.Background(), q, emailToken, email)
-	err := rows.Scan(&dbEmailToken)
+
+	dbEmailToken, err := conn.UpdateEmailToken(context.Background(), queries.UpdateEmailTokenParams{
+		EmailToken: &emailToken,
+		Email:      email,
+	})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	return dbEmailToken, nil
 }
 
-func CheckPW(user User, email string, password string) bool {
+func CheckPW(password string, actualPw string, salt string) bool {
 	pepper := getPepper()
-	hashedPW := hashPW(password, user.Salt, pepper)
-	return hashedPW == user.Password
+	hashedPW := hashPW(password, salt, pepper)
+	return hashedPW == actualPw
 }
 
 func ChangeProfilePicture(uuid string, newPicture string) error {
 	conn := db.GetDB()
-	q := "UPDATE users SET picture_url=$1 WHERE uuid=$2 RETURNING picture_url"
-	rows := conn.QueryRow(context.Background(), q, newPicture, uuid)
-	var newPictureUrl string
-	err := rows.Scan(&newPictureUrl)
+
+	err := conn.UpdatePictureURL(context.Background(), queries.UpdatePictureURLParams{PictureUrl: newPicture, Uuid: uuid})
 	if err != nil {
 		return err
 	}

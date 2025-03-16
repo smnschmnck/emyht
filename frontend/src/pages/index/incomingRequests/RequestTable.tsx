@@ -25,7 +25,7 @@ export const RequestTable: FC<RequestTableProps> = ({ handleRequest }) => {
     <div className="max-h-72 w-full overflow-scroll pr-4">
       <table className="h-fit w-full text-left text-sm">
         <thead>
-          <tr className="sticky top-0 bg-white shadow-line">
+          <tr className="shadow-line sticky top-0 bg-white">
             <th className="pb-3 font-semibold">E-Mail</th>
             <th />
             <th className="pb-3 font-semibold">Username</th>
@@ -54,7 +54,7 @@ export const RequestTable: FC<RequestTableProps> = ({ handleRequest }) => {
                     className="text-blue-500"
                     onClick={() =>
                       handleRequest({
-                        senderID: r.senderID,
+                        senderID: r.senderId,
                         action: 'accept',
                       })
                     }
@@ -68,7 +68,7 @@ export const RequestTable: FC<RequestTableProps> = ({ handleRequest }) => {
                     className="text-red-500"
                     onClick={() =>
                       handleRequest({
-                        senderID: r.senderID,
+                        senderID: r.senderId,
                         action: 'decline',
                       })
                     }
@@ -82,7 +82,7 @@ export const RequestTable: FC<RequestTableProps> = ({ handleRequest }) => {
                     className="text-red-500"
                     onClick={() =>
                       handleRequest({
-                        senderID: r.senderID,
+                        senderID: r.senderId,
                         action: 'block',
                       })
                     }
