@@ -203,21 +203,6 @@ func StartGroupChat(c echo.Context) error {
 	return c.JSON(http.StatusOK, chats)
 }
 
-type SingleChat struct {
-	ChatID            string  `json:"chatID"`
-	ChatType          string  `json:"chatType"`
-	CreationTimestamp int     `json:"creationTimestamp"`
-	Name              string  `json:"chatName"`
-	PictureUrl        string  `json:"pictureUrl"`
-	UnreadMessages    int     `json:"unreadMessages"`
-	MessageType       *string `json:"messageType"`
-	TextContent       *string `json:"textContent"`
-	Timestamp         *int    `json:"timestamp"`
-	DeliveryStatus    *string `json:"deliveryStatus"`
-	SenderID          *string `json:"senderID"`
-	SenderUsername    *string `json:"senderUsername"`
-}
-
 func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) ([]queries.GetChatsForUserRow, error) {
 	emptyChatArray := make([]queries.GetChatsForUserRow, 0)
 	isInContacts, err := contactService.AreUsersInContacts(participantUUIDs, uuid)
@@ -371,21 +356,6 @@ func GetChatParticipantsExceptUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, participantsExceptUser)
 }
 
-type singleChat struct {
-	ChatID            string  `json:"chatID"`
-	ChatType          string  `json:"chatType"`
-	CreationTimestamp int     `json:"creationTimestamp"`
-	Name              string  `json:"chatName"`
-	PictureUrl        string  `json:"pictureUrl"`
-	UnreadMessages    int     `json:"unreadMessages"`
-	MessageType       *string `json:"messageType"`
-	TextContent       *string `json:"textContent"`
-	Timestamp         int     `json:"timestamp"`
-	DeliveryStatus    *string `json:"deliveryStatus"`
-	SenderID          *string `json:"senderID"`
-	SenderUsername    *string `json:"senderUsername"`
-}
-
 func GetChats(c echo.Context) error {
 	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
@@ -504,17 +474,6 @@ func SendMessage(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, messages)
-}
-
-type singleMessage struct {
-	MessageID      string `json:"messageID" validate:"required"`
-	SenderID       string `json:"senderID" validate:"required"`
-	SenderUsername string `json:"senderUsername" validate:"required"`
-	TextContent    string `json:"textContent" validate:"required"`
-	MessageType    string `json:"messageType" validate:"required"`
-	MediaUrl       string `json:"mediaUrl" validate:"required"`
-	Timestamp      int    `json:"timestamp" validate:"required"`
-	DeliveryStatus string `json:"deliveryStatus" validate:"required"`
 }
 
 func getMessagesByChatID(chatID string, uuid string) ([]queries.GetChatMessagesRow, error) {

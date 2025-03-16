@@ -260,7 +260,7 @@ func blockUser(uuidToBeBlocked string, uuid string, chatID string) error {
 		return errors.New("INTERNAL ERROR")
 	}
 
-	conn.BlockChat(context.Background(), chatID)
+	_, err = conn.BlockChat(context.Background(), chatID)
 	if err != nil {
 		fmt.Println(err)
 		return errors.New("INTERNAL ERROR")
@@ -303,13 +303,6 @@ func BlockUser(c echo.Context) error {
 	return c.String(http.StatusOK, "SUCCESS")
 }
 
-type singleContactRequest struct {
-	SenderID             string `json:"senderID"`
-	SenderUsername       string `json:"senderUsername"`
-	SenderProfilePicture string `json:"senderProfilePicture"`
-	SenderEmail          string `json:"senderEmail"`
-}
-
 func GetSentContactRequests(c echo.Context) error {
 	token, err := authService.GetSessionToken(c)
 	if err != nil {
@@ -329,7 +322,7 @@ func GetSentContactRequests(c echo.Context) error {
 	}
 
 	if contactRequests == nil {
-		return c.JSON(http.StatusOK, make([]singleContactRequest, 0))
+		return c.JSON(http.StatusOK, make([]queries.GetPendingContactRequestsRow, 0))
 	}
 
 	return c.JSON(http.StatusOK, contactRequests)

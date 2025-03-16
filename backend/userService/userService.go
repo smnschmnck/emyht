@@ -18,18 +18,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type User struct {
-	Uuid              string `json:"uuid"`
-	Email             string `json:"email"`
-	Username          string `json:"username"`
-	Password          string `json:"password"`
-	Salt              string `json:"salt"`
-	IsAdmin           bool   `json:"isAdmin"`
-	EmailActive       bool   `json:"emailActive"`
-	EmailToken        string `json:"emailToken"`
-	ProfilePictureUrl string `json:"profilePictureUrl"`
-}
-
 func getPepper() string {
 	pepper := os.Getenv("PEPPER")
 	if pepper == "" {
