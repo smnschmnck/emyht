@@ -2,17 +2,23 @@ import { fetchWithDefaults } from '@/utils/fetch';
 import { useQuery } from '@tanstack/react-query';
 
 export type Chat = {
-  chatID: string;
-  creationTimestamp: string;
-  chatName: string;
+  chatId: string;
   chatType: 'group' | 'one_on_one' | 'contactRequest' | 'other';
-  pictureUrl?: string;
+  creationTimestamp: number;
+  chatName: string;
+  chatPictureUrl?: string;
   unreadMessages: number;
-  messageType?: 'plaintext' | 'image' | 'video' | 'audio' | 'data';
-  textContent?: string;
-  timestamp?: string;
-  deliveryStatus?: string;
-  senderID?: string;
+  messageType?: {
+    messageType: 'plaintext' | 'image' | 'video' | 'audio' | 'data';
+    valid: boolean;
+  };
+  textContent?: string | null;
+  timestamp?: number;
+  deliveryStatus?: {
+    deliveryStatus: 'sent' | 'received' | 'read' | 'pending' | 'failed';
+    valid: boolean;
+  };
+  senderId?: string;
   senderUsername?: string;
 };
 

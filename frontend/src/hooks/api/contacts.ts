@@ -2,9 +2,9 @@ import { fetchWithDefaults } from '@/utils/fetch';
 import { useQuery } from '@tanstack/react-query';
 
 type Contact = {
-  name: string;
-  id: string;
-  profilePictureUrl: string;
+  username: string;
+  uuid: string;
+  pictureUrl: string;
 };
 
 export const useContacts = () => {
@@ -43,7 +43,7 @@ export const useSentContactRequests = () => {
 };
 
 type ContactRequest = {
-  senderID: string;
+  senderId: string;
   senderUsername: string;
   senderProfilePicture?: string;
   senderEmail: string;
