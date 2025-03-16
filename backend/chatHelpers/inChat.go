@@ -23,21 +23,21 @@ func GetChatsByUUID(uuid string) ([]queries.GetChatsForUserRow, error) {
 	}
 
 	sort.SliceStable(chats, func(i, j int) bool {
-		var a int64
-		var b int64
+		var a int
+		var b int
 		c1 := chats[i]
 		c2 := chats[j]
 		t1 := c1.Timestamp
 		t2 := c2.Timestamp
-		if t1.Valid {
-			a = t1.Int64
+		if t1 != nil {
+			a = int(*t1)
 		} else {
-			a = c1.CreationTimestamp
+			a = int(c1.CreationTimestamp)
 		}
-		if t2.Valid {
-			b = t2.Int64
+		if t2 != nil {
+			b = int(*t2)
 		} else {
-			b = c2.CreationTimestamp
+			b = int(c2.CreationTimestamp)
 		}
 		return a > b
 	})

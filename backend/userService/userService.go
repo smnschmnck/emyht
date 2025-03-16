@@ -16,7 +16,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type User struct {
@@ -125,7 +124,7 @@ func AddUser(email string, username string, password string) (queries.User, erro
 		Salt:        salt,
 		IsAdmin:     false,
 		EmailActive: false,
-		EmailToken:  pgtype.Text{String: emailToken, Valid: true},
+		EmailToken:  &emailToken,
 		PictureUrl:  defaultPicture,
 	})
 
@@ -141,19 +140,19 @@ func AddUser(email string, username string, password string) (queries.User, erro
 	return user, nil
 }
 
-func RenewEmailToken(email string) (string, error) {
+func RenewEmailToken(email string) (*string, error) {
 	conn := db.GetDB()
 
 	emailToken := uuid.New().String()
 
 	dbEmailToken, err := conn.UpdateEmailToken(context.Background(), queries.UpdateEmailTokenParams{
-		EmailToken: pgtype.Text{String: emailToken, Valid: true},
+		EmailToken: &emailToken,
 		Email:      email,
 	})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return dbEmailToken.String, nil
+	return dbEmailToken, nil
 }
 
 func CheckPW(password string, actualPw string, salt string) bool {

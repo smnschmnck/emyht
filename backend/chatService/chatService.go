@@ -19,7 +19,6 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -398,32 +397,13 @@ func GetChats(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	dbChats, err := chatHelpers.GetChatsByUUID(reqUUID)
+	chats, err := chatHelpers.GetChatsByUUID(reqUUID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	chats := make([]singleChat, 0)
-
-	for _, chat := range dbChats {
-		chats = append(chats, singleChat{
-			ChatID:            chat.ChatID,
-			ChatType:          string(chat.ChatType),
-			CreationTimestamp: int(chat.CreationTimestamp),
-			Name:              chat.ChatName,
-			PictureUrl:        chat.ChatPictureUrl,
-			UnreadMessages:    int(chat.UnreadMessages),
-			MessageType:       (*string)(&chat.MessageType.MessageType),
-			TextContent:       &chat.TextContent.String,
-			Timestamp:         int(chat.Timestamp.Int64),
-			DeliveryStatus:    (*string)(&chat.DeliveryStatus.DeliveryStatus),
-			SenderID:          &chat.SenderID.String,
-			SenderUsername:    &chat.SenderUsername.String,
-		})
-	}
-
 	for i, chat := range chats {
-		chats[i].PictureUrl = s3Helpers.FormatPictureUrl(chat.PictureUrl)
+		chats[i].ChatPictureUrl = s3Helpers.FormatPictureUrl(chat.ChatPictureUrl)
 	}
 
 	return c.JSON(http.StatusOK, chats)
@@ -490,9 +470,9 @@ func SendMessage(c echo.Context) error {
 		MessageID:   uuid.NewString(),
 		ChatID:      req.ChatID,
 		SenderID:    reqUUID,
-		TextContent: pgtype.Text{String: req.TextContent, Valid: true},
+		TextContent: &req.TextContent,
 		MessageType: queries.MessageType(req.MessageType),
-		MediaUrl:    pgtype.Text{String: formattedFileID, Valid: true},
+		MediaUrl:    &formattedFileID,
 		Timestamp:   time.Now().Unix()})
 	if err != nil {
 		fmt.Println(err.Error())
@@ -500,7 +480,7 @@ func SendMessage(c echo.Context) error {
 	}
 
 	chatID, err := conn.UpdateLastMessageID(context.Background(), queries.UpdateLastMessageIDParams{
-		LastMessageID: pgtype.Text{String: messageID, Valid: true},
+		LastMessageID: &messageID,
 		ChatID:        req.ChatID})
 	if err != nil {
 		fmt.Println(err.Error())
@@ -537,42 +517,30 @@ type singleMessage struct {
 	DeliveryStatus string `json:"deliveryStatus" validate:"required"`
 }
 
-func getMessagesByChatID(chatID string, uuid string) ([]singleMessage, error) {
+func getMessagesByChatID(chatID string, uuid string) ([]queries.GetChatMessagesRow, error) {
 	inChat, err := chatHelpers.IsUserInChat(uuid, chatID)
+	emptyMessageArr := make([]queries.GetChatMessagesRow, 0)
 	if err != nil {
-		return make([]singleMessage, 0), err
+		return emptyMessageArr, err
 	}
 	if !inChat {
-		return make([]singleMessage, 0), errors.New("USER NOT IN CHAT")
+		return emptyMessageArr, errors.New("USER NOT IN CHAT")
 	}
 
 	conn := db.GetDB()
 
-	dbMessages, err := conn.GetChatMessages(context.Background(), chatID)
+	messages, err := conn.GetChatMessages(context.Background(), chatID)
 	if err != nil {
-		return make([]singleMessage, 0), errors.New("INTERNAL ERROR")
-	}
-
-	messages := make([]singleMessage, 0)
-	for _, message := range dbMessages {
-		messages = append(messages, singleMessage{
-			MessageID:      message.MessageID,
-			SenderID:       message.SenderID,
-			SenderUsername: message.SenderUsername,
-			TextContent:    message.TextContent.String,
-			MessageType:    string(message.MessageType),
-			MediaUrl:       message.MediaUrl.String,
-			Timestamp:      int(message.Timestamp),
-			DeliveryStatus: string(message.DeliveryStatus),
-		})
+		return emptyMessageArr, errors.New("INTERNAL ERROR")
 	}
 
 	if messages == nil {
-		return make([]singleMessage, 0), nil
+		return emptyMessageArr, nil
 	}
 
 	for i, message := range messages {
-		messages[i].MediaUrl = s3Helpers.FormatPictureUrl(message.MediaUrl)
+		formattedUrl := s3Helpers.FormatPictureUrl(*message.MediaUrl)
+		messages[i].MediaUrl = &formattedUrl
 	}
 
 	return messages, nil

@@ -17,7 +17,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 
 	"github.com/go-playground/validator/v10"
@@ -161,8 +160,9 @@ func Register(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
 	}
 
-	err = emailService.SendVerificationEmail(reqUser.Username, reqUser.Email, user.EmailToken.String)
-
+	if user.EmailToken != nil {
+		err = emailService.SendVerificationEmail(reqUser.Username, reqUser.Email, *user.EmailToken)
+	}
 	if err != nil {
 		fmt.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
@@ -192,7 +192,9 @@ func ResendVerificationEmail(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "ERROR WHILE SENDING EMAIL")
 	}
-	err = emailService.SendVerificationEmail(user.Username, user.Email, emailToken)
+	if emailToken != nil {
+		err = emailService.SendVerificationEmail(user.Username, user.Email, *emailToken)
+	}
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "ERROR WHILE SENDING EMAIL")
 	}
@@ -214,11 +216,11 @@ func VerifyEmail(c echo.Context) error {
 	}
 
 	conn := db.GetDB()
-	_, err = conn.GetEmailActiveByToken(context.Background(), pgtype.Text{String: emailToken.Token})
+	_, err = conn.GetEmailActiveByToken(context.Background(), &emailToken.Token)
 	if err != nil {
 		return c.String(http.StatusNotFound, "COULD NOT FIND E-MAIL ADDRESS MATCHING THE SUPPLIED LINK")
 	}
-	active, err := conn.ActivateEmail(context.Background(), queries.ActivateEmailParams{EmailToken: pgtype.Text{String: ""}, EmailToken_2: pgtype.Text{String: emailToken.Token}})
+	active, err := conn.ActivateEmail(context.Background(), queries.ActivateEmailParams{EmailToken: nil, EmailToken_2: &emailToken.Token})
 	if err != nil || !active {
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE VERIYFING YOUR E-MAIL")
 	}
@@ -345,7 +347,7 @@ func ConfirmChangedEmail(c echo.Context) error {
 	}
 
 	conn := db.GetDB()
-	dbNewEmail, err := conn.UpdateEmailFromChangeEmail(context.Background(), queries.UpdateEmailFromChangeEmailParams{EmailToken: pgtype.Text{String: ""}, ConfirmationToken: confirmToken.Token})
+	dbNewEmail, err := conn.UpdateEmailFromChangeEmail(context.Background(), queries.UpdateEmailFromChangeEmailParams{EmailToken: nil, ConfirmationToken: confirmToken.Token})
 	if err != nil || dbNewEmail == "" {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
