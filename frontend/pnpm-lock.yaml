@@ -80,7 +80,7 @@ importers:
         version: 4.0.15
       '@types/node':
         specifier: ^22.13.8
-        version: 22.13.10
+        version: 22.13.11
       '@types/react':
         specifier: ^19.0.0
         version: 19.0.12
@@ -89,7 +89,7 @@ importers:
         version: 19.0.4(@types/react@19.0.12)
       '@vitejs/plugin-react-swc':
         specifier: ^3.7.0
-        version: 3.8.0(vite@6.2.2(@types/node@22.13.10)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0))
+        version: 3.8.0(vite@6.2.2(@types/node@22.13.11)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0))
       eslint:
         specifier: ^9.20.1
         version: 9.22.0(jiti@2.4.2)
@@ -101,7 +101,7 @@ importers:
         version: 0.4.19(eslint@9.22.0(jiti@2.4.2))
       knip:
         specifier: ^5.45.0
-        version: 5.46.0(@types/node@22.13.10)(typescript@5.8.2)
+        version: 5.46.0(@types/node@22.13.11)(typescript@5.8.2)
       postcss:
         specifier: ^8.4.41
         version: 8.5.3
@@ -122,13 +122,13 @@ importers:
         version: 8.27.0(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2)
       unplugin-fonts:
         specifier: ^1.1.1
-        version: 1.3.1(vite@6.2.2(@types/node@22.13.10)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0))
+        version: 1.3.1(vite@6.2.2(@types/node@22.13.11)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0))
       vite:
         specifier: ^6.0.0
-        version: 6.2.2(@types/node@22.13.10)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)
+        version: 6.2.2(@types/node@22.13.11)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)
       vite-plugin-pwa:
         specifier: ^0.21.0
-        version: 0.21.2(vite@6.2.2(@types/node@22.13.10)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0))(workbox-build@7.3.0)(workbox-window@7.3.0)
+        version: 0.21.2(vite@6.2.2(@types/node@22.13.11)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0))(workbox-build@7.3.0)(workbox-window@7.3.0)
       workbox-window:
         specifier: ^7.3.0
         version: 7.3.0
@@ -1568,8 +1568,8 @@ packages:
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
-  '@types/node@22.13.10':
-    resolution: {integrity: sha512-I6LPUvlRH+O6VRUqYOcMudhaIdUVWfsjnZavnsraHvpBwaEyMN29ry+0UVJhImYL16xsscu0aske3yA+uPOWfw==}
+  '@types/node@22.13.11':
+    resolution: {integrity: sha512-iEUCUJoU0i3VnrCmgoWCXttklWcvoCIx4jzcP22fioIVSdTmjgoEvmAO/QPw6TcS9k5FrNgn4w7q5lGOd1CT5g==}
 
   '@types/react-dom@19.0.4':
     resolution: {integrity: sha512-4fSQ8vWFkg+TGhePfUzVmat3eC14TXYSsiiDSLI0dVLsrm9gZFABjPy/Qu6TKgl1tq1Bu1yDsuQgY3A3DOjCcg==}
@@ -4644,7 +4644,7 @@ snapshots:
 
   '@types/json-schema@7.0.15': {}
 
-  '@types/node@22.13.10':
+  '@types/node@22.13.11':
     dependencies:
       undici-types: 6.20.0
 
@@ -4737,10 +4737,10 @@ snapshots:
       '@typescript-eslint/types': 8.27.0
       eslint-visitor-keys: 4.2.0
 
-  '@vitejs/plugin-react-swc@3.8.0(vite@6.2.2(@types/node@22.13.10)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0))':
+  '@vitejs/plugin-react-swc@3.8.0(vite@6.2.2(@types/node@22.13.11)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0))':
     dependencies:
       '@swc/core': 1.10.16
-      vite: 6.2.2(@types/node@22.13.10)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)
+      vite: 6.2.2(@types/node@22.13.11)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)
     transitivePeerDependencies:
       - '@swc/helpers'
 
@@ -5536,11 +5536,11 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  knip@5.46.0(@types/node@22.13.10)(typescript@5.8.2):
+  knip@5.46.0(@types/node@22.13.11)(typescript@5.8.2):
     dependencies:
       '@nodelib/fs.walk': 3.0.1
       '@snyk/github-codeowners': 1.1.0
-      '@types/node': 22.13.10
+      '@types/node': 22.13.11
       easy-table: 1.2.0
       enhanced-resolve: 5.18.1
       fast-glob: 3.3.3
@@ -6184,11 +6184,11 @@ snapshots:
 
   universalify@2.0.1: {}
 
-  unplugin-fonts@1.3.1(vite@6.2.2(@types/node@22.13.10)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)):
+  unplugin-fonts@1.3.1(vite@6.2.2(@types/node@22.13.11)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)):
     dependencies:
       fast-glob: 3.3.3
       unplugin: 2.0.0-beta.1
-      vite: 6.2.2(@types/node@22.13.10)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)
+      vite: 6.2.2(@types/node@22.13.11)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)
 
   unplugin@2.0.0-beta.1:
     dependencies:
@@ -6226,24 +6226,24 @@ snapshots:
     dependencies:
       react: 19.0.0
 
-  vite-plugin-pwa@0.21.2(vite@6.2.2(@types/node@22.13.10)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0))(workbox-build@7.3.0)(workbox-window@7.3.0):
+  vite-plugin-pwa@0.21.2(vite@6.2.2(@types/node@22.13.11)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0))(workbox-build@7.3.0)(workbox-window@7.3.0):
     dependencies:
       debug: 4.4.0
       pretty-bytes: 6.1.1
       tinyglobby: 0.2.12
-      vite: 6.2.2(@types/node@22.13.10)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)
+      vite: 6.2.2(@types/node@22.13.11)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)
       workbox-build: 7.3.0
       workbox-window: 7.3.0
     transitivePeerDependencies:
       - supports-color
 
-  vite@6.2.2(@types/node@22.13.10)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0):
+  vite@6.2.2(@types/node@22.13.11)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0):
     dependencies:
       esbuild: 0.25.1
       postcss: 8.5.3
       rollup: 4.35.0
     optionalDependencies:
-      '@types/node': 22.13.10
+      '@types/node': 22.13.11
       fsevents: 2.3.3
       jiti: 2.4.2
       lightningcss: 1.29.2
