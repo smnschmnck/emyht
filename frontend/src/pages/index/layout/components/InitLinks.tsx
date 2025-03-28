@@ -22,7 +22,7 @@ export const InitLinks: FC = () => {
       </div>
       <hr className="h-6 w-0.5 rounded-full bg-zinc-300" />
       <IconLink to="/initiate" aria-label="Start new chat" className="p-1.5">
-        <PlusIcon strokeWidth={2} />
+        <PlusIcon strokeWidth={2.5} />
       </IconLink>
     </div>
   );

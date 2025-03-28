@@ -440,24 +440,33 @@ func (q *Queries) GetAvailableGroupChats(ctx context.Context, arg GetAvailableGr
 }
 
 const getChatMembers = `-- name: GetChatMembers :many
-SELECT uuid
+SELECT users.uuid,
+    picture_url,
+    username
 FROM user_chat
+    JOIN users ON users.uuid = user_chat.uuid
 WHERE chat_id = $1
 `
 
-func (q *Queries) GetChatMembers(ctx context.Context, chatID string) ([]string, error) {
+type GetChatMembersRow struct {
+	Uuid       string `json:"uuid"`
+	PictureUrl string `json:"pictureUrl"`
+	Username   string `json:"username"`
+}
+
+func (q *Queries) GetChatMembers(ctx context.Context, chatID string) ([]GetChatMembersRow, error) {
 	rows, err := q.db.Query(ctx, getChatMembers, chatID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []string
+	var items []GetChatMembersRow
 	for rows.Next() {
-		var uuid string
-		if err := rows.Scan(&uuid); err != nil {
+		var i GetChatMembersRow
+		if err := rows.Scan(&i.Uuid, &i.PictureUrl, &i.Username); err != nil {
 			return nil, err
 		}
-		items = append(items, uuid)
+		items = append(items, i)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

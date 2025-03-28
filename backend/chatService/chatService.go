@@ -315,28 +315,16 @@ func GetChatParticipantsExceptUser(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	type request struct {
-		ChatID string `json:"chatID"`
-	}
+	chatID := c.Param("chatID")
 
-	req := new(request)
-	if err := c.Bind(req); err != nil {
-		return c.String(http.StatusBadRequest, "BAD REQUEST")
-	}
-
-	err = validate.Struct(req)
-	if err != nil {
-		return c.String(http.StatusBadRequest, "BAD REQUEST")
-	}
-
-	chatParticipants, err := getChatMembers(req.ChatID)
+	chatParticipants, err := getChatMembers(chatID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	inChat := false
 	for _, p := range chatParticipants {
-		if p != reqUUID {
+		if p.Uuid == reqUUID {
 			inChat = true
 			break
 		}
@@ -346,12 +334,14 @@ func GetChatParticipantsExceptUser(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	var participantsExceptUser []string
+	var participantsExceptUser []queries.GetChatMembersRow
 	for _, p := range chatParticipants {
-		if p != reqUUID {
+		if p.Uuid != reqUUID {
 			participantsExceptUser = append(participantsExceptUser, p)
 		}
 	}
+
+	fmt.Println(participantsExceptUser)
 
 	return c.JSON(http.StatusOK, participantsExceptUser)
 }
@@ -546,7 +536,7 @@ func markChatAsRead(uuid string, chatID string) error {
 	return nil
 }
 
-func getChatMembers(chatId string) ([]string, error) {
+func getChatMembers(chatId string) ([]queries.GetChatMembersRow, error) {
 	conn := db.GetDB()
 
 	uuids, err := conn.GetChatMembers(context.Background(), chatId)
@@ -957,7 +947,7 @@ func GetContactsNotInChat(c echo.Context) error {
 	}
 
 	for _, chatMember := range chatMembers {
-		delete(contactsAsMap, chatMember)
+		delete(contactsAsMap, chatMember.Uuid)
 	}
 
 	usersNotInChat := make([]queries.GetUserContactsRow, len(contactsAsMap))

@@ -244,8 +244,11 @@ SET unread_messages = 0
 WHERE chat_id = $1
     AND uuid = $2;
 -- name: GetChatMembers :many
-SELECT uuid
+SELECT users.uuid,
+    picture_url,
+    username
 FROM user_chat
+    JOIN users ON users.uuid = user_chat.uuid
 WHERE chat_id = $1;
 -- name: IsGroupChat :one
 SELECT chat_type = 'group'
