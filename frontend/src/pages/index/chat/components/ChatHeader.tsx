@@ -32,7 +32,7 @@ export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
     },
   });
 
-  const curChat = allChats?.find((c) => c.chatID === chatId);
+  const curChat = allChats?.find((c) => c.chatId === chatId);
 
   return (
     <div className="flex h-24 w-full items-center justify-between border-b border-b-zinc-100 bg-white px-8">
@@ -47,7 +47,7 @@ export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
           aria-label="Chat settings"
           className="flex gap-3 rounded-xl px-4 py-3 transition hover:bg-zinc-100"
         >
-          <Avatar imgUrl={curChat?.pictureUrl} alt={curChat?.chatName} />
+          <Avatar imgUrl={curChat?.chatPictureUrl} alt={curChat?.chatName} />
           <div className="flex flex-col justify-center gap-0.5 text-sm">
             <div className="flex h-5 min-w-24 items-center">
               <h1 className="font-semibold">{curChat?.chatName}</h1>

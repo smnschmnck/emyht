@@ -6,6 +6,7 @@ import (
 	"chat/contactService"
 	"chat/db"
 	"chat/pusher"
+	"chat/queries"
 	"chat/s3Helpers"
 	"chat/userService"
 	"context"
@@ -17,7 +18,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5"
 
 	"github.com/google/uuid"
@@ -70,22 +70,7 @@ func StartOneOnOneChat(c echo.Context) error {
 
 	conn := db.GetDB()
 
-	//Complex SQL Query ahead
-	/*
-		SELECT ALL one_on_one chats which belong to one of two UUIDs
-		If the same chat_id exists for both UUIDs (twice) it must mean
-		that a one_on_one chat must already exist between both uuids
-	*/
-	checkChatExistsQuery := "SELECT count(user_chat.chat_id) >= 2 AS chatcount " +
-		"FROM user_chat " +
-		"JOIN chats c on user_chat.chat_id = c.chat_id " +
-		"WHERE chat_type='one_on_one' " +
-		"AND (uuid=$1 OR uuid=$2) " +
-		"GROUP BY c.chat_id " +
-		"ORDER BY chatcount DESC " +
-		"LIMIT 1"
-	var chatExists bool
-	err = conn.QueryRow(context.Background(), checkChatExistsQuery, reqUUID, req.ParticipantUUID).Scan(&chatExists)
+	chatExists, err := conn.CheckChatExists(context.Background(), queries.CheckChatExistsParams{Uuid: reqUUID, Uuid_2: req.ParticipantUUID})
 	if err != nil {
 		if err.Error() == "no rows in result set" {
 			chatExists = false
@@ -98,28 +83,19 @@ func StartOneOnOneChat(c echo.Context) error {
 	}
 
 	chatID := uuid.New().String()
-	var dbChatID string
-	createChatQuery := "INSERT INTO chats(chat_id, name, picture_url, chat_type, creation_timestamp) " +
-		"VALUES ($1, '', '','one_on_one', $2) " +
-		"RETURNING chat_id"
-	err = conn.QueryRow(context.Background(), createChatQuery, chatID, time.Now().Unix()).Scan(&dbChatID)
+
+	_, err = conn.CreateOneOnOneChat(context.Background(), queries.CreateOneOnOneChatParams{ChatID: chatID, CreationTimestamp: time.Now().Unix()})
 	if err != nil {
 		fmt.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	insertSelfIntoChatQuery := "INSERT INTO user_chat(uuid, chat_id, unread_messages) " +
-		"VALUES($1, $2, 0) " +
-		"RETURNING chat_id"
-	err = conn.QueryRow(context.Background(), insertSelfIntoChatQuery, reqUUID, chatID).Scan(&dbChatID)
+	_, err = conn.InsertUserChat(context.Background(), queries.InsertUserChatParams{Uuid: reqUUID, ChatID: chatID})
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	insertParticipantIntoChatQuery := "INSERT INTO user_chat(uuid, chat_id, unread_messages) " +
-		"VALUES($1, $2, 0) " +
-		"RETURNING chat_id"
-	err = conn.QueryRow(context.Background(), insertParticipantIntoChatQuery, req.ParticipantUUID, chatID).Scan(&dbChatID)
+	_, err = conn.InsertParticipantChat(context.Background(), queries.InsertParticipantChatParams{Uuid: req.ParticipantUUID, ChatID: chatID})
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
@@ -129,12 +105,7 @@ func StartOneOnOneChat(c echo.Context) error {
 		fmt.Println(err)
 	}
 
-	chats, err := chatHelpers.GetChatsByUUID(reqUUID)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
-	}
-
-	return c.JSON(http.StatusOK, chats)
+	return c.String(http.StatusOK, "SUCCESS")
 }
 
 func StartGroupChat(c echo.Context) error {
@@ -196,11 +167,7 @@ func StartGroupChat(c echo.Context) error {
 
 	//CREATE CHAT
 	chatID := uuid.New().String()
-	var dbChatID string
-	createChatQuery := "INSERT INTO chats(chat_id, name, picture_url, chat_type, creation_timestamp) " +
-		"VALUES ($1, $2, $3,'group', $4) " +
-		"RETURNING chat_id"
-	err = conn.QueryRow(context.Background(), createChatQuery, chatID, req.ChatName, chatPicture, time.Now().Unix()).Scan(&dbChatID)
+	_, err = conn.CreateGroupChat(context.Background(), queries.CreateGroupChatParams{ChatID: chatID, Name: req.ChatName, PictureUrl: chatPicture, CreationTimestamp: time.Now().Unix()})
 	if err != nil {
 		fmt.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -213,7 +180,9 @@ func StartGroupChat(c echo.Context) error {
 		rows = append(rows, []any{p, chatID, 0})
 	}
 
-	copyCount, err := conn.CopyFrom(
+	rawConn := db.GetRawConn()
+
+	copyCount, err := rawConn.CopyFrom(
 		context.Background(),
 		pgx.Identifier{"user_chat"},
 		[]string{"uuid", "chat_id", "unread_messages"},
@@ -234,46 +203,41 @@ func StartGroupChat(c echo.Context) error {
 	return c.JSON(http.StatusOK, chats)
 }
 
-func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) ([]chatHelpers.SingleChat, error) {
+func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) ([]queries.GetChatsForUserRow, error) {
+	emptyChatArray := make([]queries.GetChatsForUserRow, 0)
 	isInContacts, err := contactService.AreUsersInContacts(participantUUIDs, uuid)
 	if err != nil {
-		return make([]chatHelpers.SingleChat, 0), errors.New("INTERNAL ERROR")
+		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
 	if !isInContacts {
-		return make([]chatHelpers.SingleChat, 0), errors.New("NOT ALL USERS IN CONTACTS")
+		return make([]queries.GetChatsForUserRow, 0), errors.New("NOT ALL USERS IN CONTACTS")
 	}
 
 	conn := db.GetDB()
 
-	//CHECK IF CHAT EXISTS
-	var dbChatID string
-	checkChatQuery := "SELECT chat_id FROM chats WHERE chat_id = $1"
-	err = conn.QueryRow(context.Background(), checkChatQuery, chatId).Scan(&dbChatID)
+	dbChatID, err := conn.ValidateChatID(context.Background(), chatId)
 	if err != nil {
-		return make([]chatHelpers.SingleChat, 0), errors.New("CHAT NOT FOUND")
+		return emptyChatArray, errors.New("CHAT NOT FOUND")
 	}
 
-	//CHECK IF CHAT IS GROUP CHAT
-	var chatType string
-	checkChatTypeQuery := "SELECT chat_type FROM chats WHERE chat_id = $1"
-	err = conn.QueryRow(context.Background(), checkChatTypeQuery, dbChatID).Scan(&chatType)
+	chatType, err := conn.GetChatType(context.Background(), dbChatID)
 	if err != nil {
-		return make([]chatHelpers.SingleChat, 0), errors.New("INTERNAL ERROR")
+		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
-	if chatType != "group" {
-		return make([]chatHelpers.SingleChat, 0), errors.New("CHAT IS NOT GROUP CHAT")
+	if chatType != queries.ChatTypeGroup {
+		return emptyChatArray, errors.New("CHAT IS NOT GROUP CHAT")
 	}
 
 	//CHECK IF USER IS IN CHAT
 	userInChat, err := chatHelpers.IsUserInChat(uuid, dbChatID)
 	if err != nil {
-		return make([]chatHelpers.SingleChat, 0), errors.New("INTERNAL ERROR")
+		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
 	if !userInChat {
-		return make([]chatHelpers.SingleChat, 0), errors.New("NO AUTH")
+		return emptyChatArray, errors.New("NO AUTH")
 	}
 
 	//INSERT ALL PARTICIPANTS INTO CHAT
@@ -282,7 +246,9 @@ func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) 
 		rows = append(rows, []any{p, dbChatID, 0})
 	}
 
-	copyCount, err := conn.CopyFrom(
+	rawConn := db.GetRawConn()
+
+	copyCount, err := rawConn.CopyFrom(
 		context.Background(),
 		pgx.Identifier{"user_chat"},
 		[]string{"uuid", "chat_id", "unread_messages"},
@@ -290,12 +256,12 @@ func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) 
 	)
 
 	if err != nil || int(copyCount) != len(participantUUIDs) {
-		return make([]chatHelpers.SingleChat, 0), errors.New("INTERNAL ERROR")
+		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
 	chats, err := chatHelpers.GetChatsByUUID(uuid)
 	if err != nil {
-		return make([]chatHelpers.SingleChat, 0), errors.New("INTERNAL ERROR")
+		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
 	pusherEvents := pusher.MakePusherEventArray(pusher.USER_FEED_PREFIX, participantUUIDs, "NEW_CHAT", nil)
@@ -461,7 +427,7 @@ func GetChats(c echo.Context) error {
 	}
 
 	for i, chat := range chats {
-		chats[i].PictureUrl = s3Helpers.FormatPictureUrl(chat.PictureUrl)
+		chats[i].ChatPictureUrl = s3Helpers.FormatPictureUrl(chat.ChatPictureUrl)
 	}
 
 	return c.JSON(http.StatusOK, chats)
@@ -524,38 +490,28 @@ func SendMessage(c echo.Context) error {
 
 	conn := db.GetDB()
 
-	messageQuery := "INSERT INTO chatmessages(message_id, chat_id, sender_id, text_content, message_type, media_url, timestamp, delivery_status) " +
-		"VALUES ($1, $2, $3, $4, $5, $6, $7, 'sent') " +
-		"RETURNING message_id"
-
-	rows := conn.QueryRow(context.Background(), messageQuery, uuid.New(), req.ChatID, reqUUID, req.TextContent, req.MessageType, formattedFileID, time.Now().Unix())
-	var messageID string
-	err = rows.Scan(&messageID)
+	messageID, err := conn.CreateChatMessage(context.Background(), queries.CreateChatMessageParams{
+		MessageID:   uuid.NewString(),
+		ChatID:      req.ChatID,
+		SenderID:    reqUUID,
+		TextContent: &req.TextContent,
+		MessageType: queries.MessageType(req.MessageType),
+		MediaUrl:    &formattedFileID,
+		Timestamp:   time.Now().Unix()})
 	if err != nil {
 		fmt.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	var chatID string
-	//add into chats as last_message_id
-	lastChatMessageQuery := "UPDATE chats " +
-		"SET last_message_id=$1 " +
-		"WHERE chat_id=$2 " +
-		"RETURNING chat_id"
-	rows = conn.QueryRow(context.Background(), lastChatMessageQuery, messageID, req.ChatID)
-	err = rows.Scan(&chatID)
+	chatID, err := conn.UpdateLastMessageID(context.Background(), queries.UpdateLastMessageIDParams{
+		LastMessageID: &messageID,
+		ChatID:        req.ChatID})
 	if err != nil {
 		fmt.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	querySuccess := false
-	incrementUnreadMessagesQuery := "UPDATE user_chat " +
-		"SET unread_messages=(unread_messages + 1) " +
-		"WHERE chat_id=$1 AND uuid!=$2 " +
-		"RETURNING true"
-	rows = conn.QueryRow(context.Background(), incrementUnreadMessagesQuery, chatID, reqUUID)
-	err = rows.Scan(&querySuccess)
+	querySuccess, err := conn.IncrementUnreadMessages(context.Background(), queries.IncrementUnreadMessagesParams{ChatID: chatID, Uuid: reqUUID})
 	if err != nil || !querySuccess {
 		fmt.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -574,45 +530,30 @@ func SendMessage(c echo.Context) error {
 	return c.JSON(http.StatusOK, messages)
 }
 
-type singleMessage struct {
-	MessageID      string `json:"messageID" validate:"required"`
-	SenderID       string `json:"senderID" validate:"required"`
-	SenderUsername string `json:"senderUsername" validate:"required"`
-	TextContent    string `json:"textContent" validate:"required"`
-	MessageType    string `json:"messageType" validate:"required"`
-	MediaUrl       string `json:"mediaUrl" validate:"required"`
-	Timestamp      int    `json:"timestamp" validate:"required"`
-	DeliveryStatus string `json:"deliveryStatus" validate:"required"`
-}
-
-func getMessagesByChatID(chatID string, uuid string) ([]singleMessage, error) {
+func getMessagesByChatID(chatID string, uuid string) ([]queries.GetChatMessagesRow, error) {
 	inChat, err := chatHelpers.IsUserInChat(uuid, chatID)
+	emptyMessageArr := make([]queries.GetChatMessagesRow, 0)
 	if err != nil {
-		return make([]singleMessage, 0), err
+		return emptyMessageArr, err
 	}
 	if !inChat {
-		return make([]singleMessage, 0), errors.New("USER NOT IN CHAT")
+		return emptyMessageArr, errors.New("USER NOT IN CHAT")
 	}
 
 	conn := db.GetDB()
 
-	query := "SELECT message_id, sender_id, username AS sender_username, text_content, message_type, media_url, timestamp, delivery_status " +
-		"FROM chatmessages " +
-		"JOIN users u on u.uuid = chatmessages.sender_id " +
-		"WHERE chat_id=$1 " +
-		"ORDER BY timestamp ASC"
-	var messages []singleMessage
-	err = pgxscan.Select(context.Background(), conn, &messages, query, chatID)
+	messages, err := conn.GetChatMessages(context.Background(), chatID)
 	if err != nil {
-		return make([]singleMessage, 0), errors.New("INTERNAL ERROR")
+		return emptyMessageArr, errors.New("INTERNAL ERROR")
 	}
 
 	if messages == nil {
-		return make([]singleMessage, 0), nil
+		return emptyMessageArr, nil
 	}
 
 	for i, message := range messages {
-		messages[i].MediaUrl = s3Helpers.FormatPictureUrl(message.MediaUrl)
+		formattedUrl := s3Helpers.FormatPictureUrl(*message.MediaUrl)
+		messages[i].MediaUrl = &formattedUrl
 	}
 
 	return messages, nil
@@ -651,14 +592,8 @@ func GetMessages(c echo.Context) error {
 func markChatAsRead(uuid string, chatID string) error {
 	conn := db.GetDB()
 
-	querySuccess := false
-	query := "UPDATE user_chat " +
-		"SET unread_messages=0 " +
-		"WHERE chat_id=$1 AND uuid=$2 " +
-		"RETURNING true"
-	rows := conn.QueryRow(context.Background(), query, chatID, uuid)
-	err := rows.Scan(&querySuccess)
-	if err != nil || !querySuccess {
+	err := conn.ResetUnreadMessages(context.Background(), queries.ResetUnreadMessagesParams{ChatID: chatID, Uuid: uuid})
+	if err != nil {
 		return errors.New("INTERNAL ERROR")
 	}
 
@@ -668,12 +603,7 @@ func markChatAsRead(uuid string, chatID string) error {
 func getChatMembers(chatId string) ([]contactService.Contact, error) {
 	conn := db.GetDB()
 
-	query := "SELECT uc.uuid, u.username, u.picture_url " +
-		"FROM user_chat AS uc " +
-		"JOIN users AS u ON u.uuid = uc.uuid " +
-		"WHERE chat_id = $1"
-	var contacts []contactService.Contact
-	err := pgxscan.Select(context.Background(), conn, &contacts, query, chatId)
+	uuids, err := conn.GetChatMembers(context.Background(), chatId)
 	if err != nil {
 		return nil, err
 	}
@@ -712,25 +642,14 @@ func GetChatInfo(c echo.Context) error {
 
 	conn := db.GetDB()
 
-	var isGroupChat bool
-	isGroupChatQuery := "SELECT chat_type = 'group' " +
-		"FROM chats " +
-		"WHERE chat_id=$1"
-	rows := conn.QueryRow(context.Background(), isGroupChatQuery, chatID)
-	err = rows.Scan(&isGroupChat)
+	isGroupChat, err := conn.IsGroupChat(context.Background(), chatID)
 	if err != nil {
 		fmt.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	if isGroupChat {
-		var groupChatUsers int
-		groupChatUsersQuery := "SELECT count(uuid) " +
-			"FROM user_chat " +
-			"WHERE chat_id = $1 " +
-			"GROUP BY chat_id"
-		rows := conn.QueryRow(context.Background(), groupChatUsersQuery, chatID)
-		err := rows.Scan(&groupChatUsers)
+		groupChatUsers, err := conn.GetGroupChatUserCount(context.Background(), chatID)
 		if err != nil {
 			fmt.Println(err.Error())
 			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -874,22 +793,17 @@ func LeaveGroupChat(c echo.Context) error {
 
 	conn := db.GetDB()
 
-	chatType := "false"
-	query := "SELECT chat_type FROM chats WHERE chat_id=$1"
-	rows := conn.QueryRow(context.Background(), query, req.ChatID)
-	err = rows.Scan(&chatType)
+	isGroupChat, err := conn.IsGroupChat(context.Background(), req.ChatID)
 	if err != nil {
 		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	if chatType != "group" {
+	if !isGroupChat {
 		return c.String(http.StatusBadRequest, "NOT A GROUP CHAT")
 	}
 
-	leaveQuery := "DELETE FROM user_chat WHERE chat_id=$1 AND uuid=$2"
-	r, err := conn.Query(context.Background(), leaveQuery, req.ChatID, reqUUID)
-	r.Close()
+	err = conn.LeaveGroupChat(context.Background(), queries.LeaveGroupChatParams{ChatID: req.ChatID, Uuid: reqUUID})
 	if err != nil {
 		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -904,24 +818,10 @@ func LeaveGroupChat(c echo.Context) error {
 	return c.JSON(http.StatusOK, chats)
 }
 
-type simpleChat struct {
-	ChatID     string `json:"chatID"`
-	ChatName   string `json:"chatName"`
-	PictureUrl string `json:"pictureUrl"`
-}
-
-func getGroupchatsNewUserIsNotPartOf(uuid string, newUserUUID string) ([]simpleChat, error) {
+func getGroupchatsNewUserIsNotPartOf(uuid string, newUserUUID string) ([]queries.GetAvailableGroupChatsRow, error) {
 	conn := db.GetDB()
 
-	query := `SELECT c.chat_id, c.name AS chat_name, c.picture_url FROM user_chat uc
-	JOIN chats c ON c.chat_id = uc.chat_id
-	WHERE uuid = $1 AND c.chat_type != 'one_on_one'
-	EXCEPT
-	SELECT c.chat_id, c.name AS chat_name, c.picture_url FROM user_chat uc
-	JOIN chats c ON c.chat_id = uc.chat_id
-	WHERE uuid = $2 AND c.chat_type != 'one_on_one'`
-	var chats []simpleChat
-	err := pgxscan.Select(context.Background(), conn, &chats, query, uuid, newUserUUID)
+	chats, err := conn.GetAvailableGroupChats(context.Background(), queries.GetAvailableGroupChatsParams{Uuid: uuid, Uuid_2: newUserUUID})
 	if err != nil {
 		return nil, errors.New("INTERNAL ERROR")
 	}
@@ -1017,14 +917,14 @@ func AddSingleUserToGroupChats(c echo.Context) error {
 		}
 	}
 
-	conn := db.GetDB()
+	rawConn := db.GetRawConn()
 
 	rows := [][]any{}
 	for _, chatID := range req.ChatIDs {
 		rows = append(rows, []any{req.ParticipantUUID, chatID, 0})
 	}
 
-	copyCount, err := conn.CopyFrom(
+	copyCount, err := rawConn.CopyFrom(
 		context.Background(),
 		pgx.Identifier{"user_chat"},
 		[]string{"uuid", "chat_id", "unread_messages"},
@@ -1066,10 +966,7 @@ func GetOneOnOneChatParticipant(c echo.Context) error {
 
 	conn := db.GetDB()
 
-	var participantUUID string
-	query := `SELECT uuid FROM user_chat WHERE chat_id = $1 AND uuid != $2;`
-	rows := conn.QueryRow(context.Background(), query, chatID, reqUUID)
-	err = rows.Scan(&participantUUID)
+	participantUUID, err := conn.GetOneOnOneChatParticipant(context.Background(), queries.GetOneOnOneChatParticipantParams{ChatID: chatID, Uuid: reqUUID})
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
@@ -1107,7 +1004,7 @@ func GetContactsNotInChat(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	contactsAsMap := make(map[string]contactService.Contact)
+	contactsAsMap := make(map[string]queries.GetUserContactsRow)
 
 	for _, contact := range contacts {
 		contactsAsMap[contact.Uuid] = contact
@@ -1117,7 +1014,7 @@ func GetContactsNotInChat(c echo.Context) error {
 		delete(contactsAsMap, chatMember.Uuid)
 	}
 
-	usersNotInChat := make([]contactService.Contact, len(contactsAsMap))
+	usersNotInChat := make([]queries.GetUserContactsRow, len(contactsAsMap))
 
 	i := 0
 	for _, user := range contactsAsMap {

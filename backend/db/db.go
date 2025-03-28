@@ -1,6 +1,7 @@
 package db
 
 import (
+	"chat/queries"
 	"chat/utils"
 	"context"
 	"fmt"
@@ -24,6 +25,14 @@ func InitDB() {
 	fmt.Println("Successfully connected to the database")
 }
 
-func GetDB() *pgxpool.Pool {
+func GetRawConn() *pgxpool.Pool {
 	return dbPool
+}
+
+func GetDB() *queries.Queries {
+	return queries.New(dbPool)
+}
+
+func Close() {
+	dbPool.Close()
 }

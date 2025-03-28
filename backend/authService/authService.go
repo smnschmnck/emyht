@@ -3,6 +3,7 @@ package authService
 import (
 	"chat/db"
 	"chat/emailService"
+	"chat/queries"
 	"chat/redisdb"
 	"chat/s3Helpers"
 	"chat/userService"
@@ -81,7 +82,7 @@ func GetUserBySession(c echo.Context) error {
 		return c.String(respErr.StatusCode, respErr.Msg)
 	}
 
-	formattedProfilePic := s3Helpers.FormatPictureUrl(user.ProfilePictureUrl)
+	formattedProfilePic := s3Helpers.FormatPictureUrl(user.PictureUrl)
 
 	res := UserRes{
 		UUID:              user.Uuid,
@@ -159,8 +160,9 @@ func Register(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
 	}
 
-	err = emailService.SendVerificationEmail(reqUser.Username, reqUser.Email, user.EmailToken)
-
+	if user.EmailToken != nil {
+		err = emailService.SendVerificationEmail(reqUser.Username, reqUser.Email, *user.EmailToken)
+	}
 	if err != nil {
 		fmt.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
@@ -190,7 +192,9 @@ func ResendVerificationEmail(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "ERROR WHILE SENDING EMAIL")
 	}
-	err = emailService.SendVerificationEmail(user.Username, user.Email, emailToken)
+	if emailToken != nil {
+		err = emailService.SendVerificationEmail(user.Username, user.Email, *emailToken)
+	}
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "ERROR WHILE SENDING EMAIL")
 	}
@@ -212,18 +216,11 @@ func VerifyEmail(c echo.Context) error {
 	}
 
 	conn := db.GetDB()
-	selectQuery := "SELECT email_active FROM users WHERE email_token=$1"
-	rows := conn.QueryRow(context.Background(), selectQuery, emailToken.Token)
-	var dbUserEmailActive bool
-	err = rows.Scan(&dbUserEmailActive)
+	_, err = conn.GetEmailActiveByToken(context.Background(), &emailToken.Token)
 	if err != nil {
 		return c.String(http.StatusNotFound, "COULD NOT FIND E-MAIL ADDRESS MATCHING THE SUPPLIED LINK")
 	}
-
-	insertQuery := "UPDATE users SET email_active=true, email_token=$1 WHERE email_token=$2 RETURNING email_active"
-	insertedRows := conn.QueryRow(context.Background(), insertQuery, nil, emailToken.Token)
-	var active bool
-	err = insertedRows.Scan(&active)
+	active, err := conn.ActivateEmail(context.Background(), queries.ActivateEmailParams{EmailToken: nil, EmailToken_2: &emailToken.Token})
 	if err != nil || !active {
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE VERIYFING YOUR E-MAIL")
 	}
@@ -266,7 +263,7 @@ func Authenticate(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	pwCorrect := userService.CheckPW(user, lowerCaseEmail, credentials.Password)
+	pwCorrect := userService.CheckPW(credentials.Password, user.Password, user.Salt)
 	if !pwCorrect {
 		return c.String(http.StatusUnauthorized, "WRONG CREDENTIALS")
 	}
@@ -312,12 +309,7 @@ func ChangeEmail(c echo.Context) error {
 
 	trimmedEmail := strings.TrimSpace(changeReq.NewEmail)
 	lowerCaseEmail := strings.ToLower(trimmedEmail)
-	var emailExists bool
-	checkQuery := "SELECT count(1) > 0 " +
-		"FROM users " +
-		"WHERE email=$1"
-	rows := conn.QueryRow(context.Background(), checkQuery, lowerCaseEmail)
-	err = rows.Scan(&emailExists)
+	emailExists, err := conn.EmailExists(context.Background(), lowerCaseEmail)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
@@ -325,20 +317,13 @@ func ChangeEmail(c echo.Context) error {
 		return c.String(http.StatusConflict, "EMAIL EXISTS ALREADY")
 	}
 
-	insertQuery := "INSERT INTO change_email(uuid, new_email, confirmation_token) " +
-		"VALUES ($1, $2, $3) " +
-		"ON CONFLICT(uuid) DO UPDATE SET new_email=$2, confirmation_token=$3 " +
-		"RETURNING confirmation_token, new_email"
 	confirmationToken := uuid.New().String()
-	insertedRows := conn.QueryRow(context.Background(), insertQuery, user.Uuid, lowerCaseEmail, confirmationToken)
-	var dbConfirmationToken string
-	var dbNewEmail string
-	err = insertedRows.Scan(&dbConfirmationToken, &dbNewEmail)
+	rows, err := conn.UpsertChangeEmail(context.Background(), queries.UpsertChangeEmailParams{Uuid: user.Uuid, NewEmail: lowerCaseEmail, ConfirmationToken: confirmationToken})
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	err = emailService.SendVerifyEmailChangeEmail(user.Username, dbNewEmail, dbConfirmationToken)
+	err = emailService.SendVerifyEmailChangeEmail(user.Username, rows.NewEmail, rows.ConfirmationToken)
 
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -362,26 +347,11 @@ func ConfirmChangedEmail(c echo.Context) error {
 	}
 
 	conn := db.GetDB()
-	updateQuery := "UPDATE users u " +
-		"SET email_active=true, email_token=$1, email=( " +
-		"SELECT c.new_email " +
-		"FROM change_email c " +
-		"WHERE c.confirmation_token=$2 " +
-		") " +
-		"WHERE u.uuid=( " +
-		"SELECT c.uuid " +
-		"FROM change_email c " +
-		"WHERE c.confirmation_token=$2 " +
-		") " +
-		"RETURNING u.email;"
-	updatedRows := conn.QueryRow(context.Background(), updateQuery, nil, confirmToken.Token)
-	var dbNewEmail string
-	err = updatedRows.Scan(&dbNewEmail)
+	dbNewEmail, err := conn.UpdateEmailFromChangeEmail(context.Background(), queries.UpdateEmailFromChangeEmailParams{EmailToken: nil, ConfirmationToken: confirmToken.Token})
 	if err != nil || dbNewEmail == "" {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
-	deleteQuery := "DELETE FROM change_email WHERE confirmation_token=$1"
-	_, err = conn.Query(context.Background(), deleteQuery, confirmToken.Token)
+	err = conn.DeleteChangeEmail(context.Background(), confirmToken.Token)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
@@ -413,13 +383,7 @@ func ChangeUsername(c echo.Context) error {
 	}
 
 	conn := db.GetDB()
-	query := "UPDATE users " +
-		"SET username=$1 " +
-		"WHERE uuid=$2 " +
-		"RETURNING username"
-	var newUsername string
-	rows := conn.QueryRow(context.Background(), query, changeReq.NewUsername, reqUUID)
-	err = rows.Scan(&newUsername)
+	_, err = conn.UpdateUsername(context.Background(), queries.UpdateUsernameParams{Username: changeReq.NewUsername, Uuid: reqUUID})
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "COULD NOT CHANGE USERNAME")
 	}

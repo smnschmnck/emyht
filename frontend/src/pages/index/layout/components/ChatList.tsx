@@ -19,45 +19,46 @@ type SingleChatProps = {
   chat: Chat;
 };
 
-const SingleChat: FC<SingleChatProps> = ({ chat }) => (
-  <li>
-    <RouterLink
-      className="flex w-full items-center gap-3 rounded-lg p-3 transition hover:bg-zinc-100 data-[status=active]:bg-zinc-100"
-      to="/chat/$chatId"
-      params={{ chatId: chat.chatID }}
-    >
-      <div className="relative">
-        {chat.unreadMessages > 0 && <Badge>{''}</Badge>}
-        <Avatar imgUrl={chat.pictureUrl} />
-      </div>
-      <div className="w-full truncate text-sm">
-        <div className="flex w-full items-center justify-between">
-          <p className="font-semibold">{chat.chatName}</p>
-          <p className="text-xs text-zinc-400">
-            {formatTimestamp(Number(chat.timestamp))}
-          </p>
+const SingleChat: FC<SingleChatProps> = ({ chat }) => {
+  const messageType = chat.messageType?.messageType;
+  return (
+    <li>
+      <RouterLink
+        className="flex w-full items-center gap-3 rounded-lg p-3 transition hover:bg-zinc-100 data-[status=active]:bg-zinc-100"
+        to="/chat/$chatId"
+        params={{ chatId: chat.chatId }}
+      >
+        <div className="relative">
+          {chat.unreadMessages > 0 && <Badge>{''}</Badge>}
+          <Avatar imgUrl={chat.chatPictureUrl} />
         </div>
-        <div className="flex items-center gap-1 text-zinc-500">
-          {chat.messageType === 'audio' && (
-            <MusicalNoteIcon className="h-4 w-4" />
-          )}
-          {chat.messageType === 'image' && <PhotoIcon className="h-4 w-4" />}
-          {chat.messageType === 'data' && <DocumentIcon className="h-4 w-4" />}
-          {chat.messageType === 'video' && (
-            <PlayCircleIcon className="h-4 w-4" />
-          )}
-          {!!chat.textContent && <p className="truncate">{chat.textContent}</p>}
-          {!chat.textContent && !chat.messageType && (
-            <span>{`Send a message to ${chat.chatName}`}</span>
-          )}
-          {chat.textContent === '' && chat.messageType !== 'plaintext' && (
-            <span className="capitalize">{chat.messageType}</span>
-          )}
+        <div className="w-full truncate text-sm">
+          <div className="flex w-full items-center justify-between">
+            <p className="font-semibold">{chat.chatName}</p>
+            <p className="text-xs text-zinc-400">
+              {formatTimestamp(Number(chat.timestamp))}
+            </p>
+          </div>
+          <div className="flex items-center gap-1 text-zinc-500">
+            {messageType === 'audio' && <MusicalNoteIcon className="h-4 w-4" />}
+            {messageType === 'image' && <PhotoIcon className="h-4 w-4" />}
+            {messageType === 'data' && <DocumentIcon className="h-4 w-4" />}
+            {messageType === 'video' && <PlayCircleIcon className="h-4 w-4" />}
+            {!!chat.textContent && (
+              <p className="truncate">{chat.textContent}</p>
+            )}
+            {!chat.textContent && !chat.messageType?.valid && (
+              <span>{`Send a message to ${chat.chatName}`}</span>
+            )}
+            {chat.textContent === '' && messageType !== 'plaintext' && (
+              <span className="capitalize">{messageType}</span>
+            )}
+          </div>
         </div>
-      </div>
-    </RouterLink>
-  </li>
-);
+      </RouterLink>
+    </li>
+  );
+};
 
 const useDataChangeDetector = <T,>({
   data,
@@ -137,7 +138,7 @@ export const ChatList: FC = () => {
             ref={animationParent}
           >
             {filteredChats.map((c) => (
-              <SingleChat key={c.chatID} chat={c} />
+              <SingleChat key={c.chatId} chat={c} />
             ))}
           </ul>
         )}

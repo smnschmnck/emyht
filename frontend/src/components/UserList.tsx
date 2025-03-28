@@ -47,8 +47,8 @@ export const UserList: FC<UserListProps> = ({
     setSearchQuery(query);
   };
 
-  const filteredUsers = users?.filter((user) => {
-    const curUsernameLowerCase = user.name.toLowerCase();
+  const filteredUsers = contacts?.filter((user) => {
+    const curUsernameLowerCase = user.username.toLowerCase();
     const queryLowerCase = searchQuery.toLowerCase();
 
     return curUsernameLowerCase.includes(queryLowerCase);
@@ -68,18 +68,18 @@ export const UserList: FC<UserListProps> = ({
         <ul>
           {!!filteredUsers &&
             filteredUsers.map((user) => (
-              <li key={user.id}>
+              <li key={user.uuid}>
                 <button
-                  onClick={() => changeUser(user.id)}
-                  aria-label={`Add ${user.name} to chat`}
-                  className="flex w-full cursor-pointer items-center justify-between rounded-lg p-2 transition hover:bg-zinc-100"
+                  onClick={() => changeUser(user.uuid)}
+                  aria-label={`Add ${user.username} to chat`}
+                  className="flex w-full items-center justify-between border-b border-b-zinc-100 p-2 transition hover:bg-zinc-100"
                 >
                   <div className="flex items-center gap-4">
-                    <Avatar imgUrl={user.profilePictureUrl} />
-                    <p className="text-sm font-semibold">{user.name}</p>
+                    <Avatar imgUrl={user.pictureUrl} />
+                    <p className="text-sm font-semibold">{user.username}</p>
                   </div>
                   <SelectedIndicator
-                    selected={selectedUsers.includes(user.id)}
+                    selected={selectedUsers.includes(user.uuid)}
                   />
                 </button>
               </li>

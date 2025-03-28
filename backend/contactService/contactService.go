@@ -4,15 +4,16 @@ import (
 	"chat/authService"
 	"chat/db"
 	"chat/pusher"
+	"chat/queries"
 	"chat/s3Helpers"
 	"chat/userService"
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
-	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
@@ -50,14 +51,7 @@ func SendContactRequest(c echo.Context) error {
 
 	conn := db.GetDB()
 
-	checkDuplicateQuery := "SELECT EXISTS( " +
-		"SELECT 1 " +
-		"FROM friends " +
-		"WHERE reciever = $1 AND sender = (SELECT uuid FROM users WHERE email=$2) " +
-		") "
-	checkDuplicateRows := conn.QueryRow(context.Background(), checkDuplicateQuery, user.Uuid, lowerCaseEmail)
-	var duplicateExists bool
-	err = checkDuplicateRows.Scan(&duplicateExists)
+	duplicateExists, err := conn.CheckDuplicateFriendRequest(context.TODO(), queries.CheckDuplicateFriendRequestParams{Reciever: user.Uuid, Email: lowerCaseEmail})
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
@@ -65,12 +59,7 @@ func SendContactRequest(c echo.Context) error {
 		return c.String(http.StatusConflict, lowerCaseEmail+" ALREADY SENT A FRIEND REQUEST TO YOU")
 	}
 
-	contactReqQuery := "INSERT INTO friends(sender, reciever, status) " +
-		"VALUES ($1, (SELECT uuid FROM users WHERE email=$2), 'pending') " +
-		"RETURNING status"
-	contactReqRows := conn.QueryRow(context.Background(), contactReqQuery, user.Uuid, lowerCaseEmail)
-	var status string
-	err = contactReqRows.Scan(&status)
+	_, err = conn.CreateFriendRequest(context.Background(), queries.CreateFriendRequestParams{Sender: user.Uuid, Email: lowerCaseEmail})
 	if err != nil {
 		if strings.Contains(err.Error(), "violates not-null constraint") {
 			return c.String(http.StatusNotFound, "USER DOES NOT EXIST")
@@ -98,28 +87,17 @@ func sendNewContactReqNotification(email string) error {
 	return nil
 }
 
-type Contact struct {
-	Username   string `json:"name"`
-	Uuid       string `json:"id"`
-	PictureUrl string `json:"profilePictureUrl"`
-}
-
-func GetUserContactsbyUUID(uuid string) ([]Contact, error) {
+func GetUserContactsbyUUID(uuid string) ([]queries.GetUserContactsRow, error) {
 	conn := db.GetDB()
 
-	query := "SELECT u.username, u.uuid, u.picture_url " +
-		"FROM friends " +
-		"JOIN users u ON u.uuid = friends.sender OR friends.reciever = u.uuid " +
-		"WHERE (reciever=$1 OR sender=$1) AND status='accepted' AND u.uuid != $1"
-	var contacts []Contact
-	err := pgxscan.Select(context.Background(), conn, &contacts, query, uuid)
+	contacts, err := conn.GetUserContacts(context.Background(), uuid)
 	if err != nil {
 		fmt.Println(err)
-		return []Contact{}, errors.New("INTERNAL ERROR")
+		return []queries.GetUserContactsRow{}, errors.New("INTERNAL ERROR")
 	}
 
 	if contacts == nil {
-		return make([]Contact, 0), nil
+		return make([]queries.GetUserContactsRow, 0), nil
 	}
 	return contacts, nil
 }
@@ -169,27 +147,15 @@ func GetContacts(c echo.Context) error {
 	return c.JSON(http.StatusOK, contacts)
 }
 
-type singleContactRequest struct {
-	SenderID             string `json:"senderID"`
-	SenderUsername       string `json:"senderUsername"`
-	SenderProfilePicture string `json:"senderProfilePicture"`
-	SenderEmail          string `json:"senderEmail"`
-}
-
-func GetPendingContactRequestsByUUID(uuid string) ([]singleContactRequest, error) {
+func GetPendingContactRequestsByUUID(uuid string) ([]queries.GetPendingFriendRequestsRow, error) {
 	conn := db.GetDB()
-	pendingRequestQuery := "SELECT sender AS sender_id, u.username AS sender_username, u.picture_url AS sender_profile_picture, u.email AS sender_email " +
-		"FROM friends " +
-		"JOIN users u on friends.sender = u.uuid " +
-		"WHERE reciever=$1 AND status='pending' "
-	var contactRequests []singleContactRequest
-	err := pgxscan.Select(context.Background(), conn, &contactRequests, pendingRequestQuery, uuid)
+	contactRequests, err := conn.GetPendingFriendRequests(context.Background(), uuid)
 	if err != nil {
-		return make([]singleContactRequest, 0), errors.New("INTERNAL ERROR")
+		return make([]queries.GetPendingFriendRequestsRow, 0), errors.New("INTERNAL ERROR")
 	}
 
 	if contactRequests == nil {
-		return make([]singleContactRequest, 0), nil
+		return make([]queries.GetPendingFriendRequestsRow, 0), nil
 	}
 
 	return contactRequests, nil
@@ -236,28 +202,42 @@ func HandleContactRequest(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	var query string
+	conn := db.GetDB()
+	ctx := context.Background()
+	senderUUID := contactReqResolution.SenderID
+
 	switch contactReqResolution.Action {
 	case "accept":
-		query = "UPDATE friends " +
-			"SET status = 'accepted' " +
-			"WHERE sender = $1 AND  reciever = $2"
+		err = conn.AcceptFriendRequest(ctx, queries.AcceptFriendRequestParams{
+			Sender:   senderUUID,
+			Reciever: uuid,
+		})
+		if err != nil {
+			log.Println("Error accepting friend request:", err)
+			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+		}
 	case "decline":
-		query = "DELETE FROM friends " +
-			"WHERE sender = $1 AND  reciever = $2"
+		err = conn.DeclineFriendRequest(ctx, queries.DeclineFriendRequestParams{
+			Sender:   senderUUID,
+			Reciever: uuid,
+		})
+		if err != nil {
+			log.Println("Error declining friend request:", err)
+			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+		}
 	case "block":
-		query = "UPDATE friends " +
-			"SET status = 'blocked' " +
-			"WHERE sender = $1 AND  reciever = $2"
+		err = conn.BlockFriendRequest(ctx, queries.BlockFriendRequestParams{
+			Sender:   senderUUID,
+			Reciever: uuid,
+		})
+		if err != nil {
+			log.Println("Error blocking friend request:", err)
+			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+		}
 	default:
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	conn := db.GetDB()
-	_, err = conn.Query(context.Background(), query, contactReqResolution.SenderID, uuid)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
-	}
 	return c.String(http.StatusOK, "SUCCESS")
 }
 
@@ -274,23 +254,13 @@ func blockUser(uuidToBeBlocked string, uuid string, chatID string) error {
 		return errors.New("USER NOT IN CONTACTS")
 	}
 
-	var dbStatus string
-	query := "UPDATE friends " +
-		"SET status = 'blocked' " +
-		"WHERE (sender = $1 AND reciever = $2) OR (sender = $2 AND reciever = $1) " +
-		"RETURNING status"
-	err = conn.QueryRow(context.Background(), query, uuidToBeBlocked, uuid).Scan(&dbStatus)
+	err = conn.BlockUser(context.Background(), queries.BlockUserParams{Sender: uuidToBeBlocked, Reciever: uuid})
 	if err != nil {
 		fmt.Println(err)
 		return errors.New("INTERNAL ERROR")
 	}
 
-	var chatStatus bool
-	query = "UPDATE chats " +
-		"SET blocked = true " +
-		"WHERE chat_id = $1 " +
-		"RETURNING blocked"
-	err = conn.QueryRow(context.Background(), query, chatID).Scan(&chatStatus)
+	_, err = conn.BlockChat(context.Background(), chatID)
 	if err != nil {
 		fmt.Println(err)
 		return errors.New("INTERNAL ERROR")
@@ -345,23 +315,14 @@ func GetSentContactRequests(c echo.Context) error {
 
 	conn := db.GetDB()
 
-	type contactRequest struct {
-		Email string `json:"email"`
-		Date  string `json:"date"`
-	}
-
-	query := "SELECT u.email as email, TO_CHAR(created_at, 'DD.MM.YYYY') as date FROM friends " +
-		"JOIN users u on u.uuid = friends.reciever " +
-		"WHERE sender = $1 AND status='pending'"
-	var contactRequests []contactRequest
-	err = pgxscan.Select(context.Background(), conn, &contactRequests, query, uuid)
+	contactRequests, err := conn.GetPendingContactRequests(context.Background(), uuid)
 	if err != nil {
 		fmt.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	if contactRequests == nil {
-		return c.JSON(http.StatusOK, make([]singleContactRequest, 0))
+		return c.JSON(http.StatusOK, make([]queries.GetPendingContactRequestsRow, 0))
 	}
 
 	return c.JSON(http.StatusOK, contactRequests)
