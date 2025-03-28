@@ -304,7 +304,7 @@ func AddUsersToGroupChat(c echo.Context) error {
 	return c.JSON(http.StatusOK, chats)
 }
 
-func RemoveUsersFromGroupChat(c echo.Context) error {
+func GetChatParticipantsExceptUser(c echo.Context) error {
 	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
@@ -315,13 +315,8 @@ func RemoveUsersFromGroupChat(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	chatID := c.Param("chatID")
-	if len(chatID) <= 0 {
-		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
-	}
-
 	type request struct {
-		UuidsToRemove []string `json:"uuidsToRemove"`
+		ChatID string `json:"chatID"`
 	}
 
 	req := new(request)
@@ -334,63 +329,14 @@ func RemoveUsersFromGroupChat(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	isInChat, err := chatHelpers.IsUserInChat(reqUUID, chatID)
-	if err != nil {
-		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
-	}
-	if !isInChat {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	conn := db.GetDB()
-
-	query := `
-        DELETE FROM user_chat
-        WHERE chat_id = $1 AND uuid = ANY($2)
-    `
-
-	// Execute the query
-	_, err = conn.Exec(
-		context.Background(),
-		query,
-		chatID,            // $1: The chat ID
-		req.UuidsToRemove, // $2: The list of participant UUIDs
-	)
-	if err != nil {
-		fmt.Println(err.Error())
-		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
-	}
-
-	pusherEvents := pusher.MakePusherEventArray(pusher.USER_FEED_PREFIX, req.UuidsToRemove, "REMOVE_CHAT", nil)
-	pusher.PusherClient.TriggerBatch(pusherEvents)
-
-	return c.String(http.StatusOK, "SUCCESS")
-}
-
-func GetChatParticipantsExceptUser(c echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
-	if err != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	chatID := c.Param("chatID")
-	if len(chatID) <= 0 {
-		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
-	}
-
-	chatParticipants, err := getChatMembers(chatID)
+	chatParticipants, err := getChatMembers(req.ChatID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	inChat := false
 	for _, p := range chatParticipants {
-		if p.Uuid == reqUUID {
+		if p != reqUUID {
 			inChat = true
 			break
 		}
@@ -400,9 +346,9 @@ func GetChatParticipantsExceptUser(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	var participantsExceptUser []contactService.Contact
+	var participantsExceptUser []string
 	for _, p := range chatParticipants {
-		if p.Uuid != reqUUID {
+		if p != reqUUID {
 			participantsExceptUser = append(participantsExceptUser, p)
 		}
 	}
@@ -600,14 +546,14 @@ func markChatAsRead(uuid string, chatID string) error {
 	return nil
 }
 
-func getChatMembers(chatId string) ([]contactService.Contact, error) {
+func getChatMembers(chatId string) ([]string, error) {
 	conn := db.GetDB()
 
 	uuids, err := conn.GetChatMembers(context.Background(), chatId)
 	if err != nil {
 		return nil, err
 	}
-	return contacts, nil
+	return uuids, nil
 }
 
 func sendNewMessageNotification(chatId string) error {
@@ -1011,7 +957,7 @@ func GetContactsNotInChat(c echo.Context) error {
 	}
 
 	for _, chatMember := range chatMembers {
-		delete(contactsAsMap, chatMember.Uuid)
+		delete(contactsAsMap, chatMember)
 	}
 
 	usersNotInChat := make([]queries.GetUserContactsRow, len(contactsAsMap))
@@ -1027,4 +973,58 @@ func GetContactsNotInChat(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, usersNotInChat)
+}
+
+func RemoveUsersFromGroupChat(c echo.Context) error {
+	sessionID, responseErr := authService.GetSessionToken(c)
+	if responseErr != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	chatID := c.Param("chatID")
+	if len(chatID) <= 0 {
+		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
+	}
+
+	type request struct {
+		UuidsToRemove []string `json:"uuidsToRemove"`
+	}
+
+	req := new(request)
+	if err := c.Bind(req); err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	err = validate.Struct(req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	isInChat, err := chatHelpers.IsUserInChat(reqUUID, chatID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
+	}
+	if !isInChat {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	conn := db.GetDB()
+
+	err = conn.DeleteFromGroupChat(
+		context.Background(),
+		queries.DeleteFromGroupChatParams{ChatID: chatID, Column2: req.UuidsToRemove})
+	if err != nil {
+		fmt.Println(err.Error())
+		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
+	}
+
+	pusherEvents := pusher.MakePusherEventArray(pusher.USER_FEED_PREFIX, req.UuidsToRemove, "REMOVE_CHAT", nil)
+	pusher.PusherClient.TriggerBatch(pusherEvents)
+
+	return c.String(http.StatusOK, "SUCCESS")
 }

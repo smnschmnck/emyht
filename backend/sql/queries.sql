@@ -333,3 +333,7 @@ RETURNING email_token;
 UPDATE users
 SET picture_url = $1
 WHERE uuid = $2;
+-- name: DeleteFromGroupChat :exec
+DELETE FROM user_chat
+WHERE chat_id = $1
+    AND uuid = ANY($2::varchar(64) []);

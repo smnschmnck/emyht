@@ -31,7 +31,7 @@ export const ChatCreator: FC = () => {
       <div className="flex flex-col gap-10 xl:flex-row">
         <div className="h-96 max-h-60 w-full">
           <UserList
-            users={contacts}
+            contacts={contacts}
             isLoading={isLoadingContacts}
             selectedUsers={selectedUsers}
             setSelectedUsers={onUserChange}

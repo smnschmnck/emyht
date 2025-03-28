@@ -18,7 +18,7 @@ const SelectedIndicator: FC<{ selected: boolean }> = ({ selected }) => (
 );
 
 type UserListProps = {
-  users?: Contact[];
+  contacts?: Contact[];
   isLoading: boolean;
   selectedUsers: string[];
   setSelectedUsers: (selectedUsers: string[]) => void;
@@ -26,7 +26,7 @@ type UserListProps = {
 };
 
 export const UserList: FC<UserListProps> = ({
-  users,
+  contacts,
   selectedUsers,
   isLoading,
   setSelectedUsers,
@@ -47,8 +47,8 @@ export const UserList: FC<UserListProps> = ({
     setSearchQuery(query);
   };
 
-  const filteredUsers = contacts?.filter((user) => {
-    const curUsernameLowerCase = user.username.toLowerCase();
+  const filteredUsers = contacts?.filter((contact) => {
+    const curUsernameLowerCase = contact.username.toLowerCase();
     const queryLowerCase = searchQuery.toLowerCase();
 
     return curUsernameLowerCase.includes(queryLowerCase);
@@ -67,19 +67,19 @@ export const UserList: FC<UserListProps> = ({
       <div className="h-full overflow-scroll">
         <ul>
           {!!filteredUsers &&
-            filteredUsers.map((user) => (
-              <li key={user.uuid}>
+            filteredUsers.map((contact) => (
+              <li key={contact.uuid}>
                 <button
-                  onClick={() => changeUser(user.uuid)}
-                  aria-label={`Add ${user.username} to chat`}
+                  onClick={() => changeUser(contact.uuid)}
+                  aria-label={`Add ${contact.username} to chat`}
                   className="flex w-full items-center justify-between border-b border-b-zinc-100 p-2 transition hover:bg-zinc-100"
                 >
                   <div className="flex items-center gap-4">
-                    <Avatar imgUrl={user.pictureUrl} />
-                    <p className="text-sm font-semibold">{user.username}</p>
+                    <Avatar imgUrl={contact.pictureUrl} />
+                    <p className="text-sm font-semibold">{contact.username}</p>
                   </div>
                   <SelectedIndicator
-                    selected={selectedUsers.includes(user.uuid)}
+                    selected={selectedUsers.includes(contact.uuid)}
                   />
                 </button>
               </li>

@@ -125,7 +125,7 @@ const GroupMemberRemove = () => {
       </div>
       <div className="h-72">
         <UserList
-          users={groupMembers}
+          contacts={groupMembers}
           isLoading={isLoadingUsers}
           selectedUsers={selectedUsers}
           setSelectedUsers={setSelectedUsers}
@@ -189,7 +189,7 @@ const GroupMemberAdd = () => {
       <div className="h-72">
         <UserList
           emptyMessage="No users to add"
-          users={usersNotInChat}
+          contacts={usersNotInChat}
           isLoading={isLoadingUsers}
           selectedUsers={selectedUsers}
           setSelectedUsers={setSelectedUsers}
@@ -216,7 +216,7 @@ export const ChatSettingsView = () => {
   const { data: allChats } = useChats();
   const { chatId } = chatSettingsRoute.useParams();
 
-  const curChat = allChats?.find((c) => c.chatID === chatId);
+  const curChat = allChats?.find((c) => c.chatId === chatId);
 
   return (
     <div className="flex h-full w-full flex-col gap-8 overflow-scroll px-6 py-10 md:px-8 lg:px-10 xl:px-14">

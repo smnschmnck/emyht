@@ -361,6 +361,22 @@ func (q *Queries) DeleteChangeEmail(ctx context.Context, confirmationToken strin
 	return err
 }
 
+const deleteFromGroupChat = `-- name: DeleteFromGroupChat :exec
+DELETE FROM user_chat
+WHERE chat_id = $1
+    AND uuid = ANY($2::varchar(64) [])
+`
+
+type DeleteFromGroupChatParams struct {
+	ChatID  string   `json:"chatId"`
+	Column2 []string `json:"column2"`
+}
+
+func (q *Queries) DeleteFromGroupChat(ctx context.Context, arg DeleteFromGroupChatParams) error {
+	_, err := q.db.Exec(ctx, deleteFromGroupChat, arg.ChatID, arg.Column2)
+	return err
+}
+
 const emailExists = `-- name: EmailExists :one
 SELECT count(1) > 0
 FROM users
