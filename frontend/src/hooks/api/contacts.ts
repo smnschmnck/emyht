@@ -1,7 +1,7 @@
 import { fetchWithDefaults } from '@/utils/fetch';
 import { useQuery } from '@tanstack/react-query';
 
-type Contact = {
+export type Contact = {
   username: string;
   uuid: string;
   pictureUrl: string;
