@@ -133,7 +133,7 @@ const GroupMemberRemove = () => {
         />
       </div>
       <Button
-        variant="primary"
+        variant="destructive"
         disabled={selectedUsers.length <= 0}
         onClick={() => removeUsers()}
       >
