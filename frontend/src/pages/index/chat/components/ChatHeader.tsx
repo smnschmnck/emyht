@@ -1,41 +1,11 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { ButtonLink } from '@/components/ui/ButtonLink';
-import { IconButton } from '@/components/ui/IconButton';
 import { HttpError } from '@/errors/httpError/httpError';
 import { useChats } from '@/hooks/api/chats';
 import { fetchWithDefaults } from '@/utils/fetch';
-import {
-  ChevronLeftIcon,
-  EllipsisHorizontalIcon,
-} from '@heroicons/react/24/outline';
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
-
-const DropdownOptions: FC = () => {
-  return (
-    <DropdownMenu.Root>
-      <DropdownMenu.Trigger asChild>
-        <IconButton ariaLabel={'Chat settings'} className="h-8 w-8">
-          <EllipsisHorizontalIcon className="text-zinc-400" />
-        </IconButton>
-      </DropdownMenu.Trigger>
-      <DropdownMenu.Portal>
-        <DropdownMenu.Content
-          className="rounded-lg border bg-white p-1 shadow-xs"
-          align="end"
-        >
-          <DropdownMenu.Item className="flex h-8 w-32 cursor-pointer items-center rounded-xs pl-3 text-sm font-medium outline-hidden data-highlighted:bg-blue-50">
-            Leave
-          </DropdownMenu.Item>
-          <DropdownMenu.Item className="flex h-8 w-32 cursor-pointer items-center rounded-xs pl-3 text-sm font-medium outline-hidden data-highlighted:bg-blue-50">
-            Invite
-          </DropdownMenu.Item>
-        </DropdownMenu.Content>
-      </DropdownMenu.Portal>
-    </DropdownMenu.Root>
-  );
-};
 
 export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
   const { data: allChats } = useChats();
@@ -76,7 +46,6 @@ export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
           </div>
         </div>
       </div>
-      <DropdownOptions />
     </div>
   );
 };
