@@ -4,15 +4,15 @@ import { Card } from '@/components/ui/Card';
 import { FormInput } from '@/components/ui/FormInput';
 import { IconLink } from '@/components/ui/IconLink';
 import { UserList } from '@/components/UserList';
-import { Chat, useChats } from '@/hooks/api/chats';
+import { Chat, useCurrentChat } from '@/hooks/api/chats';
+import { fetchWithDefaults } from '@/utils/fetch';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { useMutation } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { useGroupMembers, useMembersNotInGroup } from './hooks/useMembers';
 import { chatSettingsRoute } from './route';
-import { useMutation } from '@tanstack/react-query';
-import { fetchWithDefaults } from '@/utils/fetch';
-import { toast } from 'sonner';
 
 const Header = ({
   chatType,
@@ -55,6 +55,10 @@ const Header = ({
 };
 
 const GroupPropertiesSettings = () => {
+  const { chatId } = chatSettingsRoute.useParams();
+  const curChat = useCurrentChat(chatId);
+  const [newName, setNewName] = useState('');
+
   return (
     <Card>
       <div>
@@ -62,13 +66,21 @@ const GroupPropertiesSettings = () => {
         <p className="text-sm text-zinc-500">Adjust group properties </p>
       </div>
       <div className="flex flex-col gap-3">
-        <FormInput label="Name" placeholder="New group name" />
+        <FormInput
+          label="Name"
+          placeholder="New group name"
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+        />
         <Button>Change name</Button>
       </div>
       <div className="flex flex-col gap-3">
         <h4 className="text-sm font-semibold">Picture</h4>
         <div className="flex w-full items-center justify-center gap-4">
-          <Avatar className="h-14 min-h-14 w-14 min-w-14" />
+          <Avatar
+            imgUrl={curChat?.chatPictureUrl}
+            className="h-14 min-h-14 w-14 min-w-14"
+          />
           <Button className="w-full" variant="secondary">
             Pick new picture
           </Button>
@@ -213,10 +225,8 @@ const GroupSettings = () => {
 };
 
 export const ChatSettingsView = () => {
-  const { data: allChats } = useChats();
   const { chatId } = chatSettingsRoute.useParams();
-
-  const curChat = allChats?.find((c) => c.chatId === chatId);
+  const curChat = useCurrentChat(chatId);
 
   return (
     <div className="flex h-full w-full flex-col gap-8 overflow-scroll px-6 py-10 md:px-8 lg:px-10 xl:px-14">

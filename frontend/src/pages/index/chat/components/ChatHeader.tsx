@@ -1,7 +1,7 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { IconLink } from '@/components/ui/IconLink';
 import { HttpError } from '@/errors/httpError/httpError';
-import { useChats } from '@/hooks/api/chats';
+import { useCurrentChat } from '@/hooks/api/chats';
 import { fetchWithDefaults } from '@/utils/fetch';
 import {
   ChevronLeftIcon,
@@ -12,7 +12,7 @@ import { Link } from '@tanstack/react-router';
 import { FC } from 'react';
 
 export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
-  const { data: allChats } = useChats();
+  const curChat = useCurrentChat(chatId);
   const { data: chatInfo } = useQuery({
     queryKey: ['chatInfo', chatId],
     queryFn: async () => {
@@ -31,8 +31,6 @@ export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
       return json;
     },
   });
-
-  const curChat = allChats?.find((c) => c.chatId === chatId);
 
   return (
     <div className="flex h-24 w-full items-center justify-between border-b border-b-zinc-100 bg-white px-8">

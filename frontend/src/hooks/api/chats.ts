@@ -37,3 +37,13 @@ export const useChats = () => {
     },
   });
 };
+
+export const useCurrentChat = (chatId: string) => {
+  const { data: allChats } = useChats();
+
+  if (!allChats) {
+    return;
+  }
+
+  return allChats?.find((c) => c.chatId === chatId);
+};
