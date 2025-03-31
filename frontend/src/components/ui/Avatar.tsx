@@ -1,5 +1,6 @@
 import { defaultGroupPictures } from '@/assets/images/defaultGroupPictures';
 import { defaultProfilePictures } from '@/assets/images/defaultProfilePictures';
+import fallbackProfilePicture from '@/assets/images/fallback_profile_picture.svg';
 import { FC } from 'react';
 
 const formatPicURL = (profilePictureUrl?: string) => {
@@ -31,11 +32,23 @@ type AvatarProps = {
 };
 
 export const Avatar: FC<AvatarProps> = ({ imgUrl, alt }) => {
+  const formattedUrl = formatPicURL(imgUrl);
+
+  if (!formattedUrl) {
+    return (
+      <img
+        src={fallbackProfilePicture}
+        alt={alt}
+        className="max-h-11 min-h-11 max-w-11 min-w-11 rounded-full object-cover"
+      />
+    );
+  }
+
   return (
     <img
-      src={formatPicURL(imgUrl)}
+      src={formattedUrl}
       alt={alt}
-      className="max-h-11 min-h-11 min-w-11 max-w-11 rounded-full object-cover"
+      className="max-h-11 min-h-11 max-w-11 min-w-11 rounded-full object-cover"
     />
   );
 };

@@ -15,7 +15,7 @@ export const IconButton = forwardRef<RefType, IconButtonProps>((props, ref) => {
     <button
       ref={ref}
       className={twMerge(
-        'grid h-9 w-9 place-items-center rounded-lg p-1.5 text-blue-600 transition hover:bg-blue-300/25',
+        'grid h-9 w-9 cursor-pointer place-items-center rounded-lg p-1.5 text-blue-600 transition hover:bg-blue-300/25',
         className
       )}
       aria-label={ariaLabel}

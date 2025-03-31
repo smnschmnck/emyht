@@ -6,6 +6,7 @@ import { useMutation } from '@tanstack/react-query';
 import { FC, FormEvent, useState } from 'react';
 import { toast } from 'sonner';
 import { ContactRequestsTable } from './ContactRequestsTable';
+import { Card } from '@/components/ui/Card';
 
 export const ContactRequests: FC = () => {
   const [recepientEmail, setRecepientEmail] = useState('');
@@ -36,7 +37,7 @@ export const ContactRequests: FC = () => {
   });
 
   return (
-    <div className="flex w-full flex-col gap-8 rounded-xl border border-zinc-100 bg-white p-6 shadow-xs lg:p-10">
+    <Card>
       <div>
         <h2 className="text-sm font-semibold">Your sent requests</h2>
         <p className="text-sm text-zinc-500">
@@ -64,6 +65,6 @@ export const ContactRequests: FC = () => {
           </form>
         </div>
       </div>
-    </div>
+    </Card>
   );
 };
