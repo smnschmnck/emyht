@@ -341,8 +341,6 @@ func GetChatParticipantsExceptUser(c echo.Context) error {
 		}
 	}
 
-	fmt.Println(participantsExceptUser)
-
 	return c.JSON(http.StatusOK, participantsExceptUser)
 }
 
