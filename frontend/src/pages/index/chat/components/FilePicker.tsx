@@ -24,7 +24,7 @@ const FilePreview = ({
   return (
     <button
       className={twMerge(
-        'flex h-48 w-full cursor-pointer flex-col overflow-hidden rounded-xl border border-zinc-100 text-left shadow-xs transition hover:border-blue-300 md:w-64',
+        'flex h-48 w-full flex-col overflow-hidden rounded-xl border border-zinc-100 text-left shadow-xs transition hover:border-blue-300 md:w-64',
         selected ? 'border-2 border-blue-500 hover:border-blue-500' : ''
       )}
       onClick={() => handleFileSelect(id)}
