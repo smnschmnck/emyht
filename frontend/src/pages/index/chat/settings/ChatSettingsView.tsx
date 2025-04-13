@@ -245,7 +245,7 @@ const GroupMemberAdd = () => {
 
 const GroupSettings = () => {
   return (
-    <div className="flex w-full gap-2">
+    <div className="flex w-full flex-col gap-2 md:flex-row">
       <GroupPropertiesSettings />
       <GroupMemberAdd />
       <GroupMemberRemove />
