@@ -14,7 +14,7 @@ export const SignInPage: FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const login = async (event: FormEvent) => {
+  const signIn = async (event: FormEvent) => {
     event.preventDefault();
 
     const res = await fetchWithDefaults('/login', {
@@ -33,8 +33,12 @@ export const SignInPage: FC = () => {
     return await getUserData();
   };
 
-  const loginMutation = useMutation({
-    mutationFn: login,
+  const {
+    isPending: isSigningIn,
+    mutate: performSignIn,
+    error: signInError,
+  } = useMutation({
+    mutationFn: signIn,
     onSuccess: ({ emailActive }) => {
       if (!emailActive) {
         navigate({
@@ -62,7 +66,11 @@ export const SignInPage: FC = () => {
       <div className="flex flex-col items-center gap-4">
         <form
           className="flex w-full flex-col gap-4"
-          onSubmit={loginMutation.mutate}
+          onSubmit={(e: FormEvent) => {
+            if (!isSigningIn) {
+              performSignIn(e);
+            }
+          }}
         >
           <FormInput
             label="E-Mail"
@@ -76,10 +84,12 @@ export const SignInPage: FC = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <Button type="submit">Sign in</Button>
+          <Button isLoading={isSigningIn} type="submit">
+            Sign in
+          </Button>
         </form>
-        {loginMutation.error && (
-          <SimpleErrorMessage>{loginMutation.error.message}</SimpleErrorMessage>
+        {signInError && (
+          <SimpleErrorMessage>{signInError.message}</SimpleErrorMessage>
         )}
         <div className="flex gap-2">
           <p className="text-sm text-zinc-500">No account?</p>

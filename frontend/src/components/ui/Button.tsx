@@ -31,10 +31,12 @@ export const Button: FC<ButtonProps> = ({
   type = 'button',
   className,
   variant,
+  disabled,
   isLoading,
   ...props
 }) => (
   <button
+    disabled={disabled || isLoading}
     className={twMerge(buttonVariants({ variant, className }))}
     type={type}
     {...props}
