@@ -4,11 +4,11 @@ import { Card } from '@/components/ui/Card';
 import { FormInput } from '@/components/ui/FormInput';
 import { IconLink } from '@/components/ui/IconLink';
 import { UserList } from '@/components/UserList';
-import { Chat, useCurrentChat } from '@/hooks/api/chats';
+import { Chat, useChats, useCurrentChat } from '@/hooks/api/chats';
 import { fetchWithDefaults } from '@/utils/fetch';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useMutation } from '@tanstack/react-query';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useGroupMembers, useMembersNotInGroup } from './hooks/useMembers';
@@ -57,7 +57,30 @@ const Header = ({
 const GroupPropertiesSettings = () => {
   const { chatId } = chatSettingsRoute.useParams();
   const curChat = useCurrentChat(chatId);
+  const { refetch: refetchChats } = useChats();
   const [newName, setNewName] = useState('');
+  const navigate = useNavigate();
+
+  const { mutate: leaveGroup } = useMutation({
+    mutationFn: async () => {
+      const res = await fetchWithDefaults('/leaveGroupChat', {
+        method: 'post',
+        body: JSON.stringify({ chatId }),
+      });
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+    },
+    onSuccess: () => {
+      refetchChats();
+      navigate({ to: '/' });
+      toast.success(`Left group ${curChat?.chatName}`);
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
 
   return (
     <Card>
@@ -86,6 +109,12 @@ const GroupPropertiesSettings = () => {
           </Button>
         </div>
         <Button>Update Picture</Button>
+      </div>
+      <div className="flex flex-col gap-3 text-red-500">
+        <h4 className="text-sm font-semibold">Leave Group</h4>
+        <Button variant="destructive" onClick={() => leaveGroup()}>
+          Leave Group
+        </Button>
       </div>
     </Card>
   );

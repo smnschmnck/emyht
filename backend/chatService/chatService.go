@@ -703,7 +703,7 @@ func LeaveGroupChat(c echo.Context) error {
 	}
 
 	type leaveReq struct {
-		ChatID string `json:"chatID" validate:"required"`
+		ChatID string `json:"chatId" validate:"required"`
 	}
 	req := new(leaveReq)
 	err = c.Bind(&req)
