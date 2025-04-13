@@ -36,7 +36,11 @@ export const SignUpPage: FC = () => {
     return await getUserData();
   };
 
-  const signUpMutation = useMutation({
+  const {
+    mutate: performSignUp,
+    error: signUpError,
+    isPending: isSigningUp,
+  } = useMutation({
     mutationFn: signUp,
     onSuccess: () => {
       navigate({
@@ -54,7 +58,11 @@ export const SignUpPage: FC = () => {
       <div className="flex flex-col items-center gap-4">
         <form
           className="flex w-full flex-col gap-4"
-          onSubmit={signUpMutation.mutate}
+          onSubmit={(e: FormEvent) => {
+            if (!isSigningUp) {
+              performSignUp(e);
+            }
+          }}
         >
           <FormInput
             label="Username"
@@ -80,12 +88,12 @@ export const SignUpPage: FC = () => {
             value={repeatedPassword}
             onChange={(e) => setRepeatedPassword(e.target.value)}
           />
-          <Button type="submit">Sign up</Button>
+          <Button disabled={isSigningUp} isLoading={isSigningUp} type="submit">
+            Sign up
+          </Button>
         </form>
-        {!!signUpMutation.error && (
-          <SimpleErrorMessage>
-            {signUpMutation.error.message}
-          </SimpleErrorMessage>
+        {!!signUpError && (
+          <SimpleErrorMessage>{signUpError.message}</SimpleErrorMessage>
         )}
         <div className="flex gap-2">
           <p className="text-sm text-zinc-500">Already got an account?</p>

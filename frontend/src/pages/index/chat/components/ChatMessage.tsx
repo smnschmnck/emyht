@@ -20,11 +20,12 @@ const MediaContent = ({ message }: { message: ChatMessageType }) => {
   return (
     <>
       {message.messageType === 'image' && (
-        <div className="max-w-48 p-1">
-          <a target="_blank" rel="noopener noreferrer" href={message.mediaUrl}>
-            <img className="overflow-clip rounded-xl" src={message.mediaUrl} />
-          </a>
-        </div>
+        <a target="_blank" rel="noopener noreferrer" href={message.mediaUrl}>
+          <img
+            className="aspect-video max-w-48 min-w-48 overflow-clip rounded-xl bg-zinc-100 object-cover"
+            src={message.mediaUrl}
+          />
+        </a>
       )}
       {message.messageType === 'data' && (
         <a

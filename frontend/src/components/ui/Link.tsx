@@ -1,16 +1,22 @@
-import { createLink } from '@tanstack/react-router';
-import { forwardRef, ReactNode } from 'react';
+import * as React from 'react';
+import { createLink, LinkComponent } from '@tanstack/react-router';
 
-const LinkWrapper = forwardRef<HTMLSpanElement, { children?: ReactNode }>(
-  ({ children, ...props }, ref) => (
-    <span
-      ref={ref}
-      className="cursor-pointer text-sm font-medium text-blue-600 hover:underline"
-      {...props}
-    >
-      {children}
-    </span>
-  )
+type BasicLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement>;
+
+const BasicLinkComponent = React.forwardRef<HTMLAnchorElement, BasicLinkProps>(
+  (props, ref) => {
+    return (
+      <a
+        ref={ref}
+        {...props}
+        className="text-sm font-medium text-blue-600 hover:underline"
+      />
+    );
+  }
 );
 
-export const Link = createLink(LinkWrapper);
+const CreatedLinkComponent = createLink(BasicLinkComponent);
+
+export const Link: LinkComponent<typeof BasicLinkComponent> = (props) => {
+  return <CreatedLinkComponent preload={'intent'} {...props} />;
+};

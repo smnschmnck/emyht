@@ -14,7 +14,7 @@ export const PersonalChatCreator: FC<PersonalChatCreatorProps> = ({
   selectedUsers,
 }) => {
   const { refetch: refetchChats } = useChats();
-  const { mutate: createChat } = useMutation({
+  const { mutate: createChat, isPending: isCreatingChat } = useMutation({
     mutationFn: async () => {
       const res = await fetchWithDefaults('/startOneOnOneChat', {
         method: 'post',
@@ -42,7 +42,15 @@ export const PersonalChatCreator: FC<PersonalChatCreatorProps> = ({
   const hasSelectedUsers = selectedUsers.length >= 1;
 
   return (
-    <Button disabled={!hasSelectedUsers} onClick={() => createChat()}>
+    <Button
+      disabled={!hasSelectedUsers || isCreatingChat}
+      isLoading={isCreatingChat}
+      onClick={() => {
+        if (!isCreatingChat) {
+          createChat();
+        }
+      }}
+    >
       Start chat
     </Button>
   );

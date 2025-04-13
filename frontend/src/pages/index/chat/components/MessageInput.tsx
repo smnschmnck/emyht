@@ -1,4 +1,5 @@
 import { IconButton } from '@/components/ui/IconButton';
+import { Spinner } from '@/components/ui/Spinner';
 import { HttpError } from '@/errors/httpError/httpError';
 import { useChats } from '@/hooks/api/chats';
 import { useChatMessages } from '@/hooks/api/messages';
@@ -91,7 +92,7 @@ export const MessageInput: FC<{
   const { refetch: refetchChats } = useChats();
   const { refetch: refetchChatMessages } = useChatMessages(chatId);
 
-  const { mutate: sendMessage } = useMutation({
+  const { mutate: sendMessage, isPending: isSending } = useMutation({
     mutationFn: async (event: FormEvent) => {
       event.preventDefault();
 
@@ -145,7 +146,11 @@ export const MessageInput: FC<{
 
   return (
     <form
-      onSubmit={sendMessage}
+      onSubmit={(e: FormEvent) => {
+        if (!isSending) {
+          sendMessage(e);
+        }
+      }}
       className="flex h-12 w-full items-center justify-center gap-1 rounded-xl border border-zinc-200 bg-white px-1.5 transition focus-within:border-blue-500"
     >
       <div>
@@ -165,10 +170,12 @@ export const MessageInput: FC<{
       />
       <div>
         <button
+          disabled={isSending}
           type="submit"
-          className="h-8 w-8 rounded-lg bg-blue-600 p-1.5 text-white transition hover:bg-blue-500"
+          className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 p-1.5 text-white transition hover:bg-blue-500 disabled:pointer-events-none disabled:opacity-50"
         >
-          <PaperAirplaneIcon />
+          {isSending && <Spinner variant="bright" size="sm" />}
+          {!isSending && <PaperAirplaneIcon />}
         </button>
       </div>
     </form>
