@@ -1,18 +1,29 @@
 import { Badge } from '@/components/ui/Bagde';
 import { useContactRequests } from '@/hooks/api/contacts';
 import emyhtLogo from '@assets/images/emyht-logo.svg';
-import { createLink } from '@tanstack/react-router';
-import { FC, ReactNode } from 'react';
+import { createLink, LinkComponent } from '@tanstack/react-router';
+import React, { FC } from 'react';
 import ballonIllustration from './assets/balloon_illustration.svg';
 
-const CtaLinkWrapper = (props: { children: ReactNode }) => (
-  <div
-    className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl border border-zinc-100 bg-white px-12 text-sm font-semibold shadow-xs transition hover:bg-zinc-100"
-    {...props}
-  />
+type BasicLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement>;
+
+const BasicLinkComponent = React.forwardRef<HTMLAnchorElement, BasicLinkProps>(
+  (props, ref) => {
+    return (
+      <a
+        ref={ref}
+        {...props}
+        className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl border border-zinc-100 bg-white px-12 text-sm font-semibold shadow-xs transition hover:bg-zinc-100"
+      />
+    );
+  }
 );
 
-const CtaLink = createLink(CtaLinkWrapper);
+const CreatedLinkComponent = createLink(BasicLinkComponent);
+
+export const CtaLink: LinkComponent<typeof BasicLinkComponent> = (props) => {
+  return <CreatedLinkComponent preload={'intent'} {...props} />;
+};
 
 export const IndexPage: FC = () => {
   const { data } = useContactRequests();

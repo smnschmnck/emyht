@@ -1,9 +1,10 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import { ButtonHTMLAttributes, FC } from 'react';
 import { twMerge } from 'tailwind-merge';
+import { Spinner } from './Spinner';
 
 const buttonVariants = cva(
-  'h-10 rounded-lg px-4 text-sm cursor-pointer font-medium transition disabled:bg-zinc-100 disabled:text-zinc-200 focus:ring-2 ring-offset-2 focus:ring-blue-600 outline-hidden',
+  'h-10 rounded-lg px-4 text-sm font-medium transition disabled:opacity-50 disabled:pointer-events-none focus:ring-2 ring-offset-2 focus:ring-blue-600 outline-hidden',
   {
     variants: {
       variant: {
@@ -22,20 +23,28 @@ const buttonVariants = cva(
 
 interface ButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {}
+    VariantProps<typeof buttonVariants> {
+  isLoading?: boolean;
+}
 
 export const Button: FC<ButtonProps> = ({
   children,
   type = 'button',
   className,
   variant,
+  disabled,
+  isLoading,
   ...props
 }) => (
   <button
+    disabled={disabled || isLoading}
     className={twMerge(buttonVariants({ variant, className }))}
     type={type}
     {...props}
   >
-    {children}
+    <span className="flex items-center justify-center gap-2">
+      {!!isLoading && <Spinner variant="bright" size="sm" />}
+      {children}
+    </span>
   </button>
 );

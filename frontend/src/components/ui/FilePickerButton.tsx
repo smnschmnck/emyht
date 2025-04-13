@@ -28,7 +28,7 @@ export const FilePickerButton: FC<FilePickerButtonProps> = ({
       />
       <label
         htmlFor={id}
-        className="flex h-9 cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white ring-offset-2 transition peer-focus:ring-2 peer-focus:ring-blue-600 hover:bg-blue-500"
+        className="flex h-9 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white ring-offset-2 transition peer-focus:ring-2 peer-focus:ring-blue-600 hover:bg-blue-500"
       >
         <PlusIcon className="h-6 w-6" />
         <span>Add file</span>

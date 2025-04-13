@@ -6,9 +6,11 @@ import { ChatHeader } from './components/ChatHeader';
 import { ChatMessage } from './components/ChatMessage';
 import { MessageInput } from './components/MessageInput';
 import { FilePicker, FilePickerFile } from './components/FilePicker';
+import { Spinner } from '@/components/ui/Spinner';
 
 const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
-  const { data: messages } = useChatMessages(chatId);
+  const { data: messages, isLoading: isLoadingMessages } =
+    useChatMessages(chatId);
   const { refetch: refetchChats } = useChats();
   const scrollContainer = useRef<null | HTMLDivElement>(null);
 
@@ -30,12 +32,19 @@ const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
       ref={scrollContainer}
       className="flex w-full grow justify-center overflow-y-scroll pt-4"
     >
-      <ul className="flex h-20 w-full max-w-3xl flex-col gap-5">
-        {messages?.map((message) => (
-          <ChatMessage key={message.messageId} message={message} />
-        ))}
-        <li className="h-0 w-0 overflow-hidden opacity-0">end of messages</li>
-      </ul>
+      {!messages && isLoadingMessages && (
+        <div className="flex h-full w-full items-center justify-center">
+          <Spinner />
+        </div>
+      )}
+      {!!messages && (
+        <ul className="flex h-20 w-full max-w-3xl flex-col gap-5">
+          {messages.map((message) => (
+            <ChatMessage key={message.messageId} message={message} />
+          ))}
+          <li className="h-0 w-0 overflow-hidden opacity-0">end of messages</li>
+        </ul>
+      )}
     </div>
   );
 };
