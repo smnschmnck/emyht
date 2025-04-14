@@ -2,6 +2,8 @@ import { Avatar } from '@/components/ui/Avatar';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Spinner } from '@/components/ui/Spinner';
 import { Contact } from '@/hooks/api/contacts';
+import { useDataChangeDetector } from '@/hooks/utils/useDataChangeDetector';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import { FC, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
@@ -33,6 +35,18 @@ export const UserList: FC<UserListProps> = ({
   emptyMessage,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [animationParent, enable] = useAutoAnimate();
+
+  useDataChangeDetector({
+    data: contacts,
+    onChange: () => {
+      enable(true);
+    },
+    onNoChange: () => {
+      enable(false);
+    },
+  });
+
   const changeUser = (id: string) => {
     if (selectedUsers.includes(id)) {
       const filteredUsers = selectedUsers.filter((u) => u !== id);
@@ -65,7 +79,7 @@ export const UserList: FC<UserListProps> = ({
         />
       </div>
       <div className="h-full overflow-scroll">
-        <ul>
+        <ul ref={animationParent}>
           {!!filteredUsers &&
             filteredUsers.map((contact) => (
               <li key={contact.uuid}>
