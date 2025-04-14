@@ -170,9 +170,15 @@ export const MessageInput: FC<{
       />
       <div>
         <button
+          type="submit"
+          className="h-8 w-8 rounded-lg bg-blue-600 p-1.5 text-white transition hover:bg-blue-500"
+        >
+          <PaperAirplaneIcon />
+        </button>
+        <button
           disabled={isSending}
           type="submit"
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 p-1.5 text-white transition hover:bg-blue-500 disabled:pointer-events-none disabled:opacity-50"
+          className="grid h-8 w-8 place-items-center rounded-lg bg-blue-600 p-1.5 text-white transition hover:bg-blue-500 disabled:pointer-events-none disabled:opacity-50"
         >
           {isSending && <Spinner variant="bright" size="sm" />}
           {!isSending && <PaperAirplaneIcon />}
