@@ -21,7 +21,7 @@ const BasicLinkComponent = React.forwardRef<HTMLAnchorElement, BasicLinkProps>(
 
 const CreatedLinkComponent = createLink(BasicLinkComponent);
 
-export const CtaLink: LinkComponent<typeof BasicLinkComponent> = (props) => {
+const CtaLink: LinkComponent<typeof BasicLinkComponent> = (props) => {
   return <CreatedLinkComponent preload={'intent'} {...props} />;
 };
 
