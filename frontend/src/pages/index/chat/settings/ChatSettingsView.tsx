@@ -61,7 +61,7 @@ const GroupPropertiesSettings = () => {
   const [newName, setNewName] = useState('');
   const navigate = useNavigate();
 
-  const { mutate: leaveGroup } = useMutation({
+  const { mutate: leaveGroup, isPending: isLeaving } = useMutation({
     mutationFn: async () => {
       const res = await fetchWithDefaults('/leaveGroupChat', {
         method: 'post',
@@ -112,7 +112,11 @@ const GroupPropertiesSettings = () => {
       </div>
       <div className="flex flex-col gap-3 text-red-500">
         <h4 className="text-sm font-semibold">Leave Group</h4>
-        <Button variant="destructive" onClick={() => leaveGroup()}>
+        <Button
+          variant="destructive"
+          onClick={() => leaveGroup()}
+          isLoading={isLeaving}
+        >
           Leave Group
         </Button>
       </div>
@@ -132,7 +136,7 @@ const GroupMemberRemove = () => {
     chatId,
   });
 
-  const { mutate: removeUsers } = useMutation({
+  const { mutate: removeUsers, isPending: isRemoving } = useMutation({
     mutationFn: async () => {
       const body = {
         uuidsToRemove: selectedUsers,
@@ -176,6 +180,7 @@ const GroupMemberRemove = () => {
       <Button
         variant="destructive"
         disabled={selectedUsers.length <= 0}
+        isLoading={isRemoving}
         onClick={() => removeUsers()}
       >
         Remove users
@@ -194,7 +199,7 @@ const GroupMemberAdd = () => {
   } = useMembersNotInGroup({ chatId });
   const { refetch: refetchGroupMembers } = useGroupMembers({ chatId });
 
-  const { mutate: addUsers } = useMutation({
+  const { mutate: addUsers, isPending: isAdding } = useMutation({
     mutationFn: async () => {
       const body = {
         chatID: chatId,
@@ -236,7 +241,11 @@ const GroupMemberAdd = () => {
           setSelectedUsers={setSelectedUsers}
         />
       </div>
-      <Button disabled={selectedUsers.length <= 0} onClick={() => addUsers()}>
+      <Button
+        disabled={selectedUsers.length <= 0}
+        onClick={() => addUsers()}
+        isLoading={isAdding}
+      >
         Add users
       </Button>
     </Card>
