@@ -24,16 +24,16 @@ importers:
         version: 0.12.0(typescript@5.8.3)(zod@3.24.2)
       '@tanstack/query-sync-storage-persister':
         specifier: ^5.59.17
-        version: 5.73.3
+        version: 5.74.3
       '@tanstack/react-query':
         specifier: ^5.51.23
-        version: 5.73.3(react@19.1.0)
+        version: 5.74.3(react@19.1.0)
       '@tanstack/react-query-persist-client':
         specifier: ^5.59.19
-        version: 5.73.3(@tanstack/react-query@5.73.3(react@19.1.0))(react@19.1.0)
+        version: 5.74.3(@tanstack/react-query@5.74.3(react@19.1.0))(react@19.1.0)
       '@tanstack/react-router':
-        specifier: 1.115.3
-        version: 1.115.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: 1.116.0
+        version: 1.116.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.1
@@ -97,7 +97,7 @@ importers:
         version: 0.4.19(eslint@9.24.0(jiti@2.4.2))
       knip:
         specifier: ^5.45.0
-        version: 5.50.2(@types/node@22.14.1)(typescript@5.8.3)
+        version: 5.50.3(@types/node@22.14.1)(typescript@5.8.3)
       postcss:
         specifier: ^8.4.41
         version: 8.5.3
@@ -2018,45 +2018,45 @@ packages:
       }
     engines: { node: '>=12' }
 
-  '@tanstack/query-core@5.73.3':
+  '@tanstack/query-core@5.74.3':
     resolution:
       {
-        integrity: sha512-LUpsgVT3IkvOECdkQ3QD6esczSH71mAzH/LDZ2cu8j6w430v5W0JB1ulzsG8FFwFBd5fm/ePM2DFpg9TucRMgQ==,
+        integrity: sha512-Mqk+5o3qTuAiZML248XpNH8r2cOzl15+LTbUsZQEwvSvn1GU4VQhvqzAbil36p+MBxpr/58oBSnRzhrBevDhfg==,
       }
 
-  '@tanstack/query-persist-client-core@5.73.3':
+  '@tanstack/query-persist-client-core@5.74.3':
     resolution:
       {
-        integrity: sha512-5lCHpcBSofGgV0iXqV6WWDt2l0VvnPmjhWrS7sKDKdbZfryfdbY6iCMDmzIcqxo9Rwvk0FZp239SG2mRD3rWkw==,
+        integrity: sha512-GDEnuMc/2Z3S4gz2TWF86qgsGkPdfd+/XRxnXlv/En/yFGoN/ejqhfZKqA2YrouLp3m0VyPmztvVf2jJ1opiVg==,
       }
 
-  '@tanstack/query-sync-storage-persister@5.73.3':
+  '@tanstack/query-sync-storage-persister@5.74.3':
     resolution:
       {
-        integrity: sha512-HmQMY3O23xsQAmpIO3a+SCjMbq5+N6fqfLAgjinUPInPSQMfWea9aPrCoIl0qZt9poAJZTHom7VNBtR8JZuRwA==,
+        integrity: sha512-XqgMr5mfR5oaT8+b9xq3R0T2jn+Uo12mmGIrRYPn3IH0xIU07I4f0TqY91iLChnBFw5niRYjd2mqTgBBOKzd0A==,
       }
 
-  '@tanstack/react-query-persist-client@5.73.3':
+  '@tanstack/react-query-persist-client@5.74.3':
     resolution:
       {
-        integrity: sha512-O2CJloSyvIDZHWV5deBDgkb5Nn63RhMhiY7K+xUjxpzg8pxvBRtKLQaI897NojPFMLKiWjYzO3Rr8YSKcV7i/w==,
-      }
-    peerDependencies:
-      '@tanstack/react-query': ^5.73.3
-      react: ^18 || ^19
-
-  '@tanstack/react-query@5.73.3':
-    resolution:
-      {
-        integrity: sha512-umsAEsVsSSnrOZrstX/OlctdqkRZm6vPsetmbl241tdNo0jT3s+0bUoof9kCaTsPr/GopPlbJ1OYlrZj4toKzg==,
+        integrity: sha512-rIUvcyApbjChDRQ0ia4JWj5OUe3HsDHiDkTJH1Q2iPUTAG8tQpxSeylz7/SYpyFd+MiRg0i4YbKvwDmNbZ8t5w==,
       }
     peerDependencies:
+      '@tanstack/react-query': ^5.74.3
       react: ^18 || ^19
 
-  '@tanstack/react-router@1.115.3':
+  '@tanstack/react-query@5.74.3':
     resolution:
       {
-        integrity: sha512-5mV9t0hW/gMdUeBabY+/lU3HuvGdaYUMDvlLpCG5dQJXBU0UzHwPAM2xy2UTte9Ty1tqxJqeA7DQoyNe/u5SEw==,
+        integrity: sha512-QrycUn0wxjVPzITvQvOxFRdhlAwIoOQSuav7qWD4SWCoKCdLbyRZ2vji2GuBq/glaxbF4wBx3fqcYRDOt8KDTA==,
+      }
+    peerDependencies:
+      react: ^18 || ^19
+
+  '@tanstack/react-router@1.116.0':
+    resolution:
+      {
+        integrity: sha512-ZBAg5Q6zJf0mnP9DYPiaaQ/wLDH2ujCMi/2RllpH86VUkdkyvQQzpAyKoiYJ891wh9OPgj6W6tPrzB4qy5FpRA==,
       }
     engines: { node: '>=12' }
     peerDependencies:
@@ -3415,10 +3415,10 @@ packages:
         integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==,
       }
 
-  knip@5.50.2:
+  knip@5.50.3:
     resolution:
       {
-        integrity: sha512-TGpfeeSMlaRd5wUkcb4HsVGSiQrE289LZF9qtW2TLHkAZbB2rM53wVQbXSf1KjOvJfBSZYSyYQ6q79lufrwsPw==,
+        integrity: sha512-0A4G7UPucGTCpNh5vHSfL0+tVQIuKfJKdg8sAq6EC3COKbAchEbM+TeN4w32OrnJW9CesHs71lqftlggMVfW2A==,
       }
     engines: { node: '>=18.18.0' }
     hasBin: true
@@ -5991,29 +5991,29 @@ snapshots:
 
   '@tanstack/history@1.115.0': {}
 
-  '@tanstack/query-core@5.73.3': {}
+  '@tanstack/query-core@5.74.3': {}
 
-  '@tanstack/query-persist-client-core@5.73.3':
+  '@tanstack/query-persist-client-core@5.74.3':
     dependencies:
-      '@tanstack/query-core': 5.73.3
+      '@tanstack/query-core': 5.74.3
 
-  '@tanstack/query-sync-storage-persister@5.73.3':
+  '@tanstack/query-sync-storage-persister@5.74.3':
     dependencies:
-      '@tanstack/query-core': 5.73.3
-      '@tanstack/query-persist-client-core': 5.73.3
+      '@tanstack/query-core': 5.74.3
+      '@tanstack/query-persist-client-core': 5.74.3
 
-  '@tanstack/react-query-persist-client@5.73.3(@tanstack/react-query@5.73.3(react@19.1.0))(react@19.1.0)':
+  '@tanstack/react-query-persist-client@5.74.3(@tanstack/react-query@5.74.3(react@19.1.0))(react@19.1.0)':
     dependencies:
-      '@tanstack/query-persist-client-core': 5.73.3
-      '@tanstack/react-query': 5.73.3(react@19.1.0)
+      '@tanstack/query-persist-client-core': 5.74.3
+      '@tanstack/react-query': 5.74.3(react@19.1.0)
       react: 19.1.0
 
-  '@tanstack/react-query@5.73.3(react@19.1.0)':
+  '@tanstack/react-query@5.74.3(react@19.1.0)':
     dependencies:
-      '@tanstack/query-core': 5.73.3
+      '@tanstack/query-core': 5.74.3
       react: 19.1.0
 
-  '@tanstack/react-router@1.115.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@tanstack/react-router@1.116.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       '@tanstack/history': 1.115.0
       '@tanstack/react-store': 0.7.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -6914,7 +6914,7 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  knip@5.50.2(@types/node@22.14.1)(typescript@5.8.3):
+  knip@5.50.3(@types/node@22.14.1)(typescript@5.8.3):
     dependencies:
       '@nodelib/fs.walk': 1.2.8
       '@types/node': 22.14.1

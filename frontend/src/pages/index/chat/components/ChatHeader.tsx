@@ -13,7 +13,7 @@ import { FC } from 'react';
 
 export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
   const curChat = useCurrentChat(chatId);
-  const { data: chatInfo } = useQuery({
+  const { data: chatInfo, isLoading: isLoadingChatInfo } = useQuery({
     queryKey: ['chatInfo', chatId],
     queryFn: async () => {
       const res = await fetchWithDefaults(`/chatInfo/${chatId}`);
@@ -51,7 +51,12 @@ export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
               <h1 className="font-semibold">{curChat?.chatName}</h1>
             </div>
             <div className="flex h-5 min-w-24 items-center">
-              <p className="text-zinc-500">{chatInfo?.info}</p>
+              {!chatInfo && isLoadingChatInfo && (
+                <div className="h-4 w-24 animate-pulse rounded-md bg-zinc-300"></div>
+              )}
+              {!!chatInfo?.info && (
+                <p className="text-zinc-500">{chatInfo?.info}</p>
+              )}
             </div>
           </div>
         </Link>
