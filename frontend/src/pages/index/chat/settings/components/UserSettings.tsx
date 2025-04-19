@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useChatsUserCanBeAddedTo } from '../hooks/useMembers';
 import { chatSettingsRoute } from '../route';
+import { EntityList } from '@/components/EntityList';
 
 const UserPropertiesSettings = () => {
   return (
@@ -53,6 +54,12 @@ const AddToGroup = () => {
     },
   });
 
+  const entities = chatsUserCanBeAddedTo?.map((chat) => ({
+    id: chat.chatId,
+    name: chat.chatName,
+    pictureUrl: chat.pictureUrl,
+  }));
+
   return (
     <Card>
       <div>
@@ -61,7 +68,16 @@ const AddToGroup = () => {
           Select the chats you want to add {currentChat?.chatName} to
         </p>
       </div>
-      <div className="h-72"></div>
+      <div className="h-72">
+        <EntityList
+          entities={entities}
+          isLoading={isLoadingChatsUserCanBeAddedTo}
+          selectedEntities={selectedChats}
+          setSelectedEntities={setSelectedChats}
+          emptyMessage="No Chats"
+          searchInputLabel="Search Chats"
+        />
+      </div>
       <Button
         disabled={selectedChats.length <= 0}
         onClick={() => addToChats()}
