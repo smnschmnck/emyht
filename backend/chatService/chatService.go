@@ -774,20 +774,12 @@ func GetGroupchatsNewUserIsNotPartOf(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	type userReq struct {
-		NewUserID string `json:"newUserID" validate:"required"`
-	}
-	req := new(userReq)
-	err = c.Bind(&req)
-	if err != nil {
-		return c.String(http.StatusBadRequest, "BAD REQUEST")
-	}
-	err = validate.Struct(req)
-	if err != nil {
-		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	newUserId := c.Param("uuid")
+	if len(newUserId) <= 0 {
+		return c.String(http.StatusBadRequest, "UUID MISSING")
 	}
 
-	groupChats, err := getGroupchatsNewUserIsNotPartOf(reqUUID, req.NewUserID)
+	groupChats, err := getGroupchatsNewUserIsNotPartOf(reqUUID, newUserId)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}

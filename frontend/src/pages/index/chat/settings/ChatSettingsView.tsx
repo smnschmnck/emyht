@@ -4,6 +4,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Link } from '@tanstack/react-router';
 import { chatSettingsRoute } from './route';
 import { GroupSettings } from './components/GroupSettings';
+import { UserSettings } from './components/UserSettings';
 
 const Header = ({
   chatType,
@@ -58,6 +59,7 @@ export const ChatSettingsView = () => {
         </IconLink>
       </div>
       {curChat?.chatType === 'group' && <GroupSettings />}
+      {curChat?.chatType === 'one_on_one' && <UserSettings />}
     </div>
   );
 };

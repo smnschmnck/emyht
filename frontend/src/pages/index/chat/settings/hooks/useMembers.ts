@@ -1,3 +1,4 @@
+import { Chat } from '@/hooks/api/chats';
 import { Contact } from '@/hooks/api/contacts';
 import { fetchWithDefaults } from '@/utils/fetch';
 import { useQuery } from '@tanstack/react-query';
@@ -28,6 +29,23 @@ export const useGroupMembers = ({ chatId }: { chatId: string }) => {
       }
 
       return (await res.json()) as Contact[];
+    },
+  });
+};
+
+export const useChatsUserCanBeAddedTo = ({ uuid }: { uuid: string }) => {
+  return useQuery({
+    queryKey: ['chatsUserCanBeAddedTo', { uuid }],
+    queryFn: async () => {
+      const res = await fetchWithDefaults(
+        `/getGroupchatsNewUserIsNotPartOf/${uuid}`
+      );
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+
+      return (await res.json()) as Chat[];
     },
   });
 };

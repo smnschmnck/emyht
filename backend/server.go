@@ -56,7 +56,7 @@ func handleRequest() {
 	e.POST("/groupChatPicturePutURL", chatService.GetGroupPicturePutURL)
 	e.POST("/leaveGroupChat", chatService.LeaveGroupChat)
 	e.GET("/oneOnOneChatParticipant/:chatID", chatService.GetOneOnOneChatParticipant)
-	e.POST("/getGroupchatsNewUserIsNotPartOf", chatService.GetGroupchatsNewUserIsNotPartOf)
+	e.POST("/getGroupchatsNewUserIsNotPartOf/:uuid", chatService.GetGroupchatsNewUserIsNotPartOf)
 	e.GET("/contactsNotInChat/:chatID", chatService.GetContactsNotInChat)
 	//user relationships
 	e.POST("/contactRequest", contactService.SendContactRequest)
