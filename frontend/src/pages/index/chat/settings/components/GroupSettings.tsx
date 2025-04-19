@@ -2,7 +2,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { FormInput } from '@/components/ui/FormInput';
-import { UserList } from '@/components/UserList';
+import { EntityList } from '@/components/EntityList';
 import { useChats, useCurrentChat } from '@/hooks/api/chats';
 import { fetchWithDefaults } from '@/utils/fetch';
 import { useMutation } from '@tanstack/react-query';
@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useGroupMembers, useMembersNotInGroup } from '../hooks/useMembers';
 import { chatSettingsRoute } from '../route';
+import { contactsToEntities } from '@/utils/contactsToEntities';
 
 const GroupPropertiesSettings = () => {
   const { chatId } = chatSettingsRoute.useParams();
@@ -118,6 +119,8 @@ const GroupMemberRemove = () => {
     },
   });
 
+  const entities = contactsToEntities(groupMembers);
+
   return (
     <Card>
       <div>
@@ -127,12 +130,13 @@ const GroupMemberRemove = () => {
         </p>
       </div>
       <div className="h-72">
-        <UserList
-          contacts={groupMembers}
+        <EntityList
+          entities={entities}
           isLoading={isLoadingUsers}
-          selectedUsers={selectedUsers}
-          setSelectedUsers={setSelectedUsers}
+          selectedEntities={selectedUsers}
+          setSelectedEntities={setSelectedUsers}
           emptyMessage="No users to remove"
+          searchInputLabel={'Select users'}
         />
       </div>
       <Button
@@ -182,6 +186,8 @@ const GroupMemberAdd = () => {
     },
   });
 
+  const entities = contactsToEntities(usersNotInChat);
+
   return (
     <Card>
       <div>
@@ -191,12 +197,13 @@ const GroupMemberAdd = () => {
         </p>
       </div>
       <div className="h-72">
-        <UserList
+        <EntityList
           emptyMessage="No users to add"
-          contacts={usersNotInChat}
+          entities={entities}
           isLoading={isLoadingUsers}
-          selectedUsers={selectedUsers}
-          setSelectedUsers={setSelectedUsers}
+          selectedEntities={selectedUsers}
+          setSelectedEntities={setSelectedUsers}
+          searchInputLabel={'Search users'}
         />
       </div>
       <Button

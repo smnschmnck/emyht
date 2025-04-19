@@ -1,32 +1,39 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Spinner } from '@/components/ui/Spinner';
-import { Contact } from '@/hooks/api/contacts';
 import { useDataChangeDetector } from '@/hooks/utils/useDataChangeDetector';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { FC, useState } from 'react';
 import { SelectedIndicator } from './ui/SelectedIndicator';
 
-type UserListProps = {
-  contacts?: Contact[];
-  isLoading: boolean;
-  selectedUsers: string[];
-  setSelectedUsers: (selectedUsers: string[]) => void;
-  emptyMessage?: string;
+type Entity = {
+  id: string;
+  name: string;
+  pictureUrl: string;
 };
 
-export const UserList: FC<UserListProps> = ({
-  contacts,
-  selectedUsers,
+type EntityListProps = {
+  entities?: Entity[];
+  isLoading: boolean;
+  selectedEntities: string[];
+  setSelectedEntities: (selectedEntities: string[]) => void;
+  emptyMessage: string;
+  searchInputLabel: string;
+};
+
+export const EntityList: FC<EntityListProps> = ({
+  entities,
+  selectedEntities,
   isLoading,
-  setSelectedUsers,
+  setSelectedEntities,
   emptyMessage,
+  searchInputLabel,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [animationParent, enable] = useAutoAnimate();
 
   useDataChangeDetector({
-    data: contacts,
+    data: entities,
     onChange: () => {
       enable(true);
     },
@@ -35,32 +42,32 @@ export const UserList: FC<UserListProps> = ({
     },
   });
 
-  const changeUser = (id: string) => {
-    if (selectedUsers.includes(id)) {
-      const filteredUsers = selectedUsers.filter((u) => u !== id);
-      setSelectedUsers(filteredUsers);
+  const toggleEntitySelection = (id: string) => {
+    if (selectedEntities.includes(id)) {
+      const filteredEntities = selectedEntities.filter((u) => u !== id);
+      setSelectedEntities(filteredEntities);
       return;
     }
 
-    setSelectedUsers([...selectedUsers, id]);
+    setSelectedEntities([...selectedEntities, id]);
   };
 
   const onSearchQueryChange = (query: string) => {
     setSearchQuery(query);
   };
 
-  const filteredUsers = contacts?.filter((contact) => {
-    const curUsernameLowerCase = contact.username.toLowerCase();
+  const filteredEntities = entities?.filter((entity) => {
+    const curNameLowerCase = entity.name.toLowerCase();
     const queryLowerCase = searchQuery.toLowerCase();
 
-    return curUsernameLowerCase.includes(queryLowerCase);
+    return curNameLowerCase.includes(queryLowerCase);
   });
 
   return (
     <div className="flex h-full flex-col gap-2">
       <div>
         <SearchInput
-          placeholder="Search contacts"
+          placeholder={searchInputLabel}
           value={searchQuery}
           onChange={(e) => onSearchQueryChange(e.target.value)}
           handleClickClear={() => onSearchQueryChange('')}
@@ -68,20 +75,20 @@ export const UserList: FC<UserListProps> = ({
       </div>
       <div className="h-full overflow-scroll">
         <ul ref={animationParent}>
-          {!!filteredUsers &&
-            filteredUsers.map((contact) => (
-              <li key={contact.uuid}>
+          {!!filteredEntities &&
+            filteredEntities.map((entity) => (
+              <li key={entity.id}>
                 <button
-                  onClick={() => changeUser(contact.uuid)}
-                  aria-label={`Add ${contact.username} to chat`}
+                  onClick={() => toggleEntitySelection(entity.id)}
+                  aria-label={`Toggle ${entity.name} selection`}
                   className="flex w-full items-center justify-between border-b border-b-zinc-100 p-2 transition hover:bg-zinc-100"
                 >
                   <div className="flex items-center gap-4">
-                    <Avatar imgUrl={contact.pictureUrl} />
-                    <p className="text-sm font-semibold">{contact.username}</p>
+                    <Avatar imgUrl={entity.pictureUrl} />
+                    <p className="text-sm font-semibold">{entity.name}</p>
                   </div>
                   <SelectedIndicator
-                    selected={selectedUsers.includes(contact.uuid)}
+                    selected={selectedEntities.includes(entity.id)}
                   />
                 </button>
               </li>
@@ -92,16 +99,10 @@ export const UserList: FC<UserListProps> = ({
             <Spinner />
           </div>
         )}
-        {((!!filteredUsers && filteredUsers.length <= 0) || !filteredUsers) && (
+        {((!!filteredEntities && filteredEntities.length <= 0) ||
+          !filteredEntities) && (
           <div className="flex h-full w-full items-center justify-center py-8">
-            {!!emptyMessage && (
-              <span className="font-semibold text-zinc-500">
-                {emptyMessage}
-              </span>
-            )}
-            {!emptyMessage && (
-              <span className="font-semibold text-zinc-500">No contacts</span>
-            )}
+            <span className="font-semibold text-zinc-500">{emptyMessage}</span>
           </div>
         )}
       </div>

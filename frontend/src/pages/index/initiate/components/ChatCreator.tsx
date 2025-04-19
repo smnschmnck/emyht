@@ -3,8 +3,9 @@ import { FC, useState } from 'react';
 import { GroupChatCreator } from './GroupChatCreator';
 import { PersonalChatCreator } from './PersonalChatCreator';
 import { Card } from '@/components/ui/Card';
-import { UserList } from '@/components/UserList';
+import { EntityList } from '@/components/EntityList';
 import { useContacts } from '@/hooks/api/contacts';
+import { contactsToEntities } from '@/utils/contactsToEntities';
 
 type ChatModes = 'personal' | 'group';
 
@@ -20,6 +21,8 @@ export const ChatCreator: FC = () => {
     setSelectedUsers(selectedUsers);
   };
 
+  const entities = contactsToEntities(contacts);
+
   return (
     <Card>
       <div>
@@ -30,11 +33,13 @@ export const ChatCreator: FC = () => {
       </div>
       <div className="flex flex-col gap-10 xl:flex-row">
         <div className="h-96 max-h-60 w-full">
-          <UserList
-            contacts={contacts}
+          <EntityList
+            entities={entities}
             isLoading={isLoadingContacts}
-            selectedUsers={selectedUsers}
-            setSelectedUsers={onUserChange}
+            selectedEntities={selectedUsers}
+            setSelectedEntities={onUserChange}
+            emptyMessage="No Contacts"
+            searchInputLabel="Search Contacts"
           />
         </div>
         <div className="flex h-full w-full flex-col">
