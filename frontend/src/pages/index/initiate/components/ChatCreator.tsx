@@ -1,12 +1,16 @@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/RadioGroup';
 import { FC, useState } from 'react';
 import { GroupChatCreator } from './GroupChatCreator';
-import { UserList } from './UserList';
 import { PersonalChatCreator } from './PersonalChatCreator';
+import { Card } from '@/components/ui/Card';
+import { EntityList } from '@/components/EntityList';
+import { useContacts } from '@/hooks/api/contacts';
+import { contactsToEntities } from '@/utils/contactsToEntities';
 
 type ChatModes = 'personal' | 'group';
 
 export const ChatCreator: FC = () => {
+  const { data: contacts, isLoading: isLoadingContacts } = useContacts();
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [chatMode, setChatMode] = useState<ChatModes>('personal');
 
@@ -17,8 +21,10 @@ export const ChatCreator: FC = () => {
     setSelectedUsers(selectedUsers);
   };
 
+  const entities = contactsToEntities(contacts);
+
   return (
-    <div className="flex w-full flex-col gap-8 rounded-xl border border-zinc-100 bg-white p-6 shadow-xs lg:p-10">
+    <Card>
       <div>
         <h2 className="text-sm font-semibold">New chat</h2>
         <p className="text-sm text-zinc-500">
@@ -27,9 +33,13 @@ export const ChatCreator: FC = () => {
       </div>
       <div className="flex flex-col gap-10 xl:flex-row">
         <div className="h-96 max-h-60 w-full">
-          <UserList
-            selectedUsers={selectedUsers}
-            setSelectedUsers={onUserChange}
+          <EntityList
+            entities={entities}
+            isLoading={isLoadingContacts}
+            selectedEntities={selectedUsers}
+            setSelectedEntities={onUserChange}
+            emptyMessage="No Contacts"
+            searchInputLabel="Search Contacts"
           />
         </div>
         <div className="flex h-full w-full flex-col">
@@ -62,6 +72,6 @@ export const ChatCreator: FC = () => {
           )}
         </div>
       </div>
-    </div>
+    </Card>
   );
 };

@@ -4,6 +4,7 @@ import { Link } from '@/components/ui/Link';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Spinner } from '@/components/ui/Spinner';
 import { Chat, useChats } from '@/hooks/api/chats';
+import { useDataChangeDetector } from '@/hooks/utils/useDataChangeDetector';
 import { formatTimestamp } from '@/utils/dateUtils';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import {
@@ -13,7 +14,7 @@ import {
   PlayCircleIcon,
 } from '@heroicons/react/24/outline';
 import { Link as RouterLink } from '@tanstack/react-router';
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 
 type SingleChatProps = {
   chat: Chat;
@@ -60,32 +61,6 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => {
   );
 };
 
-const useDataChangeDetector = <T,>({
-  data,
-  onChange,
-  onNoChange,
-}: {
-  data: T;
-  onChange: () => void;
-  onNoChange?: () => void;
-}) => {
-  const [prevData, setPrevData] = useState(data);
-
-  useEffect(() => {
-    if (
-      prevData !== null &&
-      prevData !== undefined &&
-      JSON.stringify(prevData) !== JSON.stringify(data)
-    ) {
-      onChange();
-    } else {
-      onNoChange?.();
-    }
-
-    setPrevData(data);
-  }, [data, prevData, onChange, onNoChange]);
-};
-
 export const ChatList: FC = () => {
   const { data: chats, isLoading: isLoadingChats } = useChats();
   const [chatSearchQuery, setChatSearchQuery] = useState('');
@@ -117,6 +92,7 @@ export const ChatList: FC = () => {
           onChange={(e) => setChatSearchQuery(e.target.value)}
           value={chatSearchQuery}
           placeholder="Search chats"
+          handleClickClear={() => setChatSearchQuery('')}
         />
       </div>
       <div className="flex h-full w-full justify-center overflow-y-scroll">
