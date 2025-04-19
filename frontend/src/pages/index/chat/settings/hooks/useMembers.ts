@@ -1,4 +1,3 @@
-import { Chat } from '@/hooks/api/chats';
 import { Contact } from '@/hooks/api/contacts';
 import { fetchWithDefaults } from '@/utils/fetch';
 import { useQuery } from '@tanstack/react-query';
@@ -45,7 +44,11 @@ export const useChatsUserCanBeAddedTo = ({ uuid }: { uuid: string }) => {
         throw new Error(await res.text());
       }
 
-      return (await res.json()) as Chat[];
+      return (await res.json()) as {
+        chatId: string;
+        chatName: string;
+        pictureUrl: string;
+      }[];
     },
   });
 };

@@ -4,20 +4,8 @@ import { Spinner } from '@/components/ui/Spinner';
 import { Contact } from '@/hooks/api/contacts';
 import { useDataChangeDetector } from '@/hooks/utils/useDataChangeDetector';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
-import { CheckIcon } from '@heroicons/react/24/outline';
 import { FC, useState } from 'react';
-import { twMerge } from 'tailwind-merge';
-
-const SelectedIndicator: FC<{ selected: boolean }> = ({ selected }) => (
-  <div
-    className={twMerge(
-      'grid h-4 w-4 place-items-center rounded-md p-[0.2rem] text-white',
-      selected ? 'bg-blue-500' : 'border border-zinc-300'
-    )}
-  >
-    {selected && <CheckIcon strokeWidth={4} />}
-  </div>
-);
+import { SelectedIndicator } from './ui/SelectedIndicator';
 
 type UserListProps = {
   contacts?: Contact[];
