@@ -32,10 +32,13 @@ export const useGroupMembers = ({ chatId }: { chatId: string }) => {
   });
 };
 
-export const useChatsUserCanBeAddedTo = ({ uuid }: { uuid: string }) => {
+export const useChatsUserCanBeAddedTo = ({ uuid }: { uuid?: string }) => {
   return useQuery({
     queryKey: ['chatsUserCanBeAddedTo', { uuid }],
     queryFn: async () => {
+      if (!uuid) {
+        throw new Error('No UUID');
+      }
       const res = await fetchWithDefaults(
         `/getGroupchatsNewUserIsNotPartOf/${uuid}`
       );
