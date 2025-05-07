@@ -14,13 +14,57 @@ import { chatSettingsRoute } from '../route';
 import { contactsToEntities } from '@/utils/contactsToEntities';
 import { FilePickerButton } from '@/components/ui/FilePickerButton';
 
+const fetchGroupChatPicturePutUrl = async (picture: File) => {
+  const res = await fetchWithDefaults('/groupChatPicturePutURL', {
+    method: 'post',
+    body: JSON.stringify({
+      contentLength: picture.size,
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(await res.text());
+  }
+
+  return (await res.json()) as {
+    fileID: string;
+    presignedPutURL: string;
+  };
+};
+
 const GroupPicturePicker = () => {
   const { chatId } = chatSettingsRoute.useParams();
+  const { refetch: refetchChats } = useChats();
   const curChat = useCurrentChat(chatId);
   const [selectedPicture, setSelectedPicture] = useState<File | null>(null);
   const picturePreview = selectedPicture
     ? URL.createObjectURL(selectedPicture)
     : curChat?.chatPictureUrl;
+
+  const { mutate: updatePicture, isPending: isUpdatingPicture } = useMutation({
+    mutationFn: async () => {
+      if (!selectedPicture) {
+        throw new Error('No picture selected');
+      }
+      const { presignedPutURL } =
+        await fetchGroupChatPicturePutUrl(selectedPicture);
+
+      const { ok: uploadSucess } = await fetch(presignedPutURL, {
+        method: 'PUT',
+        body: selectedPicture,
+      });
+      if (!uploadSucess) {
+        throw new Error('Upload failed');
+      }
+    },
+    onSuccess: () => {
+      refetchChats();
+      toast.success(`Successfully updated group picture`);
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
 
   return (
     <div className="flex flex-col gap-3">
@@ -39,7 +83,9 @@ const GroupPicturePicker = () => {
           Pick new picture
         </FilePickerButton>
       </div>
-      <Button>Update Picture</Button>
+      <Button onClick={() => updatePicture()} isLoading={isUpdatingPicture}>
+        Update Picture
+      </Button>
     </div>
   );
 };

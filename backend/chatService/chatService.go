@@ -658,7 +658,7 @@ func GetGroupPicturePutURL(c echo.Context) error {
 	}
 
 	const MEGABYTE int64 = 1000000
-	const MAX_SIZE = 1 * MEGABYTE
+	const MAX_SIZE = 2 * MEGABYTE
 	type reqBody struct {
 		ContentLength int64 `json:"contentLength" validate:"required"`
 	}
