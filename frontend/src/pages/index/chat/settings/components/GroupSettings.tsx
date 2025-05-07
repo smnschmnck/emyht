@@ -12,6 +12,37 @@ import { toast } from 'sonner';
 import { useGroupMembers, useMembersNotInGroup } from '../hooks/useMembers';
 import { chatSettingsRoute } from '../route';
 import { contactsToEntities } from '@/utils/contactsToEntities';
+import { FilePickerButton } from '@/components/ui/FilePickerButton';
+
+const GroupPicturePicker = () => {
+  const { chatId } = chatSettingsRoute.useParams();
+  const curChat = useCurrentChat(chatId);
+  const [selectedPicture, setSelectedPicture] = useState<File | null>(null);
+  const picturePreview = selectedPicture
+    ? URL.createObjectURL(selectedPicture)
+    : curChat?.chatPictureUrl;
+
+  return (
+    <div className="flex flex-col gap-3">
+      <h4 className="text-sm font-semibold">Picture</h4>
+      <div className="flex w-full items-center justify-center gap-4">
+        <Avatar
+          imgUrl={picturePreview}
+          className="h-14 min-h-14 w-14 min-w-14"
+        />
+        <FilePickerButton
+          multiple={false}
+          id={'groupPicPicker'}
+          handleFileChange={(fileList) => setSelectedPicture(fileList.item(0))}
+          variant="secondary"
+        >
+          Pick new picture
+        </FilePickerButton>
+      </div>
+      <Button>Update Picture</Button>
+    </div>
+  );
+};
 
 const GroupPropertiesSettings = () => {
   const { chatId } = chatSettingsRoute.useParams();
@@ -79,19 +110,7 @@ const GroupPropertiesSettings = () => {
           Change name
         </Button>
       </div>
-      <div className="flex flex-col gap-3">
-        <h4 className="text-sm font-semibold">Picture</h4>
-        <div className="flex w-full items-center justify-center gap-4">
-          <Avatar
-            imgUrl={curChat?.chatPictureUrl}
-            className="h-14 min-h-14 w-14 min-w-14"
-          />
-          <Button className="w-full" variant="secondary">
-            Pick new picture
-          </Button>
-        </div>
-        <Button>Update Picture</Button>
-      </div>
+      <GroupPicturePicker />
       <div className="flex flex-col gap-3 text-red-500">
         <h4 className="text-sm font-semibold">Leave Group</h4>
         <Button
