@@ -907,6 +907,7 @@ func ChangeGroupName(c echo.Context) error {
 
 	err = conn.ChangeGroupName(context.Background(), queries.ChangeGroupNameParams{Name: req.NewName, ChatID: chatID})
 	if err != nil {
+		fmt.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
 

@@ -41,6 +41,27 @@ const GroupPropertiesSettings = () => {
     },
   });
 
+  const { mutate: renameGroup, isPending: isRenaming } = useMutation({
+    mutationFn: async () => {
+      const res = await fetchWithDefaults(`/changeGroupName/${chatId}`, {
+        method: 'post',
+        body: JSON.stringify({ newName }),
+      });
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+    },
+    onSuccess: () => {
+      refetchChats();
+      toast.success(`Renamed group to '${newName}'`);
+      setNewName('');
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
+
   return (
     <Card>
       <div>
@@ -54,7 +75,9 @@ const GroupPropertiesSettings = () => {
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
         />
-        <Button>Change name</Button>
+        <Button onClick={() => renameGroup()} isLoading={isRenaming}>
+          Change name
+        </Button>
       </div>
       <div className="flex flex-col gap-3">
         <h4 className="text-sm font-semibold">Picture</h4>
