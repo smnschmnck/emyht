@@ -340,3 +340,8 @@ WHERE uuid = $2;
 DELETE FROM user_chat
 WHERE chat_id = $1
     AND uuid = ANY($2::varchar(64) []);
+-- name: ChangeGroupName :exec
+UPDATE chats
+SET name = $1
+WHERE chat_id = $2
+    AND chat_type = "group";

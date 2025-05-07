@@ -100,6 +100,23 @@ func (q *Queries) BlockUser(ctx context.Context, arg BlockUserParams) error {
 	return err
 }
 
+const changeGroupName = `-- name: ChangeGroupName :exec
+UPDATE chats
+SET name = $1
+WHERE chat_id = $2
+    AND chat_type = "group"
+`
+
+type ChangeGroupNameParams struct {
+	Name   string `json:"name"`
+	ChatID string `json:"chatId"`
+}
+
+func (q *Queries) ChangeGroupName(ctx context.Context, arg ChangeGroupNameParams) error {
+	_, err := q.db.Exec(ctx, changeGroupName, arg.Name, arg.ChatID)
+	return err
+}
+
 const checkChatExists = `-- name: CheckChatExists :one
 SELECT count(user_chat.chat_id) >= 2 AS chatcount
 FROM user_chat

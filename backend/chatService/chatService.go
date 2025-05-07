@@ -866,6 +866,53 @@ func AddSingleUserToGroupChats(c echo.Context) error {
 	return c.String(http.StatusOK, "SUCCESS")
 }
 
+func ChangeGroupName(c echo.Context) error {
+	sessionID, responseErr := authService.GetSessionToken(c)
+	if responseErr != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	chatID := c.Param("chatID")
+	if len(chatID) <= 0 {
+		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
+	}
+
+	type changeNameReq struct {
+		NewName string `json:"newName" validate:"required"`
+	}
+	req := new(changeNameReq)
+	err = c.Bind(&req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	err = validate.Struct(req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	userInChat, err := chatHelpers.IsUserInChat(reqUUID, chatID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	if !userInChat {
+		c.String(http.StatusUnauthorized, "YOU ARE NOT A PARTICIPANT OF THIS CHAT")
+	}
+
+	conn := db.GetDB()
+
+	err = conn.ChangeGroupName(context.Background(), queries.ChangeGroupNameParams{Name: req.NewName, ChatID: chatID})
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
+	}
+
+	return c.String(http.StatusOK, "SUCCESS")
+}
+
 func GetOneOnOneChatParticipant(c echo.Context) error {
 	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
