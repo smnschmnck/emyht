@@ -345,3 +345,8 @@ UPDATE chats
 SET name = $1
 WHERE chat_id = $2
     AND chat_type = 'group';
+-- name: ChangeGroupPicture :exec
+UPDATE chats
+SET picture_url = $1
+WHERE chat_type = 'group'
+    AND chat_id = $2;

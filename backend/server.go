@@ -49,6 +49,7 @@ func handleRequest() {
 	e.GET("/chats", chatService.GetChats)
 	e.POST("/message", chatService.SendMessage)
 	e.POST("/changeGroupName/:chatID", chatService.ChangeGroupName)
+	e.POST("/changeGroupPicture/:chatID", chatService.ChangeGroupPicture)
 	e.GET("/chatMessages/:chatID", chatService.GetMessages)
 	e.GET("/chatInfo/:chatID", chatService.GetChatInfo)
 	e.GET("/groupMembers/:chatID", chatService.GetChatParticipantsExceptUser)

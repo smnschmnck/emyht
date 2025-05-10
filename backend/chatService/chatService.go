@@ -914,6 +914,66 @@ func ChangeGroupName(c echo.Context) error {
 	return c.String(http.StatusOK, "SUCCESS")
 }
 
+func ChangeGroupPicture(c echo.Context) error {
+	sessionID, responseErr := authService.GetSessionToken(c)
+	if responseErr != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
+	chatID := c.Param("chatID")
+	if len(chatID) <= 0 {
+		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
+	}
+
+	type changeNameReq struct {
+		NewPictureUrl string `json:"newPictureUrl" validate:"required"`
+	}
+	req := new(changeNameReq)
+	err = c.Bind(&req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	err = validate.Struct(req)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	userInChat, err := chatHelpers.IsUserInChat(reqUUID, chatID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	if !userInChat {
+		c.String(http.StatusUnauthorized, "YOU ARE NOT A PARTICIPANT OF THIS CHAT")
+	}
+
+	imageKey := reqUUID + "/gcPictures/" + req.NewPictureUrl + ".png"
+	imageExists, err := s3Helpers.CheckFileExists(imageKey)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+	if !imageExists {
+		return c.String(http.StatusNotFound, "IMAGEID NOT FOUND")
+	}
+	chatPicture := "storage.emyht.com/" + imageKey
+
+	conn := db.GetDB()
+	err = conn.ChangeGroupPicture(
+		context.Background(),
+		queries.ChangeGroupPictureParams{PictureUrl: chatPicture, ChatID: chatID},
+	)
+	if err != nil {
+		fmt.Println(err.Error())
+		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
+	}
+
+	return c.String(http.StatusOK, "SUCCESS")
+}
+
 func GetOneOnOneChatParticipant(c echo.Context) error {
 	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {

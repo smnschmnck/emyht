@@ -117,6 +117,23 @@ func (q *Queries) ChangeGroupName(ctx context.Context, arg ChangeGroupNameParams
 	return err
 }
 
+const changeGroupPicture = `-- name: ChangeGroupPicture :exec
+UPDATE chats
+SET picture_url = $1
+WHERE chat_type = 'group'
+    AND chat_id = $2
+`
+
+type ChangeGroupPictureParams struct {
+	PictureUrl string `json:"pictureUrl"`
+	ChatID     string `json:"chatId"`
+}
+
+func (q *Queries) ChangeGroupPicture(ctx context.Context, arg ChangeGroupPictureParams) error {
+	_, err := q.db.Exec(ctx, changeGroupPicture, arg.PictureUrl, arg.ChatID)
+	return err
+}
+
 const checkChatExists = `-- name: CheckChatExists :one
 SELECT count(user_chat.chat_id) >= 2 AS chatcount
 FROM user_chat
