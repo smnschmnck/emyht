@@ -244,8 +244,11 @@ SET unread_messages = 0
 WHERE chat_id = $1
     AND uuid = $2;
 -- name: GetChatMembers :many
-SELECT uuid
+SELECT users.uuid,
+    picture_url,
+    username
 FROM user_chat
+    JOIN users ON users.uuid = user_chat.uuid
 WHERE chat_id = $1;
 -- name: IsGroupChat :one
 SELECT chat_type = 'group'
@@ -333,3 +336,17 @@ RETURNING email_token;
 UPDATE users
 SET picture_url = $1
 WHERE uuid = $2;
+-- name: DeleteFromGroupChat :exec
+DELETE FROM user_chat
+WHERE chat_id = $1
+    AND uuid = ANY($2::varchar(64) []);
+-- name: ChangeGroupName :exec
+UPDATE chats
+SET name = $1
+WHERE chat_id = $2
+    AND chat_type = 'group';
+-- name: ChangeGroupPicture :exec
+UPDATE chats
+SET picture_url = $1
+WHERE chat_type = 'group'
+    AND chat_id = $2;

@@ -100,6 +100,40 @@ func (q *Queries) BlockUser(ctx context.Context, arg BlockUserParams) error {
 	return err
 }
 
+const changeGroupName = `-- name: ChangeGroupName :exec
+UPDATE chats
+SET name = $1
+WHERE chat_id = $2
+    AND chat_type = 'group'
+`
+
+type ChangeGroupNameParams struct {
+	Name   string `json:"name"`
+	ChatID string `json:"chatId"`
+}
+
+func (q *Queries) ChangeGroupName(ctx context.Context, arg ChangeGroupNameParams) error {
+	_, err := q.db.Exec(ctx, changeGroupName, arg.Name, arg.ChatID)
+	return err
+}
+
+const changeGroupPicture = `-- name: ChangeGroupPicture :exec
+UPDATE chats
+SET picture_url = $1
+WHERE chat_type = 'group'
+    AND chat_id = $2
+`
+
+type ChangeGroupPictureParams struct {
+	PictureUrl string `json:"pictureUrl"`
+	ChatID     string `json:"chatId"`
+}
+
+func (q *Queries) ChangeGroupPicture(ctx context.Context, arg ChangeGroupPictureParams) error {
+	_, err := q.db.Exec(ctx, changeGroupPicture, arg.PictureUrl, arg.ChatID)
+	return err
+}
+
 const checkChatExists = `-- name: CheckChatExists :one
 SELECT count(user_chat.chat_id) >= 2 AS chatcount
 FROM user_chat
@@ -361,6 +395,22 @@ func (q *Queries) DeleteChangeEmail(ctx context.Context, confirmationToken strin
 	return err
 }
 
+const deleteFromGroupChat = `-- name: DeleteFromGroupChat :exec
+DELETE FROM user_chat
+WHERE chat_id = $1
+    AND uuid = ANY($2::varchar(64) [])
+`
+
+type DeleteFromGroupChatParams struct {
+	ChatID  string   `json:"chatId"`
+	Column2 []string `json:"column2"`
+}
+
+func (q *Queries) DeleteFromGroupChat(ctx context.Context, arg DeleteFromGroupChatParams) error {
+	_, err := q.db.Exec(ctx, deleteFromGroupChat, arg.ChatID, arg.Column2)
+	return err
+}
+
 const emailExists = `-- name: EmailExists :one
 SELECT count(1) > 0
 FROM users
@@ -424,24 +474,33 @@ func (q *Queries) GetAvailableGroupChats(ctx context.Context, arg GetAvailableGr
 }
 
 const getChatMembers = `-- name: GetChatMembers :many
-SELECT uuid
+SELECT users.uuid,
+    picture_url,
+    username
 FROM user_chat
+    JOIN users ON users.uuid = user_chat.uuid
 WHERE chat_id = $1
 `
 
-func (q *Queries) GetChatMembers(ctx context.Context, chatID string) ([]string, error) {
+type GetChatMembersRow struct {
+	Uuid       string `json:"uuid"`
+	PictureUrl string `json:"pictureUrl"`
+	Username   string `json:"username"`
+}
+
+func (q *Queries) GetChatMembers(ctx context.Context, chatID string) ([]GetChatMembersRow, error) {
 	rows, err := q.db.Query(ctx, getChatMembers, chatID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []string
+	var items []GetChatMembersRow
 	for rows.Next() {
-		var uuid string
-		if err := rows.Scan(&uuid); err != nil {
+		var i GetChatMembersRow
+		if err := rows.Scan(&i.Uuid, &i.PictureUrl, &i.Username); err != nil {
 			return nil, err
 		}
-		items = append(items, uuid)
+		items = append(items, i)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

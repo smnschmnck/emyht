@@ -7,6 +7,7 @@ export const useIsSidebarHidden = () => {
     matchRoute({ to: '/chat/$chatId' }),
     matchRoute({ to: '/initiate' }),
     matchRoute({ to: '/incoming-requests' }),
+    matchRoute({ to: '/chat/$chatId/settings' }),
   ];
 
   return hideRoutes.some((isRouteMatch) => Boolean(isRouteMatch));
