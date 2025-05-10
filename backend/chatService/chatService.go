@@ -930,10 +930,10 @@ func ChangeGroupPicture(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
 	}
 
-	type changeNameReq struct {
-		NewPictureUrl string `json:"newPictureUrl" validate:"required"`
+	type changePicReq struct {
+		FileId string `json:"fileId" validate:"required"`
 	}
-	req := new(changeNameReq)
+	req := new(changePicReq)
 	err = c.Bind(&req)
 	if err != nil {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
@@ -951,7 +951,7 @@ func ChangeGroupPicture(c echo.Context) error {
 		c.String(http.StatusUnauthorized, "YOU ARE NOT A PARTICIPANT OF THIS CHAT")
 	}
 
-	imageKey := reqUUID + "/gcPictures/" + req.NewPictureUrl + ".png"
+	imageKey := reqUUID + "/gcPictures/" + req.FileId + ".png"
 	imageExists, err := s3Helpers.CheckFileExists(imageKey)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")

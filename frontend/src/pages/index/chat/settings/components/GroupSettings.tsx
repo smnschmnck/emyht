@@ -46,7 +46,7 @@ const GroupPicturePicker = () => {
       if (!selectedPicture) {
         throw new Error('No picture selected');
       }
-      const { presignedPutURL } =
+      const { presignedPutURL, fileID } =
         await fetchGroupChatPicturePutUrl(selectedPicture);
 
       const { ok: uploadSucess } = await fetch(presignedPutURL, {
@@ -55,6 +55,14 @@ const GroupPicturePicker = () => {
       });
       if (!uploadSucess) {
         throw new Error('Upload failed');
+      }
+
+      const res = await fetchWithDefaults(`/changeGroupPicture/${chatId}`, {
+        method: 'post',
+        body: JSON.stringify({ fileID }),
+      });
+      if (!res.ok) {
+        throw new Error(await res.text());
       }
     },
     onSuccess: () => {
