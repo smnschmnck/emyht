@@ -7,8 +7,8 @@
       "driver": "PostgreSQL",
       "name": "emyht",
       "database": "postgres",
-      "password": "5ZKhawvkF85TkTseSRK2zcic",
-      "username": "postgres"
+      "username": "postgres",
+      "password": "devPassword"
     }
   ]
 }

@@ -6,7 +6,7 @@ services:
     container_name: emyht_postgres_db
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 5ZKhawvkF85TkTseSRK2zcic
+      POSTGRES_PASSWORD: devPassword
       POSTGRES_DB: postgres
     ports:
       - "5432:5432"
@@ -16,7 +16,7 @@ services:
   redis:
     image: redis:latest
     container_name: emyht_redis_db
-    command: ["redis-server", "--requirepass", "gPkpWa8Z4mw9FEMBedFf8fUa"]
+    command: ["redis-server", "--requirepass", "devPassword"]
     ports:
       - "6379:6379"
     volumes:
