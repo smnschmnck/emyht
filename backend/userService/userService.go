@@ -91,10 +91,10 @@ func makeSalt() (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
-func AddUser(email string, username string, password string) (queries.User, error) {
+func AddUser(email string, username string, password string) (queries.CreateUserRow, error) {
 	salt, err := makeSalt()
 	if err != nil {
-		return queries.User{}, errors.New("UNEXPECTED ERROR")
+		return queries.CreateUserRow{}, errors.New("UNEXPECTED ERROR")
 	}
 
 	pepper := getPepper()
@@ -119,10 +119,10 @@ func AddUser(email string, username string, password string) (queries.User, erro
 	if err != nil {
 		errString := err.Error()
 		if strings.Contains(errString, `duplicate key value violates unique constraint`) {
-			return queries.User{}, errors.New("USER EXISTS ALREADY")
+			return queries.CreateUserRow{}, errors.New("USER EXISTS ALREADY")
 		}
 		fmt.Println(err.Error())
-		return queries.User{}, errors.New("INTERNAL ERROR")
+		return queries.CreateUserRow{}, errors.New("INTERNAL ERROR")
 	}
 
 	return user, nil

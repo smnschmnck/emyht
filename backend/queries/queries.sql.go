@@ -589,7 +589,7 @@ SELECT DISTINCT c.chat_id,
     u.unread_messages,
     m.message_type,
     m.text_content,
-    m.created_at,
+    m.created_at as message_created_at,
     m.delivery_status,
     m.sender_id,
     su.username AS sender_username
@@ -605,18 +605,18 @@ WHERE u.uuid = $1
 `
 
 type GetChatsForUserRow struct {
-	ChatID         string             `json:"chatId"`
-	ChatType       ChatType           `json:"chatType"`
-	CreatedAt      pgtype.Timestamp   `json:"createdAt"`
-	ChatName       string             `json:"chatName"`
-	ChatPictureUrl string             `json:"chatPictureUrl"`
-	UnreadMessages int64              `json:"unreadMessages"`
-	MessageType    NullMessageType    `json:"messageType"`
-	TextContent    *string            `json:"textContent"`
-	CreatedAt_2    pgtype.Timestamp   `json:"createdAt2"`
-	DeliveryStatus NullDeliveryStatus `json:"deliveryStatus"`
-	SenderID       *string            `json:"senderId"`
-	SenderUsername *string            `json:"senderUsername"`
+	ChatID           string             `json:"chatId"`
+	ChatType         ChatType           `json:"chatType"`
+	CreatedAt        pgtype.Timestamp   `json:"createdAt"`
+	ChatName         string             `json:"chatName"`
+	ChatPictureUrl   string             `json:"chatPictureUrl"`
+	UnreadMessages   int64              `json:"unreadMessages"`
+	MessageType      NullMessageType    `json:"messageType"`
+	TextContent      *string            `json:"textContent"`
+	MessageCreatedAt pgtype.Timestamp   `json:"messageCreatedAt"`
+	DeliveryStatus   NullDeliveryStatus `json:"deliveryStatus"`
+	SenderID         *string            `json:"senderId"`
+	SenderUsername   *string            `json:"senderUsername"`
 }
 
 func (q *Queries) GetChatsForUser(ctx context.Context, uuid string) ([]GetChatsForUserRow, error) {
@@ -637,7 +637,7 @@ func (q *Queries) GetChatsForUser(ctx context.Context, uuid string) ([]GetChatsF
 			&i.UnreadMessages,
 			&i.MessageType,
 			&i.TextContent,
-			&i.CreatedAt_2,
+			&i.MessageCreatedAt,
 			&i.DeliveryStatus,
 			&i.SenderID,
 			&i.SenderUsername,

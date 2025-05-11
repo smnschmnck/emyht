@@ -58,7 +58,7 @@ SELECT DISTINCT c.chat_id,
     u.unread_messages,
     m.message_type,
     m.text_content,
-    m.created_at,
+    m.created_at as message_created_at,
     m.delivery_status,
     m.sender_id,
     su.username AS sender_username

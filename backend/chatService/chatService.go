@@ -84,7 +84,7 @@ func StartOneOnOneChat(c echo.Context) error {
 
 	chatID := uuid.New().String()
 
-	_, err = conn.CreateOneOnOneChat(context.Background(), queries.CreateOneOnOneChatParams{ChatID: chatID, CreationTimestamp: time.Now().Unix()})
+	_, err = conn.CreateOneOnOneChat(context.Background(), chatID)
 	if err != nil {
 		fmt.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -167,7 +167,7 @@ func StartGroupChat(c echo.Context) error {
 
 	//CREATE CHAT
 	chatID := uuid.New().String()
-	_, err = conn.CreateGroupChat(context.Background(), queries.CreateGroupChatParams{ChatID: chatID, Name: req.ChatName, PictureUrl: chatPicture, CreationTimestamp: time.Now().Unix()})
+	_, err = conn.CreateGroupChat(context.Background(), queries.CreateGroupChatParams{ChatID: chatID, Name: req.ChatName, PictureUrl: chatPicture})
 	if err != nil {
 		fmt.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -431,7 +431,7 @@ func SendMessage(c echo.Context) error {
 		TextContent: &req.TextContent,
 		MessageType: queries.MessageType(req.MessageType),
 		MediaUrl:    &formattedFileID,
-		Timestamp:   time.Now().Unix()})
+	})
 	if err != nil {
 		fmt.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
