@@ -7,7 +7,16 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"time"
 )
+
+func getChatTimestamp(chat queries.GetChatsForUserRow) time.Time {
+	if chat.MessageCreatedAt.Valid {
+		return chat.MessageCreatedAt.Time
+	}
+
+	return chat.CreatedAt.Time
+}
 
 func GetChatsByUUID(uuid string) ([]queries.GetChatsForUserRow, error) {
 	conn := db.GetDB()
@@ -23,10 +32,10 @@ func GetChatsByUUID(uuid string) ([]queries.GetChatsForUserRow, error) {
 	}
 
 	sort.SliceStable(chats, func(i, j int) bool {
-		c1 := chats[i]
-		c2 := chats[j]
+		a := getChatTimestamp(chats[i])
+		b := getChatTimestamp(chats[j])
 
-		return (c1.MessageCreatedAt.Time.After(c2.MessageCreatedAt.Time))
+		return (a.After(b))
 	})
 
 	return chats, nil
