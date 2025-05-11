@@ -195,21 +195,19 @@ INSERT INTO chatmessages (
         text_content,
         message_type,
         media_url,
-        created_at,
         delivery_status
     )
-VALUES ($1, $2, $3, $4, $5, $6, $7, 'sent')
+VALUES ($1, $2, $3, $4, $5, $6, 'sent')
 RETURNING message_id
 `
 
 type CreateChatMessageParams struct {
-	MessageID   string           `json:"messageId"`
-	ChatID      string           `json:"chatId"`
-	SenderID    string           `json:"senderId"`
-	TextContent *string          `json:"textContent"`
-	MessageType MessageType      `json:"messageType"`
-	MediaUrl    *string          `json:"mediaUrl"`
-	CreatedAt   pgtype.Timestamp `json:"createdAt"`
+	MessageID   string      `json:"messageId"`
+	ChatID      string      `json:"chatId"`
+	SenderID    string      `json:"senderId"`
+	TextContent *string     `json:"textContent"`
+	MessageType MessageType `json:"messageType"`
+	MediaUrl    *string     `json:"mediaUrl"`
 }
 
 func (q *Queries) CreateChatMessage(ctx context.Context, arg CreateChatMessageParams) (string, error) {
@@ -220,7 +218,6 @@ func (q *Queries) CreateChatMessage(ctx context.Context, arg CreateChatMessagePa
 		arg.TextContent,
 		arg.MessageType,
 		arg.MediaUrl,
-		arg.CreatedAt,
 	)
 	var message_id string
 	err := row.Scan(&message_id)
@@ -258,27 +255,20 @@ INSERT INTO chats (
         chat_id,
         name,
         picture_url,
-        chat_type,
-        created_at
+        chat_type
     )
-VALUES ($1, $2, $3, 'group', $4)
+VALUES ($1, $2, $3, 'group')
 RETURNING chat_id
 `
 
 type CreateGroupChatParams struct {
-	ChatID     string           `json:"chatId"`
-	Name       string           `json:"name"`
-	PictureUrl string           `json:"pictureUrl"`
-	CreatedAt  pgtype.Timestamp `json:"createdAt"`
+	ChatID     string `json:"chatId"`
+	Name       string `json:"name"`
+	PictureUrl string `json:"pictureUrl"`
 }
 
 func (q *Queries) CreateGroupChat(ctx context.Context, arg CreateGroupChatParams) (string, error) {
-	row := q.db.QueryRow(ctx, createGroupChat,
-		arg.ChatID,
-		arg.Name,
-		arg.PictureUrl,
-		arg.CreatedAt,
-	)
+	row := q.db.QueryRow(ctx, createGroupChat, arg.ChatID, arg.Name, arg.PictureUrl)
 	var chat_id string
 	err := row.Scan(&chat_id)
 	return chat_id, err
@@ -289,20 +279,14 @@ INSERT INTO chats (
         chat_id,
         name,
         picture_url,
-        chat_type,
-        created_at
+        chat_type
     )
-VALUES ($1, '', '', 'one_on_one', $2)
+VALUES ($1, '', '', 'one_on_one')
 RETURNING chat_id
 `
 
-type CreateOneOnOneChatParams struct {
-	ChatID    string           `json:"chatId"`
-	CreatedAt pgtype.Timestamp `json:"createdAt"`
-}
-
-func (q *Queries) CreateOneOnOneChat(ctx context.Context, arg CreateOneOnOneChatParams) (string, error) {
-	row := q.db.QueryRow(ctx, createOneOnOneChat, arg.ChatID, arg.CreatedAt)
+func (q *Queries) CreateOneOnOneChat(ctx context.Context, chatID string) (string, error) {
+	row := q.db.QueryRow(ctx, createOneOnOneChat, chatID)
 	var chat_id string
 	err := row.Scan(&chat_id)
 	return chat_id, err
@@ -716,7 +700,7 @@ func (q *Queries) GetOneOnOneChatParticipant(ctx context.Context, arg GetOneOnOn
 
 const getPendingContactRequests = `-- name: GetPendingContactRequests :many
 SELECT u.email AS email,
-    TO_CHAR(created_at, 'DD.MM.YYYY') AS date
+    friends.created_at
 FROM friends
     JOIN users u ON u.uuid = friends.reciever
 WHERE sender = $1
@@ -724,8 +708,8 @@ WHERE sender = $1
 `
 
 type GetPendingContactRequestsRow struct {
-	Email string `json:"email"`
-	Date  string `json:"date"`
+	Email     string           `json:"email"`
+	CreatedAt pgtype.Timestamp `json:"createdAt"`
 }
 
 func (q *Queries) GetPendingContactRequests(ctx context.Context, sender string) ([]GetPendingContactRequestsRow, error) {
@@ -737,7 +721,7 @@ func (q *Queries) GetPendingContactRequests(ctx context.Context, sender string) 
 	var items []GetPendingContactRequestsRow
 	for rows.Next() {
 		var i GetPendingContactRequestsRow
-		if err := rows.Scan(&i.Email, &i.Date); err != nil {
+		if err := rows.Scan(&i.Email, &i.CreatedAt); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

@@ -148,7 +148,7 @@ WHERE chat_id = $1
 RETURNING blocked;
 -- name: GetPendingContactRequests :many
 SELECT u.email AS email,
-    TO_CHAR(created_at, 'DD.MM.YYYY') AS date
+    friends.created_at
 FROM friends
     JOIN users u ON u.uuid = friends.reciever
 WHERE sender = $1
@@ -170,10 +170,9 @@ INSERT INTO chats (
         chat_id,
         name,
         picture_url,
-        chat_type,
-        created_at
+        chat_type
     )
-VALUES ($1, '', '', 'one_on_one', $2)
+VALUES ($1, '', '', 'one_on_one')
 RETURNING chat_id;
 -- name: InsertUserChat :one
 INSERT INTO user_chat (uuid, chat_id, unread_messages)
@@ -188,10 +187,9 @@ INSERT INTO chats (
         chat_id,
         name,
         picture_url,
-        chat_type,
-        created_at
+        chat_type
     )
-VALUES ($1, $2, $3, 'group', $4)
+VALUES ($1, $2, $3, 'group')
 RETURNING chat_id;
 -- name: ValidateChatID :one
 SELECT chat_id
@@ -209,10 +207,9 @@ INSERT INTO chatmessages (
         text_content,
         message_type,
         media_url,
-        created_at,
         delivery_status
     )
-VALUES ($1, $2, $3, $4, $5, $6, $7, 'sent')
+VALUES ($1, $2, $3, $4, $5, $6, 'sent')
 RETURNING message_id;
 -- name: UpdateLastMessageID :one
 UPDATE chats
