@@ -13,6 +13,8 @@ import {
 import { enGB, de } from 'date-fns/locale';
 
 export const formatTimestamp = (timestampString?: string) => {
+  console.log('timestamp', timestampString);
+
   if (!timestampString) {
     return '';
   }

@@ -13,7 +13,8 @@ export type Chat = {
     valid: boolean;
   };
   textContent?: string | null;
-  created_at?: string;
+  createdAt?: string;
+  messageCreatedAt?: string;
   deliveryStatus?: {
     deliveryStatus: 'sent' | 'received' | 'read' | 'pending' | 'failed';
     valid: boolean;

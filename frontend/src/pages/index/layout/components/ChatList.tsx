@@ -37,7 +37,7 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => {
           <div className="flex w-full items-center justify-between">
             <p className="font-semibold">{chat.chatName}</p>
             <p className="text-xs text-zinc-400">
-              {formatTimestamp(chat.created_at)}
+              {formatTimestamp(chat.messageCreatedAt)}
             </p>
           </div>
           <div className="flex items-center gap-1 text-zinc-500">

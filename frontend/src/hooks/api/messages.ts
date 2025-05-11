@@ -8,7 +8,7 @@ export type ChatMessage = {
   textContent: string;
   messageType: 'plaintext' | 'image' | 'video' | 'audio' | 'data';
   mediaUrl: string;
-  created_at: string;
+  createdAt: string;
   deliveryStatus: string;
 };
 

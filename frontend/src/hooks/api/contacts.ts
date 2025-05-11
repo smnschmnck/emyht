@@ -24,7 +24,7 @@ export const useContacts = () => {
 
 type SentContactRequest = {
   email: string;
-  date: string;
+  createdAt: string;
 };
 
 export const useSentContactRequests = () => {
