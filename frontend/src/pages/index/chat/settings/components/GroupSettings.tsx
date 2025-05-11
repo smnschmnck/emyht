@@ -87,6 +87,7 @@ const GroupPicturePicker = () => {
           id={'groupPicPicker'}
           handleFileChange={(fileList) => setSelectedPicture(fileList.item(0))}
           variant="secondary"
+          accept="image/*"
         >
           Pick new picture
         </FilePickerButton>
