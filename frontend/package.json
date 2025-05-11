@@ -21,6 +21,7 @@
     "@tanstack/react-query-persist-client": "^5.59.19",
     "@tanstack/react-router": "1.120.3",
     "class-variance-authority": "^0.7.0",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "globals": "^16.0.0",
     "nanoid": "^5.1.0",
