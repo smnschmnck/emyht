@@ -11,12 +11,14 @@ create table users (
     is_admin boolean not null,
     email_active boolean not null,
     email_token varchar(64) unique,
-    picture_url varchar(128) not null
+    picture_url varchar(128) not null,
+    created_at timestamp default CURRENT_TIMESTAMP
 );
 create table change_email (
     uuid varchar(64) not null unique references users,
     new_email varchar(64) not null unique,
-    confirmation_token varchar(64) not null unique
+    confirmation_token varchar(64) not null unique,
+    created_at timestamp default CURRENT_TIMESTAMP
 );
 create table chats (
     chat_id varchar(64) not null primary key,
@@ -24,8 +26,8 @@ create table chats (
     last_message_id varchar(64),
     picture_url varchar(128) not null,
     chat_type chat_type not null,
-    creation_timestamp bigint not null,
-    blocked boolean default false
+    blocked boolean default false,
+    created_at timestamp default CURRENT_TIMESTAMP
 );
 create table chatmessages (
     message_id varchar(64) not null primary key,
@@ -34,13 +36,14 @@ create table chatmessages (
     text_content varchar(4096),
     message_type message_type not null,
     media_url varchar(512),
-    timestamp bigint not null,
-    delivery_status delivery_status not null
+    delivery_status delivery_status not null,
+    created_at timestamp default CURRENT_TIMESTAMP
 );
 create table user_chat (
     uuid varchar(64) not null references users,
     chat_id varchar(64) not null references chats,
     unread_messages bigint not null,
+    created_at timestamp default CURRENT_TIMESTAMP,
     primary key (uuid, chat_id)
 );
 create table friends (

@@ -186,30 +186,31 @@ func (ns NullMessageType) Value() (driver.Value, error) {
 }
 
 type ChangeEmail struct {
-	Uuid              string `json:"uuid"`
-	NewEmail          string `json:"newEmail"`
-	ConfirmationToken string `json:"confirmationToken"`
+	Uuid              string           `json:"uuid"`
+	NewEmail          string           `json:"newEmail"`
+	ConfirmationToken string           `json:"confirmationToken"`
+	CreatedAt         pgtype.Timestamp `json:"createdAt"`
 }
 
 type Chat struct {
-	ChatID            string   `json:"chatId"`
-	Name              string   `json:"name"`
-	LastMessageID     *string  `json:"lastMessageId"`
-	PictureUrl        string   `json:"pictureUrl"`
-	ChatType          ChatType `json:"chatType"`
-	CreationTimestamp int64    `json:"creationTimestamp"`
-	Blocked           *bool    `json:"blocked"`
+	ChatID        string           `json:"chatId"`
+	Name          string           `json:"name"`
+	LastMessageID *string          `json:"lastMessageId"`
+	PictureUrl    string           `json:"pictureUrl"`
+	ChatType      ChatType         `json:"chatType"`
+	Blocked       *bool            `json:"blocked"`
+	CreatedAt     pgtype.Timestamp `json:"createdAt"`
 }
 
 type Chatmessage struct {
-	MessageID      string         `json:"messageId"`
-	ChatID         string         `json:"chatId"`
-	SenderID       string         `json:"senderId"`
-	TextContent    *string        `json:"textContent"`
-	MessageType    MessageType    `json:"messageType"`
-	MediaUrl       *string        `json:"mediaUrl"`
-	Timestamp      int64          `json:"timestamp"`
-	DeliveryStatus DeliveryStatus `json:"deliveryStatus"`
+	MessageID      string           `json:"messageId"`
+	ChatID         string           `json:"chatId"`
+	SenderID       string           `json:"senderId"`
+	TextContent    *string          `json:"textContent"`
+	MessageType    MessageType      `json:"messageType"`
+	MediaUrl       *string          `json:"mediaUrl"`
+	DeliveryStatus DeliveryStatus   `json:"deliveryStatus"`
+	CreatedAt      pgtype.Timestamp `json:"createdAt"`
 }
 
 type Friend struct {
@@ -220,19 +221,21 @@ type Friend struct {
 }
 
 type User struct {
-	Uuid        string  `json:"uuid"`
-	Email       string  `json:"email"`
-	Username    string  `json:"username"`
-	Password    string  `json:"password"`
-	Salt        string  `json:"salt"`
-	IsAdmin     bool    `json:"isAdmin"`
-	EmailActive bool    `json:"emailActive"`
-	EmailToken  *string `json:"emailToken"`
-	PictureUrl  string  `json:"pictureUrl"`
+	Uuid        string           `json:"uuid"`
+	Email       string           `json:"email"`
+	Username    string           `json:"username"`
+	Password    string           `json:"password"`
+	Salt        string           `json:"salt"`
+	IsAdmin     bool             `json:"isAdmin"`
+	EmailActive bool             `json:"emailActive"`
+	EmailToken  *string          `json:"emailToken"`
+	PictureUrl  string           `json:"pictureUrl"`
+	CreatedAt   pgtype.Timestamp `json:"createdAt"`
 }
 
 type UserChat struct {
-	Uuid           string `json:"uuid"`
-	ChatID         string `json:"chatId"`
-	UnreadMessages int64  `json:"unreadMessages"`
+	Uuid           string           `json:"uuid"`
+	ChatID         string           `json:"chatId"`
+	UnreadMessages int64            `json:"unreadMessages"`
+	CreatedAt      pgtype.Timestamp `json:"createdAt"`
 }

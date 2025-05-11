@@ -46,7 +46,7 @@ RETURNING username;
 -- name: GetChatsForUser :many
 SELECT DISTINCT c.chat_id,
     c.chat_type,
-    c.creation_timestamp,
+    c.created_at,
     CASE
         WHEN c.chat_type = 'one_on_one' THEN ou.username::TEXT
         ELSE c.name::TEXT
@@ -58,7 +58,7 @@ SELECT DISTINCT c.chat_id,
     u.unread_messages,
     m.message_type,
     m.text_content,
-    m.timestamp,
+    m.created_at,
     m.delivery_status,
     m.sender_id,
     su.username AS sender_username
@@ -171,7 +171,7 @@ INSERT INTO chats (
         name,
         picture_url,
         chat_type,
-        creation_timestamp
+        created_at
     )
 VALUES ($1, '', '', 'one_on_one', $2)
 RETURNING chat_id;
@@ -189,7 +189,7 @@ INSERT INTO chats (
         name,
         picture_url,
         chat_type,
-        creation_timestamp
+        created_at
     )
 VALUES ($1, $2, $3, 'group', $4)
 RETURNING chat_id;
@@ -209,7 +209,7 @@ INSERT INTO chatmessages (
         text_content,
         message_type,
         media_url,
-        timestamp,
+        created_at,
         delivery_status
     )
 VALUES ($1, $2, $3, $4, $5, $6, $7, 'sent')
@@ -232,12 +232,12 @@ SELECT message_id,
     text_content,
     message_type,
     media_url,
-    timestamp,
+    chatmessages.created_at,
     delivery_status
 FROM chatmessages
     JOIN users u ON u.uuid = chatmessages.sender_id
 WHERE chat_id = $1
-ORDER BY timestamp ASC;
+ORDER BY chatmessages.created_at ASC;
 -- name: ResetUnreadMessages :exec
 UPDATE user_chat
 SET unread_messages = 0

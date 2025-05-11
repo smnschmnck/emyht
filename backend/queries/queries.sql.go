@@ -7,6 +7,8 @@ package queries
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const acceptFriendRequest = `-- name: AcceptFriendRequest :exec
@@ -193,7 +195,7 @@ INSERT INTO chatmessages (
         text_content,
         message_type,
         media_url,
-        timestamp,
+        created_at,
         delivery_status
     )
 VALUES ($1, $2, $3, $4, $5, $6, $7, 'sent')
@@ -201,13 +203,13 @@ RETURNING message_id
 `
 
 type CreateChatMessageParams struct {
-	MessageID   string      `json:"messageId"`
-	ChatID      string      `json:"chatId"`
-	SenderID    string      `json:"senderId"`
-	TextContent *string     `json:"textContent"`
-	MessageType MessageType `json:"messageType"`
-	MediaUrl    *string     `json:"mediaUrl"`
-	Timestamp   int64       `json:"timestamp"`
+	MessageID   string           `json:"messageId"`
+	ChatID      string           `json:"chatId"`
+	SenderID    string           `json:"senderId"`
+	TextContent *string          `json:"textContent"`
+	MessageType MessageType      `json:"messageType"`
+	MediaUrl    *string          `json:"mediaUrl"`
+	CreatedAt   pgtype.Timestamp `json:"createdAt"`
 }
 
 func (q *Queries) CreateChatMessage(ctx context.Context, arg CreateChatMessageParams) (string, error) {
@@ -218,7 +220,7 @@ func (q *Queries) CreateChatMessage(ctx context.Context, arg CreateChatMessagePa
 		arg.TextContent,
 		arg.MessageType,
 		arg.MediaUrl,
-		arg.Timestamp,
+		arg.CreatedAt,
 	)
 	var message_id string
 	err := row.Scan(&message_id)
@@ -257,17 +259,17 @@ INSERT INTO chats (
         name,
         picture_url,
         chat_type,
-        creation_timestamp
+        created_at
     )
 VALUES ($1, $2, $3, 'group', $4)
 RETURNING chat_id
 `
 
 type CreateGroupChatParams struct {
-	ChatID            string `json:"chatId"`
-	Name              string `json:"name"`
-	PictureUrl        string `json:"pictureUrl"`
-	CreationTimestamp int64  `json:"creationTimestamp"`
+	ChatID     string           `json:"chatId"`
+	Name       string           `json:"name"`
+	PictureUrl string           `json:"pictureUrl"`
+	CreatedAt  pgtype.Timestamp `json:"createdAt"`
 }
 
 func (q *Queries) CreateGroupChat(ctx context.Context, arg CreateGroupChatParams) (string, error) {
@@ -275,7 +277,7 @@ func (q *Queries) CreateGroupChat(ctx context.Context, arg CreateGroupChatParams
 		arg.ChatID,
 		arg.Name,
 		arg.PictureUrl,
-		arg.CreationTimestamp,
+		arg.CreatedAt,
 	)
 	var chat_id string
 	err := row.Scan(&chat_id)
@@ -288,19 +290,19 @@ INSERT INTO chats (
         name,
         picture_url,
         chat_type,
-        creation_timestamp
+        created_at
     )
 VALUES ($1, '', '', 'one_on_one', $2)
 RETURNING chat_id
 `
 
 type CreateOneOnOneChatParams struct {
-	ChatID            string `json:"chatId"`
-	CreationTimestamp int64  `json:"creationTimestamp"`
+	ChatID    string           `json:"chatId"`
+	CreatedAt pgtype.Timestamp `json:"createdAt"`
 }
 
 func (q *Queries) CreateOneOnOneChat(ctx context.Context, arg CreateOneOnOneChatParams) (string, error) {
-	row := q.db.QueryRow(ctx, createOneOnOneChat, arg.ChatID, arg.CreationTimestamp)
+	row := q.db.QueryRow(ctx, createOneOnOneChat, arg.ChatID, arg.CreatedAt)
 	var chat_id string
 	err := row.Scan(&chat_id)
 	return chat_id, err
@@ -342,7 +344,19 @@ type CreateUserParams struct {
 	PictureUrl  string  `json:"pictureUrl"`
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+type CreateUserRow struct {
+	Uuid        string  `json:"uuid"`
+	Email       string  `json:"email"`
+	Username    string  `json:"username"`
+	Password    string  `json:"password"`
+	Salt        string  `json:"salt"`
+	IsAdmin     bool    `json:"isAdmin"`
+	EmailActive bool    `json:"emailActive"`
+	EmailToken  *string `json:"emailToken"`
+	PictureUrl  string  `json:"pictureUrl"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
 	row := q.db.QueryRow(ctx, createUser,
 		arg.Uuid,
 		arg.Email,
@@ -354,7 +368,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.EmailToken,
 		arg.PictureUrl,
 	)
-	var i User
+	var i CreateUserRow
 	err := row.Scan(
 		&i.Uuid,
 		&i.Email,
@@ -515,23 +529,23 @@ SELECT message_id,
     text_content,
     message_type,
     media_url,
-    timestamp,
+    chatmessages.created_at,
     delivery_status
 FROM chatmessages
     JOIN users u ON u.uuid = chatmessages.sender_id
 WHERE chat_id = $1
-ORDER BY timestamp ASC
+ORDER BY chatmessages.created_at ASC
 `
 
 type GetChatMessagesRow struct {
-	MessageID      string         `json:"messageId"`
-	SenderID       string         `json:"senderId"`
-	SenderUsername string         `json:"senderUsername"`
-	TextContent    *string        `json:"textContent"`
-	MessageType    MessageType    `json:"messageType"`
-	MediaUrl       *string        `json:"mediaUrl"`
-	Timestamp      int64          `json:"timestamp"`
-	DeliveryStatus DeliveryStatus `json:"deliveryStatus"`
+	MessageID      string           `json:"messageId"`
+	SenderID       string           `json:"senderId"`
+	SenderUsername string           `json:"senderUsername"`
+	TextContent    *string          `json:"textContent"`
+	MessageType    MessageType      `json:"messageType"`
+	MediaUrl       *string          `json:"mediaUrl"`
+	CreatedAt      pgtype.Timestamp `json:"createdAt"`
+	DeliveryStatus DeliveryStatus   `json:"deliveryStatus"`
 }
 
 func (q *Queries) GetChatMessages(ctx context.Context, chatID string) ([]GetChatMessagesRow, error) {
@@ -550,7 +564,7 @@ func (q *Queries) GetChatMessages(ctx context.Context, chatID string) ([]GetChat
 			&i.TextContent,
 			&i.MessageType,
 			&i.MediaUrl,
-			&i.Timestamp,
+			&i.CreatedAt,
 			&i.DeliveryStatus,
 		); err != nil {
 			return nil, err
@@ -579,7 +593,7 @@ func (q *Queries) GetChatType(ctx context.Context, chatID string) (ChatType, err
 const getChatsForUser = `-- name: GetChatsForUser :many
 SELECT DISTINCT c.chat_id,
     c.chat_type,
-    c.creation_timestamp,
+    c.created_at,
     CASE
         WHEN c.chat_type = 'one_on_one' THEN ou.username::TEXT
         ELSE c.name::TEXT
@@ -591,7 +605,7 @@ SELECT DISTINCT c.chat_id,
     u.unread_messages,
     m.message_type,
     m.text_content,
-    m.timestamp,
+    m.created_at,
     m.delivery_status,
     m.sender_id,
     su.username AS sender_username
@@ -607,18 +621,18 @@ WHERE u.uuid = $1
 `
 
 type GetChatsForUserRow struct {
-	ChatID            string             `json:"chatId"`
-	ChatType          ChatType           `json:"chatType"`
-	CreationTimestamp int64              `json:"creationTimestamp"`
-	ChatName          string             `json:"chatName"`
-	ChatPictureUrl    string             `json:"chatPictureUrl"`
-	UnreadMessages    int64              `json:"unreadMessages"`
-	MessageType       NullMessageType    `json:"messageType"`
-	TextContent       *string            `json:"textContent"`
-	Timestamp         *int64             `json:"timestamp"`
-	DeliveryStatus    NullDeliveryStatus `json:"deliveryStatus"`
-	SenderID          *string            `json:"senderId"`
-	SenderUsername    *string            `json:"senderUsername"`
+	ChatID         string             `json:"chatId"`
+	ChatType       ChatType           `json:"chatType"`
+	CreatedAt      pgtype.Timestamp   `json:"createdAt"`
+	ChatName       string             `json:"chatName"`
+	ChatPictureUrl string             `json:"chatPictureUrl"`
+	UnreadMessages int64              `json:"unreadMessages"`
+	MessageType    NullMessageType    `json:"messageType"`
+	TextContent    *string            `json:"textContent"`
+	CreatedAt_2    pgtype.Timestamp   `json:"createdAt2"`
+	DeliveryStatus NullDeliveryStatus `json:"deliveryStatus"`
+	SenderID       *string            `json:"senderId"`
+	SenderUsername *string            `json:"senderUsername"`
 }
 
 func (q *Queries) GetChatsForUser(ctx context.Context, uuid string) ([]GetChatsForUserRow, error) {
@@ -633,13 +647,13 @@ func (q *Queries) GetChatsForUser(ctx context.Context, uuid string) ([]GetChatsF
 		if err := rows.Scan(
 			&i.ChatID,
 			&i.ChatType,
-			&i.CreationTimestamp,
+			&i.CreatedAt,
 			&i.ChatName,
 			&i.ChatPictureUrl,
 			&i.UnreadMessages,
 			&i.MessageType,
 			&i.TextContent,
-			&i.Timestamp,
+			&i.CreatedAt_2,
 			&i.DeliveryStatus,
 			&i.SenderID,
 			&i.SenderUsername,
