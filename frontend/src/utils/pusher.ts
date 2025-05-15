@@ -45,7 +45,6 @@ export const pusher = new Pusher(env.VITE_PUSHER_KEY, {
         const channelToken = await getPusherToken({ socketId, name });
         callback(null, { auth: channelToken });
       } catch (e) {
-        console.log('e', e);
         if (e instanceof Error) {
           callback(e, null);
         } else {
