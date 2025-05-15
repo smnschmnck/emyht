@@ -167,12 +167,11 @@ ORDER BY chatcount DESC
 LIMIT 1;
 -- name: CreateOneOnOneChat :one
 INSERT INTO chats (
-        id,
         name,
         picture_url,
         chat_type
     )
-VALUES ($1, '', '', 'one_on_one')
+VALUES ('', '', 'one_on_one')
 RETURNING id;
 -- name: InsertUserChat :one
 INSERT INTO user_chat (user_id, chat_id, unread_messages)
@@ -201,7 +200,6 @@ FROM chats
 WHERE id = $1;
 -- name: CreateChatMessage :one
 INSERT INTO chatmessages (
-        id,
         chat_id,
         sender_id,
         text_content,
@@ -209,7 +207,7 @@ INSERT INTO chatmessages (
         media_url,
         delivery_status
     )
-VALUES ($1, $2, $3, $4, $5, $6, 'sent')
+VALUES ($1, $2, $3, $4, $5, 'sent')
 RETURNING id;
 -- name: UpdateLastMessageID :one
 UPDATE chats
@@ -304,7 +302,6 @@ FROM users
 WHERE email = $1;
 -- name: CreateUser :one
 INSERT INTO users (
-        id,
         email,
         username,
         password,
@@ -314,7 +311,7 @@ INSERT INTO users (
         email_token,
         picture_url
     )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING id,
     email,
     username,
