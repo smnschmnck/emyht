@@ -23,6 +23,7 @@ type FilePickerButtonProps = {
   handleFileChange?: (files: FileList) => void;
   children?: ReactNode;
   multiple?: boolean;
+  accept?: string;
 } & VariantProps<typeof filePickerVariants>;
 
 export const FilePickerButton: FC<FilePickerButtonProps> = ({
@@ -31,6 +32,7 @@ export const FilePickerButton: FC<FilePickerButtonProps> = ({
   children,
   multiple = true,
   variant,
+  accept,
 }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const fileList = event.target.files;
@@ -47,6 +49,7 @@ export const FilePickerButton: FC<FilePickerButtonProps> = ({
         className="peer sr-only"
         type="file"
         multiple={multiple}
+        accept={accept}
       />
       <label htmlFor={id} className={filePickerVariants({ variant })}>
         {!!children && children}
