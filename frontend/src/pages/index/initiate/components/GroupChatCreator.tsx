@@ -1,12 +1,22 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
+import { FilePickerButton } from '@/components/ui/FilePickerButton';
 import { Input } from '@/components/ui/Input';
 import { HttpError } from '@/errors/httpError/httpError';
 import { useChats } from '@/hooks/api/chats';
 import { fetchWithDefaults } from '@/utils/fetch';
+import { uploadGroupChatPicture } from '@/utils/groupChat/picture';
 import { useMutation } from '@tanstack/react-query';
 import { FC, FormEvent, useState } from 'react';
 import { toast } from 'sonner';
+
+const uploadPicture = async (selectedPicture: File | null) => {
+  try {
+    return await uploadGroupChatPicture(selectedPicture);
+  } catch {
+    return { fileID: undefined };
+  }
+};
 
 type GroupChatCreatorProps = {
   selectedUsers: string[];
@@ -16,6 +26,10 @@ export const GroupChatCreator: FC<GroupChatCreatorProps> = ({
   selectedUsers,
 }) => {
   const [chatName, setChatName] = useState('');
+  const [selectedPicture, setSelectedPicture] = useState<File | null>(null);
+  const picturePreview = selectedPicture
+    ? URL.createObjectURL(selectedPicture)
+    : undefined;
   const { refetch: refetchChats } = useChats();
   const { mutate: createChat, isPending: isCreatingChat } = useMutation({
     mutationFn: async (event: FormEvent) => {
@@ -25,11 +39,13 @@ export const GroupChatCreator: FC<GroupChatCreatorProps> = ({
         return;
       }
 
+      const { fileID } = await uploadPicture(selectedPicture);
       const res = await fetchWithDefaults('/startGroupChat', {
         method: 'post',
         body: JSON.stringify({
           participantUUIDs: selectedUsers,
           chatName: chatName,
+          chatPictureID: fileID,
         }),
       });
 
@@ -62,10 +78,19 @@ export const GroupChatCreator: FC<GroupChatCreatorProps> = ({
       className="flex h-full w-full flex-col gap-4"
     >
       <div className="flex w-full items-center justify-center gap-4">
-        <Avatar className="h-14 min-h-14 w-14 min-w-14" />
-        <Button className="w-full" variant="secondary">
-          Change group picture
-        </Button>
+        <Avatar
+          imgUrl={picturePreview}
+          className="h-14 min-h-14 w-14 min-w-14"
+        />
+        <FilePickerButton
+          multiple={false}
+          id={'groupPicPicker'}
+          handleFileChange={(fileList) => setSelectedPicture(fileList.item(0))}
+          variant="secondary"
+          accept="image/*"
+        >
+          Pick new picture
+        </FilePickerButton>
       </div>
       <Input
         placeholder="Group name"
