@@ -14,17 +14,17 @@ import (
 const acceptFriendRequest = `-- name: AcceptFriendRequest :exec
 UPDATE friends
 SET status = 'accepted'
-WHERE sender = $1
-    AND reciever = $2
+WHERE sender_id = $1
+    AND receiver_id = $2
 `
 
 type AcceptFriendRequestParams struct {
-	Sender   string `json:"sender"`
-	Reciever string `json:"reciever"`
+	SenderID   pgtype.UUID `json:"senderId"`
+	ReceiverID pgtype.UUID `json:"receiverId"`
 }
 
 func (q *Queries) AcceptFriendRequest(ctx context.Context, arg AcceptFriendRequestParams) error {
-	_, err := q.db.Exec(ctx, acceptFriendRequest, arg.Sender, arg.Reciever)
+	_, err := q.db.Exec(ctx, acceptFriendRequest, arg.SenderID, arg.ReceiverID)
 	return err
 }
 
@@ -51,12 +51,12 @@ func (q *Queries) ActivateEmail(ctx context.Context, arg ActivateEmailParams) (b
 const blockChat = `-- name: BlockChat :one
 UPDATE chats
 SET blocked = true
-WHERE chat_id = $1
+WHERE id = $1
 RETURNING blocked
 `
 
-func (q *Queries) BlockChat(ctx context.Context, chatID string) (*bool, error) {
-	row := q.db.QueryRow(ctx, blockChat, chatID)
+func (q *Queries) BlockChat(ctx context.Context, id pgtype.UUID) (*bool, error) {
+	row := q.db.QueryRow(ctx, blockChat, id)
 	var blocked *bool
 	err := row.Scan(&blocked)
 	return blocked, err
@@ -65,17 +65,17 @@ func (q *Queries) BlockChat(ctx context.Context, chatID string) (*bool, error) {
 const blockFriendRequest = `-- name: BlockFriendRequest :exec
 UPDATE friends
 SET status = 'blocked'
-WHERE sender = $1
-    AND reciever = $2
+WHERE sender_id = $1
+    AND receiver_id = $2
 `
 
 type BlockFriendRequestParams struct {
-	Sender   string `json:"sender"`
-	Reciever string `json:"reciever"`
+	SenderID   pgtype.UUID `json:"senderId"`
+	ReceiverID pgtype.UUID `json:"receiverId"`
 }
 
 func (q *Queries) BlockFriendRequest(ctx context.Context, arg BlockFriendRequestParams) error {
-	_, err := q.db.Exec(ctx, blockFriendRequest, arg.Sender, arg.Reciever)
+	_, err := q.db.Exec(ctx, blockFriendRequest, arg.SenderID, arg.ReceiverID)
 	return err
 }
 
@@ -83,39 +83,39 @@ const blockUser = `-- name: BlockUser :exec
 UPDATE friends
 SET status = 'blocked'
 WHERE (
-        sender = $1
-        AND reciever = $2
+        sender_id = $1
+        AND receiver_id = $2
     )
     OR (
-        sender = $2
-        AND reciever = $1
+        sender_id = $2
+        AND receiver_id = $1
     )
 `
 
 type BlockUserParams struct {
-	Sender   string `json:"sender"`
-	Reciever string `json:"reciever"`
+	SenderID   pgtype.UUID `json:"senderId"`
+	ReceiverID pgtype.UUID `json:"receiverId"`
 }
 
 func (q *Queries) BlockUser(ctx context.Context, arg BlockUserParams) error {
-	_, err := q.db.Exec(ctx, blockUser, arg.Sender, arg.Reciever)
+	_, err := q.db.Exec(ctx, blockUser, arg.SenderID, arg.ReceiverID)
 	return err
 }
 
 const changeGroupName = `-- name: ChangeGroupName :exec
 UPDATE chats
 SET name = $1
-WHERE chat_id = $2
+WHERE id = $2
     AND chat_type = 'group'
 `
 
 type ChangeGroupNameParams struct {
-	Name   string `json:"name"`
-	ChatID string `json:"chatId"`
+	Name string      `json:"name"`
+	ID   pgtype.UUID `json:"id"`
 }
 
 func (q *Queries) ChangeGroupName(ctx context.Context, arg ChangeGroupNameParams) error {
-	_, err := q.db.Exec(ctx, changeGroupName, arg.Name, arg.ChatID)
+	_, err := q.db.Exec(ctx, changeGroupName, arg.Name, arg.ID)
 	return err
 }
 
@@ -123,40 +123,40 @@ const changeGroupPicture = `-- name: ChangeGroupPicture :exec
 UPDATE chats
 SET picture_url = $1
 WHERE chat_type = 'group'
-    AND chat_id = $2
+    AND id = $2
 `
 
 type ChangeGroupPictureParams struct {
-	PictureUrl string `json:"pictureUrl"`
-	ChatID     string `json:"chatId"`
+	PictureUrl string      `json:"pictureUrl"`
+	ID         pgtype.UUID `json:"id"`
 }
 
 func (q *Queries) ChangeGroupPicture(ctx context.Context, arg ChangeGroupPictureParams) error {
-	_, err := q.db.Exec(ctx, changeGroupPicture, arg.PictureUrl, arg.ChatID)
+	_, err := q.db.Exec(ctx, changeGroupPicture, arg.PictureUrl, arg.ID)
 	return err
 }
 
 const checkChatExists = `-- name: CheckChatExists :one
 SELECT count(user_chat.chat_id) >= 2 AS chatcount
 FROM user_chat
-    JOIN chats c ON user_chat.chat_id = c.chat_id
+    JOIN chats c ON user_chat.chat_id = c.id
 WHERE chat_type = 'one_on_one'
     AND (
-        uuid = $1
-        OR uuid = $2
+        user_id = $1
+        OR user_id = $2
     )
-GROUP BY c.chat_id
+GROUP BY c.id
 ORDER BY chatcount DESC
 LIMIT 1
 `
 
 type CheckChatExistsParams struct {
-	Uuid   string `json:"uuid"`
-	Uuid_2 string `json:"uuid2"`
+	UserID   pgtype.UUID `json:"userId"`
+	UserID_2 pgtype.UUID `json:"userId2"`
 }
 
 func (q *Queries) CheckChatExists(ctx context.Context, arg CheckChatExistsParams) (bool, error) {
-	row := q.db.QueryRow(ctx, checkChatExists, arg.Uuid, arg.Uuid_2)
+	row := q.db.QueryRow(ctx, checkChatExists, arg.UserID, arg.UserID_2)
 	var chatcount bool
 	err := row.Scan(&chatcount)
 	return chatcount, err
@@ -166,9 +166,9 @@ const checkDuplicateFriendRequest = `-- name: CheckDuplicateFriendRequest :one
 SELECT EXISTS(
         SELECT 1
         FROM friends
-        WHERE reciever = $1
-            AND sender = (
-                SELECT uuid
+        WHERE receiver_id = $1
+            AND sender_id = (
+                SELECT id
                 FROM users
                 WHERE email = $2
             )
@@ -176,12 +176,12 @@ SELECT EXISTS(
 `
 
 type CheckDuplicateFriendRequestParams struct {
-	Reciever string `json:"reciever"`
-	Email    string `json:"email"`
+	ReceiverID pgtype.UUID `json:"receiverId"`
+	Email      string      `json:"email"`
 }
 
 func (q *Queries) CheckDuplicateFriendRequest(ctx context.Context, arg CheckDuplicateFriendRequestParams) (bool, error) {
-	row := q.db.QueryRow(ctx, checkDuplicateFriendRequest, arg.Reciever, arg.Email)
+	row := q.db.QueryRow(ctx, checkDuplicateFriendRequest, arg.ReceiverID, arg.Email)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
@@ -189,7 +189,6 @@ func (q *Queries) CheckDuplicateFriendRequest(ctx context.Context, arg CheckDupl
 
 const createChatMessage = `-- name: CreateChatMessage :one
 INSERT INTO chatmessages (
-        message_id,
         chat_id,
         sender_id,
         text_content,
@@ -197,39 +196,37 @@ INSERT INTO chatmessages (
         media_url,
         delivery_status
     )
-VALUES ($1, $2, $3, $4, $5, $6, 'sent')
-RETURNING message_id
+VALUES ($1, $2, $3, $4, $5, 'sent')
+RETURNING id
 `
 
 type CreateChatMessageParams struct {
-	MessageID   string      `json:"messageId"`
-	ChatID      string      `json:"chatId"`
-	SenderID    string      `json:"senderId"`
+	ChatID      pgtype.UUID `json:"chatId"`
+	SenderID    pgtype.UUID `json:"senderId"`
 	TextContent *string     `json:"textContent"`
 	MessageType MessageType `json:"messageType"`
 	MediaUrl    *string     `json:"mediaUrl"`
 }
 
-func (q *Queries) CreateChatMessage(ctx context.Context, arg CreateChatMessageParams) (string, error) {
+func (q *Queries) CreateChatMessage(ctx context.Context, arg CreateChatMessageParams) (pgtype.UUID, error) {
 	row := q.db.QueryRow(ctx, createChatMessage,
-		arg.MessageID,
 		arg.ChatID,
 		arg.SenderID,
 		arg.TextContent,
 		arg.MessageType,
 		arg.MediaUrl,
 	)
-	var message_id string
-	err := row.Scan(&message_id)
-	return message_id, err
+	var id pgtype.UUID
+	err := row.Scan(&id)
+	return id, err
 }
 
 const createFriendRequest = `-- name: CreateFriendRequest :one
-INSERT INTO friends (sender, reciever, status)
+INSERT INTO friends (sender_id, receiver_id, status)
 VALUES (
         $1,
         (
-            SELECT uuid
+            SELECT id
             FROM users
             WHERE email = $2
         ),
@@ -239,12 +236,12 @@ RETURNING status
 `
 
 type CreateFriendRequestParams struct {
-	Sender string `json:"sender"`
-	Email  string `json:"email"`
+	SenderID pgtype.UUID `json:"senderId"`
+	Email    string      `json:"email"`
 }
 
 func (q *Queries) CreateFriendRequest(ctx context.Context, arg CreateFriendRequestParams) (FriendshipStatus, error) {
-	row := q.db.QueryRow(ctx, createFriendRequest, arg.Sender, arg.Email)
+	row := q.db.QueryRow(ctx, createFriendRequest, arg.SenderID, arg.Email)
 	var status FriendshipStatus
 	err := row.Scan(&status)
 	return status, err
@@ -252,49 +249,47 @@ func (q *Queries) CreateFriendRequest(ctx context.Context, arg CreateFriendReque
 
 const createGroupChat = `-- name: CreateGroupChat :one
 INSERT INTO chats (
-        chat_id,
+        id,
         name,
         picture_url,
         chat_type
     )
 VALUES ($1, $2, $3, 'group')
-RETURNING chat_id
+RETURNING id
 `
 
 type CreateGroupChatParams struct {
-	ChatID     string `json:"chatId"`
-	Name       string `json:"name"`
-	PictureUrl string `json:"pictureUrl"`
+	ID         pgtype.UUID `json:"id"`
+	Name       string      `json:"name"`
+	PictureUrl string      `json:"pictureUrl"`
 }
 
-func (q *Queries) CreateGroupChat(ctx context.Context, arg CreateGroupChatParams) (string, error) {
-	row := q.db.QueryRow(ctx, createGroupChat, arg.ChatID, arg.Name, arg.PictureUrl)
-	var chat_id string
-	err := row.Scan(&chat_id)
-	return chat_id, err
+func (q *Queries) CreateGroupChat(ctx context.Context, arg CreateGroupChatParams) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, createGroupChat, arg.ID, arg.Name, arg.PictureUrl)
+	var id pgtype.UUID
+	err := row.Scan(&id)
+	return id, err
 }
 
 const createOneOnOneChat = `-- name: CreateOneOnOneChat :one
 INSERT INTO chats (
-        chat_id,
         name,
         picture_url,
         chat_type
     )
-VALUES ($1, '', '', 'one_on_one')
-RETURNING chat_id
+VALUES ('', '', 'one_on_one')
+RETURNING id
 `
 
-func (q *Queries) CreateOneOnOneChat(ctx context.Context, chatID string) (string, error) {
-	row := q.db.QueryRow(ctx, createOneOnOneChat, chatID)
-	var chat_id string
-	err := row.Scan(&chat_id)
-	return chat_id, err
+func (q *Queries) CreateOneOnOneChat(ctx context.Context) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, createOneOnOneChat)
+	var id pgtype.UUID
+	err := row.Scan(&id)
+	return id, err
 }
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
-        uuid,
         email,
         username,
         password,
@@ -304,8 +299,8 @@ INSERT INTO users (
         email_token,
         picture_url
     )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-RETURNING uuid,
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING id,
     email,
     username,
     password,
@@ -317,7 +312,6 @@ RETURNING uuid,
 `
 
 type CreateUserParams struct {
-	Uuid        string  `json:"uuid"`
 	Email       string  `json:"email"`
 	Username    string  `json:"username"`
 	Password    string  `json:"password"`
@@ -329,20 +323,19 @@ type CreateUserParams struct {
 }
 
 type CreateUserRow struct {
-	Uuid        string  `json:"uuid"`
-	Email       string  `json:"email"`
-	Username    string  `json:"username"`
-	Password    string  `json:"password"`
-	Salt        string  `json:"salt"`
-	IsAdmin     bool    `json:"isAdmin"`
-	EmailActive bool    `json:"emailActive"`
-	EmailToken  *string `json:"emailToken"`
-	PictureUrl  string  `json:"pictureUrl"`
+	ID          pgtype.UUID `json:"id"`
+	Email       string      `json:"email"`
+	Username    string      `json:"username"`
+	Password    string      `json:"password"`
+	Salt        string      `json:"salt"`
+	IsAdmin     bool        `json:"isAdmin"`
+	EmailActive bool        `json:"emailActive"`
+	EmailToken  *string     `json:"emailToken"`
+	PictureUrl  string      `json:"pictureUrl"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
 	row := q.db.QueryRow(ctx, createUser,
-		arg.Uuid,
 		arg.Email,
 		arg.Username,
 		arg.Password,
@@ -354,7 +347,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 	)
 	var i CreateUserRow
 	err := row.Scan(
-		&i.Uuid,
+		&i.ID,
 		&i.Email,
 		&i.Username,
 		&i.Password,
@@ -369,17 +362,17 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 
 const declineFriendRequest = `-- name: DeclineFriendRequest :exec
 DELETE FROM friends
-WHERE sender = $1
-    AND reciever = $2
+WHERE sender_id = $1
+    AND receiver_id = $2
 `
 
 type DeclineFriendRequestParams struct {
-	Sender   string `json:"sender"`
-	Reciever string `json:"reciever"`
+	SenderID   pgtype.UUID `json:"senderId"`
+	ReceiverID pgtype.UUID `json:"receiverId"`
 }
 
 func (q *Queries) DeclineFriendRequest(ctx context.Context, arg DeclineFriendRequestParams) error {
-	_, err := q.db.Exec(ctx, declineFriendRequest, arg.Sender, arg.Reciever)
+	_, err := q.db.Exec(ctx, declineFriendRequest, arg.SenderID, arg.ReceiverID)
 	return err
 }
 
@@ -396,12 +389,12 @@ func (q *Queries) DeleteChangeEmail(ctx context.Context, confirmationToken strin
 const deleteFromGroupChat = `-- name: DeleteFromGroupChat :exec
 DELETE FROM user_chat
 WHERE chat_id = $1
-    AND uuid = ANY($2::varchar(64) [])
+    AND user_id = ANY($2::varchar(64) [])
 `
 
 type DeleteFromGroupChatParams struct {
-	ChatID  string   `json:"chatId"`
-	Column2 []string `json:"column2"`
+	ChatID  pgtype.UUID `json:"chatId"`
+	Column2 []string    `json:"column2"`
 }
 
 func (q *Queries) DeleteFromGroupChat(ctx context.Context, arg DeleteFromGroupChatParams) error {
@@ -423,36 +416,36 @@ func (q *Queries) EmailExists(ctx context.Context, email string) (bool, error) {
 }
 
 const getAvailableGroupChats = `-- name: GetAvailableGroupChats :many
-SELECT c.chat_id,
+SELECT c.id,
     c.name AS chat_name,
     c.picture_url
 FROM user_chat uc
-    JOIN chats c ON c.chat_id = uc.chat_id
-WHERE uc.uuid = $1
+    JOIN chats c ON c.id = uc.chat_id
+WHERE uc.user_id = $1
     AND c.chat_type = 'group'
 EXCEPT
-SELECT c.chat_id,
+SELECT c.id,
     c.name AS chat_name,
     c.picture_url
 FROM user_chat uc
     JOIN chats c ON c.chat_id = uc.chat_id
-WHERE uc.uuid = $2
+WHERE uc.user_id = $2
     AND c.chat_type = 'group'
 `
 
 type GetAvailableGroupChatsParams struct {
-	Uuid   string `json:"uuid"`
-	Uuid_2 string `json:"uuid2"`
+	UserID   pgtype.UUID `json:"userId"`
+	UserID_2 pgtype.UUID `json:"userId2"`
 }
 
 type GetAvailableGroupChatsRow struct {
-	ChatID     string `json:"chatId"`
-	ChatName   string `json:"chatName"`
-	PictureUrl string `json:"pictureUrl"`
+	ID         pgtype.UUID `json:"id"`
+	ChatName   string      `json:"chatName"`
+	PictureUrl string      `json:"pictureUrl"`
 }
 
 func (q *Queries) GetAvailableGroupChats(ctx context.Context, arg GetAvailableGroupChatsParams) ([]GetAvailableGroupChatsRow, error) {
-	rows, err := q.db.Query(ctx, getAvailableGroupChats, arg.Uuid, arg.Uuid_2)
+	rows, err := q.db.Query(ctx, getAvailableGroupChats, arg.UserID, arg.UserID_2)
 	if err != nil {
 		return nil, err
 	}
@@ -460,7 +453,7 @@ func (q *Queries) GetAvailableGroupChats(ctx context.Context, arg GetAvailableGr
 	var items []GetAvailableGroupChatsRow
 	for rows.Next() {
 		var i GetAvailableGroupChatsRow
-		if err := rows.Scan(&i.ChatID, &i.ChatName, &i.PictureUrl); err != nil {
+		if err := rows.Scan(&i.ID, &i.ChatName, &i.PictureUrl); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -472,21 +465,21 @@ func (q *Queries) GetAvailableGroupChats(ctx context.Context, arg GetAvailableGr
 }
 
 const getChatMembers = `-- name: GetChatMembers :many
-SELECT users.uuid,
+SELECT users.id,
     picture_url,
     username
 FROM user_chat
-    JOIN users ON users.uuid = user_chat.uuid
+    JOIN users ON users.id = user_chat.user_id
 WHERE chat_id = $1
 `
 
 type GetChatMembersRow struct {
-	Uuid       string `json:"uuid"`
-	PictureUrl string `json:"pictureUrl"`
-	Username   string `json:"username"`
+	ID         pgtype.UUID `json:"id"`
+	PictureUrl string      `json:"pictureUrl"`
+	Username   string      `json:"username"`
 }
 
-func (q *Queries) GetChatMembers(ctx context.Context, chatID string) ([]GetChatMembersRow, error) {
+func (q *Queries) GetChatMembers(ctx context.Context, chatID pgtype.UUID) ([]GetChatMembersRow, error) {
 	rows, err := q.db.Query(ctx, getChatMembers, chatID)
 	if err != nil {
 		return nil, err
@@ -495,7 +488,7 @@ func (q *Queries) GetChatMembers(ctx context.Context, chatID string) ([]GetChatM
 	var items []GetChatMembersRow
 	for rows.Next() {
 		var i GetChatMembersRow
-		if err := rows.Scan(&i.Uuid, &i.PictureUrl, &i.Username); err != nil {
+		if err := rows.Scan(&i.ID, &i.PictureUrl, &i.Username); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -507,7 +500,7 @@ func (q *Queries) GetChatMembers(ctx context.Context, chatID string) ([]GetChatM
 }
 
 const getChatMessages = `-- name: GetChatMessages :many
-SELECT message_id,
+SELECT chatmessages.id,
     sender_id,
     username AS sender_username,
     text_content,
@@ -516,14 +509,14 @@ SELECT message_id,
     chatmessages.created_at,
     delivery_status
 FROM chatmessages
-    JOIN users u ON u.uuid = chatmessages.sender_id
+    JOIN users u ON u.id = chatmessages.sender_id
 WHERE chat_id = $1
 ORDER BY chatmessages.created_at ASC
 `
 
 type GetChatMessagesRow struct {
-	MessageID      string           `json:"messageId"`
-	SenderID       string           `json:"senderId"`
+	ID             pgtype.UUID      `json:"id"`
+	SenderID       pgtype.UUID      `json:"senderId"`
 	SenderUsername string           `json:"senderUsername"`
 	TextContent    *string          `json:"textContent"`
 	MessageType    MessageType      `json:"messageType"`
@@ -532,7 +525,7 @@ type GetChatMessagesRow struct {
 	DeliveryStatus DeliveryStatus   `json:"deliveryStatus"`
 }
 
-func (q *Queries) GetChatMessages(ctx context.Context, chatID string) ([]GetChatMessagesRow, error) {
+func (q *Queries) GetChatMessages(ctx context.Context, chatID pgtype.UUID) ([]GetChatMessagesRow, error) {
 	rows, err := q.db.Query(ctx, getChatMessages, chatID)
 	if err != nil {
 		return nil, err
@@ -542,7 +535,7 @@ func (q *Queries) GetChatMessages(ctx context.Context, chatID string) ([]GetChat
 	for rows.Next() {
 		var i GetChatMessagesRow
 		if err := rows.Scan(
-			&i.MessageID,
+			&i.ID,
 			&i.SenderID,
 			&i.SenderUsername,
 			&i.TextContent,
@@ -564,18 +557,18 @@ func (q *Queries) GetChatMessages(ctx context.Context, chatID string) ([]GetChat
 const getChatType = `-- name: GetChatType :one
 SELECT chat_type
 FROM chats
-WHERE chat_id = $1
+WHERE id = $1
 `
 
-func (q *Queries) GetChatType(ctx context.Context, chatID string) (ChatType, error) {
-	row := q.db.QueryRow(ctx, getChatType, chatID)
+func (q *Queries) GetChatType(ctx context.Context, id pgtype.UUID) (ChatType, error) {
+	row := q.db.QueryRow(ctx, getChatType, id)
 	var chat_type ChatType
 	err := row.Scan(&chat_type)
 	return chat_type, err
 }
 
 const getChatsForUser = `-- name: GetChatsForUser :many
-SELECT DISTINCT c.chat_id,
+SELECT DISTINCT c.id,
     c.chat_type,
     c.created_at,
     CASE
@@ -595,17 +588,17 @@ SELECT DISTINCT c.chat_id,
     su.username AS sender_username
 FROM user_chat u
     JOIN chats c ON u.chat_id = c.chat_id
-    LEFT JOIN chatmessages m ON m.message_id = c.last_message_id -- Only join for one_on_one chats
-    LEFT JOIN user_chat ouc ON c.chat_id = ouc.chat_id
-    AND ouc.uuid != $1
+    LEFT JOIN chatmessages m ON m.id = c.last_message_id -- Only join for one_on_one chats
+    LEFT JOIN user_chat ouc ON c.id = ouc.chat_id
+    AND ouc.user_id != $1
     AND c.chat_type = 'one_on_one'
-    LEFT JOIN users ou ON ouc.uuid = ou.uuid
+    LEFT JOIN users ou ON ouc.user_id = ou.uuid
     LEFT JOIN users su ON m.sender_id = su.uuid
-WHERE u.uuid = $1
+WHERE u.user_id = $1
 `
 
 type GetChatsForUserRow struct {
-	ChatID           string             `json:"chatId"`
+	ID               pgtype.UUID        `json:"id"`
 	ChatType         ChatType           `json:"chatType"`
 	CreatedAt        pgtype.Timestamp   `json:"createdAt"`
 	ChatName         string             `json:"chatName"`
@@ -615,12 +608,12 @@ type GetChatsForUserRow struct {
 	TextContent      *string            `json:"textContent"`
 	MessageCreatedAt pgtype.Timestamp   `json:"messageCreatedAt"`
 	DeliveryStatus   NullDeliveryStatus `json:"deliveryStatus"`
-	SenderID         *string            `json:"senderId"`
+	SenderID         pgtype.UUID        `json:"senderId"`
 	SenderUsername   *string            `json:"senderUsername"`
 }
 
-func (q *Queries) GetChatsForUser(ctx context.Context, uuid string) ([]GetChatsForUserRow, error) {
-	rows, err := q.db.Query(ctx, getChatsForUser, uuid)
+func (q *Queries) GetChatsForUser(ctx context.Context, userID pgtype.UUID) ([]GetChatsForUserRow, error) {
+	rows, err := q.db.Query(ctx, getChatsForUser, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -629,7 +622,7 @@ func (q *Queries) GetChatsForUser(ctx context.Context, uuid string) ([]GetChatsF
 	for rows.Next() {
 		var i GetChatsForUserRow
 		if err := rows.Scan(
-			&i.ChatID,
+			&i.ID,
 			&i.ChatType,
 			&i.CreatedAt,
 			&i.ChatName,
@@ -666,13 +659,13 @@ func (q *Queries) GetEmailActiveByToken(ctx context.Context, emailToken *string)
 }
 
 const getGroupChatUserCount = `-- name: GetGroupChatUserCount :one
-SELECT count(uuid)
+SELECT count(user_id)
 FROM user_chat
 WHERE chat_id = $1
 GROUP BY chat_id
 `
 
-func (q *Queries) GetGroupChatUserCount(ctx context.Context, chatID string) (int64, error) {
+func (q *Queries) GetGroupChatUserCount(ctx context.Context, chatID pgtype.UUID) (int64, error) {
 	row := q.db.QueryRow(ctx, getGroupChatUserCount, chatID)
 	var count int64
 	err := row.Scan(&count)
@@ -680,30 +673,30 @@ func (q *Queries) GetGroupChatUserCount(ctx context.Context, chatID string) (int
 }
 
 const getOneOnOneChatParticipant = `-- name: GetOneOnOneChatParticipant :one
-SELECT uuid
+SELECT user_id
 FROM user_chat
 WHERE chat_id = $1
-    AND uuid != $2
+    AND user_id != $2
 `
 
 type GetOneOnOneChatParticipantParams struct {
-	ChatID string `json:"chatId"`
-	Uuid   string `json:"uuid"`
+	ChatID pgtype.UUID `json:"chatId"`
+	UserID pgtype.UUID `json:"userId"`
 }
 
-func (q *Queries) GetOneOnOneChatParticipant(ctx context.Context, arg GetOneOnOneChatParticipantParams) (string, error) {
-	row := q.db.QueryRow(ctx, getOneOnOneChatParticipant, arg.ChatID, arg.Uuid)
-	var uuid string
-	err := row.Scan(&uuid)
-	return uuid, err
+func (q *Queries) GetOneOnOneChatParticipant(ctx context.Context, arg GetOneOnOneChatParticipantParams) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, getOneOnOneChatParticipant, arg.ChatID, arg.UserID)
+	var user_id pgtype.UUID
+	err := row.Scan(&user_id)
+	return user_id, err
 }
 
 const getPendingContactRequests = `-- name: GetPendingContactRequests :many
 SELECT u.email AS email,
     friends.created_at
 FROM friends
-    JOIN users u ON u.uuid = friends.reciever
-WHERE sender = $1
+    JOIN users u ON u.id = friends.receiver_id
+WHERE sender_id = $1
     AND status = 'pending'
 `
 
@@ -712,8 +705,8 @@ type GetPendingContactRequestsRow struct {
 	CreatedAt pgtype.Timestamp `json:"createdAt"`
 }
 
-func (q *Queries) GetPendingContactRequests(ctx context.Context, sender string) ([]GetPendingContactRequestsRow, error) {
-	rows, err := q.db.Query(ctx, getPendingContactRequests, sender)
+func (q *Queries) GetPendingContactRequests(ctx context.Context, senderID pgtype.UUID) ([]GetPendingContactRequestsRow, error) {
+	rows, err := q.db.Query(ctx, getPendingContactRequests, senderID)
 	if err != nil {
 		return nil, err
 	}
@@ -733,25 +726,25 @@ func (q *Queries) GetPendingContactRequests(ctx context.Context, sender string) 
 }
 
 const getPendingFriendRequests = `-- name: GetPendingFriendRequests :many
-SELECT sender AS sender_id,
+SELECT sender_id,
     u.username AS sender_username,
     u.picture_url AS sender_profile_picture,
     u.email AS sender_email
 FROM friends
-    JOIN users u ON friends.sender = u.uuid
-WHERE reciever = $1
+    JOIN users u ON friends.sender_id = u.id
+WHERE receiver_id = $1
     AND status = 'pending'
 `
 
 type GetPendingFriendRequestsRow struct {
-	SenderID             string `json:"senderId"`
-	SenderUsername       string `json:"senderUsername"`
-	SenderProfilePicture string `json:"senderProfilePicture"`
-	SenderEmail          string `json:"senderEmail"`
+	SenderID             pgtype.UUID `json:"senderId"`
+	SenderUsername       string      `json:"senderUsername"`
+	SenderProfilePicture string      `json:"senderProfilePicture"`
+	SenderEmail          string      `json:"senderEmail"`
 }
 
-func (q *Queries) GetPendingFriendRequests(ctx context.Context, reciever string) ([]GetPendingFriendRequestsRow, error) {
-	rows, err := q.db.Query(ctx, getPendingFriendRequests, reciever)
+func (q *Queries) GetPendingFriendRequests(ctx context.Context, receiverID pgtype.UUID) ([]GetPendingFriendRequestsRow, error) {
+	rows, err := q.db.Query(ctx, getPendingFriendRequests, receiverID)
 	if err != nil {
 		return nil, err
 	}
@@ -776,7 +769,7 @@ func (q *Queries) GetPendingFriendRequests(ctx context.Context, reciever string)
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT uuid,
+SELECT id,
     email,
     username,
     password,
@@ -788,20 +781,20 @@ WHERE email = $1
 `
 
 type GetUserByEmailRow struct {
-	Uuid        string `json:"uuid"`
-	Email       string `json:"email"`
-	Username    string `json:"username"`
-	Password    string `json:"password"`
-	Salt        string `json:"salt"`
-	IsAdmin     bool   `json:"isAdmin"`
-	EmailActive bool   `json:"emailActive"`
+	ID          pgtype.UUID `json:"id"`
+	Email       string      `json:"email"`
+	Username    string      `json:"username"`
+	Password    string      `json:"password"`
+	Salt        string      `json:"salt"`
+	IsAdmin     bool        `json:"isAdmin"`
+	EmailActive bool        `json:"emailActive"`
 }
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
 	row := q.db.QueryRow(ctx, getUserByEmail, email)
 	var i GetUserByEmailRow
 	err := row.Scan(
-		&i.Uuid,
+		&i.ID,
 		&i.Email,
 		&i.Username,
 		&i.Password,
@@ -813,7 +806,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 }
 
 const getUserByUUID = `-- name: GetUserByUUID :one
-SELECT uuid,
+SELECT id,
     email,
     username,
     password,
@@ -822,25 +815,25 @@ SELECT uuid,
     email_active,
     picture_url
 FROM users
-WHERE uuid = $1
+WHERE id = $1
 `
 
 type GetUserByUUIDRow struct {
-	Uuid        string `json:"uuid"`
-	Email       string `json:"email"`
-	Username    string `json:"username"`
-	Password    string `json:"password"`
-	Salt        string `json:"salt"`
-	IsAdmin     bool   `json:"isAdmin"`
-	EmailActive bool   `json:"emailActive"`
-	PictureUrl  string `json:"pictureUrl"`
+	ID          pgtype.UUID `json:"id"`
+	Email       string      `json:"email"`
+	Username    string      `json:"username"`
+	Password    string      `json:"password"`
+	Salt        string      `json:"salt"`
+	IsAdmin     bool        `json:"isAdmin"`
+	EmailActive bool        `json:"emailActive"`
+	PictureUrl  string      `json:"pictureUrl"`
 }
 
-func (q *Queries) GetUserByUUID(ctx context.Context, uuid string) (GetUserByUUIDRow, error) {
-	row := q.db.QueryRow(ctx, getUserByUUID, uuid)
+func (q *Queries) GetUserByUUID(ctx context.Context, id pgtype.UUID) (GetUserByUUIDRow, error) {
+	row := q.db.QueryRow(ctx, getUserByUUID, id)
 	var i GetUserByUUIDRow
 	err := row.Scan(
-		&i.Uuid,
+		&i.ID,
 		&i.Email,
 		&i.Username,
 		&i.Password,
@@ -854,27 +847,27 @@ func (q *Queries) GetUserByUUID(ctx context.Context, uuid string) (GetUserByUUID
 
 const getUserContacts = `-- name: GetUserContacts :many
 SELECT u.username,
-    u.uuid,
+    u.id,
     u.picture_url
 FROM friends
-    JOIN users u ON u.uuid = friends.sender
-    OR friends.reciever = u.uuid
+    JOIN users u ON u.id = friends.sender
+    OR friends.reciever = u.id
 WHERE (
-        reciever = $1
-        OR sender = $1
+        receiver_id = $1
+        OR sender_id = $1
     )
     AND status = 'accepted'
-    AND u.uuid != $1
+    AND u.id != $1
 `
 
 type GetUserContactsRow struct {
-	Username   string `json:"username"`
-	Uuid       string `json:"uuid"`
-	PictureUrl string `json:"pictureUrl"`
+	Username   string      `json:"username"`
+	ID         pgtype.UUID `json:"id"`
+	PictureUrl string      `json:"pictureUrl"`
 }
 
-func (q *Queries) GetUserContacts(ctx context.Context, reciever string) ([]GetUserContactsRow, error) {
-	rows, err := q.db.Query(ctx, getUserContacts, reciever)
+func (q *Queries) GetUserContacts(ctx context.Context, receiverID pgtype.UUID) ([]GetUserContactsRow, error) {
+	rows, err := q.db.Query(ctx, getUserContacts, receiverID)
 	if err != nil {
 		return nil, err
 	}
@@ -882,7 +875,7 @@ func (q *Queries) GetUserContacts(ctx context.Context, reciever string) ([]GetUs
 	var items []GetUserContactsRow
 	for rows.Next() {
 		var i GetUserContactsRow
-		if err := rows.Scan(&i.Username, &i.Uuid, &i.PictureUrl); err != nil {
+		if err := rows.Scan(&i.Username, &i.ID, &i.PictureUrl); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -897,54 +890,54 @@ const incrementUnreadMessages = `-- name: IncrementUnreadMessages :one
 UPDATE user_chat
 SET unread_messages = (unread_messages + 1)
 WHERE chat_id = $1
-    AND uuid != $2
+    AND user_id != $2
 RETURNING true
 `
 
 type IncrementUnreadMessagesParams struct {
-	ChatID string `json:"chatId"`
-	Uuid   string `json:"uuid"`
+	ChatID pgtype.UUID `json:"chatId"`
+	UserID pgtype.UUID `json:"userId"`
 }
 
 func (q *Queries) IncrementUnreadMessages(ctx context.Context, arg IncrementUnreadMessagesParams) (bool, error) {
-	row := q.db.QueryRow(ctx, incrementUnreadMessages, arg.ChatID, arg.Uuid)
+	row := q.db.QueryRow(ctx, incrementUnreadMessages, arg.ChatID, arg.UserID)
 	var column_1 bool
 	err := row.Scan(&column_1)
 	return column_1, err
 }
 
 const insertParticipantChat = `-- name: InsertParticipantChat :one
-INSERT INTO user_chat (uuid, chat_id, unread_messages)
+INSERT INTO user_chat (user_id, chat_id, unread_messages)
 VALUES ($1, $2, 0)
 RETURNING chat_id
 `
 
 type InsertParticipantChatParams struct {
-	Uuid   string `json:"uuid"`
-	ChatID string `json:"chatId"`
+	UserID pgtype.UUID `json:"userId"`
+	ChatID pgtype.UUID `json:"chatId"`
 }
 
-func (q *Queries) InsertParticipantChat(ctx context.Context, arg InsertParticipantChatParams) (string, error) {
-	row := q.db.QueryRow(ctx, insertParticipantChat, arg.Uuid, arg.ChatID)
-	var chat_id string
+func (q *Queries) InsertParticipantChat(ctx context.Context, arg InsertParticipantChatParams) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, insertParticipantChat, arg.UserID, arg.ChatID)
+	var chat_id pgtype.UUID
 	err := row.Scan(&chat_id)
 	return chat_id, err
 }
 
 const insertUserChat = `-- name: InsertUserChat :one
-INSERT INTO user_chat (uuid, chat_id, unread_messages)
+INSERT INTO user_chat (user_id, chat_id, unread_messages)
 VALUES ($1, $2, 0)
 RETURNING chat_id
 `
 
 type InsertUserChatParams struct {
-	Uuid   string `json:"uuid"`
-	ChatID string `json:"chatId"`
+	UserID pgtype.UUID `json:"userId"`
+	ChatID pgtype.UUID `json:"chatId"`
 }
 
-func (q *Queries) InsertUserChat(ctx context.Context, arg InsertUserChatParams) (string, error) {
-	row := q.db.QueryRow(ctx, insertUserChat, arg.Uuid, arg.ChatID)
-	var chat_id string
+func (q *Queries) InsertUserChat(ctx context.Context, arg InsertUserChatParams) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, insertUserChat, arg.UserID, arg.ChatID)
+	var chat_id pgtype.UUID
 	err := row.Scan(&chat_id)
 	return chat_id, err
 }
@@ -952,11 +945,11 @@ func (q *Queries) InsertUserChat(ctx context.Context, arg InsertUserChatParams) 
 const isGroupChat = `-- name: IsGroupChat :one
 SELECT chat_type = 'group'
 FROM chats
-WHERE chat_id = $1
+WHERE id = $1
 `
 
-func (q *Queries) IsGroupChat(ctx context.Context, chatID string) (bool, error) {
-	row := q.db.QueryRow(ctx, isGroupChat, chatID)
+func (q *Queries) IsGroupChat(ctx context.Context, id pgtype.UUID) (bool, error) {
+	row := q.db.QueryRow(ctx, isGroupChat, id)
 	var column_1 bool
 	err := row.Scan(&column_1)
 	return column_1, err
@@ -965,16 +958,16 @@ func (q *Queries) IsGroupChat(ctx context.Context, chatID string) (bool, error) 
 const leaveGroupChat = `-- name: LeaveGroupChat :exec
 DELETE FROM user_chat
 WHERE chat_id = $1
-    AND uuid = $2
+    AND user_id = $2
 `
 
 type LeaveGroupChatParams struct {
-	ChatID string `json:"chatId"`
-	Uuid   string `json:"uuid"`
+	ChatID pgtype.UUID `json:"chatId"`
+	UserID pgtype.UUID `json:"userId"`
 }
 
 func (q *Queries) LeaveGroupChat(ctx context.Context, arg LeaveGroupChatParams) error {
-	_, err := q.db.Exec(ctx, leaveGroupChat, arg.ChatID, arg.Uuid)
+	_, err := q.db.Exec(ctx, leaveGroupChat, arg.ChatID, arg.UserID)
 	return err
 }
 
@@ -982,16 +975,16 @@ const resetUnreadMessages = `-- name: ResetUnreadMessages :exec
 UPDATE user_chat
 SET unread_messages = 0
 WHERE chat_id = $1
-    AND uuid = $2
+    AND user_id = $2
 `
 
 type ResetUnreadMessagesParams struct {
-	ChatID string `json:"chatId"`
-	Uuid   string `json:"uuid"`
+	ChatID pgtype.UUID `json:"chatId"`
+	UserID pgtype.UUID `json:"userId"`
 }
 
 func (q *Queries) ResetUnreadMessages(ctx context.Context, arg ResetUnreadMessagesParams) error {
-	_, err := q.db.Exec(ctx, resetUnreadMessages, arg.ChatID, arg.Uuid)
+	_, err := q.db.Exec(ctx, resetUnreadMessages, arg.ChatID, arg.UserID)
 	return err
 }
 
@@ -1004,8 +997,8 @@ SET email_active = true,
         FROM change_email c
         WHERE c.confirmation_token = $2
     )
-WHERE u.uuid = (
-        SELECT c.uuid
+WHERE u.user_id = (
+        SELECT c.user_id
         FROM change_email c
         WHERE c.confirmation_token = $2
     )
@@ -1046,60 +1039,60 @@ func (q *Queries) UpdateEmailToken(ctx context.Context, arg UpdateEmailTokenPara
 const updateLastMessageID = `-- name: UpdateLastMessageID :one
 UPDATE chats
 SET last_message_id = $1
-WHERE chat_id = $2
-RETURNING chat_id
+WHERE id = $2
+RETURNING id
 `
 
 type UpdateLastMessageIDParams struct {
-	LastMessageID *string `json:"lastMessageId"`
-	ChatID        string  `json:"chatId"`
+	LastMessageID pgtype.UUID `json:"lastMessageId"`
+	ID            pgtype.UUID `json:"id"`
 }
 
-func (q *Queries) UpdateLastMessageID(ctx context.Context, arg UpdateLastMessageIDParams) (string, error) {
-	row := q.db.QueryRow(ctx, updateLastMessageID, arg.LastMessageID, arg.ChatID)
-	var chat_id string
-	err := row.Scan(&chat_id)
-	return chat_id, err
+func (q *Queries) UpdateLastMessageID(ctx context.Context, arg UpdateLastMessageIDParams) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, updateLastMessageID, arg.LastMessageID, arg.ID)
+	var id pgtype.UUID
+	err := row.Scan(&id)
+	return id, err
 }
 
 const updatePictureURL = `-- name: UpdatePictureURL :exec
 UPDATE users
 SET picture_url = $1
-WHERE uuid = $2
+WHERE id = $2
 `
 
 type UpdatePictureURLParams struct {
-	PictureUrl string `json:"pictureUrl"`
-	Uuid       string `json:"uuid"`
+	PictureUrl string      `json:"pictureUrl"`
+	ID         pgtype.UUID `json:"id"`
 }
 
 func (q *Queries) UpdatePictureURL(ctx context.Context, arg UpdatePictureURLParams) error {
-	_, err := q.db.Exec(ctx, updatePictureURL, arg.PictureUrl, arg.Uuid)
+	_, err := q.db.Exec(ctx, updatePictureURL, arg.PictureUrl, arg.ID)
 	return err
 }
 
 const updateUsername = `-- name: UpdateUsername :one
 UPDATE users
 SET username = $1
-WHERE uuid = $2
+WHERE id = $2
 RETURNING username
 `
 
 type UpdateUsernameParams struct {
-	Username string `json:"username"`
-	Uuid     string `json:"uuid"`
+	Username string      `json:"username"`
+	ID       pgtype.UUID `json:"id"`
 }
 
 func (q *Queries) UpdateUsername(ctx context.Context, arg UpdateUsernameParams) (string, error) {
-	row := q.db.QueryRow(ctx, updateUsername, arg.Username, arg.Uuid)
+	row := q.db.QueryRow(ctx, updateUsername, arg.Username, arg.ID)
 	var username string
 	err := row.Scan(&username)
 	return username, err
 }
 
 const upsertChangeEmail = `-- name: UpsertChangeEmail :one
-INSERT INTO change_email (uuid, new_email, confirmation_token)
-VALUES ($1, $2, $3) ON CONFLICT (uuid) DO
+INSERT INTO change_email (user_id, new_email, confirmation_token)
+VALUES ($1, $2, $3) ON CONFLICT (user_id) DO
 UPDATE
 SET new_email = $2,
     confirmation_token = $3
@@ -1108,9 +1101,9 @@ RETURNING confirmation_token,
 `
 
 type UpsertChangeEmailParams struct {
-	Uuid              string `json:"uuid"`
-	NewEmail          string `json:"newEmail"`
-	ConfirmationToken string `json:"confirmationToken"`
+	UserID            pgtype.UUID `json:"userId"`
+	NewEmail          string      `json:"newEmail"`
+	ConfirmationToken string      `json:"confirmationToken"`
 }
 
 type UpsertChangeEmailRow struct {
@@ -1119,21 +1112,20 @@ type UpsertChangeEmailRow struct {
 }
 
 func (q *Queries) UpsertChangeEmail(ctx context.Context, arg UpsertChangeEmailParams) (UpsertChangeEmailRow, error) {
-	row := q.db.QueryRow(ctx, upsertChangeEmail, arg.Uuid, arg.NewEmail, arg.ConfirmationToken)
+	row := q.db.QueryRow(ctx, upsertChangeEmail, arg.UserID, arg.NewEmail, arg.ConfirmationToken)
 	var i UpsertChangeEmailRow
 	err := row.Scan(&i.ConfirmationToken, &i.NewEmail)
 	return i, err
 }
 
 const validateChatID = `-- name: ValidateChatID :one
-SELECT chat_id
+SELECT id
 FROM chats
-WHERE chat_id = $1
+WHERE id = $1
 `
 
-func (q *Queries) ValidateChatID(ctx context.Context, chatID string) (string, error) {
-	row := q.db.QueryRow(ctx, validateChatID, chatID)
-	var chat_id string
-	err := row.Scan(&chat_id)
-	return chat_id, err
+func (q *Queries) ValidateChatID(ctx context.Context, id pgtype.UUID) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, validateChatID, id)
+	err := row.Scan(&id)
+	return id, err
 }

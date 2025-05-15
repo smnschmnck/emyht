@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"sort"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func getChatTimestamp(chat queries.GetChatsForUserRow) time.Time {
@@ -18,7 +20,7 @@ func getChatTimestamp(chat queries.GetChatsForUserRow) time.Time {
 	return chat.CreatedAt.Time
 }
 
-func GetChatsByUUID(uuid string) ([]queries.GetChatsForUserRow, error) {
+func GetChatsByUUID(uuid pgtype.UUID) ([]queries.GetChatsForUserRow, error) {
 	conn := db.GetDB()
 
 	chats, err := conn.GetChatsForUser(context.Background(), uuid)
@@ -41,13 +43,13 @@ func GetChatsByUUID(uuid string) ([]queries.GetChatsForUserRow, error) {
 	return chats, nil
 }
 
-func IsUserInChat(uuid string, chatID string) (bool, error) {
+func IsUserInChat(uuid pgtype.UUID, chatID pgtype.UUID) (bool, error) {
 	chats, err := GetChatsByUUID(uuid)
 	if err != nil {
 		return false, err
 	}
 	for _, chat := range chats {
-		if chat.ChatID == chatID {
+		if chat.ID.String() == chatID.String() {
 			return true, nil
 		}
 	}

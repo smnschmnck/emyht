@@ -85,7 +85,7 @@ func GetUserBySession(c echo.Context) error {
 	formattedProfilePic := s3Helpers.FormatPictureUrl(user.PictureUrl)
 
 	res := UserRes{
-		UUID:              user.Uuid,
+		UUID:              user.ID.String(),
 		Email:             user.Email,
 		Username:          user.Username,
 		IsAdmin:           user.IsAdmin,
@@ -153,7 +153,7 @@ func Register(c echo.Context) error {
 		}
 		return c.String(http.StatusInternalServerError, errString)
 	}
-	session, err := startSession(user.Uuid)
+	session, err := startSession(user.ID.String())
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -267,7 +267,7 @@ func Authenticate(c echo.Context) error {
 	if !pwCorrect {
 		return c.String(http.StatusUnauthorized, "WRONG CREDENTIALS")
 	}
-	session, err := startSession(user.Uuid)
+	session, err := startSession(user.ID.String())
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE AUTHENTICATING")
 	}
@@ -318,7 +318,7 @@ func ChangeEmail(c echo.Context) error {
 	}
 
 	confirmationToken := uuid.New().String()
-	rows, err := conn.UpsertChangeEmail(context.Background(), queries.UpsertChangeEmailParams{Uuid: user.Uuid, NewEmail: lowerCaseEmail, ConfirmationToken: confirmationToken})
+	rows, err := conn.UpsertChangeEmail(context.Background(), queries.UpsertChangeEmailParams{UserID: user.ID, NewEmail: lowerCaseEmail, ConfirmationToken: confirmationToken})
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
@@ -383,7 +383,7 @@ func ChangeUsername(c echo.Context) error {
 	}
 
 	conn := db.GetDB()
-	_, err = conn.UpdateUsername(context.Background(), queries.UpdateUsernameParams{Username: changeReq.NewUsername, Uuid: reqUUID})
+	_, err = conn.UpdateUsername(context.Background(), queries.UpdateUsernameParams{Username: changeReq.NewUsername, ID: reqUUID})
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "COULD NOT CHANGE USERNAME")
 	}
