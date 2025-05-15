@@ -902,7 +902,7 @@ func AddSingleUserToGroupChats(c echo.Context) error {
 	copyCount, err := rawConn.CopyFrom(
 		context.Background(),
 		pgx.Identifier{"user_chat"},
-		[]string{"uuid", "chat_id", "unread_messages"},
+		[]string{"user_id", "chat_id", "unread_messages"},
 		pgx.CopyFromRows(rows),
 	)
 
