@@ -5,16 +5,27 @@ import (
 	"chat/queries"
 	"context"
 	"errors"
-	"fmt"
+	"log"
 	"sort"
+	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func GetChatsByUUID(uuid string) ([]queries.GetChatsForUserRow, error) {
+func getChatTimestamp(chat queries.GetChatsForUserRow) time.Time {
+	if chat.MessageCreatedAt.Valid {
+		return chat.MessageCreatedAt.Time
+	}
+
+	return chat.CreatedAt.Time
+}
+
+func GetChatsByUUID(uuid pgtype.UUID) ([]queries.GetChatsForUserRow, error) {
 	conn := db.GetDB()
 
 	chats, err := conn.GetChatsForUser(context.Background(), uuid)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return []queries.GetChatsForUserRow{}, errors.New("INTERNAL ERROR")
 	}
 
@@ -23,35 +34,22 @@ func GetChatsByUUID(uuid string) ([]queries.GetChatsForUserRow, error) {
 	}
 
 	sort.SliceStable(chats, func(i, j int) bool {
-		var a int
-		var b int
-		c1 := chats[i]
-		c2 := chats[j]
-		t1 := c1.Timestamp
-		t2 := c2.Timestamp
-		if t1 != nil {
-			a = int(*t1)
-		} else {
-			a = int(c1.CreationTimestamp)
-		}
-		if t2 != nil {
-			b = int(*t2)
-		} else {
-			b = int(c2.CreationTimestamp)
-		}
-		return a > b
+		a := getChatTimestamp(chats[i])
+		b := getChatTimestamp(chats[j])
+
+		return (a.After(b))
 	})
 
 	return chats, nil
 }
 
-func IsUserInChat(uuid string, chatID string) (bool, error) {
+func IsUserInChat(uuid pgtype.UUID, chatID pgtype.UUID) (bool, error) {
 	chats, err := GetChatsByUUID(uuid)
 	if err != nil {
 		return false, err
 	}
 	for _, chat := range chats {
-		if chat.ChatID == chatID {
+		if chat.ID.String() == chatID.String() {
 			return true, nil
 		}
 	}

@@ -45,12 +45,12 @@ export const usePusher = () => {
     refetchChats: () => void;
     onNewMessage: (chatId: string) => void;
   }) => {
-    chats.forEach(({ chatId }) => {
-      subscribe('CHAT', chatId)
+    chats.forEach(({ id }) => {
+      subscribe('CHAT', id)
         .unbind('message')
         .bind('message', () => {
           refetchChats();
-          onNewMessage(chatId);
+          onNewMessage(id);
         });
     });
   };

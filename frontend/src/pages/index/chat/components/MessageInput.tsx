@@ -19,7 +19,7 @@ const getFilePutUrl = async (file: File) => {
   });
 
   if (!res.ok) {
-    console.log(await res.text());
+    console.error(await res.text());
   }
 
   const json = await res.json();

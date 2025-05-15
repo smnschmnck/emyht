@@ -51,7 +51,7 @@ export const IndexLayout: FC = () => {
     <div className="flex h-full">
       <div
         className={twMerge(
-          'h-full w-full lg:flex lg:min-w-[22rem] lg:max-w-[22rem]',
+          'h-full w-full lg:flex lg:max-w-[22rem] lg:min-w-[22rem]',
           isSidebarHidden ? 'hidden' : 'flex'
         )}
       >

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 
 export type Contact = {
   username: string;
-  uuid: string;
+  id: string;
   pictureUrl: string;
 };
 
@@ -24,7 +24,7 @@ export const useContacts = () => {
 
 type SentContactRequest = {
   email: string;
-  date: string;
+  createdAt: string;
 };
 
 export const useSentContactRequests = () => {

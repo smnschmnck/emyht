@@ -27,7 +27,7 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => {
       <RouterLink
         className="flex w-full items-center gap-3 rounded-lg p-3 transition hover:bg-zinc-100 data-[status=active]:bg-zinc-100"
         to="/chat/$chatId"
-        params={{ chatId: chat.chatId }}
+        params={{ chatId: chat.id }}
       >
         <div className="relative">
           {chat.unreadMessages > 0 && <Badge>{''}</Badge>}
@@ -37,7 +37,7 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => {
           <div className="flex w-full items-center justify-between">
             <p className="font-semibold">{chat.chatName}</p>
             <p className="text-xs text-zinc-400">
-              {formatTimestamp(Number(chat.timestamp))}
+              {formatTimestamp(chat.messageCreatedAt)}
             </p>
           </div>
           <div className="flex items-center gap-1 text-zinc-500">
@@ -113,7 +113,7 @@ export const ChatList: FC = () => {
             ref={animationParent}
           >
             {filteredChats.map((c) => (
-              <SingleChat key={c.chatId} chat={c} />
+              <SingleChat key={c.id} chat={c} />
             ))}
           </ul>
         )}

@@ -77,7 +77,7 @@ export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
           </span>
         )}
         <span className="text-xs text-zinc-400">
-          {formatTimestamp(message.timestamp)}
+          {formatTimestamp(message.createdAt)}
         </span>
       </li>
     );
@@ -88,7 +88,7 @@ export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
       <div className="flex gap-2">
         <span className="text-xs font-semibold">{message.senderUsername}</span>
         <span className="text-xs text-zinc-400">
-          {formatTimestamp(message.timestamp)}
+          {formatTimestamp(message.createdAt)}
         </span>
       </div>
       {message.messageType !== 'plaintext' && (

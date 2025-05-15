@@ -48,7 +48,7 @@ export const useChatsUserCanBeAddedTo = ({ uuid }: { uuid?: string }) => {
       }
 
       return (await res.json()) as {
-        chatId: string;
+        id: string;
         chatName: string;
         pictureUrl: string;
       }[];

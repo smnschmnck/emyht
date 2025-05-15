@@ -8,7 +8,7 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 	"errors"
-	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"strconv"
@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func getPepper() string {
@@ -26,7 +27,7 @@ func getPepper() string {
 	return pepper
 }
 
-func GetUserByUUID(uuid string) (queries.GetUserByUUIDRow, error) {
+func GetUserByUUID(uuid pgtype.UUID) (queries.GetUserByUUIDRow, error) {
 	conn := db.GetDB()
 
 	user, err := conn.GetUserByUUID(context.Background(), uuid)
@@ -53,14 +54,21 @@ type ResponseError struct {
 	StatusCode int
 }
 
-func GetUUIDBySessionID(sessionID string) (string, error) {
+func GetUUIDBySessionID(sessionID string) (pgtype.UUID, error) {
 	rdb := redisdb.GetSessionsRedisClient()
 	uuid, err := rdb.Get(redisdb.SessionsCtx, sessionID).Result()
 	if err != nil {
-		return "", err
+		return pgtype.UUID{}, err
 	}
 	rdb.Set(redisdb.SessionsCtx, sessionID, uuid, 24*time.Hour)
-	return uuid, nil
+
+	var pgUUID pgtype.UUID
+	err = pgUUID.Scan(uuid)
+	if err != nil {
+		return pgtype.UUID{}, err
+	}
+
+	return pgUUID, nil
 }
 
 func GetUserBySessionID(sessionID string) (queries.GetUserByUUIDRow, ResponseError) {
@@ -91,21 +99,19 @@ func makeSalt() (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
-func AddUser(email string, username string, password string) (queries.User, error) {
+func AddUser(email string, username string, password string) (queries.CreateUserRow, error) {
 	salt, err := makeSalt()
 	if err != nil {
-		return queries.User{}, errors.New("UNEXPECTED ERROR")
+		return queries.CreateUserRow{}, errors.New("UNEXPECTED ERROR")
 	}
 
 	pepper := getPepper()
 	emailToken := uuid.New().String()
 	hashedPW := hashPW(password, salt, pepper)
-	userID := uuid.New().String()
 	randPictureInt := rand.Intn(10)
 	defaultPicture := "default_" + strconv.Itoa(randPictureInt)
 	conn := db.GetDB()
 	user, err := conn.CreateUser(context.Background(), queries.CreateUserParams{
-		Uuid:        userID,
 		Email:       email,
 		Username:    username,
 		Password:    hashedPW,
@@ -119,10 +125,10 @@ func AddUser(email string, username string, password string) (queries.User, erro
 	if err != nil {
 		errString := err.Error()
 		if strings.Contains(errString, `duplicate key value violates unique constraint`) {
-			return queries.User{}, errors.New("USER EXISTS ALREADY")
+			return queries.CreateUserRow{}, errors.New("USER EXISTS ALREADY")
 		}
-		fmt.Println(err.Error())
-		return queries.User{}, errors.New("INTERNAL ERROR")
+		log.Println(err.Error())
+		return queries.CreateUserRow{}, errors.New("INTERNAL ERROR")
 	}
 
 	return user, nil
@@ -149,10 +155,10 @@ func CheckPW(password string, actualPw string, salt string) bool {
 	return hashedPW == actualPw
 }
 
-func ChangeProfilePicture(uuid string, newPicture string) error {
+func ChangeProfilePicture(uuid pgtype.UUID, newPicture string) error {
 	conn := db.GetDB()
 
-	err := conn.UpdatePictureURL(context.Background(), queries.UpdatePictureURLParams{PictureUrl: newPicture, Uuid: uuid})
+	err := conn.UpdatePictureURL(context.Background(), queries.UpdatePictureURLParams{PictureUrl: newPicture, ID: uuid})
 	if err != nil {
 		return err
 	}

@@ -1,6 +1,7 @@
 import { IconButton } from '@/components/ui/IconButton';
 import { Spinner } from '@/components/ui/Spinner';
 import { useSentContactRequests } from '@/hooks/api/contacts';
+import { formatTimestamp } from '@/utils/dateUtils';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { FC } from 'react';
 
@@ -11,7 +12,7 @@ const ContactRequestsTableDesktop: FC = () => {
     <div className="max-h-72 w-full overflow-scroll pr-4">
       <table className="h-fit w-full text-left text-sm">
         <thead>
-          <tr className="sticky top-0 bg-white shadow-line">
+          <tr className="shadow-line sticky top-0 bg-white">
             <th className="pb-3 font-semibold">E-Mail</th>
             <th className="pb-3 font-semibold">Date</th>
             <th className="pb-3 text-right font-semibold">Cancel</th>
@@ -24,7 +25,9 @@ const ContactRequestsTableDesktop: FC = () => {
                 <td className="max-w-xs truncate py-3 pr-2 font-semibold">
                   {r.email}
                 </td>
-                <td className="py-3 text-zinc-500">{r.date}</td>
+                <td className="py-3 text-zinc-500">
+                  {formatTimestamp(r.createdAt)}
+                </td>
                 <td className="flex justify-end py-3 text-red-500">
                   <IconButton
                     ariaLabel={'Cancel request'}
@@ -62,7 +65,7 @@ const ContactRequestsTableMobile: FC = () => {
     <div className="max-h-72 w-full pr-4">
       <table className="h-fit w-full text-left text-sm">
         <thead>
-          <tr className="sticky top-0 bg-white shadow-line">
+          <tr className="shadow-line sticky top-0 bg-white">
             <th className="pb-3 font-semibold">Request</th>
             <th className="pb-3 text-right font-semibold">Cancel</th>
           </tr>
@@ -76,7 +79,9 @@ const ContactRequestsTableMobile: FC = () => {
                     <span className="block max-w-[200px] truncate font-semibold">
                       {r.email}
                     </span>
-                    <span className="block text-zinc-500">{r.date}</span>
+                    <span className="block text-zinc-500">
+                      {formatTimestamp(r.createdAt)}
+                    </span>
                   </div>
                 </td>
                 <td className="flex items-center justify-end py-3 text-red-500">

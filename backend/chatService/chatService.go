@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -59,7 +60,7 @@ func StartOneOnOneChat(c echo.Context) error {
 
 	isInContacts := false
 	for _, c := range contacts {
-		if c.Uuid == req.ParticipantUUID {
+		if c.ID.String() == req.ParticipantUUID {
 			isInContacts = true
 			break
 		}
@@ -70,7 +71,12 @@ func StartOneOnOneChat(c echo.Context) error {
 
 	conn := db.GetDB()
 
-	chatExists, err := conn.CheckChatExists(context.Background(), queries.CheckChatExistsParams{Uuid: reqUUID, Uuid_2: req.ParticipantUUID})
+	var participantUuid pgtype.UUID
+	err = participantUuid.Scan(req.ParticipantUUID)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	chatExists, err := conn.CheckChatExists(context.Background(), queries.CheckChatExistsParams{UserID: reqUUID, UserID_2: participantUuid})
 	if err != nil {
 		if err.Error() == "no rows in result set" {
 			chatExists = false
@@ -82,27 +88,25 @@ func StartOneOnOneChat(c echo.Context) error {
 		return c.String(http.StatusConflict, "CHAT EXISTS ALREADY")
 	}
 
-	chatID := uuid.New().String()
-
-	_, err = conn.CreateOneOnOneChat(context.Background(), queries.CreateOneOnOneChatParams{ChatID: chatID, CreationTimestamp: time.Now().Unix()})
+	chatID, err := conn.CreateOneOnOneChat(context.Background())
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	_, err = conn.InsertUserChat(context.Background(), queries.InsertUserChatParams{Uuid: reqUUID, ChatID: chatID})
+	_, err = conn.InsertUserChat(context.Background(), queries.InsertUserChatParams{UserID: reqUUID, ChatID: chatID})
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	_, err = conn.InsertParticipantChat(context.Background(), queries.InsertParticipantChatParams{Uuid: req.ParticipantUUID, ChatID: chatID})
+	_, err = conn.InsertParticipantChat(context.Background(), queries.InsertParticipantChatParams{UserID: participantUuid, ChatID: chatID})
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	err = pusher.PusherClient.Trigger(pusher.USER_FEED_PREFIX+req.ParticipantUUID, pusher.CHAT_EVENT, nil)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
 	return c.String(http.StatusOK, "SUCCESS")
@@ -127,12 +131,12 @@ func StartGroupChat(c echo.Context) error {
 	req := new(startReq)
 	err = c.Bind(&req)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 	err = validate.Struct(req)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
@@ -150,7 +154,7 @@ func StartGroupChat(c echo.Context) error {
 
 	var chatPicture string
 	if req.ChatPictureID != "" {
-		imageKey := reqUUID + "/gcPictures/" + req.ChatPictureID + ".png"
+		imageKey := reqUUID.String() + "/gcPictures/" + req.ChatPictureID + ".png"
 		imageExists, err := s3Helpers.CheckFileExists(imageKey)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -165,19 +169,17 @@ func StartGroupChat(c echo.Context) error {
 		chatPicture = defaultPicture
 	}
 
-	//CREATE CHAT
-	chatID := uuid.New().String()
-	_, err = conn.CreateGroupChat(context.Background(), queries.CreateGroupChatParams{ChatID: chatID, Name: req.ChatName, PictureUrl: chatPicture, CreationTimestamp: time.Now().Unix()})
+	chatID, err := conn.CreateGroupChat(context.Background(), queries.CreateGroupChatParams{Name: req.ChatName, PictureUrl: chatPicture})
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	//INSERT ALL PARTICIPANTS INTO CHAT
 	rows := [][]any{}
-	rows = append(rows, []any{reqUUID, chatID, 0})
+	rows = append(rows, []any{reqUUID.String(), chatID.String(), 0})
 	for _, p := range req.ParticipantUUIDs {
-		rows = append(rows, []any{p, chatID, 0})
+		rows = append(rows, []any{p, chatID.String(), 0})
 	}
 
 	rawConn := db.GetRawConn()
@@ -185,10 +187,11 @@ func StartGroupChat(c echo.Context) error {
 	copyCount, err := rawConn.CopyFrom(
 		context.Background(),
 		pgx.Identifier{"user_chat"},
-		[]string{"uuid", "chat_id", "unread_messages"},
+		[]string{"user_id", "chat_id", "unread_messages"},
 		pgx.CopyFromRows(rows),
 	)
 	if err != nil || int(copyCount) != len(req.ParticipantUUIDs)+1 {
+		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
@@ -203,10 +206,11 @@ func StartGroupChat(c echo.Context) error {
 	return c.JSON(http.StatusOK, chats)
 }
 
-func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) ([]queries.GetChatsForUserRow, error) {
+func addUsersToGroupChat(participantUUIDs []string, uuid pgtype.UUID, chatId pgtype.UUID) ([]queries.GetChatsForUserRow, error) {
 	emptyChatArray := make([]queries.GetChatsForUserRow, 0)
 	isInContacts, err := contactService.AreUsersInContacts(participantUUIDs, uuid)
 	if err != nil {
+		log.Println(err.Error())
 		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
@@ -223,6 +227,7 @@ func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) 
 
 	chatType, err := conn.GetChatType(context.Background(), dbChatID)
 	if err != nil {
+		log.Println(err.Error())
 		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
@@ -233,6 +238,7 @@ func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) 
 	//CHECK IF USER IS IN CHAT
 	userInChat, err := chatHelpers.IsUserInChat(uuid, dbChatID)
 	if err != nil {
+		log.Println(err.Error())
 		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
@@ -251,16 +257,18 @@ func addUsersToGroupChat(participantUUIDs []string, uuid string, chatId string) 
 	copyCount, err := rawConn.CopyFrom(
 		context.Background(),
 		pgx.Identifier{"user_chat"},
-		[]string{"uuid", "chat_id", "unread_messages"},
+		[]string{"user_id", "chat_id", "unread_messages"},
 		pgx.CopyFromRows(rows),
 	)
 
 	if err != nil || int(copyCount) != len(participantUUIDs) {
+		log.Println(err.Error())
 		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
 	chats, err := chatHelpers.GetChatsByUUID(uuid)
 	if err != nil {
+		log.Println(err.Error())
 		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
@@ -296,8 +304,14 @@ func AddUsersToGroupChat(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	chats, err := addUsersToGroupChat(req.ParticipantUUIDs, reqUUID, req.ChatID)
+	var chatId pgtype.UUID
+	err = chatId.Scan(req.ChatID)
 	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	chats, err := addUsersToGroupChat(req.ParticipantUUIDs, reqUUID, chatId)
+	if err != nil {
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
@@ -315,16 +329,21 @@ func GetChatParticipantsExceptUser(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	chatID := c.Param("chatID")
-
-	chatParticipants, err := getChatMembers(chatID)
+	reqChatID := c.Param("chatID")
+	var chatId pgtype.UUID
+	err = chatId.Scan(reqChatID)
 	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	chatParticipants, err := getChatMembers(chatId)
+	if err != nil {
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	inChat := false
 	for _, p := range chatParticipants {
-		if p.Uuid == reqUUID {
+		if p.ID.String() == reqUUID.String() {
 			inChat = true
 			break
 		}
@@ -336,7 +355,7 @@ func GetChatParticipantsExceptUser(c echo.Context) error {
 
 	var participantsExceptUser []queries.GetChatMembersRow
 	for _, p := range chatParticipants {
-		if p.Uuid != reqUUID {
+		if p.ID.String() != reqUUID.String() {
 			participantsExceptUser = append(participantsExceptUser, p)
 		}
 	}
@@ -392,7 +411,7 @@ func SendMessage(c echo.Context) error {
 	}
 	err = validate.Struct(req)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
@@ -407,14 +426,19 @@ func SendMessage(c echo.Context) error {
 		if req.MessageType == "plaintext" {
 			return c.String(http.StatusBadRequest, "FILES NOT ALLOWED FOR TYPE PLAINTEXT")
 		}
-		formattedFileID = "storage.emyht.com/" + reqUUID + "/userData/" + req.FileID
+		formattedFileID = "storage.emyht.com/" + reqUUID.String() + "/userData/" + req.FileID
 	}
 
 	if req.MessageType == "plaintext" && len(req.TextContent) < 1 {
 		return c.String(http.StatusBadRequest, "MESSAGE TOO SHORT")
 	}
 
-	inChat, err := chatHelpers.IsUserInChat(reqUUID, req.ChatID)
+	var chatId pgtype.UUID
+	err = chatId.Scan(req.ChatID)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	inChat, err := chatHelpers.IsUserInChat(reqUUID, chatId)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -425,29 +449,29 @@ func SendMessage(c echo.Context) error {
 	conn := db.GetDB()
 
 	messageID, err := conn.CreateChatMessage(context.Background(), queries.CreateChatMessageParams{
-		MessageID:   uuid.NewString(),
-		ChatID:      req.ChatID,
+		ChatID:      chatId,
 		SenderID:    reqUUID,
 		TextContent: &req.TextContent,
 		MessageType: queries.MessageType(req.MessageType),
 		MediaUrl:    &formattedFileID,
-		Timestamp:   time.Now().Unix()})
+	})
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	chatID, err := conn.UpdateLastMessageID(context.Background(), queries.UpdateLastMessageIDParams{
-		LastMessageID: &messageID,
-		ChatID:        req.ChatID})
+		LastMessageID: messageID,
+		ID:            chatId,
+	})
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	querySuccess, err := conn.IncrementUnreadMessages(context.Background(), queries.IncrementUnreadMessagesParams{ChatID: chatID, Uuid: reqUUID})
+	querySuccess, err := conn.IncrementUnreadMessages(context.Background(), queries.IncrementUnreadMessagesParams{ChatID: chatID, UserID: reqUUID})
 	if err != nil || !querySuccess {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
@@ -456,15 +480,15 @@ func SendMessage(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	err = sendNewMessageNotification(chatID)
+	err = sendNewMessageNotification(chatID.String())
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
 	return c.JSON(http.StatusOK, messages)
 }
 
-func getMessagesByChatID(chatID string, uuid string) ([]queries.GetChatMessagesRow, error) {
+func getMessagesByChatID(chatID pgtype.UUID, uuid pgtype.UUID) ([]queries.GetChatMessagesRow, error) {
 	inChat, err := chatHelpers.IsUserInChat(uuid, chatID)
 	emptyMessageArr := make([]queries.GetChatMessagesRow, 0)
 	if err != nil {
@@ -504,18 +528,23 @@ func GetMessages(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	chatID := c.Param("chatID")
-	if len(chatID) <= 0 {
+	reqChatID := c.Param("chatID")
+	if len(reqChatID) <= 0 {
 		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
 	}
 
-	messages, err := getMessagesByChatID(chatID, reqUUID)
+	var chatId pgtype.UUID
+	err = chatId.Scan(reqChatID)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	messages, err := getMessagesByChatID(chatId, reqUUID)
 
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	err = markChatAsRead(reqUUID, chatID)
+	err = markChatAsRead(reqUUID, chatId)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -523,10 +552,10 @@ func GetMessages(c echo.Context) error {
 	return c.JSON(http.StatusOK, messages)
 }
 
-func markChatAsRead(uuid string, chatID string) error {
+func markChatAsRead(uuid pgtype.UUID, chatID pgtype.UUID) error {
 	conn := db.GetDB()
 
-	err := conn.ResetUnreadMessages(context.Background(), queries.ResetUnreadMessagesParams{ChatID: chatID, Uuid: uuid})
+	err := conn.ResetUnreadMessages(context.Background(), queries.ResetUnreadMessagesParams{ChatID: chatID, UserID: uuid})
 	if err != nil {
 		return errors.New("INTERNAL ERROR")
 	}
@@ -534,7 +563,7 @@ func markChatAsRead(uuid string, chatID string) error {
 	return nil
 }
 
-func getChatMembers(chatId string) ([]queries.GetChatMembersRow, error) {
+func getChatMembers(chatId pgtype.UUID) ([]queries.GetChatMembersRow, error) {
 	conn := db.GetDB()
 
 	uuids, err := conn.GetChatMembers(context.Background(), chatId)
@@ -562,11 +591,16 @@ func GetChatInfo(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
-	chatID := c.Param("chatID")
-	if len(chatID) <= 0 {
+	reqChatId := c.Param("chatID")
+	if len(reqChatId) <= 0 {
 		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
 	}
-	userInChat, err := chatHelpers.IsUserInChat(reqUUID, chatID)
+	var chatId pgtype.UUID
+	err = chatId.Scan(reqChatId)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	userInChat, err := chatHelpers.IsUserInChat(reqUUID, chatId)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
@@ -576,16 +610,16 @@ func GetChatInfo(c echo.Context) error {
 
 	conn := db.GetDB()
 
-	isGroupChat, err := conn.IsGroupChat(context.Background(), chatID)
+	isGroupChat, err := conn.IsGroupChat(context.Background(), chatId)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	if isGroupChat {
-		groupChatUsers, err := conn.GetGroupChatUserCount(context.Background(), chatID)
+		groupChatUsers, err := conn.GetGroupChatUserCount(context.Background(), chatId)
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Println(err.Error())
 			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 		}
 		out := fmt.Sprint(groupChatUsers) + " member"
@@ -630,11 +664,11 @@ func GetMediaPutURL(c echo.Context) error {
 	}
 
 	fileID := uuid.New().String() + "_" + req.FileName
-	fileName := reqUUID + "/userData/" + fileID
+	fileName := reqUUID.String() + "/userData/" + fileID
 
 	presignedPutUrl, err := s3Helpers.PresignPutObject(fileName, time.Hour, req.ContentLength)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
@@ -676,7 +710,7 @@ func GetGroupPicturePutURL(c echo.Context) error {
 	}
 
 	fileID := uuid.New().String()
-	fileName := reqUUID + "/gcPictures/" + fileID + ".png"
+	fileName := reqUUID.String() + "/gcPictures/" + fileID + ".png"
 
 	presignedPutUrl, err := s3Helpers.PresignPutObject(fileName, time.Hour, req.ContentLength)
 	if err != nil {
@@ -715,7 +749,12 @@ func LeaveGroupChat(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	inChat, err := chatHelpers.IsUserInChat(reqUUID, req.ChatID)
+	var chatId pgtype.UUID
+	err = chatId.Scan(req.ChatID)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	inChat, err := chatHelpers.IsUserInChat(reqUUID, chatId)
 	if err != nil {
 		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -727,7 +766,7 @@ func LeaveGroupChat(c echo.Context) error {
 
 	conn := db.GetDB()
 
-	isGroupChat, err := conn.IsGroupChat(context.Background(), req.ChatID)
+	isGroupChat, err := conn.IsGroupChat(context.Background(), chatId)
 	if err != nil {
 		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -737,7 +776,7 @@ func LeaveGroupChat(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "NOT A GROUP CHAT")
 	}
 
-	err = conn.LeaveGroupChat(context.Background(), queries.LeaveGroupChatParams{ChatID: req.ChatID, Uuid: reqUUID})
+	err = conn.LeaveGroupChat(context.Background(), queries.LeaveGroupChatParams{ChatID: chatId, UserID: reqUUID})
 	if err != nil {
 		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -752,10 +791,10 @@ func LeaveGroupChat(c echo.Context) error {
 	return c.JSON(http.StatusOK, chats)
 }
 
-func getGroupchatsNewUserIsNotPartOf(uuid string, newUserUUID string) ([]queries.GetAvailableGroupChatsRow, error) {
+func getGroupchatsNewUserIsNotPartOf(uuid pgtype.UUID, newUserUUID pgtype.UUID) ([]queries.GetAvailableGroupChatsRow, error) {
 	conn := db.GetDB()
 
-	chats, err := conn.GetAvailableGroupChats(context.Background(), queries.GetAvailableGroupChatsParams{Uuid: uuid, Uuid_2: newUserUUID})
+	chats, err := conn.GetAvailableGroupChats(context.Background(), queries.GetAvailableGroupChatsParams{UserID: uuid, UserID_2: newUserUUID})
 	if err != nil {
 		return nil, errors.New("INTERNAL ERROR")
 	}
@@ -774,9 +813,14 @@ func GetGroupchatsNewUserIsNotPartOf(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	newUserId := c.Param("uuid")
-	if len(newUserId) <= 0 {
+	reqNewUserId := c.Param("uuid")
+	if len(reqNewUserId) <= 0 {
 		return c.String(http.StatusBadRequest, "UUID MISSING")
+	}
+	var newUserId pgtype.UUID
+	err = newUserId.Scan(reqNewUserId)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
 	groupChats, err := getGroupchatsNewUserIsNotPartOf(reqUUID, newUserId)
@@ -825,7 +869,12 @@ func AddSingleUserToGroupChats(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "USER NOT IN CONTACTS")
 	}
 
-	potentialChats, err := getGroupchatsNewUserIsNotPartOf(reqUUID, req.ParticipantUUID)
+	var participantUuid pgtype.UUID
+	err = participantUuid.Scan(req.ParticipantUUID)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	potentialChats, err := getGroupchatsNewUserIsNotPartOf(reqUUID, participantUuid)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -833,7 +882,7 @@ func AddSingleUserToGroupChats(c echo.Context) error {
 	for _, chatID := range req.ChatIDs {
 		canAdd := false
 		for _, potentialChat := range potentialChats {
-			if chatID == potentialChat.ChatID {
+			if chatID == potentialChat.ID.String() {
 				canAdd = true
 				break
 			}
@@ -853,7 +902,7 @@ func AddSingleUserToGroupChats(c echo.Context) error {
 	copyCount, err := rawConn.CopyFrom(
 		context.Background(),
 		pgx.Identifier{"user_chat"},
-		[]string{"uuid", "chat_id", "unread_messages"},
+		[]string{"user_id", "chat_id", "unread_messages"},
 		pgx.CopyFromRows(rows),
 	)
 
@@ -877,9 +926,11 @@ func ChangeGroupName(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	chatID := c.Param("chatID")
-	if len(chatID) <= 0 {
-		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
+	reqChatID := c.Param("chatID")
+	var chatId pgtype.UUID
+	err = chatId.Scan(reqChatID)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
 	type changeNameReq struct {
@@ -895,7 +946,7 @@ func ChangeGroupName(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	userInChat, err := chatHelpers.IsUserInChat(reqUUID, chatID)
+	userInChat, err := chatHelpers.IsUserInChat(reqUUID, chatId)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -905,9 +956,9 @@ func ChangeGroupName(c echo.Context) error {
 
 	conn := db.GetDB()
 
-	err = conn.ChangeGroupName(context.Background(), queries.ChangeGroupNameParams{Name: req.NewName, ChatID: chatID})
+	err = conn.ChangeGroupName(context.Background(), queries.ChangeGroupNameParams{Name: req.NewName, ID: chatId})
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
 
@@ -925,9 +976,11 @@ func ChangeGroupPicture(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	chatID := c.Param("chatID")
-	if len(chatID) <= 0 {
-		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
+	reqChatID := c.Param("chatID")
+	var chatId pgtype.UUID
+	err = chatId.Scan(reqChatID)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
 	type changePicReq struct {
@@ -943,7 +996,7 @@ func ChangeGroupPicture(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	userInChat, err := chatHelpers.IsUserInChat(reqUUID, chatID)
+	userInChat, err := chatHelpers.IsUserInChat(reqUUID, chatId)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -951,7 +1004,7 @@ func ChangeGroupPicture(c echo.Context) error {
 		c.String(http.StatusUnauthorized, "YOU ARE NOT A PARTICIPANT OF THIS CHAT")
 	}
 
-	imageKey := reqUUID + "/gcPictures/" + req.FileId + ".png"
+	imageKey := reqUUID.String() + "/gcPictures/" + req.FileId + ".png"
 	imageExists, err := s3Helpers.CheckFileExists(imageKey)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -964,10 +1017,10 @@ func ChangeGroupPicture(c echo.Context) error {
 	conn := db.GetDB()
 	err = conn.ChangeGroupPicture(
 		context.Background(),
-		queries.ChangeGroupPictureParams{PictureUrl: chatPicture, ChatID: chatID},
+		queries.ChangeGroupPictureParams{PictureUrl: chatPicture, ID: chatId},
 	)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
 
@@ -985,12 +1038,14 @@ func GetOneOnOneChatParticipant(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	chatID := c.Param("chatID")
-	if len(chatID) <= 0 {
-		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
+	reqChatID := c.Param("chatID")
+	var chatId pgtype.UUID
+	err = chatId.Scan(reqChatID)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	userInChat, err := chatHelpers.IsUserInChat(reqUUID, chatID)
+	userInChat, err := chatHelpers.IsUserInChat(reqUUID, chatId)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -1000,7 +1055,7 @@ func GetOneOnOneChatParticipant(c echo.Context) error {
 
 	conn := db.GetDB()
 
-	participantUUID, err := conn.GetOneOnOneChatParticipant(context.Background(), queries.GetOneOnOneChatParticipantParams{ChatID: chatID, Uuid: reqUUID})
+	participantUUID, err := conn.GetOneOnOneChatParticipant(context.Background(), queries.GetOneOnOneChatParticipantParams{ChatID: chatId, UserID: reqUUID})
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
@@ -1009,7 +1064,7 @@ func GetOneOnOneChatParticipant(c echo.Context) error {
 		ParticipantUUID string `json:"participantUUID"`
 	}
 
-	return c.JSON(http.StatusOK, res{ParticipantUUID: participantUUID})
+	return c.JSON(http.StatusOK, res{ParticipantUUID: participantUUID.String()})
 }
 
 func GetContactsNotInChat(c echo.Context) error {
@@ -1023,12 +1078,14 @@ func GetContactsNotInChat(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	chatID := c.Param("chatID")
-	if len(chatID) <= 0 {
-		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
+	reqChatID := c.Param("chatID")
+	var chatId pgtype.UUID
+	err = chatId.Scan(reqChatID)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	chatMembers, err := getChatMembers(chatID)
+	chatMembers, err := getChatMembers(chatId)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -1041,11 +1098,11 @@ func GetContactsNotInChat(c echo.Context) error {
 	contactsAsMap := make(map[string]queries.GetUserContactsRow)
 
 	for _, contact := range contacts {
-		contactsAsMap[contact.Uuid] = contact
+		contactsAsMap[contact.ID.String()] = contact
 	}
 
 	for _, chatMember := range chatMembers {
-		delete(contactsAsMap, chatMember.Uuid)
+		delete(contactsAsMap, chatMember.ID.String())
 	}
 
 	usersNotInChat := make([]queries.GetUserContactsRow, len(contactsAsMap))
@@ -1063,6 +1120,21 @@ func GetContactsNotInChat(c echo.Context) error {
 	return c.JSON(http.StatusOK, usersNotInChat)
 }
 
+func stringsToUUIDs(uuidStrings []string) ([]pgtype.UUID, error) {
+	uuids := make([]pgtype.UUID, len(uuidStrings))
+
+	for i, uuidStr := range uuidStrings {
+		var uuid pgtype.UUID
+		err := uuid.Scan(uuidStr)
+		if err != nil {
+			return nil, fmt.Errorf("invalid UUID at index %d: %v", i, err)
+		}
+		uuids[i] = uuid
+	}
+
+	return uuids, nil
+}
+
 func RemoveUsersFromGroupChat(c echo.Context) error {
 	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
@@ -1074,9 +1146,11 @@ func RemoveUsersFromGroupChat(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	chatID := c.Param("chatID")
-	if len(chatID) <= 0 {
-		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
+	reqChatID := c.Param("chatID")
+	var chatId pgtype.UUID
+	err = chatId.Scan(reqChatID)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
 	type request struct {
@@ -1093,7 +1167,7 @@ func RemoveUsersFromGroupChat(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	isInChat, err := chatHelpers.IsUserInChat(reqUUID, chatID)
+	isInChat, err := chatHelpers.IsUserInChat(reqUUID, chatId)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
 	}
@@ -1103,11 +1177,17 @@ func RemoveUsersFromGroupChat(c echo.Context) error {
 
 	conn := db.GetDB()
 
+	uuidsToRemove, err := stringsToUUIDs(req.UuidsToRemove)
+	if err != nil {
+		log.Println(err.Error())
+		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
+	}
+
 	err = conn.DeleteFromGroupChat(
 		context.Background(),
-		queries.DeleteFromGroupChatParams{ChatID: chatID, Column2: req.UuidsToRemove})
+		queries.DeleteFromGroupChatParams{ChatID: chatId, Column2: uuidsToRemove})
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
 	}
 

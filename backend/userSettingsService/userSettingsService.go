@@ -45,7 +45,7 @@ func GetChangeProfilePicturePutURL(c echo.Context) error {
 	}
 
 	imageID := uuid.New().String()
-	picName := reqUUID + "/accountData/" + imageID + ".png"
+	picName := reqUUID.String() + "/accountData/" + imageID + ".png"
 
 	presignedPutUrl, err := s3Helpers.PresignPutObject(picName, time.Hour, req.ContentLength)
 	if err != nil {
@@ -84,7 +84,7 @@ func ConfirmChangedProfilePic(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	imageKey := reqUUID + "/accountData/" + req.ImageID + ".png"
+	imageKey := reqUUID.String() + "/accountData/" + req.ImageID + ".png"
 	imageExists, err := s3Helpers.CheckFileExists(imageKey)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")

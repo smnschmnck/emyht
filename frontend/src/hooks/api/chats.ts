@@ -2,7 +2,7 @@ import { fetchWithDefaults } from '@/utils/fetch';
 import { useQuery } from '@tanstack/react-query';
 
 export type Chat = {
-  chatId: string;
+  id: string;
   chatType: 'group' | 'one_on_one' | 'contactRequest' | 'other';
   creationTimestamp: number;
   chatName: string;
@@ -13,7 +13,8 @@ export type Chat = {
     valid: boolean;
   };
   textContent?: string | null;
-  timestamp?: number;
+  createdAt?: string;
+  messageCreatedAt?: string;
   deliveryStatus?: {
     deliveryStatus: 'sent' | 'received' | 'read' | 'pending' | 'failed';
     valid: boolean;
@@ -45,5 +46,5 @@ export const useCurrentChat = (chatId: string) => {
     return;
   }
 
-  return allChats?.find((c) => c.chatId === chatId);
+  return allChats?.find((c) => c.id === chatId);
 };

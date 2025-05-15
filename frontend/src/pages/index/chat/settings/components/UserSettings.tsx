@@ -112,7 +112,7 @@ const AddToGroup = () => {
   });
 
   const entities = chatsUserCanBeAddedTo?.map((chat) => ({
-    id: chat.chatId,
+    id: chat.id,
     name: chat.chatName,
     pictureUrl: chat.pictureUrl,
   }));

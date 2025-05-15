@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 	"github.com/pusher/pusher-http-go/v5"
 )
@@ -51,7 +52,12 @@ func PusherAuth(c echo.Context) error {
 
 	switch channelType {
 	case "chat":
-		inChat, err := chatHelpers.IsUserInChat(reqUUID, channelName)
+		var chatId pgtype.UUID
+		err = chatId.Scan(channelName)
+		if err != nil {
+			return c.String(http.StatusBadRequest, "BAD REQUEST")
+		}
+		inChat, err := chatHelpers.IsUserInChat(reqUUID, chatId)
 		if err != nil {
 			return c.String(http.StatusUnauthorized, err.Error())
 		}
@@ -60,7 +66,7 @@ func PusherAuth(c echo.Context) error {
 			return c.String(http.StatusUnauthorized, "User not in chat")
 		}
 	case "user_feed":
-		if reqUUID != channelName {
+		if reqUUID.String() != channelName {
 			return c.String(http.StatusUnauthorized, "NO AUTH")
 		}
 	default:
