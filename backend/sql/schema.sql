@@ -1,55 +1,63 @@
-create type chat_type as enum ('group', 'one_on_one');
-create type message_type as enum ('plaintext', 'image', 'video', 'audio', 'data');
-create type delivery_status as enum ('sent', 'delivered', 'read');
-create type friendship_status as enum ('pending', 'accepted', 'declined', 'blocked');
-create table users (
-    uuid varchar(64) not null primary key,
-    email varchar(64) not null unique,
-    username varchar(32) not null,
-    password varchar(256) not null,
-    salt varchar(128) not null,
-    is_admin boolean not null,
-    email_active boolean not null,
-    email_token varchar(64) unique,
-    picture_url varchar(128) not null,
-    created_at timestamp default CURRENT_TIMESTAMP
+-- Add pgcrypto extension for UUID generation
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- Enums
+CREATE TYPE chat_type AS ENUM ('group', 'one_on_one');
+CREATE TYPE message_type AS ENUM ('plaintext', 'image', 'video', 'audio', 'data');
+CREATE TYPE delivery_status AS ENUM ('sent', 'delivered', 'read');
+CREATE TYPE friendship_status AS ENUM ('pending', 'accepted', 'declined', 'blocked');
+-- Tables
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(64) NOT NULL UNIQUE,
+    username VARCHAR(32) NOT NULL,
+    password VARCHAR(256) NOT NULL,
+    salt VARCHAR(128) NOT NULL,
+    is_admin BOOLEAN NOT NULL,
+    email_active BOOLEAN NOT NULL,
+    email_token VARCHAR(64) UNIQUE,
+    picture_url VARCHAR(128) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-create table change_email (
-    uuid varchar(64) not null unique references users,
-    new_email varchar(64) not null unique,
-    confirmation_token varchar(64) not null unique,
-    created_at timestamp default CURRENT_TIMESTAMP
+CREATE TABLE change_email (
+    id SERIAL PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id),
+    new_email VARCHAR(64) NOT NULL UNIQUE,
+    confirmation_token VARCHAR(64) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-create table chats (
-    chat_id varchar(64) not null primary key,
-    name varchar(32) not null,
-    last_message_id varchar(64),
-    picture_url varchar(128) not null,
-    chat_type chat_type not null,
-    blocked boolean default false,
-    created_at timestamp default CURRENT_TIMESTAMP
+CREATE TABLE chats (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(32) NOT NULL,
+    last_message_id UUID,
+    picture_url VARCHAR(128) NOT NULL,
+    chat_type chat_type NOT NULL,
+    blocked BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-create table chatmessages (
-    message_id varchar(64) not null primary key,
-    chat_id varchar(64) not null references chats,
-    sender_id varchar(64) not null references users,
-    text_content varchar(4096),
-    message_type message_type not null,
-    media_url varchar(512),
-    delivery_status delivery_status not null,
-    created_at timestamp default CURRENT_TIMESTAMP
+CREATE TABLE chatmessages (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    chat_id UUID NOT NULL REFERENCES chats(id),
+    sender_id UUID NOT NULL REFERENCES users(id),
+    text_content VARCHAR(4096),
+    message_type message_type NOT NULL,
+    media_url VARCHAR(512),
+    delivery_status delivery_status NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-create table user_chat (
-    uuid varchar(64) not null references users,
-    chat_id varchar(64) not null references chats,
-    unread_messages bigint not null,
-    created_at timestamp default CURRENT_TIMESTAMP,
-    primary key (uuid, chat_id)
+-- Add foreign key constraint for last_message_id after chatmessages table is created
+ALTER TABLE chats
+ADD CONSTRAINT fk_last_message FOREIGN KEY (last_message_id) REFERENCES chatmessages(id);
+CREATE TABLE user_chat (
+    user_id UUID NOT NULL REFERENCES users(id),
+    chat_id UUID NOT NULL REFERENCES chats(id),
+    unread_messages BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, chat_id)
 );
-create table friends (
-    sender varchar(64) not null references users,
-    reciever varchar(64) not null references users,
-    status friendship_status not null,
-    created_at timestamp default CURRENT_TIMESTAMP,
-    primary key (sender, reciever)
+CREATE TABLE friends (
+    sender_id UUID NOT NULL REFERENCES users(id),
+    receiver_id UUID NOT NULL REFERENCES users(id),
+    status friendship_status NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (sender_id, receiver_id)
 );
