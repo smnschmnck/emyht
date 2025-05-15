@@ -22,7 +22,7 @@ export const IndexLayout: FC = () => {
 
   useEffect(() => {
     subscribeToUserFeed({
-      uuid: userData?.id,
+      uuid: userData?.uuid,
       refetchChats,
       refetchContactRequests,
     });
