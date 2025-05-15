@@ -2,7 +2,7 @@ import { HttpError } from '@/errors/httpError/httpError';
 import { fetchWithDefaults } from '@/utils/fetch';
 
 export type UserData = {
-  uuid: string;
+  id: string;
   email: string;
   username: string;
   isAdmin: boolean;

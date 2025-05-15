@@ -40,7 +40,7 @@ const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
       {!!messages && (
         <ul className="flex h-20 w-full max-w-3xl flex-col gap-5">
           {messages.map((message) => (
-            <ChatMessage key={message.messageId} message={message} />
+            <ChatMessage key={message.id} message={message} />
           ))}
           <li className="h-0 w-0 overflow-hidden opacity-0">end of messages</li>
         </ul>

@@ -2,7 +2,7 @@ import { fetchWithDefaults } from '@/utils/fetch';
 import { useQuery } from '@tanstack/react-query';
 
 export type ChatMessage = {
-  messageId: string;
+  id: string;
   senderId: string;
   senderUsername: string;
   textContent: string;
