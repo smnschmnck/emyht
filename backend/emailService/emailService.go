@@ -2,8 +2,8 @@ package emailService
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
+	"log"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -100,7 +100,7 @@ func SendVerificationEmail(username string, recipientMail string, token string) 
 
 	err = sendEmail(subject, recipientMail, htmlBody, textBody)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return err
 	}
 
@@ -135,7 +135,7 @@ func SendVerifyEmailChangeEmail(username string, recipientMail string, token str
 
 	err = sendEmail(subject, recipientMail, htmlBody, textBody)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return err
 	}
 

@@ -9,7 +9,6 @@ import (
 	"chat/userService"
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -93,7 +92,7 @@ func GetUserContactsbyUUID(uuid pgtype.UUID) ([]queries.GetUserContactsRow, erro
 
 	contacts, err := conn.GetUserContacts(context.Background(), uuid)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return []queries.GetUserContactsRow{}, errors.New("INTERNAL ERROR")
 	}
 
@@ -261,13 +260,13 @@ func blockUser(uuidToBeBlocked pgtype.UUID, uuid pgtype.UUID, chatID pgtype.UUID
 
 	err = conn.BlockUser(context.Background(), queries.BlockUserParams{SenderID: uuidToBeBlocked, ReceiverID: uuid})
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return errors.New("INTERNAL ERROR")
 	}
 
 	_, err = conn.BlockChat(context.Background(), chatID)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return errors.New("INTERNAL ERROR")
 	}
 
@@ -334,7 +333,7 @@ func GetSentContactRequests(c echo.Context) error {
 
 	contactRequests, err := conn.GetPendingContactRequests(context.Background(), uuid)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 

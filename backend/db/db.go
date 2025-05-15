@@ -4,7 +4,6 @@ import (
 	"chat/queries"
 	"chat/utils"
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -22,7 +21,7 @@ func InitDB() {
 		log.Fatalf("Unable to connect to database: %v\n", err)
 	}
 
-	fmt.Println("Successfully connected to the database")
+	log.Println("Successfully connected to the database")
 }
 
 func GetRawConn() *pgxpool.Pool {

@@ -5,7 +5,7 @@ import (
 	"chat/queries"
 	"context"
 	"errors"
-	"fmt"
+	"log"
 	"sort"
 	"time"
 
@@ -25,7 +25,7 @@ func GetChatsByUUID(uuid pgtype.UUID) ([]queries.GetChatsForUserRow, error) {
 
 	chats, err := conn.GetChatsForUser(context.Background(), uuid)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return []queries.GetChatsForUserRow{}, errors.New("INTERNAL ERROR")
 	}
 

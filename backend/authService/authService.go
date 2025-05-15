@@ -11,7 +11,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
-	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -106,7 +106,7 @@ func makeToken() (string, error) {
 func startSession(uuid string) (Session, error) {
 	token, err := makeToken()
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return Session{}, err
 	}
 
@@ -114,7 +114,7 @@ func startSession(uuid string) (Session, error) {
 	err = rdb.Set(redisdb.SessionsCtx, token, uuid, SESSION_DURATION).Err()
 
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return Session{}, err
 	}
 	tmpSession := Session{token, uuid}
@@ -156,7 +156,7 @@ func Register(c echo.Context) error {
 	session, err := startSession(user.ID.String())
 
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
 	}
 
@@ -164,7 +164,7 @@ func Register(c echo.Context) error {
 		err = emailService.SendVerificationEmail(reqUser.Username, reqUser.Email, *user.EmailToken)
 	}
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG WHILE CREATING YOUR ACCOUNT")
 	}
 

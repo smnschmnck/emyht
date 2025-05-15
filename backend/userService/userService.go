@@ -8,7 +8,7 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 	"errors"
-	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"strconv"
@@ -127,7 +127,7 @@ func AddUser(email string, username string, password string) (queries.CreateUser
 		if strings.Contains(errString, `duplicate key value violates unique constraint`) {
 			return queries.CreateUserRow{}, errors.New("USER EXISTS ALREADY")
 		}
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return queries.CreateUserRow{}, errors.New("INTERNAL ERROR")
 	}
 

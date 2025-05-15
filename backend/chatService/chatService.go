@@ -90,7 +90,7 @@ func StartOneOnOneChat(c echo.Context) error {
 
 	chatID, err := conn.CreateOneOnOneChat(context.Background())
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
@@ -106,7 +106,7 @@ func StartOneOnOneChat(c echo.Context) error {
 
 	err = pusher.PusherClient.Trigger(pusher.USER_FEED_PREFIX+req.ParticipantUUID, pusher.CHAT_EVENT, nil)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
 	return c.String(http.StatusOK, "SUCCESS")
@@ -131,12 +131,12 @@ func StartGroupChat(c echo.Context) error {
 	req := new(startReq)
 	err = c.Bind(&req)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 	err = validate.Struct(req)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
@@ -171,7 +171,7 @@ func StartGroupChat(c echo.Context) error {
 
 	chatID, err := conn.CreateGroupChat(context.Background(), queries.CreateGroupChatParams{Name: req.ChatName, PictureUrl: chatPicture})
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
@@ -191,7 +191,7 @@ func StartGroupChat(c echo.Context) error {
 		pgx.CopyFromRows(rows),
 	)
 	if err != nil || int(copyCount) != len(req.ParticipantUUIDs)+1 {
-		fmt.Println(err)
+		log.Println(err)
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
@@ -210,7 +210,7 @@ func addUsersToGroupChat(participantUUIDs []string, uuid pgtype.UUID, chatId pgt
 	emptyChatArray := make([]queries.GetChatsForUserRow, 0)
 	isInContacts, err := contactService.AreUsersInContacts(participantUUIDs, uuid)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
@@ -227,7 +227,7 @@ func addUsersToGroupChat(participantUUIDs []string, uuid pgtype.UUID, chatId pgt
 
 	chatType, err := conn.GetChatType(context.Background(), dbChatID)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
@@ -238,7 +238,7 @@ func addUsersToGroupChat(participantUUIDs []string, uuid pgtype.UUID, chatId pgt
 	//CHECK IF USER IS IN CHAT
 	userInChat, err := chatHelpers.IsUserInChat(uuid, dbChatID)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
@@ -262,13 +262,13 @@ func addUsersToGroupChat(participantUUIDs []string, uuid pgtype.UUID, chatId pgt
 	)
 
 	if err != nil || int(copyCount) != len(participantUUIDs) {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
 	chats, err := chatHelpers.GetChatsByUUID(uuid)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
@@ -311,7 +311,7 @@ func AddUsersToGroupChat(c echo.Context) error {
 	}
 	chats, err := addUsersToGroupChat(req.ParticipantUUIDs, reqUUID, chatId)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
@@ -337,7 +337,7 @@ func GetChatParticipantsExceptUser(c echo.Context) error {
 	}
 	chatParticipants, err := getChatMembers(chatId)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
@@ -411,7 +411,7 @@ func SendMessage(c echo.Context) error {
 	}
 	err = validate.Struct(req)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
@@ -456,7 +456,7 @@ func SendMessage(c echo.Context) error {
 		MediaUrl:    &formattedFileID,
 	})
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
@@ -465,13 +465,13 @@ func SendMessage(c echo.Context) error {
 		ID:            chatId,
 	})
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	querySuccess, err := conn.IncrementUnreadMessages(context.Background(), queries.IncrementUnreadMessagesParams{ChatID: chatID, UserID: reqUUID})
 	if err != nil || !querySuccess {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
@@ -482,7 +482,7 @@ func SendMessage(c echo.Context) error {
 
 	err = sendNewMessageNotification(chatID.String())
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
 	return c.JSON(http.StatusOK, messages)
@@ -612,14 +612,14 @@ func GetChatInfo(c echo.Context) error {
 
 	isGroupChat, err := conn.IsGroupChat(context.Background(), chatId)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	if isGroupChat {
 		groupChatUsers, err := conn.GetGroupChatUserCount(context.Background(), chatId)
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Println(err.Error())
 			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 		}
 		out := fmt.Sprint(groupChatUsers) + " member"
@@ -668,7 +668,7 @@ func GetMediaPutURL(c echo.Context) error {
 
 	presignedPutUrl, err := s3Helpers.PresignPutObject(fileName, time.Hour, req.ContentLength)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
@@ -958,7 +958,7 @@ func ChangeGroupName(c echo.Context) error {
 
 	err = conn.ChangeGroupName(context.Background(), queries.ChangeGroupNameParams{Name: req.NewName, ID: chatId})
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
 
@@ -1020,7 +1020,7 @@ func ChangeGroupPicture(c echo.Context) error {
 		queries.ChangeGroupPictureParams{PictureUrl: chatPicture, ID: chatId},
 	)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
 
@@ -1166,7 +1166,7 @@ func RemoveUsersFromGroupChat(c echo.Context) error {
 		context.Background(),
 		queries.DeleteFromGroupChatParams{ChatID: chatId, Column2: req.UuidsToRemove})
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
 	}
 
