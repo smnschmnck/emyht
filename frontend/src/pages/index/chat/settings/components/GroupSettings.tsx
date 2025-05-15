@@ -13,24 +13,7 @@ import { useGroupMembers, useMembersNotInGroup } from '../hooks/useMembers';
 import { chatSettingsRoute } from '../route';
 import { contactsToEntities } from '@/utils/contactsToEntities';
 import { FilePickerButton } from '@/components/ui/FilePickerButton';
-
-const fetchGroupChatPicturePutUrl = async (picture: File) => {
-  const res = await fetchWithDefaults('/groupChatPicturePutURL', {
-    method: 'post',
-    body: JSON.stringify({
-      contentLength: picture.size,
-    }),
-  });
-
-  if (!res.ok) {
-    throw new Error(await res.text());
-  }
-
-  return (await res.json()) as {
-    fileID: string;
-    presignedPutURL: string;
-  };
-};
+import { uploadGroupChatPicture } from '@/utils/groupChat/picture';
 
 const GroupPicturePicker = () => {
   const { chatId } = chatSettingsRoute.useParams();
@@ -43,20 +26,7 @@ const GroupPicturePicker = () => {
 
   const { mutate: updatePicture, isPending: isUpdatingPicture } = useMutation({
     mutationFn: async () => {
-      if (!selectedPicture) {
-        throw new Error('No picture selected');
-      }
-      const { presignedPutURL, fileID } =
-        await fetchGroupChatPicturePutUrl(selectedPicture);
-
-      const { ok: uploadSucess } = await fetch(presignedPutURL, {
-        method: 'PUT',
-        body: selectedPicture,
-      });
-      if (!uploadSucess) {
-        throw new Error('Upload failed');
-      }
-
+      const { fileID } = await uploadGroupChatPicture(selectedPicture);
       const res = await fetchWithDefaults(`/changeGroupPicture/${chatId}`, {
         method: 'post',
         body: JSON.stringify({ fileID }),
@@ -92,7 +62,11 @@ const GroupPicturePicker = () => {
           Pick new picture
         </FilePickerButton>
       </div>
-      <Button onClick={() => updatePicture()} isLoading={isUpdatingPicture}>
+      <Button
+        onClick={() => updatePicture()}
+        isLoading={isUpdatingPicture}
+        disabled={!selectedPicture}
+      >
         Update Picture
       </Button>
     </div>
