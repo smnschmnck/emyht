@@ -68,8 +68,8 @@ FROM user_chat u
     LEFT JOIN user_chat ouc ON c.id = ouc.chat_id
     AND ouc.user_id != $1
     AND c.chat_type = 'one_on_one'
-    LEFT JOIN users ou ON ouc.user_id = ou.uuid
-    LEFT JOIN users su ON m.sender_id = su.uuid
+    LEFT JOIN users ou ON ouc.user_id = ou.id
+    LEFT JOIN users su ON m.sender_id = su.id
 WHERE u.user_id = $1;
 -- name: CheckDuplicateFriendRequest :one
 SELECT EXISTS(
