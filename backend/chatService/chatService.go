@@ -1120,6 +1120,21 @@ func GetContactsNotInChat(c echo.Context) error {
 	return c.JSON(http.StatusOK, usersNotInChat)
 }
 
+func stringsToUUIDs(uuidStrings []string) ([]pgtype.UUID, error) {
+	uuids := make([]pgtype.UUID, len(uuidStrings))
+
+	for i, uuidStr := range uuidStrings {
+		var uuid pgtype.UUID
+		err := uuid.Scan(uuidStr)
+		if err != nil {
+			return nil, fmt.Errorf("invalid UUID at index %d: %v", i, err)
+		}
+		uuids[i] = uuid
+	}
+
+	return uuids, nil
+}
+
 func RemoveUsersFromGroupChat(c echo.Context) error {
 	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
@@ -1162,9 +1177,15 @@ func RemoveUsersFromGroupChat(c echo.Context) error {
 
 	conn := db.GetDB()
 
+	uuidsToRemove, err := stringsToUUIDs(req.UuidsToRemove)
+	if err != nil {
+		log.Println(err.Error())
+		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
+	}
+
 	err = conn.DeleteFromGroupChat(
 		context.Background(),
-		queries.DeleteFromGroupChatParams{ChatID: chatId, Column2: req.UuidsToRemove})
+		queries.DeleteFromGroupChatParams{ChatID: chatId, Column2: uuidsToRemove})
 	if err != nil {
 		log.Println(err.Error())
 		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")

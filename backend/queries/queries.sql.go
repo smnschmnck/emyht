@@ -387,12 +387,12 @@ func (q *Queries) DeleteChangeEmail(ctx context.Context, confirmationToken strin
 const deleteFromGroupChat = `-- name: DeleteFromGroupChat :exec
 DELETE FROM user_chat
 WHERE chat_id = $1
-    AND user_id = ANY($2::varchar(64) [])
+    AND user_id = ANY($2::UUID [])
 `
 
 type DeleteFromGroupChatParams struct {
-	ChatID  pgtype.UUID `json:"chatId"`
-	Column2 []string    `json:"column2"`
+	ChatID  pgtype.UUID   `json:"chatId"`
+	Column2 []pgtype.UUID `json:"column2"`
 }
 
 func (q *Queries) DeleteFromGroupChat(ctx context.Context, arg DeleteFromGroupChatParams) error {

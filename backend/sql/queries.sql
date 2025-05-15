@@ -332,7 +332,7 @@ WHERE id = $2;
 -- name: DeleteFromGroupChat :exec
 DELETE FROM user_chat
 WHERE chat_id = $1
-    AND user_id = ANY($2::varchar(64) []);
+    AND user_id = ANY($2::UUID []);
 -- name: ChangeGroupName :exec
 UPDATE chats
 SET name = $1
