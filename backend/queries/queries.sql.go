@@ -850,8 +850,8 @@ SELECT u.username,
     u.id,
     u.picture_url
 FROM friends
-    JOIN users u ON u.id = friends.sender
-    OR friends.reciever = u.id
+    JOIN users u ON u.id = friends.sender_id
+    OR friends.receiver_id = u.id
 WHERE (
         receiver_id = $1
         OR sender_id = $1
