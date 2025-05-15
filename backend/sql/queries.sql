@@ -183,12 +183,11 @@ VALUES ($1, $2, 0)
 RETURNING chat_id;
 -- name: CreateGroupChat :one
 INSERT INTO chats (
-        id,
         name,
         picture_url,
         chat_type
     )
-VALUES ($1, $2, $3, 'group')
+VALUES ($1, $2, 'group')
 RETURNING id;
 -- name: ValidateChatID :one
 SELECT id

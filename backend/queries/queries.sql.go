@@ -249,23 +249,21 @@ func (q *Queries) CreateFriendRequest(ctx context.Context, arg CreateFriendReque
 
 const createGroupChat = `-- name: CreateGroupChat :one
 INSERT INTO chats (
-        id,
         name,
         picture_url,
         chat_type
     )
-VALUES ($1, $2, $3, 'group')
+VALUES ($1, $2, 'group')
 RETURNING id
 `
 
 type CreateGroupChatParams struct {
-	ID         pgtype.UUID `json:"id"`
-	Name       string      `json:"name"`
-	PictureUrl string      `json:"pictureUrl"`
+	Name       string `json:"name"`
+	PictureUrl string `json:"pictureUrl"`
 }
 
 func (q *Queries) CreateGroupChat(ctx context.Context, arg CreateGroupChatParams) (pgtype.UUID, error) {
-	row := q.db.QueryRow(ctx, createGroupChat, arg.ID, arg.Name, arg.PictureUrl)
+	row := q.db.QueryRow(ctx, createGroupChat, arg.Name, arg.PictureUrl)
 	var id pgtype.UUID
 	err := row.Scan(&id)
 	return id, err
