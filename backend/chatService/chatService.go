@@ -210,6 +210,7 @@ func addUsersToGroupChat(participantUUIDs []string, uuid pgtype.UUID, chatId pgt
 	emptyChatArray := make([]queries.GetChatsForUserRow, 0)
 	isInContacts, err := contactService.AreUsersInContacts(participantUUIDs, uuid)
 	if err != nil {
+		fmt.Println(err.Error())
 		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
@@ -226,6 +227,7 @@ func addUsersToGroupChat(participantUUIDs []string, uuid pgtype.UUID, chatId pgt
 
 	chatType, err := conn.GetChatType(context.Background(), dbChatID)
 	if err != nil {
+		fmt.Println(err.Error())
 		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
@@ -236,6 +238,7 @@ func addUsersToGroupChat(participantUUIDs []string, uuid pgtype.UUID, chatId pgt
 	//CHECK IF USER IS IN CHAT
 	userInChat, err := chatHelpers.IsUserInChat(uuid, dbChatID)
 	if err != nil {
+		fmt.Println(err.Error())
 		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
@@ -254,16 +257,18 @@ func addUsersToGroupChat(participantUUIDs []string, uuid pgtype.UUID, chatId pgt
 	copyCount, err := rawConn.CopyFrom(
 		context.Background(),
 		pgx.Identifier{"user_chat"},
-		[]string{"uuid", "chat_id", "unread_messages"},
+		[]string{"user_id", "chat_id", "unread_messages"},
 		pgx.CopyFromRows(rows),
 	)
 
 	if err != nil || int(copyCount) != len(participantUUIDs) {
+		fmt.Println(err.Error())
 		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
 	chats, err := chatHelpers.GetChatsByUUID(uuid)
 	if err != nil {
+		fmt.Println(err.Error())
 		return emptyChatArray, errors.New("INTERNAL ERROR")
 	}
 
@@ -306,6 +311,7 @@ func AddUsersToGroupChat(c echo.Context) error {
 	}
 	chats, err := addUsersToGroupChat(req.ParticipantUUIDs, reqUUID, chatId)
 	if err != nil {
+		fmt.Println(err.Error())
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
@@ -331,6 +337,7 @@ func GetChatParticipantsExceptUser(c echo.Context) error {
 	}
 	chatParticipants, err := getChatMembers(chatId)
 	if err != nil {
+		fmt.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
