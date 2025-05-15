@@ -428,7 +428,7 @@ SELECT c.id,
     c.name AS chat_name,
     c.picture_url
 FROM user_chat uc
-    JOIN chats c ON c.chat_id = uc.chat_id
+    JOIN chats c ON c.id = uc.chat_id
 WHERE uc.user_id = $2
     AND c.chat_type = 'group'
 `
@@ -587,7 +587,7 @@ SELECT DISTINCT c.id,
     m.sender_id,
     su.username AS sender_username
 FROM user_chat u
-    JOIN chats c ON u.chat_id = c.chat_id
+    JOIN chats c ON u.chat_id = c.id
     LEFT JOIN chatmessages m ON m.id = c.last_message_id -- Only join for one_on_one chats
     LEFT JOIN user_chat ouc ON c.id = ouc.chat_id
     AND ouc.user_id != $1
