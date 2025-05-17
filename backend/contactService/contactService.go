@@ -236,28 +236,6 @@ func HandleContactRequest(c echo.Context) error {
 	return c.String(http.StatusOK, "SUCCESS")
 }
 
-func blockUser(uuidToBeBlocked pgtype.UUID, uuid pgtype.UUID) error {
-	conn := db.GetDB()
-
-	//check if user is in contacts
-	uuidToBeBlockedAsArray := []string{uuidToBeBlocked.String()}
-	inContacts, err := AreUsersInContacts(uuidToBeBlockedAsArray, uuid)
-	if err != nil {
-		return errors.New("INTERNAL ERROR")
-	}
-	if !inContacts {
-		return errors.New("USER NOT IN CONTACTS")
-	}
-
-	err = conn.BlockUser(context.Background(), queries.BlockUserParams{BlockedID: uuidToBeBlocked, BlockerID: uuid})
-	if err != nil {
-		log.Println(err)
-		return errors.New("INTERNAL ERROR")
-	}
-
-	return nil
-}
-
 func BlockUser(c echo.Context) error {
 	token, err := authService.GetSessionToken(c)
 	if err != nil {
@@ -281,15 +259,17 @@ func BlockUser(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	var userId pgtype.UUID
-	err = userId.Scan(blockUserReq.UserID)
+	var userIdToBlock pgtype.UUID
+	err = userIdToBlock.Scan(blockUserReq.UserID)
 	if err != nil {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	err = blockUser(userId, uuid)
+	conn := db.GetDB()
+	err = conn.BlockUser(context.Background(), queries.BlockUserParams{BlockedID: userIdToBlock, BlockerID: uuid})
 	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		log.Println(err)
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	return c.String(http.StatusOK, "SUCCESS")
@@ -307,7 +287,7 @@ func GetSentContactRequests(c echo.Context) error {
 
 	conn := db.GetDB()
 
-	contactRequests, err := conn.GetPendingFriendRequests(context.Background(), uuid)
+	contactRequests, err := conn.GetSentContactRequests(context.Background(), uuid)
 	if err != nil {
 		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")

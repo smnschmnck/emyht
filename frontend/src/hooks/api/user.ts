@@ -17,7 +17,7 @@ export const useUserData = (
 export const useBlockUser = ({ onSuccess }: { onSuccess: () => void }) => {
   return useMutation({
     mutationFn: async (userId?: string) => {
-      if (userId) {
+      if (!userId) {
         throw new Error('Invalid user');
       }
       const body = {

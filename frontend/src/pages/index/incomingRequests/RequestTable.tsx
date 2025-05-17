@@ -50,6 +50,7 @@ export const RequestTable: FC = () => {
   const { mutate: blockUser } = useBlockUser({
     onSuccess: () => {
       toast.success('User blocked successfully');
+      refetchContactRequests();
     },
   });
 

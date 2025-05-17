@@ -116,6 +116,13 @@ FROM friends
     JOIN users u ON friends.sender_id = u.id
 WHERE receiver_id = $1
     AND status = 'pending';
+-- name: GetSentContactRequests :many
+SELECT u.email AS email,
+    friends.created_at
+FROM friends
+    JOIN users u ON u.id = friends.receiver_id
+WHERE sender_id = $1
+    AND status = 'pending';
 -- name: AcceptFriendRequest :exec
 UPDATE friends
 SET status = 'accepted'

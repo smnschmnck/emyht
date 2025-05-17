@@ -693,6 +693,40 @@ func (q *Queries) GetPendingFriendRequests(ctx context.Context, receiverID pgtyp
 	return items, nil
 }
 
+const getSentContactRequests = `-- name: GetSentContactRequests :many
+SELECT u.email AS email,
+    friends.created_at
+FROM friends
+    JOIN users u ON u.id = friends.receiver_id
+WHERE sender_id = $1
+    AND status = 'pending'
+`
+
+type GetSentContactRequestsRow struct {
+	Email     string           `json:"email"`
+	CreatedAt pgtype.Timestamp `json:"createdAt"`
+}
+
+func (q *Queries) GetSentContactRequests(ctx context.Context, senderID pgtype.UUID) ([]GetSentContactRequestsRow, error) {
+	rows, err := q.db.Query(ctx, getSentContactRequests, senderID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetSentContactRequestsRow
+	for rows.Next() {
+		var i GetSentContactRequestsRow
+		if err := rows.Scan(&i.Email, &i.CreatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id,
     email,
