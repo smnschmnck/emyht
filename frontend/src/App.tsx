@@ -26,7 +26,7 @@ const App = () => {
         persistOptions={{ persister }}
         client={queryClient}
       >
-        <Toaster richColors position="top-right" />
+        <Toaster richColors closeButton position="top-right" />
         <RouterProvider router={router} />
       </PersistQueryClientProvider>
     </PusherContext.Provider>
