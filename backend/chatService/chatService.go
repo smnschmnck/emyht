@@ -609,15 +609,6 @@ func GetChatInfo(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	blocked, err := conn.GetIsChatBlocked(context.Background(), queries.GetIsChatBlockedParams{
-		ChatID:    chatId,
-		BlockerID: reqUUID,
-	})
-	if err != nil {
-		log.Println(err.Error())
-		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
-	}
-
 	if isGroupChat {
 		groupChatUsers, err := conn.GetGroupChatUserCount(context.Background(), chatId)
 		if err != nil {
@@ -630,8 +621,17 @@ func GetChatInfo(c echo.Context) error {
 		}
 		return c.JSON(http.StatusOK, chatInfoRes{
 			Info:    out,
-			Blocked: blocked,
+			Blocked: false,
 		})
+	}
+
+	blocked, err := conn.GetIsChatBlocked(context.Background(), queries.GetIsChatBlockedParams{
+		ChatID:    chatId,
+		BlockerID: reqUUID,
+	})
+	if err != nil {
+		log.Println(err.Error())
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	//TODO: Actually fetch last online
@@ -1183,7 +1183,23 @@ func RemoveUsersFromGroupChat(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	conn := db.GetDB()
+	isBlocked, err := contactService.IsBlockedByUsers(req.UuidsToRemove, reqUUID)
+	if err != nil {
+		log.Println(err.Error())
+		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
+	}
+	if isBlocked {
+		return c.String(http.StatusUnauthorized, "UNKNOWN ERROR")
+	}
+
+	areBlocked, err := contactService.AreUsersBlocked(req.UuidsToRemove, reqUUID)
+	if err != nil {
+		log.Println(err.Error())
+		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
+	}
+	if areBlocked {
+		return c.String(http.StatusUnauthorized, "YOU ARE TRYING TO REMOVE A USER YOU HAVE BLOCKED")
+	}
 
 	uuidsToRemove, err := stringsToUUIDs(req.UuidsToRemove)
 	if err != nil {
@@ -1191,6 +1207,7 @@ func RemoveUsersFromGroupChat(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
 	}
 
+	conn := db.GetDB()
 	err = conn.DeleteFromGroupChat(
 		context.Background(),
 		queries.DeleteFromGroupChatParams{ChatID: chatId, Column2: uuidsToRemove})

@@ -102,14 +102,55 @@ func GetUserContactsbyUUID(uuid pgtype.UUID) ([]queries.GetUserContactsRow, erro
 	return contacts, nil
 }
 
-func AreUsersInContacts(usersUUIDs []string, uuid pgtype.UUID) (bool, error) {
+func IsBlockedByUsers(userIds []string, uuid pgtype.UUID) (bool, error) {
 	conn := db.GetDB()
-	usersWhoBlockedUser, err := conn.GetUsersWhoBlockedUser(context.Background(), uuid)
+	blockers, err := conn.GetUsersWhoBlockedUser(context.Background(), uuid)
 	if err != nil {
-		log.Panicln(err.Error())
-		return false, err
+		log.Println(err.Error())
+		return true, err
 	}
 
+	for _, uuidToRemove := range userIds {
+		isBlocked := false
+		for _, blocker := range blockers {
+			if uuidToRemove == blocker.String() {
+				isBlocked = true
+				break
+			}
+		}
+		if isBlocked {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func AreUsersBlocked(userIds []string, uuid pgtype.UUID) (bool, error) {
+	conn := db.GetDB()
+	blockedUsers, err := conn.GetBlockedUsers(context.Background(), uuid)
+	if err != nil {
+		log.Println(err.Error())
+		return true, err
+	}
+
+	for _, uuidToRemove := range userIds {
+		isBlocked := false
+		for _, blockedUser := range blockedUsers {
+			if uuidToRemove == blockedUser.String() {
+				isBlocked = true
+				break
+			}
+		}
+		if isBlocked {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func AreUsersInContacts(usersUUIDs []string, uuid pgtype.UUID) (bool, error) {
 	contacts, err := GetUserContactsbyUUID(uuid)
 	if err != nil {
 		return false, err
@@ -128,17 +169,12 @@ func AreUsersInContacts(usersUUIDs []string, uuid pgtype.UUID) (bool, error) {
 		}
 	}
 
-	for _, userUUID := range usersUUIDs {
-		isBlocked := false
-		for _, blocker := range usersWhoBlockedUser {
-			if blocker.String() == userUUID {
-				isBlocked = true
-				break
-			}
-		}
-		if isBlocked {
-			return false, nil
-		}
+	isBlocked, err := IsBlockedByUsers(usersUUIDs, uuid)
+	if err != nil {
+		return false, err
+	}
+	if isBlocked {
+		return false, nil
 	}
 
 	return true, nil
