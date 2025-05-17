@@ -101,7 +101,6 @@ type FriendshipStatus string
 const (
 	FriendshipStatusPending  FriendshipStatus = "pending"
 	FriendshipStatusAccepted FriendshipStatus = "accepted"
-	FriendshipStatusDeclined FriendshipStatus = "declined"
 )
 
 func (e *FriendshipStatus) Scan(src interface{}) error {

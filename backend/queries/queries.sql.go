@@ -656,9 +656,11 @@ SELECT sender_id,
     u.picture_url AS sender_profile_picture,
     u.email AS sender_email
 FROM friends
-    JOIN users u ON friends.sender_id = u.id
+    JOIN users u ON sender_id = u.id
+    LEFT JOIN user_blocks ub ON sender_id = ub.blocked_id -- Assuming blocked_id is the ID of the person who was blocked
 WHERE receiver_id = $1
     AND status = 'pending'
+    AND ub.blocked_id IS NULL
 `
 
 type GetPendingFriendRequestsRow struct {

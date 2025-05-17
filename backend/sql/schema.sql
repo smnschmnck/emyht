@@ -4,7 +4,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE TYPE chat_type AS ENUM ('group', 'one_on_one');
 CREATE TYPE message_type AS ENUM ('plaintext', 'image', 'video', 'audio', 'data');
 CREATE TYPE delivery_status AS ENUM ('sent', 'delivered', 'read');
-CREATE TYPE friendship_status AS ENUM ('pending', 'accepted', 'declined');
+CREATE TYPE friendship_status AS ENUM ('pending', 'accepted');
 -- Tables
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

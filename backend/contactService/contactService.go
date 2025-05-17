@@ -151,6 +151,7 @@ func GetPendingContactRequestsByUUID(uuid pgtype.UUID) ([]queries.GetPendingFrie
 	conn := db.GetDB()
 	contactRequests, err := conn.GetPendingFriendRequests(context.Background(), uuid)
 	if err != nil {
+		log.Println(err.Error())
 		return make([]queries.GetPendingFriendRequestsRow, 0), errors.New("INTERNAL ERROR")
 	}
 
@@ -173,6 +174,7 @@ func GetPendingContactRequests(c echo.Context) error {
 
 	contactRequests, err := GetPendingContactRequestsByUUID(uuid)
 	if err != nil {
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
