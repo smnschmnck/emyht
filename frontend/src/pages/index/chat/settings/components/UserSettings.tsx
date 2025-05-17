@@ -32,7 +32,6 @@ const UserPropertiesSettings = () => {
     mutationFn: async () => {
       const body = {
         userID: chatParticipant?.participantUUID,
-        chatID: chatId,
       };
       const res = await fetchWithDefaults('/blockUser', {
         method: 'post',

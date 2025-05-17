@@ -230,7 +230,7 @@ func HandleContactRequest(c echo.Context) error {
 			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 		}
 	case "block":
-		err = conn.BlockUser(ctx, queries.BlockUserParams{BlockerID: uuid, BlockedID: senderUUID})
+		err = blockUser(senderUUID, uuid)
 		if err != nil {
 			log.Println("Error blocking friend request:", err)
 			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -242,7 +242,7 @@ func HandleContactRequest(c echo.Context) error {
 	return c.String(http.StatusOK, "SUCCESS")
 }
 
-func blockUser(uuidToBeBlocked pgtype.UUID, uuid pgtype.UUID, chatID pgtype.UUID) error {
+func blockUser(uuidToBeBlocked pgtype.UUID, uuid pgtype.UUID) error {
 	conn := db.GetDB()
 
 	//check if user is in contacts
@@ -276,7 +276,6 @@ func BlockUser(c echo.Context) error {
 
 	type blockUserRequest struct {
 		UserID string `json:"userID" validate:"required"`
-		ChatID string `json:"chatID" validate:"required"`
 	}
 	blockUserReq := new(blockUserRequest)
 	err = c.Bind(blockUserReq)
@@ -294,13 +293,7 @@ func BlockUser(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	var chatId pgtype.UUID
-	err = chatId.Scan(blockUserReq.UserID)
-	if err != nil {
-		return c.String(http.StatusBadRequest, "BAD REQUEST")
-	}
-
-	err = blockUser(userId, uuid, chatId)
+	err = blockUser(userId, uuid)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
