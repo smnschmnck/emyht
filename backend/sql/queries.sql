@@ -211,18 +211,21 @@ WHERE chat_id = $1
     AND user_id != $2
 RETURNING true;
 -- name: GetChatMessages :many
-SELECT chatmessages.id,
-    sender_id,
-    username AS sender_username,
-    text_content,
-    message_type,
-    media_url,
-    chatmessages.created_at,
-    delivery_status
-FROM chatmessages
-    JOIN users u ON u.id = chatmessages.sender_id
-WHERE chat_id = $1
-ORDER BY chatmessages.created_at ASC;
+SELECT cm.id,
+    cm.sender_id,
+    u.username AS sender_username,
+    cm.text_content,
+    cm.message_type,
+    cm.media_url,
+    cm.created_at,
+    cm.delivery_status
+FROM chatmessages cm
+    JOIN users u ON u.id = cm.sender_id
+    LEFT JOIN user_blocks ub ON ub.blocker_id = $1
+    AND ub.blocked_id = cm.sender_id
+WHERE cm.chat_id = $2
+    AND ub.blocker_id IS NULL
+ORDER BY cm.created_at ASC;
 -- name: ResetUnreadMessages :exec
 UPDATE user_chat
 SET unread_messages = 0

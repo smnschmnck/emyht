@@ -501,7 +501,7 @@ func getMessagesByChatID(chatID pgtype.UUID, uuid pgtype.UUID) ([]queries.GetCha
 
 	conn := db.GetDB()
 
-	messages, err := conn.GetChatMessages(context.Background(), chatID)
+	messages, err := conn.GetChatMessages(context.Background(), queries.GetChatMessagesParams{ChatID: chatID, BlockerID: uuid})
 	if err != nil {
 		return emptyMessageArr, errors.New("INTERNAL ERROR")
 	}

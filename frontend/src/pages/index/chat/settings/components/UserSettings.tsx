@@ -10,6 +10,8 @@ import { chatSettingsRoute } from '../route';
 import { EntityList } from '@/components/EntityList';
 import { useBlockUser } from '@/hooks/api/user';
 import { useChatInfo } from '../../hooks/useChatInfo';
+import { useContacts } from '@/hooks/api/contacts';
+import { useChatMessages } from '@/hooks/api/messages';
 
 const useChatParticipant = ({ chatId }: { chatId: string }) => {
   return useQuery({
@@ -28,6 +30,8 @@ const useChatParticipant = ({ chatId }: { chatId: string }) => {
 
 const UserPropertiesSettings = () => {
   const { chatId } = chatSettingsRoute.useParams();
+  const { refetch: refetchContacts } = useContacts();
+  const { refetch: refetchMessages } = useChatMessages(chatId);
   const { data: chatParticipant, isLoading: isLoadingChatParticipant } =
     useChatParticipant({ chatId });
   const {
@@ -40,6 +44,8 @@ const UserPropertiesSettings = () => {
   const { mutate: blockUser, isPending: isBlocking } = useBlockUser({
     onSuccess: () => {
       refetchChatInfo();
+      refetchContacts();
+      refetchMessages();
       toast.success('User blocked successfully');
     },
   });
