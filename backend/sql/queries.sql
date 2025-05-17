@@ -137,6 +137,10 @@ WHERE sender_id = $1
 -- name: BlockUser :exec
 INSERT INTO user_blocks (blocker_id, blocked_id)
 VALUES ($1, $2) ON CONFLICT (blocker_id, blocked_id) DO NOTHING;
+-- name: UnblockUser :exec
+DELETE FROM user_blocks
+WHERE blocker_id = $1
+    AND blocked_id = $2;
 -- name: CheckChatExists :one
 SELECT count(user_chat.chat_id) >= 2 AS chatcount
 FROM user_chat

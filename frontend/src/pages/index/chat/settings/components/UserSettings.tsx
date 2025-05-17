@@ -9,6 +9,7 @@ import { useChatsUserCanBeAddedTo } from '../hooks/useMembers';
 import { chatSettingsRoute } from '../route';
 import { EntityList } from '@/components/EntityList';
 import { useBlockUser } from '@/hooks/api/user';
+import { useChatInfo } from '../../hooks/useChatInfo';
 
 const useChatParticipant = ({ chatId }: { chatId: string }) => {
   return useQuery({
@@ -27,12 +28,59 @@ const useChatParticipant = ({ chatId }: { chatId: string }) => {
 
 const UserPropertiesSettings = () => {
   const { chatId } = chatSettingsRoute.useParams();
-  const { data: chatParticipant } = useChatParticipant({ chatId });
+  const { data: chatParticipant, isLoading: isLoadingChatParticipant } =
+    useChatParticipant({ chatId });
+  const {
+    data: chatInfo,
+    isLoading: isLoadingChatInfo,
+    refetch: refetchChatInfo,
+  } = useChatInfo({
+    chatId,
+  });
   const { mutate: blockUser, isPending: isBlocking } = useBlockUser({
     onSuccess: () => {
+      refetchChatInfo();
       toast.success('User blocked successfully');
     },
   });
+
+  const { mutate: unblockUser } = useMutation({
+    mutationFn: async (userId?: string) => {
+      if (!userId) {
+        throw new Error('Invalid user');
+      }
+      const body = {
+        userID: userId,
+      };
+      const res = await fetchWithDefaults('/unblockUser', {
+        method: 'post',
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+    onSuccess: () => {
+      refetchChatInfo();
+      toast.success('User unblocked successfully');
+    },
+  });
+
+  const handleToggleBlock = () => {
+    if (!chatInfo) {
+      return;
+    }
+    if (!chatInfo.isChatBlocked) {
+      blockUser(chatParticipant?.participantUUID);
+    }
+    if (chatInfo.isChatBlocked) {
+      unblockUser(chatParticipant?.participantUUID);
+    }
+  };
 
   return (
     <Card>
@@ -44,10 +92,15 @@ const UserPropertiesSettings = () => {
         <h4 className="text-sm font-semibold">Block User</h4>
         <Button
           variant="destructive"
-          onClick={() => blockUser(chatParticipant?.participantUUID)}
+          onClick={handleToggleBlock}
           isLoading={isBlocking}
+          disabled={isLoadingChatInfo || isLoadingChatParticipant}
         >
-          Block User
+          {!chatInfo && isLoadingChatInfo && (
+            <div className="h-5 w-28 animate-pulse rounded-md bg-zinc-100/75" />
+          )}
+          {!!chatInfo && !chatInfo.isChatBlocked && <span>Block User</span>}
+          {!!chatInfo && chatInfo.isChatBlocked && <span>Unblock User</span>}
         </Button>
       </div>
     </Card>
@@ -123,7 +176,7 @@ const AddToGroup = () => {
         onClick={() => addToChats()}
         isLoading={isAdding}
       >
-        Add user
+        Add User
       </Button>
     </Card>
   );

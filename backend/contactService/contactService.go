@@ -277,6 +277,45 @@ func BlockUser(c echo.Context) error {
 	return c.String(http.StatusOK, "SUCCESS")
 }
 
+func UnblockUser(c echo.Context) error {
+	token, err := authService.GetSessionToken(c)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NO AUTH")
+	}
+	uuid, err := userService.GetUUIDBySessionID(token)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NO AUTH")
+	}
+
+	type blockUserRequest struct {
+		UserID string `json:"userID" validate:"required"`
+	}
+	blockUserReq := new(blockUserRequest)
+	err = c.Bind(blockUserReq)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	err = validate.Struct(blockUserReq)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	var userIdToUnblock pgtype.UUID
+	err = userIdToUnblock.Scan(blockUserReq.UserID)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	conn := db.GetDB()
+	err = conn.UnblockUser(context.Background(), queries.UnblockUserParams{BlockedID: userIdToUnblock, BlockerID: uuid})
+	if err != nil {
+		log.Println(err)
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
+	return c.String(http.StatusOK, "SUCCESS")
+}
+
 func GetSentContactRequests(c echo.Context) error {
 	token, err := authService.GetSessionToken(c)
 	if err != nil {

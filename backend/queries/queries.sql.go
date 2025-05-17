@@ -971,6 +971,22 @@ func (q *Queries) ResetUnreadMessages(ctx context.Context, arg ResetUnreadMessag
 	return err
 }
 
+const unblockUser = `-- name: UnblockUser :exec
+DELETE FROM user_blocks
+WHERE blocker_id = $1
+    AND blocked_id = $2
+`
+
+type UnblockUserParams struct {
+	BlockerID pgtype.UUID `json:"blockerId"`
+	BlockedID pgtype.UUID `json:"blockedId"`
+}
+
+func (q *Queries) UnblockUser(ctx context.Context, arg UnblockUserParams) error {
+	_, err := q.db.Exec(ctx, unblockUser, arg.BlockerID, arg.BlockedID)
+	return err
+}
+
 const updateEmailFromChangeEmail = `-- name: UpdateEmailFromChangeEmail :one
 UPDATE users u
 SET email_active = true,
