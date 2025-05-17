@@ -423,6 +423,32 @@ func (q *Queries) GetAvailableGroupChats(ctx context.Context, arg GetAvailableGr
 	return items, nil
 }
 
+const getBlockedUsers = `-- name: GetBlockedUsers :many
+SELECT blocked_id
+FROM user_blocks
+WHERE blocker_id = $1
+`
+
+func (q *Queries) GetBlockedUsers(ctx context.Context, blockerID pgtype.UUID) ([]pgtype.UUID, error) {
+	rows, err := q.db.Query(ctx, getBlockedUsers, blockerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []pgtype.UUID
+	for rows.Next() {
+		var blocked_id pgtype.UUID
+		if err := rows.Scan(&blocked_id); err != nil {
+			return nil, err
+		}
+		items = append(items, blocked_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getChatMembers = `-- name: GetChatMembers :many
 SELECT users.id,
     picture_url,
@@ -835,12 +861,15 @@ SELECT u.username,
 FROM friends
     JOIN users u ON u.id = friends.sender_id
     OR friends.receiver_id = u.id
+    LEFT JOIN user_blocks ub ON ub.blocker_id = $1
+    AND ub.blocked_id = u.id
 WHERE (
         receiver_id = $1
         OR sender_id = $1
     )
     AND status = 'accepted'
     AND u.id != $1
+    AND ub.blocker_id IS NULL
 `
 
 type GetUserContactsRow struct {
@@ -849,8 +878,8 @@ type GetUserContactsRow struct {
 	PictureUrl string      `json:"pictureUrl"`
 }
 
-func (q *Queries) GetUserContacts(ctx context.Context, receiverID pgtype.UUID) ([]GetUserContactsRow, error) {
-	rows, err := q.db.Query(ctx, getUserContacts, receiverID)
+func (q *Queries) GetUserContacts(ctx context.Context, blockerID pgtype.UUID) ([]GetUserContactsRow, error) {
+	rows, err := q.db.Query(ctx, getUserContacts, blockerID)
 	if err != nil {
 		return nil, err
 	}

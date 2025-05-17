@@ -101,12 +101,15 @@ SELECT u.username,
 FROM friends
     JOIN users u ON u.id = friends.sender_id
     OR friends.receiver_id = u.id
+    LEFT JOIN user_blocks ub ON ub.blocker_id = $1
+    AND ub.blocked_id = u.id
 WHERE (
         receiver_id = $1
         OR sender_id = $1
     )
     AND status = 'accepted'
-    AND u.id != $1;
+    AND u.id != $1
+    AND ub.blocker_id IS NULL;
 -- name: GetPendingFriendRequests :many
 SELECT sender_id,
     u.username AS sender_username,
@@ -343,3 +346,7 @@ SELECT EXISTS (
 SELECT blocker_id
 FROM user_blocks
 WHERE blocked_id = $1;
+-- name: GetBlockedUsers :many
+SELECT blocked_id
+FROM user_blocks
+WHERE blocker_id = $1;
