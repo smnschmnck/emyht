@@ -339,3 +339,7 @@ SELECT EXISTS (
         WHERE ub.blocker_id = $1
             AND uc.chat_id = $2
     );
+-- name: GetUsersWhoBlockedUser :many
+SELECT blocker_id
+FROM user_blocks
+WHERE blocked_id = $1;

@@ -103,6 +103,13 @@ func GetUserContactsbyUUID(uuid pgtype.UUID) ([]queries.GetUserContactsRow, erro
 }
 
 func AreUsersInContacts(usersUUIDs []string, uuid pgtype.UUID) (bool, error) {
+	conn := db.GetDB()
+	usersWhoBlockedUser, err := conn.GetUsersWhoBlockedUser(context.Background(), uuid)
+	if err != nil {
+		log.Panicln(err.Error())
+		return false, err
+	}
+
 	contacts, err := GetUserContactsbyUUID(uuid)
 	if err != nil {
 		return false, err
@@ -110,6 +117,12 @@ func AreUsersInContacts(usersUUIDs []string, uuid pgtype.UUID) (bool, error) {
 
 	for _, userUUID := range usersUUIDs {
 		inContacts := false
+		for _, blocker := range usersWhoBlockedUser {
+			if blocker.String() == userUUID {
+				inContacts = false
+				break
+			}
+		}
 		for _, contact := range contacts {
 			if contact.ID.String() == userUUID {
 				inContacts = true

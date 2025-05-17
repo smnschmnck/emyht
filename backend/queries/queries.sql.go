@@ -869,6 +869,32 @@ func (q *Queries) GetUserContacts(ctx context.Context, receiverID pgtype.UUID) (
 	return items, nil
 }
 
+const getUsersWhoBlockedUser = `-- name: GetUsersWhoBlockedUser :many
+SELECT blocker_id
+FROM user_blocks
+WHERE blocked_id = $1
+`
+
+func (q *Queries) GetUsersWhoBlockedUser(ctx context.Context, blockedID pgtype.UUID) ([]pgtype.UUID, error) {
+	rows, err := q.db.Query(ctx, getUsersWhoBlockedUser, blockedID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []pgtype.UUID
+	for rows.Next() {
+		var blocker_id pgtype.UUID
+		if err := rows.Scan(&blocker_id); err != nil {
+			return nil, err
+		}
+		items = append(items, blocker_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const incrementUnreadMessages = `-- name: IncrementUnreadMessages :one
 UPDATE user_chat
 SET unread_messages = (unread_messages + 1)
