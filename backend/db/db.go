@@ -12,7 +12,7 @@ import (
 var dbPool *pgxpool.Pool
 
 func InitDB() {
-	connString := utils.GetEnv("DATABASE_PRIVATE_URL")
+	connString := utils.GetEnv("DATABASE_URL")
 
 	var err error
 
