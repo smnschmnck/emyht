@@ -1,37 +1,19 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { IconLink } from '@/components/ui/IconLink';
-import { HttpError } from '@/errors/httpError/httpError';
 import { useCurrentChat } from '@/hooks/api/chats';
-import { fetchWithDefaults } from '@/utils/fetch';
 import {
   ChevronLeftIcon,
   EllipsisHorizontalIcon,
   NoSymbolIcon,
 } from '@heroicons/react/24/outline';
-import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { FC } from 'react';
+import { useChatInfo } from '../hooks/useChatInfo';
 
 export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
   const curChat = useCurrentChat(chatId);
-  const { data: chatInfo, isLoading: isLoadingChatInfo } = useQuery({
-    queryKey: ['chatInfo', chatId],
-    queryFn: async () => {
-      const res = await fetchWithDefaults(`/chatInfo/${chatId}`);
-
-      if (!res.ok) {
-        throw new HttpError({
-          message: await res.text(),
-          statusCode: res.status,
-        });
-      }
-      const json = (await res.json()) as {
-        info: string;
-        isChatBlocked: boolean;
-      };
-
-      return json;
-    },
+  const { data: chatInfo, isLoading: isLoadingChatInfo } = useChatInfo({
+    chatId,
   });
 
   return (
