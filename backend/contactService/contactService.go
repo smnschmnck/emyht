@@ -117,12 +117,6 @@ func AreUsersInContacts(usersUUIDs []string, uuid pgtype.UUID) (bool, error) {
 
 	for _, userUUID := range usersUUIDs {
 		inContacts := false
-		for _, blocker := range usersWhoBlockedUser {
-			if blocker.String() == userUUID {
-				inContacts = false
-				break
-			}
-		}
 		for _, contact := range contacts {
 			if contact.ID.String() == userUUID {
 				inContacts = true
@@ -130,6 +124,19 @@ func AreUsersInContacts(usersUUIDs []string, uuid pgtype.UUID) (bool, error) {
 			}
 		}
 		if !inContacts {
+			return false, nil
+		}
+	}
+
+	for _, userUUID := range usersUUIDs {
+		isBlocked := false
+		for _, blocker := range usersWhoBlockedUser {
+			if blocker.String() == userUUID {
+				isBlocked = true
+				break
+			}
+		}
+		if isBlocked {
 			return false, nil
 		}
 	}
