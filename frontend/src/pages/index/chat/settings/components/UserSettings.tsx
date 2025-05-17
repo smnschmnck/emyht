@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { useChatsUserCanBeAddedTo } from '../hooks/useMembers';
 import { chatSettingsRoute } from '../route';
 import { EntityList } from '@/components/EntityList';
+import { useBlockUser } from '@/hooks/api/user';
 
 const useChatParticipant = ({ chatId }: { chatId: string }) => {
   return useQuery({
@@ -27,24 +28,7 @@ const useChatParticipant = ({ chatId }: { chatId: string }) => {
 const UserPropertiesSettings = () => {
   const { chatId } = chatSettingsRoute.useParams();
   const { data: chatParticipant } = useChatParticipant({ chatId });
-
-  const { mutate: blockUser, isPending: isBlocking } = useMutation({
-    mutationFn: async () => {
-      const body = {
-        userID: chatParticipant?.participantUUID,
-      };
-      const res = await fetchWithDefaults('/blockUser', {
-        method: 'post',
-        body: JSON.stringify(body),
-      });
-
-      if (!res.ok) {
-        throw new Error(await res.text());
-      }
-    },
-    onError: (err) => {
-      toast.error(err.message);
-    },
+  const { mutate: blockUser, isPending: isBlocking } = useBlockUser({
     onSuccess: () => {
       toast.success('User blocked successfully');
     },
@@ -60,7 +44,7 @@ const UserPropertiesSettings = () => {
         <h4 className="text-sm font-semibold">Block User</h4>
         <Button
           variant="destructive"
-          onClick={() => blockUser()}
+          onClick={() => blockUser(chatParticipant?.participantUUID)}
           isLoading={isBlocking}
         >
           Block User
