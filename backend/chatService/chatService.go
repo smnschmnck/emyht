@@ -411,6 +411,22 @@ func SendMessage(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "MESSAGE TOO LONG")
 	}
 
+	var chatId pgtype.UUID
+	err = chatId.Scan(req.ChatID)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	conn := db.GetDB()
+	isChatBlocked, err := conn.GetIsChatBlocked(context.Background(), queries.GetIsChatBlockedParams{BlockerID: reqUUID, ID: chatId})
+	if err != nil {
+		log.Println(err.Error())
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+	if isChatBlocked {
+		return c.String(http.StatusForbidden, "CANNOT SEND A MESSAGE TO A BLOCKED USER")
+	}
+
 	//make sure platform only media URLs are being sent. TLDR: More comprehensive validation
 	fileExists := len(req.FileID) > 0
 	formattedFileID := ""
@@ -425,11 +441,6 @@ func SendMessage(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "MESSAGE TOO SHORT")
 	}
 
-	var chatId pgtype.UUID
-	err = chatId.Scan(req.ChatID)
-	if err != nil {
-		return c.String(http.StatusBadRequest, "BAD REQUEST")
-	}
 	inChat, err := chatHelpers.IsUserInChat(reqUUID, chatId)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
@@ -437,8 +448,6 @@ func SendMessage(c echo.Context) error {
 	if !inChat {
 		return c.String(http.StatusUnauthorized, "USER NOT IN CHAT")
 	}
-
-	conn := db.GetDB()
 
 	messageID, err := conn.CreateChatMessage(context.Background(), queries.CreateChatMessageParams{
 		ChatID:      chatId,
@@ -626,7 +635,7 @@ func GetChatInfo(c echo.Context) error {
 	}
 
 	blocked, err := conn.GetIsChatBlocked(context.Background(), queries.GetIsChatBlockedParams{
-		ChatID:    chatId,
+		ID:        chatId,
 		BlockerID: reqUUID,
 	})
 	if err != nil {

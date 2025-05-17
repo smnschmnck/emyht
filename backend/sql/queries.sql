@@ -339,8 +339,10 @@ SELECT EXISTS (
         SELECT 1
         FROM user_blocks ub
             JOIN user_chat uc ON ub.blocked_id = uc.user_id
+            JOIN chats c ON c.id = $2
         WHERE ub.blocker_id = $1
             AND uc.chat_id = $2
+            AND c.chat_type = 'one_on_one'
     );
 -- name: GetUsersWhoBlockedUser :many
 SELECT blocker_id

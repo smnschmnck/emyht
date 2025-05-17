@@ -662,18 +662,20 @@ SELECT EXISTS (
         SELECT 1
         FROM user_blocks ub
             JOIN user_chat uc ON ub.blocked_id = uc.user_id
+            JOIN chats c ON c.id = $2
         WHERE ub.blocker_id = $1
             AND uc.chat_id = $2
+            AND c.chat_type = 'one_on_one'
     )
 `
 
 type GetIsChatBlockedParams struct {
 	BlockerID pgtype.UUID `json:"blockerId"`
-	ChatID    pgtype.UUID `json:"chatId"`
+	ID        pgtype.UUID `json:"id"`
 }
 
 func (q *Queries) GetIsChatBlocked(ctx context.Context, arg GetIsChatBlockedParams) (bool, error) {
-	row := q.db.QueryRow(ctx, getIsChatBlocked, arg.BlockerID, arg.ChatID)
+	row := q.db.QueryRow(ctx, getIsChatBlocked, arg.BlockerID, arg.ID)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
