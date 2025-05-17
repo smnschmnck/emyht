@@ -48,57 +48,18 @@ func (q *Queries) ActivateEmail(ctx context.Context, arg ActivateEmailParams) (b
 	return email_active, err
 }
 
-const blockChat = `-- name: BlockChat :one
-UPDATE chats
-SET blocked = true
-WHERE id = $1
-RETURNING blocked
-`
-
-func (q *Queries) BlockChat(ctx context.Context, id pgtype.UUID) (*bool, error) {
-	row := q.db.QueryRow(ctx, blockChat, id)
-	var blocked *bool
-	err := row.Scan(&blocked)
-	return blocked, err
-}
-
-const blockFriendRequest = `-- name: BlockFriendRequest :exec
-UPDATE friends
-SET status = 'blocked'
-WHERE sender_id = $1
-    AND receiver_id = $2
-`
-
-type BlockFriendRequestParams struct {
-	SenderID   pgtype.UUID `json:"senderId"`
-	ReceiverID pgtype.UUID `json:"receiverId"`
-}
-
-func (q *Queries) BlockFriendRequest(ctx context.Context, arg BlockFriendRequestParams) error {
-	_, err := q.db.Exec(ctx, blockFriendRequest, arg.SenderID, arg.ReceiverID)
-	return err
-}
-
 const blockUser = `-- name: BlockUser :exec
-UPDATE friends
-SET status = 'blocked'
-WHERE (
-        sender_id = $1
-        AND receiver_id = $2
-    )
-    OR (
-        sender_id = $2
-        AND receiver_id = $1
-    )
+INSERT INTO user_blocks (blocker_id, blocked_id)
+VALUES ($1, $2) ON CONFLICT (blocker_id, blocked_id) DO NOTHING
 `
 
 type BlockUserParams struct {
-	SenderID   pgtype.UUID `json:"senderId"`
-	ReceiverID pgtype.UUID `json:"receiverId"`
+	BlockerID pgtype.UUID `json:"blockerId"`
+	BlockedID pgtype.UUID `json:"blockedId"`
 }
 
 func (q *Queries) BlockUser(ctx context.Context, arg BlockUserParams) error {
-	_, err := q.db.Exec(ctx, blockUser, arg.SenderID, arg.ReceiverID)
+	_, err := q.db.Exec(ctx, blockUser, arg.BlockerID, arg.BlockedID)
 	return err
 }
 
@@ -687,40 +648,6 @@ func (q *Queries) GetOneOnOneChatParticipant(ctx context.Context, arg GetOneOnOn
 	var user_id pgtype.UUID
 	err := row.Scan(&user_id)
 	return user_id, err
-}
-
-const getPendingContactRequests = `-- name: GetPendingContactRequests :many
-SELECT u.email AS email,
-    friends.created_at
-FROM friends
-    JOIN users u ON u.id = friends.receiver_id
-WHERE sender_id = $1
-    AND status = 'pending'
-`
-
-type GetPendingContactRequestsRow struct {
-	Email     string           `json:"email"`
-	CreatedAt pgtype.Timestamp `json:"createdAt"`
-}
-
-func (q *Queries) GetPendingContactRequests(ctx context.Context, senderID pgtype.UUID) ([]GetPendingContactRequestsRow, error) {
-	rows, err := q.db.Query(ctx, getPendingContactRequests, senderID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetPendingContactRequestsRow
-	for rows.Next() {
-		var i GetPendingContactRequestsRow
-		if err := rows.Scan(&i.Email, &i.CreatedAt); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const getPendingFriendRequests = `-- name: GetPendingFriendRequests :many

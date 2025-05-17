@@ -125,34 +125,9 @@ WHERE sender_id = $1
 DELETE FROM friends
 WHERE sender_id = $1
     AND receiver_id = $2;
--- name: BlockFriendRequest :exec
-UPDATE friends
-SET status = 'blocked'
-WHERE sender_id = $1
-    AND receiver_id = $2;
 -- name: BlockUser :exec
-UPDATE friends
-SET status = 'blocked'
-WHERE (
-        sender_id = $1
-        AND receiver_id = $2
-    )
-    OR (
-        sender_id = $2
-        AND receiver_id = $1
-    );
--- name: BlockChat :one
-UPDATE chats
-SET blocked = true
-WHERE id = $1
-RETURNING blocked;
--- name: GetPendingContactRequests :many
-SELECT u.email AS email,
-    friends.created_at
-FROM friends
-    JOIN users u ON u.id = friends.receiver_id
-WHERE sender_id = $1
-    AND status = 'pending';
+INSERT INTO user_blocks (blocker_id, blocked_id)
+VALUES ($1, $2) ON CONFLICT (blocker_id, blocked_id) DO NOTHING;
 -- name: CheckChatExists :one
 SELECT count(user_chat.chat_id) >= 2 AS chatcount
 FROM user_chat

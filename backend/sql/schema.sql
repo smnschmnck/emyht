@@ -4,7 +4,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE TYPE chat_type AS ENUM ('group', 'one_on_one');
 CREATE TYPE message_type AS ENUM ('plaintext', 'image', 'video', 'audio', 'data');
 CREATE TYPE delivery_status AS ENUM ('sent', 'delivered', 'read');
-CREATE TYPE friendship_status AS ENUM ('pending', 'accepted', 'declined', 'blocked');
+CREATE TYPE friendship_status AS ENUM ('pending', 'accepted', 'declined');
 -- Tables
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -36,7 +36,6 @@ CREATE TABLE chats (
     last_message_id UUID,
     picture_url VARCHAR(128) NOT NULL,
     chat_type chat_type NOT NULL,
-    blocked BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX idx_chats_chat_type ON chats(chat_type);
@@ -80,3 +79,12 @@ CREATE INDEX idx_friends_receiver_id ON friends(receiver_id);
 CREATE INDEX idx_friends_status ON friends(status);
 CREATE INDEX idx_friends_sender_status ON friends(sender_id, status);
 CREATE INDEX idx_friends_receiver_status ON friends(receiver_id, status);
+CREATE TABLE user_blocks (
+    blocker_id UUID NOT NULL,
+    blocked_id UUID NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (blocker_id, blocked_id),
+    FOREIGN KEY (blocker_id) REFERENCES users(id),
+    FOREIGN KEY (blocked_id) REFERENCES users(id),
+    CONSTRAINT no_self_blocking CHECK (blocker_id != blocked_id)
+);

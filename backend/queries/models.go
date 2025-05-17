@@ -102,7 +102,6 @@ const (
 	FriendshipStatusPending  FriendshipStatus = "pending"
 	FriendshipStatusAccepted FriendshipStatus = "accepted"
 	FriendshipStatusDeclined FriendshipStatus = "declined"
-	FriendshipStatusBlocked  FriendshipStatus = "blocked"
 )
 
 func (e *FriendshipStatus) Scan(src interface{}) error {
@@ -199,7 +198,6 @@ type Chat struct {
 	LastMessageID pgtype.UUID      `json:"lastMessageId"`
 	PictureUrl    string           `json:"pictureUrl"`
 	ChatType      ChatType         `json:"chatType"`
-	Blocked       *bool            `json:"blocked"`
 	CreatedAt     pgtype.Timestamp `json:"createdAt"`
 }
 
@@ -232,6 +230,12 @@ type User struct {
 	EmailToken  *string          `json:"emailToken"`
 	PictureUrl  string           `json:"pictureUrl"`
 	CreatedAt   pgtype.Timestamp `json:"createdAt"`
+}
+
+type UserBlock struct {
+	BlockerID pgtype.UUID      `json:"blockerId"`
+	BlockedID pgtype.UUID      `json:"blockedId"`
+	CreatedAt pgtype.Timestamp `json:"createdAt"`
 }
 
 type UserChat struct {

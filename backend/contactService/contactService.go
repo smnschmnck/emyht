@@ -264,7 +264,7 @@ func blockUser(uuidToBeBlocked pgtype.UUID, uuid pgtype.UUID, chatID pgtype.UUID
 		return errors.New("INTERNAL ERROR")
 	}
 
-	_, err = conn.BlockChat(context.Background(), chatID)
+	_, err = conn.BlockChat(context.Background(), queries.BlockChatParams{UserID: uuid, ChatID: chatID})
 	if err != nil {
 		log.Println(err)
 		return errors.New("INTERNAL ERROR")
