@@ -230,10 +230,7 @@ func HandleContactRequest(c echo.Context) error {
 			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 		}
 	case "block":
-		err = conn.BlockFriendRequest(ctx, queries.BlockFriendRequestParams{
-			SenderID:   senderUUID,
-			ReceiverID: uuid,
-		})
+		err = conn.BlockUser(ctx, queries.BlockUserParams{BlockerID: uuid, BlockedID: senderUUID})
 		if err != nil {
 			log.Println("Error blocking friend request:", err)
 			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
@@ -258,19 +255,11 @@ func blockUser(uuidToBeBlocked pgtype.UUID, uuid pgtype.UUID, chatID pgtype.UUID
 		return errors.New("USER NOT IN CONTACTS")
 	}
 
-	err = conn.BlockUser(context.Background(), queries.BlockUserParams{SenderID: uuidToBeBlocked, ReceiverID: uuid})
+	err = conn.BlockUser(context.Background(), queries.BlockUserParams{BlockedID: uuidToBeBlocked, BlockerID: uuid})
 	if err != nil {
 		log.Println(err)
 		return errors.New("INTERNAL ERROR")
 	}
-
-	_, err = conn.BlockChat(context.Background(), queries.BlockChatParams{UserID: uuid, ChatID: chatID})
-	if err != nil {
-		log.Println(err)
-		return errors.New("INTERNAL ERROR")
-	}
-
-	pusher.PusherClient.Trigger(pusher.USER_FEED_PREFIX+uuidToBeBlocked.String(), pusher.CHAT_EVENT, nil)
 
 	return nil
 }
@@ -331,14 +320,14 @@ func GetSentContactRequests(c echo.Context) error {
 
 	conn := db.GetDB()
 
-	contactRequests, err := conn.GetPendingContactRequests(context.Background(), uuid)
+	contactRequests, err := conn.GetPendingFriendRequests(context.Background(), uuid)
 	if err != nil {
 		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	if contactRequests == nil {
-		return c.JSON(http.StatusOK, make([]queries.GetPendingContactRequestsRow, 0))
+		return c.JSON(http.StatusOK, make([]queries.GetPendingFriendRequestsRow, 0))
 	}
 
 	return c.JSON(http.StatusOK, contactRequests)
