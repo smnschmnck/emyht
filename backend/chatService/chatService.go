@@ -53,29 +53,21 @@ func StartOneOnOneChat(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	contacts, err := contactService.GetUserContactsbyUUID(reqUUID)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-
-	isInContacts := false
-	for _, c := range contacts {
-		if c.ID.String() == req.ParticipantUUID {
-			isInContacts = true
-			break
-		}
-	}
+	isInContacts, err := contactService.AreUsersInContacts([]string{req.ParticipantUUID}, reqUUID)
 	if !isInContacts {
-		return c.String(http.StatusInternalServerError, "USER NOT IN CONTACTS")
+		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
-
-	conn := db.GetDB()
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
+	}
 
 	var participantUuid pgtype.UUID
 	err = participantUuid.Scan(req.ParticipantUUID)
 	if err != nil {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
+
+	conn := db.GetDB()
 	chatExists, err := conn.CheckChatExists(context.Background(), queries.CheckChatExistsParams{UserID: reqUUID, UserID_2: participantUuid})
 	if err != nil {
 		if err.Error() == "no rows in result set" {
@@ -419,6 +411,22 @@ func SendMessage(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "MESSAGE TOO LONG")
 	}
 
+	var chatId pgtype.UUID
+	err = chatId.Scan(req.ChatID)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	conn := db.GetDB()
+	isChatBlocked, err := conn.GetIsChatBlocked(context.Background(), queries.GetIsChatBlockedParams{BlockerID: reqUUID, ID: chatId})
+	if err != nil {
+		log.Println(err.Error())
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+	if isChatBlocked {
+		return c.String(http.StatusForbidden, "CANNOT SEND A MESSAGE TO A BLOCKED USER")
+	}
+
 	//make sure platform only media URLs are being sent. TLDR: More comprehensive validation
 	fileExists := len(req.FileID) > 0
 	formattedFileID := ""
@@ -433,11 +441,6 @@ func SendMessage(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "MESSAGE TOO SHORT")
 	}
 
-	var chatId pgtype.UUID
-	err = chatId.Scan(req.ChatID)
-	if err != nil {
-		return c.String(http.StatusBadRequest, "BAD REQUEST")
-	}
 	inChat, err := chatHelpers.IsUserInChat(reqUUID, chatId)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
@@ -445,8 +448,6 @@ func SendMessage(c echo.Context) error {
 	if !inChat {
 		return c.String(http.StatusUnauthorized, "USER NOT IN CHAT")
 	}
-
-	conn := db.GetDB()
 
 	messageID, err := conn.CreateChatMessage(context.Background(), queries.CreateChatMessageParams{
 		ChatID:      chatId,
@@ -500,7 +501,7 @@ func getMessagesByChatID(chatID pgtype.UUID, uuid pgtype.UUID) ([]queries.GetCha
 
 	conn := db.GetDB()
 
-	messages, err := conn.GetChatMessages(context.Background(), chatID)
+	messages, err := conn.GetChatMessages(context.Background(), queries.GetChatMessagesParams{ChatID: chatID, BlockerID: uuid})
 	if err != nil {
 		return emptyMessageArr, errors.New("INTERNAL ERROR")
 	}
@@ -580,7 +581,8 @@ func sendNewMessageNotification(chatId string) error {
 
 func GetChatInfo(c echo.Context) error {
 	type chatInfoRes struct {
-		Info string `json:"info"`
+		Info    string `json:"info"`
+		Blocked bool   `json:"isChatBlocked"`
 	}
 
 	sessionID, responseErr := authService.GetSessionToken(c)
@@ -626,11 +628,26 @@ func GetChatInfo(c echo.Context) error {
 		if groupChatUsers > 1 {
 			out += "s"
 		}
-		return c.JSON(http.StatusOK, chatInfoRes{Info: out})
+		return c.JSON(http.StatusOK, chatInfoRes{
+			Info:    out,
+			Blocked: false,
+		})
+	}
+
+	blocked, err := conn.GetIsChatBlocked(context.Background(), queries.GetIsChatBlockedParams{
+		ID:        chatId,
+		BlockerID: reqUUID,
+	})
+	if err != nil {
+		log.Println(err.Error())
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	//TODO: Actually fetch last online
-	return c.JSON(http.StatusOK, chatInfoRes{Info: "14:21"})
+	return c.JSON(http.StatusOK, chatInfoRes{
+		Info:    "14:21",
+		Blocked: blocked,
+	})
 }
 
 func GetMediaPutURL(c echo.Context) error {
@@ -1175,7 +1192,23 @@ func RemoveUsersFromGroupChat(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
 
-	conn := db.GetDB()
+	isBlocked, err := contactService.IsBlockedByUsers(req.UuidsToRemove, reqUUID)
+	if err != nil {
+		log.Println(err.Error())
+		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
+	}
+	if isBlocked {
+		return c.String(http.StatusUnauthorized, "UNKNOWN ERROR")
+	}
+
+	areBlocked, err := contactService.AreUsersBlocked(req.UuidsToRemove, reqUUID)
+	if err != nil {
+		log.Println(err.Error())
+		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
+	}
+	if areBlocked {
+		return c.String(http.StatusUnauthorized, "YOU ARE TRYING TO REMOVE A USER YOU HAVE BLOCKED")
+	}
 
 	uuidsToRemove, err := stringsToUUIDs(req.UuidsToRemove)
 	if err != nil {
@@ -1183,6 +1216,7 @@ func RemoveUsersFromGroupChat(c echo.Context) error {
 		return c.String(http.StatusUnauthorized, "INTERNAL ERROR")
 	}
 
+	conn := db.GetDB()
 	err = conn.DeleteFromGroupChat(
 		context.Background(),
 		queries.DeleteFromGroupChatParams{ChatID: chatId, Column2: uuidsToRemove})

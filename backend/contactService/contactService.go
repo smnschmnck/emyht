@@ -102,6 +102,54 @@ func GetUserContactsbyUUID(uuid pgtype.UUID) ([]queries.GetUserContactsRow, erro
 	return contacts, nil
 }
 
+func IsBlockedByUsers(userIds []string, uuid pgtype.UUID) (bool, error) {
+	conn := db.GetDB()
+	blockers, err := conn.GetUsersWhoBlockedUser(context.Background(), uuid)
+	if err != nil {
+		log.Println(err.Error())
+		return true, err
+	}
+
+	for _, uuidToRemove := range userIds {
+		isBlocked := false
+		for _, blocker := range blockers {
+			if uuidToRemove == blocker.String() {
+				isBlocked = true
+				break
+			}
+		}
+		if isBlocked {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func AreUsersBlocked(userIds []string, uuid pgtype.UUID) (bool, error) {
+	conn := db.GetDB()
+	blockedUsers, err := conn.GetBlockedUsers(context.Background(), uuid)
+	if err != nil {
+		log.Println(err.Error())
+		return true, err
+	}
+
+	for _, uuidToRemove := range userIds {
+		isBlocked := false
+		for _, blockedUser := range blockedUsers {
+			if uuidToRemove == blockedUser.String() {
+				isBlocked = true
+				break
+			}
+		}
+		if isBlocked {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
 func AreUsersInContacts(usersUUIDs []string, uuid pgtype.UUID) (bool, error) {
 	contacts, err := GetUserContactsbyUUID(uuid)
 	if err != nil {
@@ -119,6 +167,14 @@ func AreUsersInContacts(usersUUIDs []string, uuid pgtype.UUID) (bool, error) {
 		if !inContacts {
 			return false, nil
 		}
+	}
+
+	isBlocked, err := IsBlockedByUsers(usersUUIDs, uuid)
+	if err != nil {
+		return false, err
+	}
+	if isBlocked {
+		return false, nil
 	}
 
 	return true, nil
@@ -151,6 +207,7 @@ func GetPendingContactRequestsByUUID(uuid pgtype.UUID) ([]queries.GetPendingFrie
 	conn := db.GetDB()
 	contactRequests, err := conn.GetPendingFriendRequests(context.Background(), uuid)
 	if err != nil {
+		log.Println(err.Error())
 		return make([]queries.GetPendingFriendRequestsRow, 0), errors.New("INTERNAL ERROR")
 	}
 
@@ -173,6 +230,7 @@ func GetPendingContactRequests(c echo.Context) error {
 
 	contactRequests, err := GetPendingContactRequestsByUUID(uuid)
 	if err != nil {
+		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
@@ -229,50 +287,11 @@ func HandleContactRequest(c echo.Context) error {
 			log.Println("Error declining friend request:", err)
 			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 		}
-	case "block":
-		err = conn.BlockFriendRequest(ctx, queries.BlockFriendRequestParams{
-			SenderID:   senderUUID,
-			ReceiverID: uuid,
-		})
-		if err != nil {
-			log.Println("Error blocking friend request:", err)
-			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
-		}
 	default:
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
 	return c.String(http.StatusOK, "SUCCESS")
-}
-
-func blockUser(uuidToBeBlocked pgtype.UUID, uuid pgtype.UUID, chatID pgtype.UUID) error {
-	conn := db.GetDB()
-
-	//check if user is in contacts
-	uuidToBeBlockedAsArray := []string{uuidToBeBlocked.String()}
-	inContacts, err := AreUsersInContacts(uuidToBeBlockedAsArray, uuid)
-	if err != nil {
-		return errors.New("INTERNAL ERROR")
-	}
-	if !inContacts {
-		return errors.New("USER NOT IN CONTACTS")
-	}
-
-	err = conn.BlockUser(context.Background(), queries.BlockUserParams{SenderID: uuidToBeBlocked, ReceiverID: uuid})
-	if err != nil {
-		log.Println(err)
-		return errors.New("INTERNAL ERROR")
-	}
-
-	_, err = conn.BlockChat(context.Background(), chatID)
-	if err != nil {
-		log.Println(err)
-		return errors.New("INTERNAL ERROR")
-	}
-
-	pusher.PusherClient.Trigger(pusher.USER_FEED_PREFIX+uuidToBeBlocked.String(), pusher.CHAT_EVENT, nil)
-
-	return nil
 }
 
 func BlockUser(c echo.Context) error {
@@ -287,7 +306,6 @@ func BlockUser(c echo.Context) error {
 
 	type blockUserRequest struct {
 		UserID string `json:"userID" validate:"required"`
-		ChatID string `json:"chatID" validate:"required"`
 	}
 	blockUserReq := new(blockUserRequest)
 	err = c.Bind(blockUserReq)
@@ -299,21 +317,56 @@ func BlockUser(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	var userId pgtype.UUID
-	err = userId.Scan(blockUserReq.UserID)
+	var userIdToBlock pgtype.UUID
+	err = userIdToBlock.Scan(blockUserReq.UserID)
 	if err != nil {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	var chatId pgtype.UUID
-	err = chatId.Scan(blockUserReq.UserID)
+	conn := db.GetDB()
+	err = conn.BlockUser(context.Background(), queries.BlockUserParams{BlockedID: userIdToBlock, BlockerID: uuid})
+	if err != nil {
+		log.Println(err)
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
+	return c.String(http.StatusOK, "SUCCESS")
+}
+
+func UnblockUser(c echo.Context) error {
+	token, err := authService.GetSessionToken(c)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NO AUTH")
+	}
+	uuid, err := userService.GetUUIDBySessionID(token)
+	if err != nil {
+		return c.String(http.StatusUnauthorized, "NO AUTH")
+	}
+
+	type blockUserRequest struct {
+		UserID string `json:"userID" validate:"required"`
+	}
+	blockUserReq := new(blockUserRequest)
+	err = c.Bind(blockUserReq)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+	err = validate.Struct(blockUserReq)
 	if err != nil {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	err = blockUser(userId, uuid, chatId)
+	var userIdToUnblock pgtype.UUID
+	err = userIdToUnblock.Scan(blockUserReq.UserID)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		return c.String(http.StatusBadRequest, "BAD REQUEST")
+	}
+
+	conn := db.GetDB()
+	err = conn.UnblockUser(context.Background(), queries.UnblockUserParams{BlockedID: userIdToUnblock, BlockerID: uuid})
+	if err != nil {
+		log.Println(err)
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	return c.String(http.StatusOK, "SUCCESS")
@@ -331,14 +384,14 @@ func GetSentContactRequests(c echo.Context) error {
 
 	conn := db.GetDB()
 
-	contactRequests, err := conn.GetPendingContactRequests(context.Background(), uuid)
+	contactRequests, err := conn.GetSentContactRequests(context.Background(), uuid)
 	if err != nil {
 		log.Println(err.Error())
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	if contactRequests == nil {
-		return c.JSON(http.StatusOK, make([]queries.GetPendingContactRequestsRow, 0))
+		return c.JSON(http.StatusOK, make([]queries.GetPendingFriendRequestsRow, 0))
 	}
 
 	return c.JSON(http.StatusOK, contactRequests)
