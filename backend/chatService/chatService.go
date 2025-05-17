@@ -580,7 +580,8 @@ func sendNewMessageNotification(chatId string) error {
 
 func GetChatInfo(c echo.Context) error {
 	type chatInfoRes struct {
-		Info string `json:"info"`
+		Info    string `json:"info"`
+		Blocked bool   `json:"isChatBlocked"`
 	}
 
 	sessionID, responseErr := authService.GetSessionToken(c)
@@ -616,6 +617,15 @@ func GetChatInfo(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
+	blocked, err := conn.GetIsChatBlocked(context.Background(), queries.GetIsChatBlockedParams{
+		ChatID:    chatId,
+		BlockerID: reqUUID,
+	})
+	if err != nil {
+		log.Println(err.Error())
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+	}
+
 	if isGroupChat {
 		groupChatUsers, err := conn.GetGroupChatUserCount(context.Background(), chatId)
 		if err != nil {
@@ -626,11 +636,17 @@ func GetChatInfo(c echo.Context) error {
 		if groupChatUsers > 1 {
 			out += "s"
 		}
-		return c.JSON(http.StatusOK, chatInfoRes{Info: out})
+		return c.JSON(http.StatusOK, chatInfoRes{
+			Info:    out,
+			Blocked: blocked,
+		})
 	}
 
 	//TODO: Actually fetch last online
-	return c.JSON(http.StatusOK, chatInfoRes{Info: "14:21"})
+	return c.JSON(http.StatusOK, chatInfoRes{
+		Info:    "14:21",
+		Blocked: blocked,
+	})
 }
 
 func GetMediaPutURL(c echo.Context) error {

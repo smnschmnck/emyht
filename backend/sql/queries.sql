@@ -327,3 +327,11 @@ UPDATE chats
 SET picture_url = $1
 WHERE chat_type = 'group'
     AND id = $2;
+-- name: GetIsChatBlocked :one
+SELECT EXISTS (
+        SELECT 1
+        FROM user_blocks ub
+            JOIN user_chat uc ON ub.blocked_id = uc.user_id
+        WHERE ub.blocker_id = $1
+            AND uc.chat_id = $2
+    );

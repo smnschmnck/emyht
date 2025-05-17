@@ -631,6 +631,28 @@ func (q *Queries) GetGroupChatUserCount(ctx context.Context, chatID pgtype.UUID)
 	return count, err
 }
 
+const getIsChatBlocked = `-- name: GetIsChatBlocked :one
+SELECT EXISTS (
+        SELECT 1
+        FROM user_blocks ub
+            JOIN user_chat uc ON ub.blocked_id = uc.user_id
+        WHERE ub.blocker_id = $1
+            AND uc.chat_id = $2
+    )
+`
+
+type GetIsChatBlockedParams struct {
+	BlockerID pgtype.UUID `json:"blockerId"`
+	ChatID    pgtype.UUID `json:"chatId"`
+}
+
+func (q *Queries) GetIsChatBlocked(ctx context.Context, arg GetIsChatBlockedParams) (bool, error) {
+	row := q.db.QueryRow(ctx, getIsChatBlocked, arg.BlockerID, arg.ChatID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const getOneOnOneChatParticipant = `-- name: GetOneOnOneChatParticipant :one
 SELECT user_id
 FROM user_chat
