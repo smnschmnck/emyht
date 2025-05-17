@@ -224,7 +224,10 @@ FROM chatmessages cm
     LEFT JOIN user_blocks ub ON ub.blocker_id = $1
     AND ub.blocked_id = cm.sender_id
 WHERE cm.chat_id = $2
-    AND ub.blocker_id IS NULL
+    AND (
+        ub.blocker_id IS NULL -- Keep messages if the sender is NOT blocked by the current user
+        OR cm.created_at < ub.created_at -- OR keep messages if the sender IS blocked, but the message was sent BEFORE the block
+    )
 ORDER BY cm.created_at ASC;
 -- name: ResetUnreadMessages :exec
 UPDATE user_chat
