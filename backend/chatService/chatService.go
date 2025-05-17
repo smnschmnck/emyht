@@ -53,29 +53,21 @@ func StartOneOnOneChat(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	contacts, err := contactService.GetUserContactsbyUUID(reqUUID)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-
-	isInContacts := false
-	for _, c := range contacts {
-		if c.ID.String() == req.ParticipantUUID {
-			isInContacts = true
-			break
-		}
-	}
+	isInContacts, err := contactService.AreUsersInContacts([]string{req.ParticipantUUID}, reqUUID)
 	if !isInContacts {
-		return c.String(http.StatusInternalServerError, "USER NOT IN CONTACTS")
+		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
 	}
-
-	conn := db.GetDB()
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
+	}
 
 	var participantUuid pgtype.UUID
 	err = participantUuid.Scan(req.ParticipantUUID)
 	if err != nil {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
+
+	conn := db.GetDB()
 	chatExists, err := conn.CheckChatExists(context.Background(), queries.CheckChatExistsParams{UserID: reqUUID, UserID_2: participantUuid})
 	if err != nil {
 		if err.Error() == "no rows in result set" {
