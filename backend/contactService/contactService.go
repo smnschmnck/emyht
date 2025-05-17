@@ -229,12 +229,6 @@ func HandleContactRequest(c echo.Context) error {
 			log.Println("Error declining friend request:", err)
 			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 		}
-	case "block":
-		err = blockUser(senderUUID, uuid)
-		if err != nil {
-			log.Println("Error blocking friend request:", err)
-			return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
-		}
 	default:
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
