@@ -4,11 +4,11 @@ import { useCurrentChat } from '@/hooks/api/chats';
 import {
   ChevronLeftIcon,
   EllipsisHorizontalIcon,
+  NoSymbolIcon,
 } from '@heroicons/react/24/outline';
 import { Link } from '@tanstack/react-router';
 import { FC } from 'react';
 import { useChatInfo } from '../hooks/useChatInfo';
-import { BlockedBadge } from './BlockedBadge';
 
 export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
   const curChat = useCurrentChat(chatId);
@@ -41,7 +41,12 @@ export const ChatHeader: FC<{ chatId: string }> = ({ chatId }) => {
               {!!chatInfo?.info && (
                 <p className="text-zinc-500">{chatInfo?.info}</p>
               )}
-              {!!chatInfo && chatInfo.isChatBlocked && <BlockedBadge />}
+              {!!chatInfo && chatInfo.isChatBlocked && (
+                <div className="flex h-6 items-center gap-1 rounded-md bg-red-100 px-2 text-red-500">
+                  <NoSymbolIcon className="h-4 w-4" strokeWidth={2.5} />
+                  <span className="text-sm font-medium">Blocked</span>
+                </div>
+              )}
             </div>
           </div>
         </Link>

@@ -1,9 +1,11 @@
 import { ChatMessage as ChatMessageType } from '@/hooks/api/messages';
 import { useUserData } from '@/hooks/api/user';
 import { formatTimestamp } from '@/utils/dateUtils';
-import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
+import {
+  DocumentArrowDownIcon,
+  NoSymbolIcon,
+} from '@heroicons/react/24/outline';
 import { FC, useState } from 'react';
-import { BlockedBadge } from './BlockedBadge';
 
 const MediaContent = ({ message }: { message: ChatMessageType }) => {
   const getFileName = (s3Key: string) => {
@@ -59,6 +61,13 @@ const MediaContent = ({ message }: { message: ChatMessageType }) => {
   );
 };
 
+const BlockedMessage = () => (
+  <span className="flex w-fit items-center gap-1 rounded-2xl bg-red-100 px-3 py-1.5 text-sm font-medium text-red-500">
+    <NoSymbolIcon className="h-4 w-4" strokeWidth={2.5} />
+    <span>Blocked</span>
+  </span>
+);
+
 export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
   const { data } = useUserData();
   const [hideBlockedContent] = useState(message.blocked);
@@ -93,19 +102,19 @@ export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
           {formatTimestamp(message.createdAt)}
         </span>
       </div>
-      {message.messageType !== 'plaintext' && (
-        <MediaContent message={message} />
-      )}
-      {!!message.textContent && (
+      {!hideBlockedContent && (
         <>
-          {!hideBlockedContent && (
+          {message.messageType !== 'plaintext' && (
+            <MediaContent message={message} />
+          )}
+          {!!message.textContent && (
             <span className="w-fit rounded-2xl bg-zinc-100 px-3 py-1.5 text-sm text-black">
               {message.textContent}
             </span>
           )}
-          {hideBlockedContent && <BlockedBadge />}
         </>
       )}
+      {hideBlockedContent && <BlockedMessage />}
     </li>
   );
 };
