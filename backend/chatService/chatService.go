@@ -476,17 +476,12 @@ func SendMessage(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
-	messages, err := getMessagesByChatID(chatID, reqUUID)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-
 	err = sendNewMessageNotification(chatID.String())
 	if err != nil {
 		log.Println(err)
 	}
 
-	return c.JSON(http.StatusOK, messages)
+	return c.String(http.StatusOK, "SUCCESS")
 }
 
 func getMessagesByChatID(chatID pgtype.UUID, uuid pgtype.UUID) ([]queries.GetChatMessagesRow, error) {
