@@ -68,7 +68,7 @@ export const ChatView: FC = () => {
     <div className="flex h-full w-full flex-col items-center bg-white">
       <ChatHeader chatId={chatId} />
       <div className="flex h-full w-full flex-col items-center px-6">
-        {!showFilePicker && <MessageList chatId={chatId} />}
+        {!showFilePicker && <MessageList chatId={chatId} key={chatId} />}
         {showFilePicker && (
           <FilePicker
             setFiles={setFiles}

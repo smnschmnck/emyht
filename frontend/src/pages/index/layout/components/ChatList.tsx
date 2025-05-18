@@ -10,6 +10,7 @@ import { useAutoAnimate } from '@formkit/auto-animate/react';
 import {
   DocumentIcon,
   MusicalNoteIcon,
+  NoSymbolIcon,
   PhotoIcon,
   PlayCircleIcon,
 } from '@heroicons/react/24/outline';
@@ -47,13 +48,26 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => {
             {messageType === 'data' && <DocumentIcon className="h-4 w-4" />}
             {messageType === 'video' && <PlayCircleIcon className="h-4 w-4" />}
             {!!lastMessage?.textContent && (
-              <p className="truncate">{lastMessage?.textContent}</p>
+              <>
+                {!lastMessage.isBlocked && (
+                  <p className="truncate">{lastMessage?.textContent}</p>
+                )}
+                {lastMessage.isBlocked && (
+                  <div className="flex items-center gap-1">
+                    <NoSymbolIcon className="h-3 w-3" strokeWidth={2.5} />
+                    <span className="flex">Blocked</span>
+                  </div>
+                )}
+              </>
             )}
             {!lastMessage && (
               <span>{`Send a message to ${chat.chatName}`}</span>
             )}
             {lastMessage?.textContent === '' && messageType !== 'plaintext' && (
-              <span className="capitalize">{messageType}</span>
+              <span className="capitalize">
+                {lastMessage.isBlocked && 'Blocked '}
+                {messageType}
+              </span>
             )}
           </div>
         </div>
