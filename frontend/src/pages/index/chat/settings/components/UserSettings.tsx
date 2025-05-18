@@ -72,6 +72,7 @@ const UserPropertiesSettings = () => {
     },
     onSuccess: () => {
       refetchChatInfo();
+      refetchMessages();
       toast.success('User unblocked successfully');
     },
   });
