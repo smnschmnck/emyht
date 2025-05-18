@@ -14,7 +14,7 @@ import { useMutation } from '@tanstack/react-query';
 import { FC } from 'react';
 import { toast } from 'sonner';
 
-export type ContactRequestActions = 'accept' | 'decline' | 'block';
+type ContactRequestActions = 'accept' | 'decline' | 'block';
 
 export const RequestTable: FC = () => {
   const { refetch: refetchContacts } = useContacts();
