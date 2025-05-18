@@ -2,7 +2,8 @@ import { ChatMessage as ChatMessageType } from '@/hooks/api/messages';
 import { useUserData } from '@/hooks/api/user';
 import { formatTimestamp } from '@/utils/dateUtils';
 import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
-import { FC } from 'react';
+import { FC, useState } from 'react';
+import { BlockedBadge } from './BlockedBadge';
 
 const MediaContent = ({ message }: { message: ChatMessageType }) => {
   const getFileName = (s3Key: string) => {
@@ -60,6 +61,7 @@ const MediaContent = ({ message }: { message: ChatMessageType }) => {
 
 export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
   const { data } = useUserData();
+  const [hideBlockedContent] = useState(message.blocked);
 
   if (!data) {
     return <></>;
@@ -95,9 +97,14 @@ export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
         <MediaContent message={message} />
       )}
       {!!message.textContent && (
-        <span className="w-fit rounded-2xl bg-zinc-100 px-3 py-1.5 text-sm text-black">
-          {message.textContent}
-        </span>
+        <>
+          {!hideBlockedContent && (
+            <span className="w-fit rounded-2xl bg-zinc-100 px-3 py-1.5 text-sm text-black">
+              {message.textContent}
+            </span>
+          )}
+          {hideBlockedContent && <BlockedBadge />}
+        </>
       )}
     </li>
   );
