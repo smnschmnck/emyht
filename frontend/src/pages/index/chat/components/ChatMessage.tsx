@@ -66,7 +66,9 @@ const MediaContent = ({ message }: { message: ChatMessageType }) => {
 
 export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
   const { data } = useUserData();
-  const [hideBlockedContent, setHideBlockedContent] = useState(message.blocked);
+  const [hideBlockedContent, setHideBlockedContent] = useState(true);
+
+  const isBlockedContentHidden = hideBlockedContent && message.blocked;
 
   if (!data) {
     return <></>;
@@ -99,7 +101,7 @@ export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
         </span>
       </div>
       <div className="group flex gap-2">
-        {!hideBlockedContent && (
+        {!isBlockedContentHidden && (
           <div className="flex w-full flex-col items-start gap-1">
             {message.messageType !== 'plaintext' && (
               <MediaContent message={message} />
@@ -111,7 +113,7 @@ export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
             )}
           </div>
         )}
-        {hideBlockedContent && (
+        {isBlockedContentHidden && (
           <BlockedMessage messageType={message.messageType} />
         )}
         {message.blocked && (
@@ -119,13 +121,13 @@ export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
             onClick={() => setHideBlockedContent((prev) => !prev)}
             className="text-zinc-400"
             ariaLabel={
-              hideBlockedContent
+              isBlockedContentHidden
                 ? 'View blocked content'
                 : 'Hide blocked content'
             }
           >
-            {hideBlockedContent && <EyeIcon />}
-            {!hideBlockedContent && <EyeSlashIcon />}
+            {isBlockedContentHidden && <EyeIcon />}
+            {!isBlockedContentHidden && <EyeSlashIcon />}
           </IconButton>
         )}
       </div>
