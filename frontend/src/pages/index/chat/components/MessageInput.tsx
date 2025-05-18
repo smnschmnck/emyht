@@ -9,7 +9,6 @@ import { PaperAirplaneIcon, PaperClipIcon } from '@heroicons/react/24/solid';
 import { useMutation } from '@tanstack/react-query';
 import { FC, FormEvent, useState } from 'react';
 import { toast } from 'sonner';
-import { useChatInfo } from '../hooks/useChatInfo';
 
 const getFilePutUrl = async (file: File) => {
   const contentLength = file.size;
@@ -92,7 +91,6 @@ export const MessageInput: FC<{
   const [textContent, setTextContent] = useState('');
   const { refetch: refetchChats } = useChats();
   const { refetch: refetchChatMessages } = useChatMessages(chatId);
-  const { data: chatInfo } = useChatInfo({ chatId });
 
   const { mutate: sendMessage, isPending: isSending } = useMutation({
     mutationFn: async (event: FormEvent) => {
@@ -145,10 +143,6 @@ export const MessageInput: FC<{
       toast.error(err.message);
     },
   });
-
-  if (!!chatInfo && chatInfo.isChatBlocked) {
-    return null;
-  }
 
   return (
     <form
