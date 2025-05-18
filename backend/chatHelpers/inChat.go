@@ -5,6 +5,8 @@ import (
 	"context"
 	"errors"
 	"log"
+	"sort"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -27,6 +29,14 @@ type Chat struct {
 	ChatPictureUrl string           `json:"chatPictureUrl"`
 	UnreadMessages int              `json:"unreadMessages"`
 	LastMessage    *LastChatMessage `json:"lastMessage"`
+}
+
+func getTimestamp(chat Chat) string {
+	if chat.LastMessage != nil {
+		return chat.LastMessage.CreatedAt
+	}
+
+	return chat.CreatedAt
 }
 
 func GetChatsByUUID(uuid pgtype.UUID) ([]Chat, error) {
@@ -62,7 +72,7 @@ func GetChatsByUUID(uuid pgtype.UUID) ([]Chat, error) {
 			SenderUsername: message.SenderUsername,
 			MessageType:    string(message.MessageType),
 			TextContent:    message.TextContent,
-			CreatedAt:      message.CreatedAt.Time.String(),
+			CreatedAt:      message.CreatedAt.Time.Format(time.RFC3339),
 			DeliveryStatus: string(message.DeliveryStatus),
 			IsBlocked:      *message.Blocked,
 		}
@@ -74,7 +84,7 @@ func GetChatsByUUID(uuid pgtype.UUID) ([]Chat, error) {
 			SenderUsername: message.SenderUsername,
 			MessageType:    string(message.MessageType),
 			TextContent:    message.TextContent,
-			CreatedAt:      message.CreatedAt.Time.String(),
+			CreatedAt:      message.CreatedAt.Time.Format(time.RFC3339),
 			DeliveryStatus: string(message.DeliveryStatus),
 			IsBlocked:      false,
 		}
@@ -86,7 +96,7 @@ func GetChatsByUUID(uuid pgtype.UUID) ([]Chat, error) {
 			ID:             chat.ID.String(),
 			ChatName:       chat.ChatName,
 			ChatType:       string(chat.ChatType),
-			CreatedAt:      chat.CreatedAt.Time.String(),
+			CreatedAt:      chat.CreatedAt.Time.Format(time.RFC3339),
 			ChatPictureUrl: chat.ChatPictureUrl,
 			UnreadMessages: int(chat.UnreadMessages),
 			LastMessage:    nil,
@@ -99,6 +109,13 @@ func GetChatsByUUID(uuid pgtype.UUID) ([]Chat, error) {
 
 		chatList = append(chatList, fullChat)
 	}
+
+	sort.SliceStable(chatList, func(i, j int) bool {
+		a := getTimestamp(chatList[i])
+		b := getTimestamp(chatList[j])
+
+		return a > b
+	})
 
 	return chatList, nil
 }
