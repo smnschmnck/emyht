@@ -398,3 +398,12 @@ WHERE blocked_id = $1;
 SELECT blocked_id
 FROM user_blocks
 WHERE blocker_id = $1;
+-- name: GetBlockedChats :many
+SELECT uca.chat_id
+FROM user_blocks
+    JOIN user_chat uca on blocked_id = uca.user_id
+    JOIN user_chat ucb on ucb.user_id = $1
+    JOIN chats on ucb.chat_id = chats.id
+WHERE blocker_id = $1
+    AND uca.chat_id = ucb.chat_id
+    AND chats.chat_type = 'one_on_one';

@@ -90,6 +90,16 @@ func GetChatsByUUID(uuid pgtype.UUID) ([]Chat, error) {
 		}
 	}
 
+	blockedChats, err := conn.GetBlockedChats(context.Background(), uuid)
+	if err != nil {
+		log.Println(err)
+		return emptyResult, errors.New("INTERNAL ERROR")
+	}
+	blockedChatsMap := make(map[string]bool)
+	for _, blockedChat := range blockedChats {
+		blockedChatsMap[blockedChat.String()] = true
+	}
+
 	chatList := make([]Chat, 0)
 	for _, chat := range chats {
 		fullChat := Chat{
@@ -100,6 +110,11 @@ func GetChatsByUUID(uuid pgtype.UUID) ([]Chat, error) {
 			ChatPictureUrl: chat.ChatPictureUrl,
 			UnreadMessages: int(chat.UnreadMessages),
 			LastMessage:    nil,
+		}
+
+		_, isChatBlocked := blockedChatsMap[chat.ID.String()]
+		if isChatBlocked {
+			fullChat.UnreadMessages = 0
 		}
 
 		lastMessage, ok := lastMessageMap[chat.ID.String()]

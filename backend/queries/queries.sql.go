@@ -423,6 +423,37 @@ func (q *Queries) GetAvailableGroupChats(ctx context.Context, arg GetAvailableGr
 	return items, nil
 }
 
+const getBlockedChats = `-- name: GetBlockedChats :many
+SELECT uca.chat_id
+FROM user_blocks
+    JOIN user_chat uca on blocked_id = uca.user_id
+    JOIN user_chat ucb on ucb.user_id = $1
+    JOIN chats on ucb.chat_id = chats.id
+WHERE blocker_id = $1
+    AND uca.chat_id = ucb.chat_id
+    AND chats.chat_type = 'one_on_one'
+`
+
+func (q *Queries) GetBlockedChats(ctx context.Context, userID pgtype.UUID) ([]pgtype.UUID, error) {
+	rows, err := q.db.Query(ctx, getBlockedChats, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []pgtype.UUID
+	for rows.Next() {
+		var chat_id pgtype.UUID
+		if err := rows.Scan(&chat_id); err != nil {
+			return nil, err
+		}
+		items = append(items, chat_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getBlockedUsers = `-- name: GetBlockedUsers :many
 SELECT blocked_id
 FROM user_blocks
