@@ -1,17 +1,17 @@
+import { EntityList } from '@/components/EntityList';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { useCurrentChat } from '@/hooks/api/chats';
+import { useChats, useCurrentChat } from '@/hooks/api/chats';
+import { useContacts } from '@/hooks/api/contacts';
+import { useChatMessages } from '@/hooks/api/messages';
+import { useBlockUser } from '@/hooks/api/user';
 import { fetchWithDefaults } from '@/utils/fetch';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useChatInfo } from '../../hooks/useChatInfo';
 import { useChatsUserCanBeAddedTo } from '../hooks/useMembers';
 import { chatSettingsRoute } from '../route';
-import { EntityList } from '@/components/EntityList';
-import { useBlockUser } from '@/hooks/api/user';
-import { useChatInfo } from '../../hooks/useChatInfo';
-import { useContacts } from '@/hooks/api/contacts';
-import { useChatMessages } from '@/hooks/api/messages';
 
 const useChatParticipant = ({ chatId }: { chatId: string }) => {
   return useQuery({
@@ -31,6 +31,7 @@ const useChatParticipant = ({ chatId }: { chatId: string }) => {
 const UserPropertiesSettings = () => {
   const { chatId } = chatSettingsRoute.useParams();
   const { refetch: refetchContacts } = useContacts();
+  const { refetch: refetchChats } = useChats();
   const { refetch: refetchMessages } = useChatMessages(chatId);
   const { data: chatParticipant, isLoading: isLoadingChatParticipant } =
     useChatParticipant({ chatId });
@@ -72,7 +73,9 @@ const UserPropertiesSettings = () => {
     },
     onSuccess: () => {
       refetchChatInfo();
+      refetchChats();
       refetchMessages();
+      refetchContacts();
       toast.success('User unblocked successfully');
     },
   });
