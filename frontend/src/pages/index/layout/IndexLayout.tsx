@@ -9,6 +9,7 @@ import { Sidebar } from './components/Sidebar';
 import { useChatId, useIsSidebarHidden } from './hooks';
 import { indexLayoutRoute } from './route';
 import { useChatMessages } from '@/hooks/api/messages';
+import { useChatInfo } from '../chat/hooks/useChatInfo';
 
 export const IndexLayout: FC = () => {
   const loaderUserData = indexLayoutRoute.useLoaderData();
@@ -16,6 +17,7 @@ export const IndexLayout: FC = () => {
   const isSidebarHidden = useIsSidebarHidden();
   const { data: chats, refetch: refetchChats } = useChats();
   const chatId = useChatId();
+  const { data: info } = useChatInfo({ chatId });
   const { refetch: refetchMessages } = useChatMessages(chatId);
   const { refetch: refetchContactRequests } = useContactRequests();
   const { subscribeToUserFeed, subscribeToAllChats } = usePusher();
@@ -31,6 +33,9 @@ export const IndexLayout: FC = () => {
       chats,
       refetchChats,
       onNewMessage: (channelChatId: string) => {
+        if (info?.isChatBlocked) {
+          return;
+        }
         if (channelChatId === chatId) {
           refetchMessages();
         }
@@ -45,6 +50,7 @@ export const IndexLayout: FC = () => {
     refetchContactRequests,
     subscribeToAllChats,
     refetchMessages,
+    info?.isChatBlocked,
   ]);
 
   return (
