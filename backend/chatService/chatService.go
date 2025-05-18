@@ -510,6 +510,23 @@ func getMessagesByChatID(chatID pgtype.UUID, uuid pgtype.UUID) ([]queries.GetCha
 		messages[i].MediaUrl = &formattedUrl
 	}
 
+	isGroupChat, err := conn.IsGroupChat(context.Background(), chatID)
+	if err != nil {
+		return emptyMessageArr, errors.New("INTERNAL ERROR")
+	}
+	if !isGroupChat {
+		filteredMessages := make([]queries.GetChatMessagesRow, 0)
+
+		for _, message := range messages {
+			if !*message.Blocked {
+				filteredMessages = append(filteredMessages, message)
+			}
+
+		}
+
+		return filteredMessages, nil
+	}
+
 	return messages, nil
 }
 
