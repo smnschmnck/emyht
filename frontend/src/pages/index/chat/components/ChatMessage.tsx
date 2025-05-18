@@ -1,23 +1,21 @@
 import { ChatMessage as ChatMessageType } from '@/hooks/api/messages';
 import { useUserData } from '@/hooks/api/user';
 import { formatTimestamp } from '@/utils/dateUtils';
-import {
-  DocumentArrowDownIcon,
-  NoSymbolIcon,
-} from '@heroicons/react/24/outline';
+import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import { FC, useState } from 'react';
+import { BlockedMessage } from './BlockedMessage';
+
+const getFileName = (s3Key: string) => {
+  // Regular expression to match the file name after the last underscore
+  // and before the query parameters (if any)
+  const regex = /_(.+?\.[^?]+)(\?|$)/;
+
+  const match = s3Key.match(regex);
+
+  return match ? match[1] : null;
+};
 
 const MediaContent = ({ message }: { message: ChatMessageType }) => {
-  const getFileName = (s3Key: string) => {
-    // Regular expression to match the file name after the last underscore
-    // and before the query parameters (if any)
-    const regex = /_(.+?\.[^?]+)(\?|$)/;
-
-    const match = s3Key.match(regex);
-
-    return match ? match[1] : null;
-  };
-
   const fileName = getFileName(message.mediaUrl);
 
   return (
@@ -60,13 +58,6 @@ const MediaContent = ({ message }: { message: ChatMessageType }) => {
     </>
   );
 };
-
-const BlockedMessage = () => (
-  <span className="flex w-fit items-center gap-1 rounded-2xl bg-red-100 px-3 py-1.5 text-sm font-medium text-red-500">
-    <NoSymbolIcon className="h-4 w-4" strokeWidth={2.5} />
-    <span>Blocked</span>
-  </span>
-);
 
 export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
   const { data } = useUserData();
@@ -114,7 +105,9 @@ export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
           )}
         </>
       )}
-      {hideBlockedContent && <BlockedMessage />}
+      {hideBlockedContent && (
+        <BlockedMessage messageType={message.messageType} />
+      )}
     </li>
   );
 };
