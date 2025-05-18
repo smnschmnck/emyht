@@ -10,6 +10,7 @@ export type ChatMessage = {
   mediaUrl: string;
   createdAt: string;
   deliveryStatus: string;
+  blocked: boolean;
 };
 
 export const useChatMessages = (chatId?: string) => {

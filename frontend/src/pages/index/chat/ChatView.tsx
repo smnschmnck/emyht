@@ -7,6 +7,7 @@ import { ChatMessage } from './components/ChatMessage';
 import { MessageInput } from './components/MessageInput';
 import { FilePicker, FilePickerFile } from './components/FilePicker';
 import { Spinner } from '@/components/ui/Spinner';
+import { useChatInfo } from './hooks/useChatInfo';
 
 const MessageList: FC<{ chatId: string }> = ({ chatId }) => {
   const { data: messages, isLoading: isLoadingMessages } =
@@ -53,6 +54,7 @@ export const ChatView: FC = () => {
   const [showFilePicker, setShowFilePicker] = useState(false);
   const [files, setFiles] = useState<FilePickerFile[]>([]);
   const { chatId } = useParams({ from: '/indexLayoutRoute/chat/$chatId' });
+  const { data: chatInfo } = useChatInfo({ chatId });
 
   useEffect(() => {
     setShowFilePicker(false);
@@ -60,11 +62,13 @@ export const ChatView: FC = () => {
 
   const rawFiles = files.map((f) => f.file);
 
+  const showMessageInput = !chatInfo || !chatInfo.isChatBlocked;
+
   return (
     <div className="flex h-full w-full flex-col items-center bg-white">
       <ChatHeader chatId={chatId} />
       <div className="flex h-full w-full flex-col items-center px-6">
-        {!showFilePicker && <MessageList chatId={chatId} />}
+        {!showFilePicker && <MessageList chatId={chatId} key={chatId} />}
         {showFilePicker && (
           <FilePicker
             setFiles={setFiles}
@@ -72,15 +76,17 @@ export const ChatView: FC = () => {
             setShowFilePicker={setShowFilePicker}
           />
         )}
-        <div className="flex h-24 w-full max-w-3xl items-center justify-center">
-          <MessageInput
-            resetFiles={() => setFiles([])}
-            files={rawFiles}
-            chatId={chatId}
-            showFilePicker={showFilePicker}
-            setShowFilePicker={setShowFilePicker}
-          />
-        </div>
+        {showMessageInput && (
+          <div className="flex h-24 w-full max-w-3xl items-center justify-center">
+            <MessageInput
+              resetFiles={() => setFiles([])}
+              files={rawFiles}
+              chatId={chatId}
+              showFilePicker={showFilePicker}
+              setShowFilePicker={setShowFilePicker}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

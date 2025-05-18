@@ -55,22 +55,62 @@ SELECT DISTINCT c.id,
         WHEN c.chat_type = 'one_on_one' THEN ou.picture_url::TEXT
         ELSE c.picture_url::TEXT
     END AS chat_picture_url,
-    u.unread_messages,
-    m.message_type,
-    m.text_content,
-    m.created_at as message_created_at,
-    m.delivery_status,
-    m.sender_id,
-    su.username AS sender_username
+    u.unread_messages
 FROM user_chat u
     JOIN chats c ON u.chat_id = c.id
-    LEFT JOIN chatmessages m ON m.id = c.last_message_id -- Only join for one_on_one chats
     LEFT JOIN user_chat ouc ON c.id = ouc.chat_id
     AND ouc.user_id != $1
     AND c.chat_type = 'one_on_one'
     LEFT JOIN users ou ON ouc.user_id = ou.id
-    LEFT JOIN users su ON m.sender_id = su.id
 WHERE u.user_id = $1;
+-- name: GetLastGroupChatMessages :many
+SELECT DISTINCT ON (cm.chat_id) cm.id,
+    cm.chat_id,
+    cm.sender_id,
+    u.username AS sender_username,
+    cm.text_content,
+    cm.message_type,
+    cm.media_url,
+    cm.created_at,
+    cm.delivery_status,
+    (
+        ub.blocker_id IS NOT NULL
+        AND cm.created_at >= ub.created_at
+    ) AS blocked
+FROM chatmessages cm
+    JOIN users u ON u.id = cm.sender_id
+    JOIN user_chat uc ON cm.chat_id = uc.chat_id
+    JOIN chats c ON uc.chat_id = c.id
+    LEFT JOIN user_blocks ub ON ub.blocker_id = $1
+    AND ub.blocked_id = cm.sender_id
+WHERE uc.user_id = $1
+    AND c.chat_type = 'group'
+ORDER BY cm.chat_id,
+    cm.created_at DESC;
+-- name: GetLastOneOnOneChatMessages :many
+SELECT DISTINCT ON (cm.chat_id) cm.id,
+    cm.chat_id,
+    cm.sender_id,
+    u.username AS sender_username,
+    cm.text_content,
+    cm.message_type,
+    cm.media_url,
+    cm.created_at,
+    cm.delivery_status
+FROM chatmessages cm
+    JOIN users u ON u.id = cm.sender_id
+    JOIN user_chat uc ON cm.chat_id = uc.chat_id
+    JOIN chats c ON uc.chat_id = c.id
+    LEFT JOIN user_blocks ub ON ub.blocker_id = $1
+    AND ub.blocked_id = cm.sender_id
+WHERE uc.user_id = $1
+    AND c.chat_type = 'one_on_one'
+    AND (
+        ub.blocker_id IS NULL
+        OR cm.created_at < ub.created_at
+    )
+ORDER BY cm.chat_id,
+    cm.created_at DESC;
 -- name: CheckDuplicateFriendRequest :one
 SELECT EXISTS(
         SELECT 1
@@ -101,20 +141,32 @@ SELECT u.username,
 FROM friends
     JOIN users u ON u.id = friends.sender_id
     OR friends.receiver_id = u.id
+    LEFT JOIN user_blocks ub ON ub.blocker_id = $1
+    AND ub.blocked_id = u.id
 WHERE (
         receiver_id = $1
         OR sender_id = $1
     )
     AND status = 'accepted'
-    AND u.id != $1;
+    AND u.id != $1
+    AND ub.blocker_id IS NULL;
 -- name: GetPendingFriendRequests :many
 SELECT sender_id,
     u.username AS sender_username,
     u.picture_url AS sender_profile_picture,
     u.email AS sender_email
 FROM friends
-    JOIN users u ON friends.sender_id = u.id
+    JOIN users u ON sender_id = u.id
+    LEFT JOIN user_blocks ub ON sender_id = ub.blocked_id -- Assuming blocked_id is the ID of the person who was blocked
 WHERE receiver_id = $1
+    AND status = 'pending'
+    AND ub.blocked_id IS NULL;
+-- name: GetSentContactRequests :many
+SELECT u.email AS email,
+    friends.created_at
+FROM friends
+    JOIN users u ON u.id = friends.receiver_id
+WHERE sender_id = $1
     AND status = 'pending';
 -- name: AcceptFriendRequest :exec
 UPDATE friends
@@ -125,34 +177,13 @@ WHERE sender_id = $1
 DELETE FROM friends
 WHERE sender_id = $1
     AND receiver_id = $2;
--- name: BlockFriendRequest :exec
-UPDATE friends
-SET status = 'blocked'
-WHERE sender_id = $1
-    AND receiver_id = $2;
 -- name: BlockUser :exec
-UPDATE friends
-SET status = 'blocked'
-WHERE (
-        sender_id = $1
-        AND receiver_id = $2
-    )
-    OR (
-        sender_id = $2
-        AND receiver_id = $1
-    );
--- name: BlockChat :one
-UPDATE chats
-SET blocked = true
-WHERE id = $1
-RETURNING blocked;
--- name: GetPendingContactRequests :many
-SELECT u.email AS email,
-    friends.created_at
-FROM friends
-    JOIN users u ON u.id = friends.receiver_id
-WHERE sender_id = $1
-    AND status = 'pending';
+INSERT INTO user_blocks (blocker_id, blocked_id)
+VALUES ($1, $2) ON CONFLICT (blocker_id, blocked_id) DO NOTHING;
+-- name: UnblockUser :exec
+DELETE FROM user_blocks
+WHERE blocker_id = $1
+    AND blocked_id = $2;
 -- name: CheckChatExists :one
 SELECT count(user_chat.chat_id) >= 2 AS chatcount
 FROM user_chat
@@ -220,18 +251,24 @@ WHERE chat_id = $1
     AND user_id != $2
 RETURNING true;
 -- name: GetChatMessages :many
-SELECT chatmessages.id,
-    sender_id,
-    username AS sender_username,
-    text_content,
-    message_type,
-    media_url,
-    chatmessages.created_at,
-    delivery_status
-FROM chatmessages
-    JOIN users u ON u.id = chatmessages.sender_id
-WHERE chat_id = $1
-ORDER BY chatmessages.created_at ASC;
+SELECT cm.id,
+    cm.sender_id,
+    u.username AS sender_username,
+    cm.text_content,
+    cm.message_type,
+    cm.media_url,
+    cm.created_at,
+    cm.delivery_status,
+    (
+        ub.blocker_id IS NOT NULL
+        AND cm.created_at >= ub.created_at
+    ) AS blocked
+FROM chatmessages cm
+    JOIN users u ON u.id = cm.sender_id
+    LEFT JOIN user_blocks ub ON ub.blocker_id = $1
+    AND ub.blocked_id = cm.sender_id
+WHERE cm.chat_id = $2 -- Chat ID
+ORDER BY cm.created_at ASC;
 -- name: ResetUnreadMessages :exec
 UPDATE user_chat
 SET unread_messages = 0
@@ -343,3 +380,30 @@ UPDATE chats
 SET picture_url = $1
 WHERE chat_type = 'group'
     AND id = $2;
+-- name: GetIsChatBlocked :one
+SELECT EXISTS (
+        SELECT 1
+        FROM user_blocks ub
+            JOIN user_chat uc ON ub.blocked_id = uc.user_id
+            JOIN chats c ON c.id = $2
+        WHERE ub.blocker_id = $1
+            AND uc.chat_id = $2
+            AND c.chat_type = 'one_on_one'
+    );
+-- name: GetUsersWhoBlockedUser :many
+SELECT blocker_id
+FROM user_blocks
+WHERE blocked_id = $1;
+-- name: GetBlockedUsers :many
+SELECT blocked_id
+FROM user_blocks
+WHERE blocker_id = $1;
+-- name: GetBlockedChats :many
+SELECT uca.chat_id
+FROM user_blocks
+    JOIN user_chat uca on blocked_id = uca.user_id
+    JOIN user_chat ucb on ucb.user_id = $1
+    JOIN chats on ucb.chat_id = chats.id
+WHERE blocker_id = $1
+    AND uca.chat_id = ucb.chat_id
+    AND chats.chat_type = 'one_on_one';

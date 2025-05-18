@@ -1,25 +1,58 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { IconButton } from '@/components/ui/IconButton';
 import { Spinner } from '@/components/ui/Spinner';
-import { useContactRequests } from '@/hooks/api/contacts';
+import { HttpError } from '@/errors/httpError/httpError';
+import { useContactRequests, useContacts } from '@/hooks/api/contacts';
+import { useBlockUser } from '@/hooks/api/user';
+import { fetchWithDefaults } from '@/utils/fetch';
 import {
   CheckIcon,
   NoSymbolIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+import { useMutation } from '@tanstack/react-query';
 import { FC } from 'react';
+import { toast } from 'sonner';
 
-export type ContactRequestActions = 'accept' | 'decline' | 'block';
+type ContactRequestActions = 'accept' | 'decline' | 'block';
 
-type RequestTableProps = {
-  handleRequest: (opts: {
-    senderID: string;
-    action: ContactRequestActions;
-  }) => void;
-};
+export const RequestTable: FC = () => {
+  const { refetch: refetchContacts } = useContacts();
+  const {
+    data,
+    isLoading,
+    refetch: refetchContactRequests,
+  } = useContactRequests();
 
-export const RequestTable: FC<RequestTableProps> = ({ handleRequest }) => {
-  const { data, isLoading } = useContactRequests();
+  const { mutate: handleRequest } = useMutation({
+    mutationFn: async (opts: {
+      senderID: string;
+      action: ContactRequestActions;
+    }) => {
+      const res = await fetchWithDefaults('/handleContactRequest', {
+        method: 'post',
+        body: JSON.stringify(opts),
+      });
+
+      if (!res.ok) {
+        throw new HttpError({
+          message: await res.text(),
+          statusCode: res.status,
+        });
+      }
+    },
+    onSuccess: () => {
+      refetchContacts();
+      refetchContactRequests();
+    },
+  });
+
+  const { mutate: blockUser } = useBlockUser({
+    onSuccess: () => {
+      toast.success('User blocked successfully');
+      refetchContactRequests();
+    },
+  });
 
   return (
     <div className="max-h-72 w-full overflow-scroll pr-4">
@@ -80,12 +113,7 @@ export const RequestTable: FC<RequestTableProps> = ({ handleRequest }) => {
                   <IconButton
                     ariaLabel={'Block request'}
                     className="text-red-500"
-                    onClick={() =>
-                      handleRequest({
-                        senderID: r.senderId,
-                        action: 'block',
-                      })
-                    }
+                    onClick={() => blockUser(r.senderId)}
                   >
                     <NoSymbolIcon />
                   </IconButton>

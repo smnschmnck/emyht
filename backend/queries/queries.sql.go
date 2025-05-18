@@ -48,57 +48,18 @@ func (q *Queries) ActivateEmail(ctx context.Context, arg ActivateEmailParams) (b
 	return email_active, err
 }
 
-const blockChat = `-- name: BlockChat :one
-UPDATE chats
-SET blocked = true
-WHERE id = $1
-RETURNING blocked
-`
-
-func (q *Queries) BlockChat(ctx context.Context, id pgtype.UUID) (*bool, error) {
-	row := q.db.QueryRow(ctx, blockChat, id)
-	var blocked *bool
-	err := row.Scan(&blocked)
-	return blocked, err
-}
-
-const blockFriendRequest = `-- name: BlockFriendRequest :exec
-UPDATE friends
-SET status = 'blocked'
-WHERE sender_id = $1
-    AND receiver_id = $2
-`
-
-type BlockFriendRequestParams struct {
-	SenderID   pgtype.UUID `json:"senderId"`
-	ReceiverID pgtype.UUID `json:"receiverId"`
-}
-
-func (q *Queries) BlockFriendRequest(ctx context.Context, arg BlockFriendRequestParams) error {
-	_, err := q.db.Exec(ctx, blockFriendRequest, arg.SenderID, arg.ReceiverID)
-	return err
-}
-
 const blockUser = `-- name: BlockUser :exec
-UPDATE friends
-SET status = 'blocked'
-WHERE (
-        sender_id = $1
-        AND receiver_id = $2
-    )
-    OR (
-        sender_id = $2
-        AND receiver_id = $1
-    )
+INSERT INTO user_blocks (blocker_id, blocked_id)
+VALUES ($1, $2) ON CONFLICT (blocker_id, blocked_id) DO NOTHING
 `
 
 type BlockUserParams struct {
-	SenderID   pgtype.UUID `json:"senderId"`
-	ReceiverID pgtype.UUID `json:"receiverId"`
+	BlockerID pgtype.UUID `json:"blockerId"`
+	BlockedID pgtype.UUID `json:"blockedId"`
 }
 
 func (q *Queries) BlockUser(ctx context.Context, arg BlockUserParams) error {
-	_, err := q.db.Exec(ctx, blockUser, arg.SenderID, arg.ReceiverID)
+	_, err := q.db.Exec(ctx, blockUser, arg.BlockerID, arg.BlockedID)
 	return err
 }
 
@@ -462,6 +423,63 @@ func (q *Queries) GetAvailableGroupChats(ctx context.Context, arg GetAvailableGr
 	return items, nil
 }
 
+const getBlockedChats = `-- name: GetBlockedChats :many
+SELECT uca.chat_id
+FROM user_blocks
+    JOIN user_chat uca on blocked_id = uca.user_id
+    JOIN user_chat ucb on ucb.user_id = $1
+    JOIN chats on ucb.chat_id = chats.id
+WHERE blocker_id = $1
+    AND uca.chat_id = ucb.chat_id
+    AND chats.chat_type = 'one_on_one'
+`
+
+func (q *Queries) GetBlockedChats(ctx context.Context, userID pgtype.UUID) ([]pgtype.UUID, error) {
+	rows, err := q.db.Query(ctx, getBlockedChats, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []pgtype.UUID
+	for rows.Next() {
+		var chat_id pgtype.UUID
+		if err := rows.Scan(&chat_id); err != nil {
+			return nil, err
+		}
+		items = append(items, chat_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getBlockedUsers = `-- name: GetBlockedUsers :many
+SELECT blocked_id
+FROM user_blocks
+WHERE blocker_id = $1
+`
+
+func (q *Queries) GetBlockedUsers(ctx context.Context, blockerID pgtype.UUID) ([]pgtype.UUID, error) {
+	rows, err := q.db.Query(ctx, getBlockedUsers, blockerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []pgtype.UUID
+	for rows.Next() {
+		var blocked_id pgtype.UUID
+		if err := rows.Scan(&blocked_id); err != nil {
+			return nil, err
+		}
+		items = append(items, blocked_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getChatMembers = `-- name: GetChatMembers :many
 SELECT users.id,
     picture_url,
@@ -498,19 +516,30 @@ func (q *Queries) GetChatMembers(ctx context.Context, chatID pgtype.UUID) ([]Get
 }
 
 const getChatMessages = `-- name: GetChatMessages :many
-SELECT chatmessages.id,
-    sender_id,
-    username AS sender_username,
-    text_content,
-    message_type,
-    media_url,
-    chatmessages.created_at,
-    delivery_status
-FROM chatmessages
-    JOIN users u ON u.id = chatmessages.sender_id
-WHERE chat_id = $1
-ORDER BY chatmessages.created_at ASC
+SELECT cm.id,
+    cm.sender_id,
+    u.username AS sender_username,
+    cm.text_content,
+    cm.message_type,
+    cm.media_url,
+    cm.created_at,
+    cm.delivery_status,
+    (
+        ub.blocker_id IS NOT NULL
+        AND cm.created_at >= ub.created_at
+    ) AS blocked
+FROM chatmessages cm
+    JOIN users u ON u.id = cm.sender_id
+    LEFT JOIN user_blocks ub ON ub.blocker_id = $1
+    AND ub.blocked_id = cm.sender_id
+WHERE cm.chat_id = $2 -- Chat ID
+ORDER BY cm.created_at ASC
 `
+
+type GetChatMessagesParams struct {
+	BlockerID pgtype.UUID `json:"blockerId"`
+	ChatID    pgtype.UUID `json:"chatId"`
+}
 
 type GetChatMessagesRow struct {
 	ID             pgtype.UUID      `json:"id"`
@@ -521,10 +550,11 @@ type GetChatMessagesRow struct {
 	MediaUrl       *string          `json:"mediaUrl"`
 	CreatedAt      pgtype.Timestamp `json:"createdAt"`
 	DeliveryStatus DeliveryStatus   `json:"deliveryStatus"`
+	Blocked        *bool            `json:"blocked"`
 }
 
-func (q *Queries) GetChatMessages(ctx context.Context, chatID pgtype.UUID) ([]GetChatMessagesRow, error) {
-	rows, err := q.db.Query(ctx, getChatMessages, chatID)
+func (q *Queries) GetChatMessages(ctx context.Context, arg GetChatMessagesParams) ([]GetChatMessagesRow, error) {
+	rows, err := q.db.Query(ctx, getChatMessages, arg.BlockerID, arg.ChatID)
 	if err != nil {
 		return nil, err
 	}
@@ -541,6 +571,7 @@ func (q *Queries) GetChatMessages(ctx context.Context, chatID pgtype.UUID) ([]Ge
 			&i.MediaUrl,
 			&i.CreatedAt,
 			&i.DeliveryStatus,
+			&i.Blocked,
 		); err != nil {
 			return nil, err
 		}
@@ -577,37 +608,23 @@ SELECT DISTINCT c.id,
         WHEN c.chat_type = 'one_on_one' THEN ou.picture_url::TEXT
         ELSE c.picture_url::TEXT
     END AS chat_picture_url,
-    u.unread_messages,
-    m.message_type,
-    m.text_content,
-    m.created_at as message_created_at,
-    m.delivery_status,
-    m.sender_id,
-    su.username AS sender_username
+    u.unread_messages
 FROM user_chat u
     JOIN chats c ON u.chat_id = c.id
-    LEFT JOIN chatmessages m ON m.id = c.last_message_id -- Only join for one_on_one chats
     LEFT JOIN user_chat ouc ON c.id = ouc.chat_id
     AND ouc.user_id != $1
     AND c.chat_type = 'one_on_one'
     LEFT JOIN users ou ON ouc.user_id = ou.id
-    LEFT JOIN users su ON m.sender_id = su.id
 WHERE u.user_id = $1
 `
 
 type GetChatsForUserRow struct {
-	ID               pgtype.UUID        `json:"id"`
-	ChatType         ChatType           `json:"chatType"`
-	CreatedAt        pgtype.Timestamp   `json:"createdAt"`
-	ChatName         string             `json:"chatName"`
-	ChatPictureUrl   string             `json:"chatPictureUrl"`
-	UnreadMessages   int64              `json:"unreadMessages"`
-	MessageType      NullMessageType    `json:"messageType"`
-	TextContent      *string            `json:"textContent"`
-	MessageCreatedAt pgtype.Timestamp   `json:"messageCreatedAt"`
-	DeliveryStatus   NullDeliveryStatus `json:"deliveryStatus"`
-	SenderID         pgtype.UUID        `json:"senderId"`
-	SenderUsername   *string            `json:"senderUsername"`
+	ID             pgtype.UUID      `json:"id"`
+	ChatType       ChatType         `json:"chatType"`
+	CreatedAt      pgtype.Timestamp `json:"createdAt"`
+	ChatName       string           `json:"chatName"`
+	ChatPictureUrl string           `json:"chatPictureUrl"`
+	UnreadMessages int64            `json:"unreadMessages"`
 }
 
 func (q *Queries) GetChatsForUser(ctx context.Context, userID pgtype.UUID) ([]GetChatsForUserRow, error) {
@@ -626,12 +643,6 @@ func (q *Queries) GetChatsForUser(ctx context.Context, userID pgtype.UUID) ([]Ge
 			&i.ChatName,
 			&i.ChatPictureUrl,
 			&i.UnreadMessages,
-			&i.MessageType,
-			&i.TextContent,
-			&i.MessageCreatedAt,
-			&i.DeliveryStatus,
-			&i.SenderID,
-			&i.SenderUsername,
 		); err != nil {
 			return nil, err
 		}
@@ -670,6 +681,168 @@ func (q *Queries) GetGroupChatUserCount(ctx context.Context, chatID pgtype.UUID)
 	return count, err
 }
 
+const getIsChatBlocked = `-- name: GetIsChatBlocked :one
+SELECT EXISTS (
+        SELECT 1
+        FROM user_blocks ub
+            JOIN user_chat uc ON ub.blocked_id = uc.user_id
+            JOIN chats c ON c.id = $2
+        WHERE ub.blocker_id = $1
+            AND uc.chat_id = $2
+            AND c.chat_type = 'one_on_one'
+    )
+`
+
+type GetIsChatBlockedParams struct {
+	BlockerID pgtype.UUID `json:"blockerId"`
+	ID        pgtype.UUID `json:"id"`
+}
+
+func (q *Queries) GetIsChatBlocked(ctx context.Context, arg GetIsChatBlockedParams) (bool, error) {
+	row := q.db.QueryRow(ctx, getIsChatBlocked, arg.BlockerID, arg.ID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const getLastGroupChatMessages = `-- name: GetLastGroupChatMessages :many
+SELECT DISTINCT ON (cm.chat_id) cm.id,
+    cm.chat_id,
+    cm.sender_id,
+    u.username AS sender_username,
+    cm.text_content,
+    cm.message_type,
+    cm.media_url,
+    cm.created_at,
+    cm.delivery_status,
+    (
+        ub.blocker_id IS NOT NULL
+        AND cm.created_at >= ub.created_at
+    ) AS blocked
+FROM chatmessages cm
+    JOIN users u ON u.id = cm.sender_id
+    JOIN user_chat uc ON cm.chat_id = uc.chat_id
+    JOIN chats c ON uc.chat_id = c.id
+    LEFT JOIN user_blocks ub ON ub.blocker_id = $1
+    AND ub.blocked_id = cm.sender_id
+WHERE uc.user_id = $1
+    AND c.chat_type = 'group'
+ORDER BY cm.chat_id,
+    cm.created_at DESC
+`
+
+type GetLastGroupChatMessagesRow struct {
+	ID             pgtype.UUID      `json:"id"`
+	ChatID         pgtype.UUID      `json:"chatId"`
+	SenderID       pgtype.UUID      `json:"senderId"`
+	SenderUsername string           `json:"senderUsername"`
+	TextContent    *string          `json:"textContent"`
+	MessageType    MessageType      `json:"messageType"`
+	MediaUrl       *string          `json:"mediaUrl"`
+	CreatedAt      pgtype.Timestamp `json:"createdAt"`
+	DeliveryStatus DeliveryStatus   `json:"deliveryStatus"`
+	Blocked        *bool            `json:"blocked"`
+}
+
+func (q *Queries) GetLastGroupChatMessages(ctx context.Context, blockerID pgtype.UUID) ([]GetLastGroupChatMessagesRow, error) {
+	rows, err := q.db.Query(ctx, getLastGroupChatMessages, blockerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetLastGroupChatMessagesRow
+	for rows.Next() {
+		var i GetLastGroupChatMessagesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ChatID,
+			&i.SenderID,
+			&i.SenderUsername,
+			&i.TextContent,
+			&i.MessageType,
+			&i.MediaUrl,
+			&i.CreatedAt,
+			&i.DeliveryStatus,
+			&i.Blocked,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getLastOneOnOneChatMessages = `-- name: GetLastOneOnOneChatMessages :many
+SELECT DISTINCT ON (cm.chat_id) cm.id,
+    cm.chat_id,
+    cm.sender_id,
+    u.username AS sender_username,
+    cm.text_content,
+    cm.message_type,
+    cm.media_url,
+    cm.created_at,
+    cm.delivery_status
+FROM chatmessages cm
+    JOIN users u ON u.id = cm.sender_id
+    JOIN user_chat uc ON cm.chat_id = uc.chat_id
+    JOIN chats c ON uc.chat_id = c.id
+    LEFT JOIN user_blocks ub ON ub.blocker_id = $1
+    AND ub.blocked_id = cm.sender_id
+WHERE uc.user_id = $1
+    AND c.chat_type = 'one_on_one'
+    AND (
+        ub.blocker_id IS NULL
+        OR cm.created_at < ub.created_at
+    )
+ORDER BY cm.chat_id,
+    cm.created_at DESC
+`
+
+type GetLastOneOnOneChatMessagesRow struct {
+	ID             pgtype.UUID      `json:"id"`
+	ChatID         pgtype.UUID      `json:"chatId"`
+	SenderID       pgtype.UUID      `json:"senderId"`
+	SenderUsername string           `json:"senderUsername"`
+	TextContent    *string          `json:"textContent"`
+	MessageType    MessageType      `json:"messageType"`
+	MediaUrl       *string          `json:"mediaUrl"`
+	CreatedAt      pgtype.Timestamp `json:"createdAt"`
+	DeliveryStatus DeliveryStatus   `json:"deliveryStatus"`
+}
+
+func (q *Queries) GetLastOneOnOneChatMessages(ctx context.Context, blockerID pgtype.UUID) ([]GetLastOneOnOneChatMessagesRow, error) {
+	rows, err := q.db.Query(ctx, getLastOneOnOneChatMessages, blockerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetLastOneOnOneChatMessagesRow
+	for rows.Next() {
+		var i GetLastOneOnOneChatMessagesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ChatID,
+			&i.SenderID,
+			&i.SenderUsername,
+			&i.TextContent,
+			&i.MessageType,
+			&i.MediaUrl,
+			&i.CreatedAt,
+			&i.DeliveryStatus,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getOneOnOneChatParticipant = `-- name: GetOneOnOneChatParticipant :one
 SELECT user_id
 FROM user_chat
@@ -689,49 +862,17 @@ func (q *Queries) GetOneOnOneChatParticipant(ctx context.Context, arg GetOneOnOn
 	return user_id, err
 }
 
-const getPendingContactRequests = `-- name: GetPendingContactRequests :many
-SELECT u.email AS email,
-    friends.created_at
-FROM friends
-    JOIN users u ON u.id = friends.receiver_id
-WHERE sender_id = $1
-    AND status = 'pending'
-`
-
-type GetPendingContactRequestsRow struct {
-	Email     string           `json:"email"`
-	CreatedAt pgtype.Timestamp `json:"createdAt"`
-}
-
-func (q *Queries) GetPendingContactRequests(ctx context.Context, senderID pgtype.UUID) ([]GetPendingContactRequestsRow, error) {
-	rows, err := q.db.Query(ctx, getPendingContactRequests, senderID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetPendingContactRequestsRow
-	for rows.Next() {
-		var i GetPendingContactRequestsRow
-		if err := rows.Scan(&i.Email, &i.CreatedAt); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getPendingFriendRequests = `-- name: GetPendingFriendRequests :many
 SELECT sender_id,
     u.username AS sender_username,
     u.picture_url AS sender_profile_picture,
     u.email AS sender_email
 FROM friends
-    JOIN users u ON friends.sender_id = u.id
+    JOIN users u ON sender_id = u.id
+    LEFT JOIN user_blocks ub ON sender_id = ub.blocked_id -- Assuming blocked_id is the ID of the person who was blocked
 WHERE receiver_id = $1
     AND status = 'pending'
+    AND ub.blocked_id IS NULL
 `
 
 type GetPendingFriendRequestsRow struct {
@@ -756,6 +897,40 @@ func (q *Queries) GetPendingFriendRequests(ctx context.Context, receiverID pgtyp
 			&i.SenderProfilePicture,
 			&i.SenderEmail,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getSentContactRequests = `-- name: GetSentContactRequests :many
+SELECT u.email AS email,
+    friends.created_at
+FROM friends
+    JOIN users u ON u.id = friends.receiver_id
+WHERE sender_id = $1
+    AND status = 'pending'
+`
+
+type GetSentContactRequestsRow struct {
+	Email     string           `json:"email"`
+	CreatedAt pgtype.Timestamp `json:"createdAt"`
+}
+
+func (q *Queries) GetSentContactRequests(ctx context.Context, senderID pgtype.UUID) ([]GetSentContactRequestsRow, error) {
+	rows, err := q.db.Query(ctx, getSentContactRequests, senderID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetSentContactRequestsRow
+	for rows.Next() {
+		var i GetSentContactRequestsRow
+		if err := rows.Scan(&i.Email, &i.CreatedAt); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -850,12 +1025,15 @@ SELECT u.username,
 FROM friends
     JOIN users u ON u.id = friends.sender_id
     OR friends.receiver_id = u.id
+    LEFT JOIN user_blocks ub ON ub.blocker_id = $1
+    AND ub.blocked_id = u.id
 WHERE (
         receiver_id = $1
         OR sender_id = $1
     )
     AND status = 'accepted'
     AND u.id != $1
+    AND ub.blocker_id IS NULL
 `
 
 type GetUserContactsRow struct {
@@ -864,8 +1042,8 @@ type GetUserContactsRow struct {
 	PictureUrl string      `json:"pictureUrl"`
 }
 
-func (q *Queries) GetUserContacts(ctx context.Context, receiverID pgtype.UUID) ([]GetUserContactsRow, error) {
-	rows, err := q.db.Query(ctx, getUserContacts, receiverID)
+func (q *Queries) GetUserContacts(ctx context.Context, blockerID pgtype.UUID) ([]GetUserContactsRow, error) {
+	rows, err := q.db.Query(ctx, getUserContacts, blockerID)
 	if err != nil {
 		return nil, err
 	}
@@ -877,6 +1055,32 @@ func (q *Queries) GetUserContacts(ctx context.Context, receiverID pgtype.UUID) (
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUsersWhoBlockedUser = `-- name: GetUsersWhoBlockedUser :many
+SELECT blocker_id
+FROM user_blocks
+WHERE blocked_id = $1
+`
+
+func (q *Queries) GetUsersWhoBlockedUser(ctx context.Context, blockedID pgtype.UUID) ([]pgtype.UUID, error) {
+	rows, err := q.db.Query(ctx, getUsersWhoBlockedUser, blockedID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []pgtype.UUID
+	for rows.Next() {
+		var blocker_id pgtype.UUID
+		if err := rows.Scan(&blocker_id); err != nil {
+			return nil, err
+		}
+		items = append(items, blocker_id)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -983,6 +1187,22 @@ type ResetUnreadMessagesParams struct {
 
 func (q *Queries) ResetUnreadMessages(ctx context.Context, arg ResetUnreadMessagesParams) error {
 	_, err := q.db.Exec(ctx, resetUnreadMessages, arg.ChatID, arg.UserID)
+	return err
+}
+
+const unblockUser = `-- name: UnblockUser :exec
+DELETE FROM user_blocks
+WHERE blocker_id = $1
+    AND blocked_id = $2
+`
+
+type UnblockUserParams struct {
+	BlockerID pgtype.UUID `json:"blockerId"`
+	BlockedID pgtype.UUID `json:"blockedId"`
+}
+
+func (q *Queries) UnblockUser(ctx context.Context, arg UnblockUserParams) error {
+	_, err := q.db.Exec(ctx, unblockUser, arg.BlockerID, arg.BlockedID)
 	return err
 }
 
