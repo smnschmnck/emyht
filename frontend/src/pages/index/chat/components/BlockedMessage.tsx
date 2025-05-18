@@ -65,7 +65,7 @@ export const BlockedMessage: FC<{
   }
 
   return (
-    <span className="flex w-fit items-center gap-1 rounded-2xl bg-red-100 px-3 py-1.5 text-sm font-medium text-red-500">
+    <span className="flex h-fit w-fit items-center gap-1 rounded-2xl bg-red-100 px-3 py-1.5 text-sm font-medium text-red-500">
       <NoSymbolIcon className="h-4 w-4" strokeWidth={2.5} />
       <span>Blocked</span>
     </span>

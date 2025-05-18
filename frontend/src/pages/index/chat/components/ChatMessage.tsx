@@ -1,9 +1,14 @@
 import { ChatMessage as ChatMessageType } from '@/hooks/api/messages';
 import { useUserData } from '@/hooks/api/user';
 import { formatTimestamp } from '@/utils/dateUtils';
-import { DocumentArrowDownIcon } from '@heroicons/react/24/outline';
+import {
+  DocumentArrowDownIcon,
+  EyeIcon,
+  EyeSlashIcon,
+} from '@heroicons/react/24/outline';
 import { FC, useState } from 'react';
 import { BlockedMessage } from './BlockedMessage';
+import { IconButton } from '@/components/ui/IconButton';
 
 const getFileName = (s3Key: string) => {
   // Regular expression to match the file name after the last underscore
@@ -61,7 +66,7 @@ const MediaContent = ({ message }: { message: ChatMessageType }) => {
 
 export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
   const { data } = useUserData();
-  const [hideBlockedContent] = useState(message.blocked);
+  const [hideBlockedContent, setHideBlockedContent] = useState(message.blocked);
 
   if (!data) {
     return <></>;
@@ -93,21 +98,37 @@ export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
           {formatTimestamp(message.createdAt)}
         </span>
       </div>
-      {!hideBlockedContent && (
-        <>
-          {message.messageType !== 'plaintext' && (
-            <MediaContent message={message} />
-          )}
-          {!!message.textContent && (
-            <span className="w-fit rounded-2xl bg-zinc-100 px-3 py-1.5 text-sm text-black">
-              {message.textContent}
-            </span>
-          )}
-        </>
-      )}
-      {hideBlockedContent && (
-        <BlockedMessage messageType={message.messageType} />
-      )}
+      <div className="group flex gap-2">
+        {!hideBlockedContent && (
+          <div className="flex w-full flex-col items-start gap-1">
+            {message.messageType !== 'plaintext' && (
+              <MediaContent message={message} />
+            )}
+            {!!message.textContent && (
+              <span className="w-fit rounded-2xl bg-zinc-100 px-3 py-1.5 text-sm text-black">
+                {message.textContent}
+              </span>
+            )}
+          </div>
+        )}
+        {hideBlockedContent && (
+          <BlockedMessage messageType={message.messageType} />
+        )}
+        {message.blocked && (
+          <IconButton
+            onClick={() => setHideBlockedContent((prev) => !prev)}
+            className="text-zinc-400"
+            ariaLabel={
+              hideBlockedContent
+                ? 'View blocked content'
+                : 'Hide blocked content'
+            }
+          >
+            {hideBlockedContent && <EyeIcon />}
+            {!hideBlockedContent && <EyeSlashIcon />}
+          </IconButton>
+        )}
+      </div>
     </li>
   );
 };
