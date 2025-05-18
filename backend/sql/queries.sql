@@ -55,22 +55,62 @@ SELECT DISTINCT c.id,
         WHEN c.chat_type = 'one_on_one' THEN ou.picture_url::TEXT
         ELSE c.picture_url::TEXT
     END AS chat_picture_url,
-    u.unread_messages,
-    m.message_type,
-    m.text_content,
-    m.created_at as message_created_at,
-    m.delivery_status,
-    m.sender_id,
-    su.username AS sender_username
+    u.unread_messages
 FROM user_chat u
     JOIN chats c ON u.chat_id = c.id
-    LEFT JOIN chatmessages m ON m.id = c.last_message_id -- Only join for one_on_one chats
     LEFT JOIN user_chat ouc ON c.id = ouc.chat_id
     AND ouc.user_id != $1
     AND c.chat_type = 'one_on_one'
     LEFT JOIN users ou ON ouc.user_id = ou.id
-    LEFT JOIN users su ON m.sender_id = su.id
 WHERE u.user_id = $1;
+-- name: GetLastGroupChatMessages :many
+SELECT DISTINCT ON (cm.chat_id) cm.id,
+    cm.chat_id,
+    cm.sender_id,
+    u.username AS sender_username,
+    cm.text_content,
+    cm.message_type,
+    cm.media_url,
+    cm.created_at,
+    cm.delivery_status,
+    (
+        ub.blocker_id IS NOT NULL
+        AND cm.created_at >= ub.created_at
+    ) AS blocked
+FROM chatmessages cm
+    JOIN users u ON u.id = cm.sender_id
+    JOIN user_chat uc ON cm.chat_id = uc.chat_id
+    JOIN chats c ON uc.chat_id = c.id
+    LEFT JOIN user_blocks ub ON ub.blocker_id = $1
+    AND ub.blocked_id = cm.sender_id
+WHERE uc.user_id = $1
+    AND c.chat_type = 'group'
+ORDER BY cm.chat_id,
+    cm.created_at DESC;
+-- name: GetLastOneOnOneChatMessages :many
+SELECT DISTINCT ON (cm.chat_id) cm.id,
+    cm.chat_id,
+    cm.sender_id,
+    u.username AS sender_username,
+    cm.text_content,
+    cm.message_type,
+    cm.media_url,
+    cm.created_at,
+    cm.delivery_status
+FROM chatmessages cm
+    JOIN users u ON u.id = cm.sender_id
+    JOIN user_chat uc ON cm.chat_id = uc.chat_id
+    JOIN chats c ON uc.chat_id = c.id
+    LEFT JOIN user_blocks ub ON ub.blocker_id = $1
+    AND ub.blocked_id = cm.sender_id
+WHERE uc.user_id = $1
+    AND c.chat_type = 'one_on_one'
+    AND (
+        ub.blocker_id IS NULL
+        OR cm.created_at < ub.created_at
+    )
+ORDER BY cm.chat_id,
+    cm.created_at DESC;
 -- name: CheckDuplicateFriendRequest :one
 SELECT EXISTS(
         SELECT 1

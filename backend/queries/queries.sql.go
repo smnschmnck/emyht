@@ -577,37 +577,23 @@ SELECT DISTINCT c.id,
         WHEN c.chat_type = 'one_on_one' THEN ou.picture_url::TEXT
         ELSE c.picture_url::TEXT
     END AS chat_picture_url,
-    u.unread_messages,
-    m.message_type,
-    m.text_content,
-    m.created_at as message_created_at,
-    m.delivery_status,
-    m.sender_id,
-    su.username AS sender_username
+    u.unread_messages
 FROM user_chat u
     JOIN chats c ON u.chat_id = c.id
-    LEFT JOIN chatmessages m ON m.id = c.last_message_id -- Only join for one_on_one chats
     LEFT JOIN user_chat ouc ON c.id = ouc.chat_id
     AND ouc.user_id != $1
     AND c.chat_type = 'one_on_one'
     LEFT JOIN users ou ON ouc.user_id = ou.id
-    LEFT JOIN users su ON m.sender_id = su.id
 WHERE u.user_id = $1
 `
 
 type GetChatsForUserRow struct {
-	ID               pgtype.UUID        `json:"id"`
-	ChatType         ChatType           `json:"chatType"`
-	CreatedAt        pgtype.Timestamp   `json:"createdAt"`
-	ChatName         string             `json:"chatName"`
-	ChatPictureUrl   string             `json:"chatPictureUrl"`
-	UnreadMessages   int64              `json:"unreadMessages"`
-	MessageType      NullMessageType    `json:"messageType"`
-	TextContent      *string            `json:"textContent"`
-	MessageCreatedAt pgtype.Timestamp   `json:"messageCreatedAt"`
-	DeliveryStatus   NullDeliveryStatus `json:"deliveryStatus"`
-	SenderID         pgtype.UUID        `json:"senderId"`
-	SenderUsername   *string            `json:"senderUsername"`
+	ID             pgtype.UUID      `json:"id"`
+	ChatType       ChatType         `json:"chatType"`
+	CreatedAt      pgtype.Timestamp `json:"createdAt"`
+	ChatName       string           `json:"chatName"`
+	ChatPictureUrl string           `json:"chatPictureUrl"`
+	UnreadMessages int64            `json:"unreadMessages"`
 }
 
 func (q *Queries) GetChatsForUser(ctx context.Context, userID pgtype.UUID) ([]GetChatsForUserRow, error) {
@@ -626,12 +612,6 @@ func (q *Queries) GetChatsForUser(ctx context.Context, userID pgtype.UUID) ([]Ge
 			&i.ChatName,
 			&i.ChatPictureUrl,
 			&i.UnreadMessages,
-			&i.MessageType,
-			&i.TextContent,
-			&i.MessageCreatedAt,
-			&i.DeliveryStatus,
-			&i.SenderID,
-			&i.SenderUsername,
 		); err != nil {
 			return nil, err
 		}
@@ -692,6 +672,144 @@ func (q *Queries) GetIsChatBlocked(ctx context.Context, arg GetIsChatBlockedPara
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
+}
+
+const getLastGroupChatMessages = `-- name: GetLastGroupChatMessages :many
+SELECT DISTINCT ON (cm.chat_id) cm.id,
+    cm.chat_id,
+    cm.sender_id,
+    u.username AS sender_username,
+    cm.text_content,
+    cm.message_type,
+    cm.media_url,
+    cm.created_at,
+    cm.delivery_status,
+    (
+        ub.blocker_id IS NOT NULL
+        AND cm.created_at >= ub.created_at
+    ) AS blocked
+FROM chatmessages cm
+    JOIN users u ON u.id = cm.sender_id
+    JOIN user_chat uc ON cm.chat_id = uc.chat_id
+    JOIN chats c ON uc.chat_id = c.id
+    LEFT JOIN user_blocks ub ON ub.blocker_id = $1
+    AND ub.blocked_id = cm.sender_id
+WHERE uc.user_id = $1
+    AND c.chat_type = 'group'
+ORDER BY cm.chat_id,
+    cm.created_at DESC
+`
+
+type GetLastGroupChatMessagesRow struct {
+	ID             pgtype.UUID      `json:"id"`
+	ChatID         pgtype.UUID      `json:"chatId"`
+	SenderID       pgtype.UUID      `json:"senderId"`
+	SenderUsername string           `json:"senderUsername"`
+	TextContent    *string          `json:"textContent"`
+	MessageType    MessageType      `json:"messageType"`
+	MediaUrl       *string          `json:"mediaUrl"`
+	CreatedAt      pgtype.Timestamp `json:"createdAt"`
+	DeliveryStatus DeliveryStatus   `json:"deliveryStatus"`
+	Blocked        *bool            `json:"blocked"`
+}
+
+func (q *Queries) GetLastGroupChatMessages(ctx context.Context, blockerID pgtype.UUID) ([]GetLastGroupChatMessagesRow, error) {
+	rows, err := q.db.Query(ctx, getLastGroupChatMessages, blockerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetLastGroupChatMessagesRow
+	for rows.Next() {
+		var i GetLastGroupChatMessagesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ChatID,
+			&i.SenderID,
+			&i.SenderUsername,
+			&i.TextContent,
+			&i.MessageType,
+			&i.MediaUrl,
+			&i.CreatedAt,
+			&i.DeliveryStatus,
+			&i.Blocked,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getLastOneOnOneChatMessages = `-- name: GetLastOneOnOneChatMessages :many
+SELECT DISTINCT ON (cm.chat_id) cm.id,
+    cm.chat_id,
+    cm.sender_id,
+    u.username AS sender_username,
+    cm.text_content,
+    cm.message_type,
+    cm.media_url,
+    cm.created_at,
+    cm.delivery_status
+FROM chatmessages cm
+    JOIN users u ON u.id = cm.sender_id
+    JOIN user_chat uc ON cm.chat_id = uc.chat_id
+    JOIN chats c ON uc.chat_id = c.id
+    LEFT JOIN user_blocks ub ON ub.blocker_id = $1
+    AND ub.blocked_id = cm.sender_id
+WHERE uc.user_id = $1
+    AND c.chat_type = 'one_on_one'
+    AND (
+        ub.blocker_id IS NULL
+        OR cm.created_at < ub.created_at
+    )
+ORDER BY cm.chat_id,
+    cm.created_at DESC
+`
+
+type GetLastOneOnOneChatMessagesRow struct {
+	ID             pgtype.UUID      `json:"id"`
+	ChatID         pgtype.UUID      `json:"chatId"`
+	SenderID       pgtype.UUID      `json:"senderId"`
+	SenderUsername string           `json:"senderUsername"`
+	TextContent    *string          `json:"textContent"`
+	MessageType    MessageType      `json:"messageType"`
+	MediaUrl       *string          `json:"mediaUrl"`
+	CreatedAt      pgtype.Timestamp `json:"createdAt"`
+	DeliveryStatus DeliveryStatus   `json:"deliveryStatus"`
+}
+
+func (q *Queries) GetLastOneOnOneChatMessages(ctx context.Context, blockerID pgtype.UUID) ([]GetLastOneOnOneChatMessagesRow, error) {
+	rows, err := q.db.Query(ctx, getLastOneOnOneChatMessages, blockerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetLastOneOnOneChatMessagesRow
+	for rows.Next() {
+		var i GetLastOneOnOneChatMessagesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ChatID,
+			&i.SenderID,
+			&i.SenderUsername,
+			&i.TextContent,
+			&i.MessageType,
+			&i.MediaUrl,
+			&i.CreatedAt,
+			&i.DeliveryStatus,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getOneOnOneChatParticipant = `-- name: GetOneOnOneChatParticipant :one

@@ -21,7 +21,8 @@ type SingleChatProps = {
 };
 
 const SingleChat: FC<SingleChatProps> = ({ chat }) => {
-  const messageType = chat.messageType?.messageType;
+  const lastMessage = chat.lastMessage;
+  const messageType = lastMessage?.messageType;
   return (
     <li>
       <RouterLink
@@ -37,7 +38,7 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => {
           <div className="flex w-full items-center justify-between">
             <p className="font-semibold">{chat.chatName}</p>
             <p className="text-xs text-zinc-400">
-              {formatTimestamp(chat.messageCreatedAt)}
+              {formatTimestamp(lastMessage?.createdAt)}
             </p>
           </div>
           <div className="flex items-center gap-1 text-zinc-500">
@@ -45,13 +46,13 @@ const SingleChat: FC<SingleChatProps> = ({ chat }) => {
             {messageType === 'image' && <PhotoIcon className="h-4 w-4" />}
             {messageType === 'data' && <DocumentIcon className="h-4 w-4" />}
             {messageType === 'video' && <PlayCircleIcon className="h-4 w-4" />}
-            {!!chat.textContent && (
-              <p className="truncate">{chat.textContent}</p>
+            {!!lastMessage?.textContent && (
+              <p className="truncate">{lastMessage?.textContent}</p>
             )}
-            {!chat.textContent && !chat.messageType?.valid && (
+            {!lastMessage && (
               <span>{`Send a message to ${chat.chatName}`}</span>
             )}
-            {chat.textContent === '' && messageType !== 'plaintext' && (
+            {lastMessage?.textContent === '' && messageType !== 'plaintext' && (
               <span className="capitalize">{messageType}</span>
             )}
           </div>

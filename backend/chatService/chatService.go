@@ -198,8 +198,8 @@ func StartGroupChat(c echo.Context) error {
 	return c.JSON(http.StatusOK, chats)
 }
 
-func addUsersToGroupChat(participantUUIDs []string, uuid pgtype.UUID, chatId pgtype.UUID) ([]queries.GetChatsForUserRow, error) {
-	emptyChatArray := make([]queries.GetChatsForUserRow, 0)
+func addUsersToGroupChat(participantUUIDs []string, uuid pgtype.UUID, chatId pgtype.UUID) ([]chatHelpers.Chat, error) {
+	emptyChatArray := make([]chatHelpers.Chat, 0)
 	isInContacts, err := contactService.AreUsersInContacts(participantUUIDs, uuid)
 	if err != nil {
 		log.Println(err.Error())
@@ -207,7 +207,7 @@ func addUsersToGroupChat(participantUUIDs []string, uuid pgtype.UUID, chatId pgt
 	}
 
 	if !isInContacts {
-		return make([]queries.GetChatsForUserRow, 0), errors.New("NOT ALL USERS IN CONTACTS")
+		return emptyChatArray, errors.New("NOT ALL USERS IN CONTACTS")
 	}
 
 	conn := db.GetDB()
