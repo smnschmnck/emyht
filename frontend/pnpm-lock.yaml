@@ -101,7 +101,7 @@ importers:
         version: 0.4.20(eslint@9.27.0(jiti@2.4.2))
       knip:
         specifier: ^5.45.0
-        version: 5.57.1(@types/node@22.15.21)(typescript@5.8.3)
+        version: 5.57.2(@types/node@22.15.21)(typescript@5.8.3)
       postcss:
         specifier: ^8.4.41
         version: 8.5.3
@@ -2299,8 +2299,8 @@ packages:
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
-  knip@5.57.1:
-    resolution: {integrity: sha512-FWdCuoYtaVB9+/9F9iGcKOGX2Orz9xEfbxCENq2UGnCwa6PGRYmlVR8d3MybnoplLmBjTC9yO/+npK5CRLTb2w==}
+  knip@5.57.2:
+    resolution: {integrity: sha512-6a5h4MLfn71DxfwkLaA447+4SSFtEs/LVX1241yqX/B1ARGiCQTstA1adF949JESIMwUUJP/JLCH9TSn+aRFMg==}
     engines: {node: '>=18.18.0'}
     hasBin: true
     peerDependencies:
@@ -5373,7 +5373,7 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  knip@5.57.1(@types/node@22.15.21)(typescript@5.8.3):
+  knip@5.57.2(@types/node@22.15.21)(typescript@5.8.3):
     dependencies:
       '@nodelib/fs.walk': 1.2.8
       '@types/node': 22.15.21
