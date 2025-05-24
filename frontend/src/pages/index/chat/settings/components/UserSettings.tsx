@@ -51,7 +51,7 @@ const UserPropertiesSettings = () => {
     },
   });
 
-  const { mutate: unblockUser } = useMutation({
+  const { mutate: unblockUser, isPending: isUnblocking } = useMutation({
     mutationFn: async (userId?: string) => {
       if (!userId) {
         throw new Error('Invalid user');
@@ -103,7 +103,7 @@ const UserPropertiesSettings = () => {
         <Button
           variant="destructive"
           onClick={handleToggleBlock}
-          isLoading={isBlocking}
+          isLoading={isBlocking || isUnblocking}
           disabled={isLoadingChatInfo || isLoadingChatParticipant}
         >
           {!chatInfo && isLoadingChatInfo && (
