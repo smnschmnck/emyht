@@ -1,14 +1,21 @@
+import { IconButton } from '@/components/ui/IconButton';
 import { ChatMessage as ChatMessageType } from '@/hooks/api/messages';
 import { useUserData } from '@/hooks/api/user';
 import { formatTimestamp } from '@/utils/dateUtils';
 import {
+  ArrowsPointingOutIcon,
   DocumentArrowDownIcon,
   EyeIcon,
   EyeSlashIcon,
 } from '@heroicons/react/24/outline';
+import {
+  Dialog,
+  DialogContent,
+  DialogOverlay,
+  DialogPortal,
+} from '@radix-ui/react-dialog';
 import { FC, useState } from 'react';
 import { BlockedMessage } from './BlockedMessage';
-import { IconButton } from '@/components/ui/IconButton';
 
 const getFileName = (s3Key: string) => {
   // Regular expression to match the file name after the last underscore
@@ -20,18 +27,61 @@ const getFileName = (s3Key: string) => {
   return match ? match[1] : null;
 };
 
+const Lightbox = ({
+  onOpenChange,
+  message,
+}: {
+  onOpenChange: (open: boolean) => void;
+  message: ChatMessageType;
+}) => {
+  return (
+    <Dialog open onOpenChange={onOpenChange}>
+      <DialogPortal>
+        <DialogOverlay className="fixed inset-0 bg-black/50" />
+        <DialogContent className="fixed top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center overflow-hidden">
+          {message.messageType === 'image' && (
+            <img
+              src={message.mediaUrl}
+              className="max-h-[75vh] max-w-[75vw] object-contain"
+            />
+          )}
+          {message.messageType === 'video' && (
+            <div>
+              <video
+                controls
+                src={message.mediaUrl}
+                className="max-h-[75vh] max-w-[75vw] object-contain"
+              />
+            </div>
+          )}
+        </DialogContent>
+      </DialogPortal>
+    </Dialog>
+  );
+};
+
 const MediaContent = ({ message }: { message: ChatMessageType }) => {
   const fileName = getFileName(message.mediaUrl);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   return (
     <>
+      {lightboxOpen && (
+        <Lightbox onOpenChange={setLightboxOpen} message={message} />
+      )}
       {message.messageType === 'image' && (
-        <a target="_blank" rel="noopener noreferrer" href={message.mediaUrl}>
+        <div className="relative overflow-clip rounded-xl">
+          <button
+            onClick={() => setLightboxOpen(true)}
+            className="absolute flex h-full w-full items-center justify-center bg-black/50 opacity-0 transition hover:opacity-100"
+          >
+            <ArrowsPointingOutIcon className="absolute h-8 w-8 text-white" />
+          </button>
           <img
-            className="aspect-video max-w-48 min-w-48 overflow-clip rounded-xl bg-zinc-100 object-cover"
+            className="aspect-video max-w-48 min-w-48 bg-zinc-100 object-cover"
             src={message.mediaUrl}
           />
-        </a>
+        </div>
       )}
       {message.messageType === 'data' && (
         <a
@@ -51,13 +101,17 @@ const MediaContent = ({ message }: { message: ChatMessageType }) => {
         <audio controls src={message.mediaUrl} />
       )}
       {message.messageType === 'video' && (
-        <div className="max-w-48 p-1">
-          <a target="_blank" rel="noopener noreferrer" href={message.mediaUrl}>
-            <video
-              className="overflow-clip rounded-xl"
-              src={message.mediaUrl}
-            />
-          </a>
+        <div className="relative overflow-clip rounded-xl">
+          <button
+            onClick={() => setLightboxOpen(true)}
+            className="absolute z-10 flex h-full w-full items-center justify-center bg-black/50 opacity-0 transition hover:opacity-100"
+          >
+            <ArrowsPointingOutIcon className="absolute h-8 w-8 text-white" />
+          </button>
+          <video
+            className="aspect-video max-w-48 min-w-48 bg-zinc-100 object-cover"
+            src={message.mediaUrl}
+          />
         </div>
       )}
     </>
