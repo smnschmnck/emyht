@@ -21,6 +21,7 @@ CREATE TABLE users (
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_email_token ON users(email_token);
 CREATE INDEX idx_users_username ON users(username);
+CREATE INDEX idx_users_id ON users(id);
 CREATE TABLE change_email (
     id SERIAL PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES users(id),
@@ -30,6 +31,7 @@ CREATE TABLE change_email (
 );
 CREATE INDEX idx_change_email_user_id ON change_email(user_id);
 CREATE INDEX idx_change_email_confirmation_token ON change_email(confirmation_token);
+CREATE INDEX idx_change_email_token_user ON change_email(confirmation_token, user_id);
 CREATE TABLE chats (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(32) NOT NULL,
@@ -57,6 +59,7 @@ CREATE INDEX idx_chatmessages_chat_id ON chatmessages(chat_id);
 CREATE INDEX idx_chatmessages_sender_id ON chatmessages(sender_id);
 CREATE INDEX idx_chatmessages_created_at ON chatmessages(created_at);
 CREATE INDEX idx_chatmessages_chat_created ON chatmessages(chat_id, created_at);
+CREATE INDEX idx_chatmessages_chat_created_desc ON chatmessages(chat_id, created_at DESC);
 CREATE TABLE user_chat (
     user_id UUID NOT NULL REFERENCES users(id),
     chat_id UUID NOT NULL REFERENCES chats(id),
@@ -67,6 +70,7 @@ CREATE TABLE user_chat (
 CREATE INDEX idx_user_chat_chat_id ON user_chat(chat_id);
 CREATE INDEX idx_user_chat_user_id ON user_chat(user_id);
 CREATE INDEX idx_user_chat_combined ON user_chat(chat_id, user_id);
+CREATE INDEX idx_user_chat_user_unread ON user_chat(user_id, unread_messages);
 CREATE TABLE friends (
     sender_id UUID NOT NULL REFERENCES users(id),
     receiver_id UUID NOT NULL REFERENCES users(id),
@@ -79,6 +83,7 @@ CREATE INDEX idx_friends_receiver_id ON friends(receiver_id);
 CREATE INDEX idx_friends_status ON friends(status);
 CREATE INDEX idx_friends_sender_status ON friends(sender_id, status);
 CREATE INDEX idx_friends_receiver_status ON friends(receiver_id, status);
+CREATE INDEX idx_friends_receiver_sender ON friends(receiver_id, sender_id);
 CREATE TABLE user_blocks (
     blocker_id UUID NOT NULL,
     blocked_id UUID NOT NULL,
@@ -88,3 +93,6 @@ CREATE TABLE user_blocks (
     FOREIGN KEY (blocked_id) REFERENCES users(id),
     CONSTRAINT no_self_blocking CHECK (blocker_id != blocked_id)
 );
+CREATE INDEX idx_user_blocks_blocker_id ON user_blocks(blocker_id);
+CREATE INDEX idx_user_blocks_blocked_id ON user_blocks(blocked_id);
+CREATE INDEX idx_user_blocks_blocker_created ON user_blocks(blocker_id, created_at);
