@@ -7,11 +7,9 @@ import {
   DocumentArrowDownIcon,
   EyeIcon,
   EyeSlashIcon,
-  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogOverlay,
   DialogPortal,
@@ -47,18 +45,15 @@ const Lightbox = ({
               className="max-h-[75vh] max-w-[75vw] object-contain"
             />
           )}
-        </DialogContent>
-        <DialogContent className="fixed top-0 right-0 items-center justify-center overflow-hidden">
-          <div className="flex items-center gap-4 px-8 py-6">
-            <DialogClose>
-              <IconButton
-                ariaLabel="Close Image View"
-                className="bg-white hover:bg-blue-100"
-              >
-                <XMarkIcon strokeWidth={2} />
-              </IconButton>
-            </DialogClose>
-          </div>
+          {message.messageType === 'video' && (
+            <div>
+              <video
+                controls
+                src={message.mediaUrl}
+                className="max-h-[75vh] max-w-[75vw] object-contain"
+              />
+            </div>
+          )}
         </DialogContent>
       </DialogPortal>
     </Dialog>
@@ -83,7 +78,7 @@ const MediaContent = ({ message }: { message: ChatMessageType }) => {
             <ArrowsPointingOutIcon className="absolute h-8 w-8 text-white" />
           </button>
           <img
-            className="aspect-video max-w-48 min-w-48 bg-zinc-100 object-cover transition hover:opacity-50"
+            className="aspect-video max-w-48 min-w-48 bg-zinc-100 object-cover"
             src={message.mediaUrl}
           />
         </div>
@@ -106,13 +101,17 @@ const MediaContent = ({ message }: { message: ChatMessageType }) => {
         <audio controls src={message.mediaUrl} />
       )}
       {message.messageType === 'video' && (
-        <div className="max-w-48 p-1">
-          <a target="_blank" rel="noopener noreferrer" href={message.mediaUrl}>
-            <video
-              className="overflow-clip rounded-xl"
-              src={message.mediaUrl}
-            />
-          </a>
+        <div className="relative overflow-clip rounded-xl">
+          <button
+            onClick={() => setLightboxOpen(true)}
+            className="absolute z-10 flex h-full w-full items-center justify-center bg-black/50 opacity-0 transition hover:opacity-100"
+          >
+            <ArrowsPointingOutIcon className="absolute h-8 w-8 text-white" />
+          </button>
+          <video
+            className="aspect-video max-w-48 min-w-48 bg-zinc-100 object-cover"
+            src={message.mediaUrl}
+          />
         </div>
       )}
     </>
