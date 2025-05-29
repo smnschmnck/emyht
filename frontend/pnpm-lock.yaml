@@ -25,7 +25,7 @@ importers:
         version: 1.3.7(@types/react-dom@19.1.5(@types/react@19.1.6))(@types/react@19.1.6)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@t3-oss/env-core':
         specifier: ^0.13.0
-        version: 0.13.6(arktype@2.1.20)(typescript@5.8.3)(zod@3.25.33)
+        version: 0.13.6(arktype@2.1.20)(typescript@5.8.3)(zod@3.25.34)
       '@tanstack/query-sync-storage-persister':
         specifier: ^5.59.17
         version: 5.77.2
@@ -73,7 +73,7 @@ importers:
         version: 3.3.0
       zod:
         specifier: ^3.23.8
-        version: 3.25.33
+        version: 3.25.34
     devDependencies:
       '@eslint/js':
         specifier: ^9.20.0
@@ -1769,8 +1769,8 @@ packages:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
     engines: {node: '>=8'}
 
-  browserslist@4.24.5:
-    resolution: {integrity: sha512-FDToo4Wo82hIdgc1CQ+NQD0hEhmpPjrZ3hiUgwgOG6IuTdlpr8jdjyG24P6cNP1yJpTLzS5OcGgSw0xmDU1/Tw==}
+  browserslist@4.25.0:
+    resolution: {integrity: sha512-PJ8gYKeS5e/whHBh8xrwYK+dAvEj7JXtz6uTucnMRB8OiGTsKccFekoRrjajPBHV8oOY+2tI4uxeceSimKwMFA==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
 
@@ -1913,15 +1913,15 @@ packages:
     engines: {node: '>=0.10.0'}
     hasBin: true
 
-  electron-to-chromium@1.5.159:
-    resolution: {integrity: sha512-CEvHptWAMV5p6GJ0Lq8aheyvVbfzVrv5mmidu1D3pidoVNkB3tTBsTMVtPJ+rzRK5oV229mCLz9Zj/hNvU8GBA==}
+  electron-to-chromium@1.5.160:
+    resolution: {integrity: sha512-8yQk54/CoCQT8GX3zuxqPBwMAQuIr6dWI/qO8Aah/JAZwB5XmCbEElsqb1n4pzc2vpkTdfc/kbyNPJOjswfbgg==}
 
   enhanced-resolve@5.18.1:
     resolution: {integrity: sha512-ZSW3ma5GkcQBIpwZTSRAI8N71Uuwgs93IezB7mf7R60tC8ZbJideoDNKjHn2O9KIlx6rkGTTEk1xUCK2E1Y2Yg==}
     engines: {node: '>=10.13.0'}
 
-  es-abstract@1.23.10:
-    resolution: {integrity: sha512-MtUbM072wlJNyeYAe0mhzrD+M6DIJa96CZAOBBrhDbgKnB4MApIKefcyAB1eOdYn8cUNZgvwBvEzdoAYsxgEIw==}
+  es-abstract@1.24.0:
+    resolution: {integrity: sha512-WSzPgsdLtTcQwm4CROfS5ju2Wa1QQcVeT37jFjYzdFz1r9ahadC8B8/a4qxJxM+09F18iumCdRmlr96ZYkQvEg==}
     engines: {node: '>= 0.4'}
 
   es-define-property@1.0.1:
@@ -2279,6 +2279,10 @@ packages:
 
   is-module@1.0.0:
     resolution: {integrity: sha512-51ypPSPCoTEIN9dy5Oy+h4pShgJmPCygKfyRCISBI+JoWT/2oJvK8QPxmwv7b/p239jXrm9M1mlQbyKJ5A152g==}
+
+  is-negative-zero@2.0.3:
+    resolution: {integrity: sha512-5KoIu2Ngpyek75jXodFvnafB6DJgr3u8uuK0LEZJjrU19DrMD3EVERaR8sjz8CCGgpZvxPl9SuE1GMVPFHx1mw==}
+    engines: {node: '>= 0.4'}
 
   is-number-object@1.1.1:
     resolution: {integrity: sha512-lZhclumE1G6VYD8VHe35wFaIif+CTy5SJIi5+3y4psDgWu4wPDoBhF8NxUOinEc7pHgiTsT6MaBb92rKhhD+Xw==}
@@ -2915,6 +2919,10 @@ packages:
     resolution: {integrity: sha512-9NykojV5Uih4lgo5So5dtw+f0JgJX30KCNI8gwhz2J9A15wD0Ml6tjHKwf6fTSa6fAdVBdZeNOs9eJ71qCk8vA==}
     deprecated: Please use @jridgewell/sourcemap-codec instead
 
+  stop-iteration-iterator@1.1.0:
+    resolution: {integrity: sha512-eLoXW/DHyl62zxY4SCaIgnRhuMr6ri4juEYARS8E6sCEqzKpOiE521Ucofdx+KnDZl5xmvGYaaKCk5FEOxJCoQ==}
+    engines: {node: '>= 0.4'}
+
   string.prototype.matchall@4.0.12:
     resolution: {integrity: sha512-6CC9uyBL+/48dYizRf7H7VAYCMCNTBeM78x/VTUe9bFEaxBepPJDa1Ow99LqI/1yF7kuy7Q3cQsYMrcjGUcskA==}
     engines: {node: '>= 0.4'}
@@ -3291,8 +3299,8 @@ packages:
     peerDependencies:
       zod: ^3.24.4
 
-  zod@3.25.33:
-    resolution: {integrity: sha512-RnBGYCwJFrLi/hUmeqbYjSIrS/strWjN5PHWgUfyVq96nKycSa4gp4+p6hQGwvcabZs0DWRGzyLhEeQWl+5NhA==}
+  zod@3.25.34:
+    resolution: {integrity: sha512-lZHvSc2PpWdcfpHlyB33HA9nqP16GpC9IpiG4lYq9jZCJVLZNnWd6Y1cj79bcLSBKTkxepfpjckPv5Y5VOPlwA==}
 
 snapshots:
 
@@ -3362,7 +3370,7 @@ snapshots:
     dependencies:
       '@babel/compat-data': 7.27.3
       '@babel/helper-validator-option': 7.27.1
-      browserslist: 4.24.5
+      browserslist: 4.25.0
       lru-cache: 5.1.1
       semver: 6.3.1
 
@@ -4575,11 +4583,11 @@ snapshots:
     dependencies:
       '@swc/counter': 0.1.3
 
-  '@t3-oss/env-core@0.13.6(arktype@2.1.20)(typescript@5.8.3)(zod@3.25.33)':
+  '@t3-oss/env-core@0.13.6(arktype@2.1.20)(typescript@5.8.3)(zod@3.25.34)':
     optionalDependencies:
       arktype: 2.1.20
       typescript: 5.8.3
-      zod: 3.25.33
+      zod: 3.25.34
 
   '@tailwindcss/node@4.1.8':
     dependencies:
@@ -4878,7 +4886,7 @@ snapshots:
       array-buffer-byte-length: 1.0.2
       call-bind: 1.0.8
       define-properties: 1.2.1
-      es-abstract: 1.23.10
+      es-abstract: 1.24.0
       es-errors: 1.3.0
       get-intrinsic: 1.3.0
       is-array-buffer: 3.0.5
@@ -4932,12 +4940,12 @@ snapshots:
     dependencies:
       fill-range: 7.1.1
 
-  browserslist@4.24.5:
+  browserslist@4.25.0:
     dependencies:
       caniuse-lite: 1.0.30001718
-      electron-to-chromium: 1.5.159
+      electron-to-chromium: 1.5.160
       node-releases: 2.0.19
-      update-browserslist-db: 1.1.3(browserslist@4.24.5)
+      update-browserslist-db: 1.1.3(browserslist@4.25.0)
 
   buffer-from@1.1.2: {}
 
@@ -4991,7 +4999,7 @@ snapshots:
 
   core-js-compat@3.42.0:
     dependencies:
-      browserslist: 4.24.5
+      browserslist: 4.25.0
 
   cross-spawn@7.0.6:
     dependencies:
@@ -5063,14 +5071,14 @@ snapshots:
     dependencies:
       jake: 10.9.2
 
-  electron-to-chromium@1.5.159: {}
+  electron-to-chromium@1.5.160: {}
 
   enhanced-resolve@5.18.1:
     dependencies:
       graceful-fs: 4.2.11
       tapable: 2.2.2
 
-  es-abstract@1.23.10:
+  es-abstract@1.24.0:
     dependencies:
       array-buffer-byte-length: 1.0.2
       arraybuffer.prototype.slice: 1.0.4
@@ -5099,7 +5107,9 @@ snapshots:
       is-array-buffer: 3.0.5
       is-callable: 1.2.7
       is-data-view: 1.0.2
+      is-negative-zero: 2.0.3
       is-regex: 1.2.1
+      is-set: 2.0.3
       is-shared-array-buffer: 1.0.4
       is-string: 1.1.1
       is-typed-array: 1.1.15
@@ -5114,6 +5124,7 @@ snapshots:
       safe-push-apply: 1.0.0
       safe-regex-test: 1.1.0
       set-proto: 1.0.0
+      stop-iteration-iterator: 1.1.0
       string.prototype.trim: 1.2.10
       string.prototype.trimend: 1.0.9
       string.prototype.trimstart: 1.0.8
@@ -5520,6 +5531,8 @@ snapshots:
 
   is-module@1.0.0: {}
 
+  is-negative-zero@2.0.3: {}
+
   is-number-object@1.1.1:
     dependencies:
       call-bound: 1.0.4
@@ -5634,8 +5647,8 @@ snapshots:
       smol-toml: 1.3.4
       strip-json-comments: 5.0.1
       typescript: 5.8.3
-      zod: 3.25.33
-      zod-validation-error: 3.4.1(zod@3.25.33)
+      zod: 3.25.34
+      zod-validation-error: 3.4.1(zod@3.25.34)
 
   leven@3.1.0: {}
 
@@ -5900,7 +5913,7 @@ snapshots:
     dependencies:
       call-bind: 1.0.8
       define-properties: 1.2.1
-      es-abstract: 1.23.10
+      es-abstract: 1.24.0
       es-errors: 1.3.0
       es-object-atoms: 1.1.1
       get-intrinsic: 1.3.0
@@ -6094,12 +6107,17 @@ snapshots:
 
   sourcemap-codec@1.4.8: {}
 
+  stop-iteration-iterator@1.1.0:
+    dependencies:
+      es-errors: 1.3.0
+      internal-slot: 1.1.0
+
   string.prototype.matchall@4.0.12:
     dependencies:
       call-bind: 1.0.8
       call-bound: 1.0.4
       define-properties: 1.2.1
-      es-abstract: 1.23.10
+      es-abstract: 1.24.0
       es-errors: 1.3.0
       es-object-atoms: 1.1.1
       get-intrinsic: 1.3.0
@@ -6116,7 +6134,7 @@ snapshots:
       call-bound: 1.0.4
       define-data-property: 1.1.4
       define-properties: 1.2.1
-      es-abstract: 1.23.10
+      es-abstract: 1.24.0
       es-object-atoms: 1.1.1
       has-property-descriptors: 1.0.2
 
@@ -6302,9 +6320,9 @@ snapshots:
 
   upath@1.2.0: {}
 
-  update-browserslist-db@1.1.3(browserslist@4.24.5):
+  update-browserslist-db@1.1.3(browserslist@4.25.0):
     dependencies:
-      browserslist: 4.24.5
+      browserslist: 4.25.0
       escalade: 3.2.0
       picocolors: 1.1.1
 
@@ -6537,8 +6555,8 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod-validation-error@3.4.1(zod@3.25.33):
+  zod-validation-error@3.4.1(zod@3.25.34):
     dependencies:
-      zod: 3.25.33
+      zod: 3.25.34
 
-  zod@3.25.33: {}
+  zod@3.25.34: {}
