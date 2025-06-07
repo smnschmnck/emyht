@@ -22,7 +22,7 @@ var PORT string
 // TODO Check if email is active for most requests!
 func handleRequest() {
 	e := echo.New()
-	//TODO: Use Redis for distributed rate limiting
+	e.Use(middleware.Gzip())
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
 	// Pusher
 	e.POST("/pusher/auth", pusher.PusherAuth)
