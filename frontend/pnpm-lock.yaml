@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@fontsource-variable/plus-jakarta-sans':
         specifier: ^5.0.21
-        version: 5.2.5
+        version: 5.2.6
       '@formkit/auto-animate':
         specifier: ^0.8.2
         version: 0.8.2
@@ -840,8 +840,8 @@ packages:
     resolution: {integrity: sha512-0J+zgWxHN+xXONWIyPWKFMgVuJoZuGiIFu8yxk7RJjxkzpGmyja5wRFqZIVtjDVOQpV+Rw0iOAjYPE2eQyjr0w==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@fontsource-variable/plus-jakarta-sans@5.2.5':
-    resolution: {integrity: sha512-nkAWzq+QWBSK+52HIlNCyoh5YXrZ/AwV1OqzxZz6VnPmsIpU68B1bf1YT8heRAJKY1kXNtWIJ9jJMYVaStgf+w==}
+  '@fontsource-variable/plus-jakarta-sans@5.2.6':
+    resolution: {integrity: sha512-w0954jYDlHvzABXY5NgkBtitBiHcULblm1cScowZrRV5V6KtgB17Ubw3knFr82P3qvN48kgQk5DLPhB27OlTnQ==}
 
   '@formkit/auto-animate@0.8.2':
     resolution: {integrity: sha512-SwPWfeRa5veb1hOIBMdzI+73te5puUBHmqqaF1Bu7FjvxlYSz/kJcZKSa9Cg60zL0uRNeJL2SbRxV6Jp6Q1nFQ==}
@@ -4104,7 +4104,7 @@ snapshots:
       '@eslint/core': 0.14.0
       levn: 0.4.1
 
-  '@fontsource-variable/plus-jakarta-sans@5.2.5': {}
+  '@fontsource-variable/plus-jakarta-sans@5.2.6': {}
 
   '@formkit/auto-animate@0.8.2': {}
 
