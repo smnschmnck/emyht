@@ -25,7 +25,7 @@ importers:
         version: 1.3.7(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@t3-oss/env-core':
         specifier: ^0.13.0
-        version: 0.13.8(arktype@2.1.20)(typescript@5.8.3)(zod@3.25.61)
+        version: 0.13.8(arktype@2.1.20)(typescript@5.8.3)(zod@3.25.62)
       '@tanstack/query-sync-storage-persister':
         specifier: ^5.59.17
         version: 5.80.6
@@ -73,7 +73,7 @@ importers:
         version: 3.3.1
       zod:
         specifier: ^3.23.8
-        version: 3.25.61
+        version: 3.25.62
     devDependencies:
       '@eslint/js':
         specifier: ^9.20.0
@@ -3317,8 +3317,8 @@ packages:
     peerDependencies:
       zod: ^3.24.4
 
-  zod@3.25.61:
-    resolution: {integrity: sha512-fzfJgUw78LTNnHujj9re1Ov/JJQkRZZGDMcYqSx7Hp4rPOkKywaFHq0S6GoHeXs0wGNE/sIOutkXgnwzrVOGCQ==}
+  zod@3.25.62:
+    resolution: {integrity: sha512-YCxsr4DmhPcrKPC9R1oBHQNlQzlJEyPAId//qTau/vBee9uO8K6prmRq4eMkOyxvBfH4wDPIPdLx9HVMWIY3xA==}
 
 snapshots:
 
@@ -4601,11 +4601,11 @@ snapshots:
     dependencies:
       '@swc/counter': 0.1.3
 
-  '@t3-oss/env-core@0.13.8(arktype@2.1.20)(typescript@5.8.3)(zod@3.25.61)':
+  '@t3-oss/env-core@0.13.8(arktype@2.1.20)(typescript@5.8.3)(zod@3.25.62)':
     optionalDependencies:
       arktype: 2.1.20
       typescript: 5.8.3
-      zod: 3.25.61
+      zod: 3.25.62
 
   '@tailwindcss/node@4.1.8':
     dependencies:
@@ -5675,8 +5675,8 @@ snapshots:
       smol-toml: 1.3.4
       strip-json-comments: 5.0.2
       typescript: 5.8.3
-      zod: 3.25.61
-      zod-validation-error: 3.4.1(zod@3.25.61)
+      zod: 3.25.62
+      zod-validation-error: 3.4.1(zod@3.25.62)
 
   leven@3.1.0: {}
 
@@ -6583,8 +6583,8 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod-validation-error@3.4.1(zod@3.25.61):
+  zod-validation-error@3.4.1(zod@3.25.62):
     dependencies:
-      zod: 3.25.61
+      zod: 3.25.62
 
-  zod@3.25.61: {}
+  zod@3.25.62: {}
