@@ -92,7 +92,7 @@ importers:
         version: 19.1.6(@types/react@19.1.8)
       '@vitejs/plugin-react-swc':
         specifier: ^3.7.0
-        version: 3.10.2(vite@6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.42.0))
+        version: 3.10.2(vite@6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.0))
       eslint:
         specifier: ^9.20.1
         version: 9.29.0(jiti@2.4.2)
@@ -104,7 +104,7 @@ importers:
         version: 0.4.20(eslint@9.29.0(jiti@2.4.2))
       knip:
         specifier: ^5.45.0
-        version: 5.61.1(@types/node@22.15.32)(typescript@5.8.3)
+        version: 5.61.2(@types/node@22.15.32)(typescript@5.8.3)
       postcss:
         specifier: ^8.4.41
         version: 8.5.6
@@ -125,13 +125,13 @@ importers:
         version: 8.34.1(eslint@9.29.0(jiti@2.4.2))(typescript@5.8.3)
       unplugin-fonts:
         specifier: ^1.1.1
-        version: 1.3.1(vite@6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.42.0))
+        version: 1.3.1(vite@6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.0))
       vite:
         specifier: ^6.0.0
-        version: 6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.42.0)
+        version: 6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.0)
       vite-plugin-pwa:
         specifier: ^1.0.0
-        version: 1.0.0(vite@6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.42.0))(workbox-build@7.3.0)(workbox-window@7.3.0)
+        version: 1.0.0(vite@6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.0))(workbox-build@7.3.0)(workbox-window@7.3.0)
       workbox-window:
         specifier: ^7.3.0
         version: 7.3.0
@@ -1260,8 +1260,8 @@ packages:
     peerDependencies:
       rollup: ^1.20.0||^2.0.0
 
-  '@rollup/pluginutils@5.1.4':
-    resolution: {integrity: sha512-USm05zrsFxYLPdWWq+K3STlWiT/3ELn3RcV5hJMghpeAIhxfsUIg6mt12CBJBInWMV4VneoV7SfGv8xIwo2qNQ==}
+  '@rollup/pluginutils@5.2.0':
+    resolution: {integrity: sha512-qWJ2ZTbmumwiLFomfzTyt5Kng4hwPi9rwCYN4SHb6eaRU1KNO4ccxINHr/VhH4GgPlt1XfSTLX2LBTme8ne4Zw==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
@@ -1922,8 +1922,8 @@ packages:
     engines: {node: '>=0.10.0'}
     hasBin: true
 
-  electron-to-chromium@1.5.168:
-    resolution: {integrity: sha512-RUNQmFLNIWVW6+z32EJQ5+qx8ci6RGvdtDC0Ls+F89wz6I2AthpXF0w0DIrn2jpLX0/PU9ZCo+Qp7bg/EckJmA==}
+  electron-to-chromium@1.5.170:
+    resolution: {integrity: sha512-GP+M7aeluQo9uAyiTCxgIj/j+PrWhMlY7LFVj8prlsPljd0Fdg9AprlfUi+OCSFWy9Y5/2D/Jrj9HS8Z4rpKWA==}
 
   enhanced-resolve@5.18.1:
     resolution: {integrity: sha512-ZSW3ma5GkcQBIpwZTSRAI8N71Uuwgs93IezB7mf7R60tC8ZbJideoDNKjHn2O9KIlx6rkGTTEk1xUCK2E1Y2Yg==}
@@ -2411,8 +2411,8 @@ packages:
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
-  knip@5.61.1:
-    resolution: {integrity: sha512-keywAzpu8R9S50JRT3qxilb1i/pv3ztBHhZ3tRuHvRclqfhfPkY7kb/G6l4q7zozbyndidSr7IScvayG76HtkA==}
+  knip@5.61.2:
+    resolution: {integrity: sha512-ZBv37zDvZj0/Xwk0e93xSjM3+5bjxgqJ0PH2GlB5tnWV0ktXtmatWLm+dLRUCT/vpO3SdGz2nNAfvVhuItUNcQ==}
     engines: {node: '>=18.18.0'}
     hasBin: true
     peerDependencies:
@@ -2994,8 +2994,8 @@ packages:
     resolution: {integrity: sha512-G13vtMYPT/J8A4X2SjdtBTphZlrp1gKv6hZiOjw14RCWg6GbHuQBGtjlx75xLbYV/wEc0D7G5K4rxKP/cXk8Bw==}
     engines: {node: '>=10'}
 
-  terser@5.42.0:
-    resolution: {integrity: sha512-UYCvU9YQW2f/Vwl+P0GfhxJxbUGLwd+5QrrGgLajzWAtC/23AX0vcise32kkP7Eu0Wu9VlzzHAXkLObgjQfFlQ==}
+  terser@5.43.0:
+    resolution: {integrity: sha512-CqNNxKSGKSZCunSvwKLTs8u8sGGlp27sxNZ4quGh0QeNuyHM0JSEM/clM9Mf4zUp6J+tO2gUXhgXT2YMMkwfKQ==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -3303,8 +3303,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  zod-validation-error@3.5.1:
-    resolution: {integrity: sha512-ozT8jy2nHaeKjaRIEThwgRXBwm16hAy0BaTRx1I2IY1xrezPegmlFmYKb5tcvYqZDQm0sfZtDr2IR7CdCJzTGw==}
+  zod-validation-error@3.5.2:
+    resolution: {integrity: sha512-mdi7YOLtram5dzJ5aDtm1AG9+mxRma1iaMrZdYIpFO7epdKBUwLHIxTF8CPDeCQ828zAXYtizrKlEJAtzgfgrw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       zod: ^3.25.0
@@ -4441,7 +4441,7 @@ snapshots:
 
   '@rollup/plugin-node-resolve@15.3.1(rollup@2.79.2)':
     dependencies:
-      '@rollup/pluginutils': 5.1.4(rollup@2.79.2)
+      '@rollup/pluginutils': 5.2.0(rollup@2.79.2)
       '@types/resolve': 1.20.2
       deepmerge: 4.3.1
       is-module: 1.0.0
@@ -4459,7 +4459,7 @@ snapshots:
     dependencies:
       serialize-javascript: 6.0.2
       smob: 1.5.0
-      terser: 5.42.0
+      terser: 5.43.0
     optionalDependencies:
       rollup: 2.79.2
 
@@ -4470,7 +4470,7 @@ snapshots:
       picomatch: 2.3.1
       rollup: 2.79.2
 
-  '@rollup/pluginutils@5.1.4(rollup@2.79.2)':
+  '@rollup/pluginutils@5.2.0(rollup@2.79.2)':
     dependencies:
       '@types/estree': 1.0.8
       estree-walker: 2.0.2
@@ -4846,11 +4846,11 @@ snapshots:
       '@typescript-eslint/types': 8.34.1
       eslint-visitor-keys: 4.2.1
 
-  '@vitejs/plugin-react-swc@3.10.2(vite@6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.42.0))':
+  '@vitejs/plugin-react-swc@3.10.2(vite@6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.0))':
     dependencies:
       '@rolldown/pluginutils': 1.0.0-beta.11
       '@swc/core': 1.11.31
-      vite: 6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.42.0)
+      vite: 6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.0)
     transitivePeerDependencies:
       - '@swc/helpers'
 
@@ -4959,7 +4959,7 @@ snapshots:
   browserslist@4.25.0:
     dependencies:
       caniuse-lite: 1.0.30001723
-      electron-to-chromium: 1.5.168
+      electron-to-chromium: 1.5.170
       node-releases: 2.0.19
       update-browserslist-db: 1.1.3(browserslist@4.25.0)
 
@@ -5087,7 +5087,7 @@ snapshots:
     dependencies:
       jake: 10.9.2
 
-  electron-to-chromium@1.5.168: {}
+  electron-to-chromium@1.5.170: {}
 
   enhanced-resolve@5.18.1:
     dependencies:
@@ -5648,7 +5648,7 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  knip@5.61.1(@types/node@22.15.32)(typescript@5.8.3):
+  knip@5.61.2(@types/node@22.15.32)(typescript@5.8.3):
     dependencies:
       '@nodelib/fs.walk': 1.2.8
       '@types/node': 22.15.32
@@ -5664,7 +5664,7 @@ snapshots:
       strip-json-comments: 5.0.2
       typescript: 5.8.3
       zod: 3.25.67
-      zod-validation-error: 3.5.1(zod@3.25.67)
+      zod-validation-error: 3.5.2(zod@3.25.67)
 
   leven@3.1.0: {}
 
@@ -6209,7 +6209,7 @@ snapshots:
       type-fest: 0.16.0
       unique-string: 2.0.0
 
-  terser@5.42.0:
+  terser@5.43.0:
     dependencies:
       '@jridgewell/source-map': 0.3.6
       acorn: 8.15.0
@@ -6323,11 +6323,11 @@ snapshots:
 
   universalify@2.0.1: {}
 
-  unplugin-fonts@1.3.1(vite@6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.42.0)):
+  unplugin-fonts@1.3.1(vite@6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.0)):
     dependencies:
       fast-glob: 3.3.3
       unplugin: 2.0.0-beta.1
-      vite: 6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.42.0)
+      vite: 6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.0)
 
   unplugin@2.0.0-beta.1:
     dependencies:
@@ -6365,18 +6365,18 @@ snapshots:
     dependencies:
       react: 19.1.0
 
-  vite-plugin-pwa@1.0.0(vite@6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.42.0))(workbox-build@7.3.0)(workbox-window@7.3.0):
+  vite-plugin-pwa@1.0.0(vite@6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.0))(workbox-build@7.3.0)(workbox-window@7.3.0):
     dependencies:
       debug: 4.4.0
       pretty-bytes: 6.1.1
       tinyglobby: 0.2.12
-      vite: 6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.42.0)
+      vite: 6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.0)
       workbox-build: 7.3.0
       workbox-window: 7.3.0
     transitivePeerDependencies:
       - supports-color
 
-  vite@6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.42.0):
+  vite@6.3.5(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.0):
     dependencies:
       esbuild: 0.25.3
       fdir: 6.4.4(picomatch@4.0.2)
@@ -6389,7 +6389,7 @@ snapshots:
       fsevents: 2.3.3
       jiti: 2.4.2
       lightningcss: 1.30.1
-      terser: 5.42.0
+      terser: 5.43.0
 
   walk-up-path@4.0.0: {}
 
@@ -6571,7 +6571,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod-validation-error@3.5.1(zod@3.25.67):
+  zod-validation-error@3.5.2(zod@3.25.67):
     dependencies:
       zod: 3.25.67
 
