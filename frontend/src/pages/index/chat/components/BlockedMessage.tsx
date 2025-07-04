@@ -6,8 +6,7 @@ import {
   PhotoIcon,
   PlayCircleIcon,
 } from '@heroicons/react/24/outline';
-import { ReactNode } from '@tanstack/react-router';
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 
 const BaseBlockedMedia = ({
   label,
