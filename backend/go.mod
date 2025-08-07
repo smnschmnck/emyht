@@ -50,7 +50,7 @@ require (
 )
 
 require (
-	github.com/aws/aws-sdk-go v1.55.7
+	github.com/aws/aws-sdk-go v1.55.8
 	github.com/aws/aws-sdk-go-v2 v1.37.2
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.86.0
 	github.com/go-playground/locales v0.14.1 // indirect
