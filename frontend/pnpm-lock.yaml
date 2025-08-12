@@ -92,7 +92,7 @@ importers:
         version: 19.1.7(@types/react@19.1.10)
       '@vitejs/plugin-react-swc':
         specifier: ^4.0.0
-        version: 4.0.0(vite@7.1.1(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1))
+        version: 4.0.0(vite@7.1.2(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1))
       eslint:
         specifier: ^9.20.1
         version: 9.33.0(jiti@2.4.2)
@@ -125,13 +125,13 @@ importers:
         version: 8.39.1(eslint@9.33.0(jiti@2.4.2))(typescript@5.9.2)
       unplugin-fonts:
         specifier: ^1.1.1
-        version: 1.4.0(vite@7.1.1(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1))
+        version: 1.4.0(vite@7.1.2(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1))
       vite:
         specifier: ^7.0.0
-        version: 7.1.1(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+        version: 7.1.2(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
       vite-plugin-pwa:
         specifier: ^1.0.0
-        version: 1.0.2(vite@7.1.1(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1))(workbox-build@7.3.0)(workbox-window@7.3.0)
+        version: 1.0.2(vite@7.1.2(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1))(workbox-build@7.3.0)(workbox-window@7.3.0)
       workbox-window:
         specifier: ^7.3.0
         version: 7.3.0
@@ -3196,8 +3196,8 @@ packages:
       '@vite-pwa/assets-generator':
         optional: true
 
-  vite@7.1.1:
-    resolution: {integrity: sha512-yJ+Mp7OyV+4S+afWo+QyoL9jFWD11QFH0i5i7JypnfTcA1rmgxCbiA8WwAICDEtZ1Z1hzrVhN8R8rGTqkTY8ZQ==}
+  vite@7.1.2:
+    resolution: {integrity: sha512-J0SQBPlQiEXAF7tajiH+rUooJPo0l8KQgyg4/aMunNtrOa7bwuZJsJbDWzeljqQpgftxuq5yNJxQ91O9ts29UQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -4920,11 +4920,11 @@ snapshots:
       '@typescript-eslint/types': 8.39.1
       eslint-visitor-keys: 4.2.1
 
-  '@vitejs/plugin-react-swc@4.0.0(vite@7.1.1(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1))':
+  '@vitejs/plugin-react-swc@4.0.0(vite@7.1.2(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1))':
     dependencies:
       '@rolldown/pluginutils': 1.0.0-beta.30
       '@swc/core': 1.13.3
-      vite: 7.1.1(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      vite: 7.1.2(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
     transitivePeerDependencies:
       - '@swc/helpers'
 
@@ -6395,11 +6395,11 @@ snapshots:
 
   universalify@2.0.1: {}
 
-  unplugin-fonts@1.4.0(vite@7.1.1(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)):
+  unplugin-fonts@1.4.0(vite@7.1.2(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)):
     dependencies:
       fast-glob: 3.3.3
       unplugin: 2.3.5
-      vite: 7.1.1(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      vite: 7.1.2(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
 
   unplugin@2.3.5:
     dependencies:
@@ -6438,18 +6438,18 @@ snapshots:
     dependencies:
       react: 19.1.1
 
-  vite-plugin-pwa@1.0.2(vite@7.1.1(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1))(workbox-build@7.3.0)(workbox-window@7.3.0):
+  vite-plugin-pwa@1.0.2(vite@7.1.2(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1))(workbox-build@7.3.0)(workbox-window@7.3.0):
     dependencies:
       debug: 4.4.1
       pretty-bytes: 6.1.1
       tinyglobby: 0.2.14
-      vite: 7.1.1(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
+      vite: 7.1.2(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)
       workbox-build: 7.3.0
       workbox-window: 7.3.0
     transitivePeerDependencies:
       - supports-color
 
-  vite@7.1.1(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1):
+  vite@7.1.2(@types/node@22.17.1)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1):
     dependencies:
       esbuild: 0.25.8
       fdir: 6.4.6(picomatch@4.0.3)
