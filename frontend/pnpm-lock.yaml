@@ -13,7 +13,7 @@ importers:
         version: 5.2.6
       '@formkit/auto-animate':
         specifier: ^0.8.2
-        version: 0.8.2
+        version: 0.8.4
       '@heroicons/react':
         specifier: ^2.1.5
         version: 2.2.0(react@19.1.1)
@@ -853,8 +853,8 @@ packages:
   '@fontsource-variable/plus-jakarta-sans@5.2.6':
     resolution: {integrity: sha512-w0954jYDlHvzABXY5NgkBtitBiHcULblm1cScowZrRV5V6KtgB17Ubw3knFr82P3qvN48kgQk5DLPhB27OlTnQ==}
 
-  '@formkit/auto-animate@0.8.2':
-    resolution: {integrity: sha512-SwPWfeRa5veb1hOIBMdzI+73te5puUBHmqqaF1Bu7FjvxlYSz/kJcZKSa9Cg60zL0uRNeJL2SbRxV6Jp6Q1nFQ==}
+  '@formkit/auto-animate@0.8.4':
+    resolution: {integrity: sha512-DHHC01EJ1p70Q0z/ZFRBIY8NDnmfKccQoyoM84Tgb6omLMat6jivCdf272Y8k3nf4Lzdin/Y4R9q8uFtU0GbnA==}
 
   '@heroicons/react@2.2.0':
     resolution: {integrity: sha512-LMcepvRaS9LYHJGsF0zzmgKCUim/X3N/DQKc4jepAXJ7l8QxJ1PmxJzqplF2Z3FE4PqBAIGyJAQ/w4B5dsqbtQ==}
@@ -4154,7 +4154,7 @@ snapshots:
 
   '@fontsource-variable/plus-jakarta-sans@5.2.6': {}
 
-  '@formkit/auto-animate@0.8.2': {}
+  '@formkit/auto-animate@0.8.4': {}
 
   '@heroicons/react@2.2.0(react@19.1.1)':
     dependencies:
