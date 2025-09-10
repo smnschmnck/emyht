@@ -28,13 +28,13 @@ importers:
         version: 0.13.8(typescript@5.9.2)(zod@4.1.5)
       '@tanstack/query-sync-storage-persister':
         specifier: ^5.59.17
-        version: 5.87.1
+        version: 5.87.4
       '@tanstack/react-query':
         specifier: ^5.51.23
-        version: 5.87.1(react@19.1.1)
+        version: 5.87.4(react@19.1.1)
       '@tanstack/react-query-persist-client':
         specifier: ^5.59.19
-        version: 5.87.1(@tanstack/react-query@5.87.1(react@19.1.1))(react@19.1.1)
+        version: 5.87.4(@tanstack/react-query@5.87.4(react@19.1.1))(react@19.1.1)
       '@tanstack/react-router':
         specifier: 1.131.36
         version: 1.131.36(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -1593,23 +1593,23 @@ packages:
     resolution: {integrity: sha512-cs1WKawpXIe+vSTeiZUuSBy8JFjEuDgdMKZFRLKwQysKo8y2q6Q1HvS74Yw+m5IhOW1nTZooa6rlgdfXcgFAaw==}
     engines: {node: '>=12'}
 
-  '@tanstack/query-core@5.87.1':
-    resolution: {integrity: sha512-HOFHVvhOCprrWvtccSzc7+RNqpnLlZ5R6lTmngb8aq7b4rc2/jDT0w+vLdQ4lD9bNtQ+/A4GsFXy030Gk4ollA==}
+  '@tanstack/query-core@5.87.4':
+    resolution: {integrity: sha512-uNsg6zMxraEPDVO2Bn+F3/ctHi+Zsk+MMpcN8h6P7ozqD088F6mFY5TfGM7zuyIrL7HKpDyu6QHfLWiDxh3cuw==}
 
-  '@tanstack/query-persist-client-core@5.87.1':
-    resolution: {integrity: sha512-NL3YiHNxyz49N1+97ppKxgMtk8zITxa15Edu8a07w7XLgT/xH1lz5wzElJCGeNbe84rvdbp0/4XKwSiS9rAL9Q==}
+  '@tanstack/query-persist-client-core@5.87.4':
+    resolution: {integrity: sha512-71jHVxFvRBjPfiLQ4cJ71sRICCf989s+wCdynmwvAJqW6NgWx7GkdhQC1F7tXb56ZlcK19kQPPa5X2EPqP94wA==}
 
-  '@tanstack/query-sync-storage-persister@5.87.1':
-    resolution: {integrity: sha512-vKokVj1Gw/kaN1EQh8ODYZjxRWYRh5WUH5gIAzAzkwRtrgf1UpJci4mqCI5aW6zIeLjwkfDDJ4+SddOsV+zc8Q==}
+  '@tanstack/query-sync-storage-persister@5.87.4':
+    resolution: {integrity: sha512-c09tsMaNugl/dSXvYZvWvW/rqRXluiSkDOD1+aXUmsNPmOHsM51grrFy5r8X80xJFuBwfd5ouir7Nm5eSxKxLA==}
 
-  '@tanstack/react-query-persist-client@5.87.1':
-    resolution: {integrity: sha512-S3nJD31YRdv0q0n/IYY9pdeIPkEx319ygHSpDieeTbTFuYxn2b6LMUCNZhPw96ZYi182uwH53Z3KGcTGnWjzYQ==}
+  '@tanstack/react-query-persist-client@5.87.4':
+    resolution: {integrity: sha512-RFnkAfYJcQ8nEQUWx0rhcPVPdRmvHAYG+mJwcykiJKVHaFeCuiHaEoW3KseGTBZcliV//UjI07bplAaT2ElR8g==}
     peerDependencies:
-      '@tanstack/react-query': ^5.87.1
+      '@tanstack/react-query': ^5.87.4
       react: ^18 || ^19
 
-  '@tanstack/react-query@5.87.1':
-    resolution: {integrity: sha512-YKauf8jfMowgAqcxj96AHs+Ux3m3bWT1oSVKamaRPXSnW2HqSznnTCEkAVqctF1e/W9R/mPcyzzINIgpOH94qg==}
+  '@tanstack/react-query@5.87.4':
+    resolution: {integrity: sha512-T5GT/1ZaNsUXf5I3RhcYuT17I4CPlbZgyLxc/ZGv7ciS6esytlbjb3DgUFO6c8JWYMDpdjSWInyGZUErgzqhcA==}
     peerDependencies:
       react: ^18 || ^19
 
@@ -2814,8 +2814,8 @@ packages:
     resolution: {integrity: sha512-dYqgNSZbDwkaJ2ceRd9ojCGjBq+mOm9LmtXnAnEGyHhN/5R7iDW2TRw3h+o/jCFxus3P2LfWIIiwowAjANm7IA==}
     engines: {node: '>= 0.4'}
 
-  regexpu-core@6.2.0:
-    resolution: {integrity: sha512-H66BPQMrv+V16t8xtmq+UC0CBpiTBA60V8ibS1QVReIp8T1z8hwFxqcGzm9K6lgsN7sB5edVH8a+ze6Fqm4weA==}
+  regexpu-core@6.3.1:
+    resolution: {integrity: sha512-DzcswPr252wEr7Qz8AyAVbfyBDKLoYp6eRA1We2Fa9qirRFSdtkP5sHr3yglDKy2BbA0fd2T+j/CUSKes3FeVQ==}
     engines: {node: '>=4'}
 
   regjsgen@0.8.0:
@@ -3427,7 +3427,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.28.4
       '@babel/helper-annotate-as-pure': 7.27.3
-      regexpu-core: 6.2.0
+      regexpu-core: 6.3.1
       semver: 6.3.1
 
   '@babel/helper-define-polyfill-provider@0.6.5(@babel/core@7.28.4)':
@@ -4744,26 +4744,26 @@ snapshots:
 
   '@tanstack/history@1.131.2': {}
 
-  '@tanstack/query-core@5.87.1': {}
+  '@tanstack/query-core@5.87.4': {}
 
-  '@tanstack/query-persist-client-core@5.87.1':
+  '@tanstack/query-persist-client-core@5.87.4':
     dependencies:
-      '@tanstack/query-core': 5.87.1
+      '@tanstack/query-core': 5.87.4
 
-  '@tanstack/query-sync-storage-persister@5.87.1':
+  '@tanstack/query-sync-storage-persister@5.87.4':
     dependencies:
-      '@tanstack/query-core': 5.87.1
-      '@tanstack/query-persist-client-core': 5.87.1
+      '@tanstack/query-core': 5.87.4
+      '@tanstack/query-persist-client-core': 5.87.4
 
-  '@tanstack/react-query-persist-client@5.87.1(@tanstack/react-query@5.87.1(react@19.1.1))(react@19.1.1)':
+  '@tanstack/react-query-persist-client@5.87.4(@tanstack/react-query@5.87.4(react@19.1.1))(react@19.1.1)':
     dependencies:
-      '@tanstack/query-persist-client-core': 5.87.1
-      '@tanstack/react-query': 5.87.1(react@19.1.1)
+      '@tanstack/query-persist-client-core': 5.87.4
+      '@tanstack/react-query': 5.87.4(react@19.1.1)
       react: 19.1.1
 
-  '@tanstack/react-query@5.87.1(react@19.1.1)':
+  '@tanstack/react-query@5.87.4(react@19.1.1)':
     dependencies:
-      '@tanstack/query-core': 5.87.1
+      '@tanstack/query-core': 5.87.4
       react: 19.1.1
 
   '@tanstack/react-router@1.131.36(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
@@ -6017,7 +6017,7 @@ snapshots:
       gopd: 1.2.0
       set-function-name: 2.0.2
 
-  regexpu-core@6.2.0:
+  regexpu-core@6.3.1:
     dependencies:
       regenerate: 1.4.2
       regenerate-unicode-properties: 10.2.2
