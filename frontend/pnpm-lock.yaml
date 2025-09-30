@@ -83,7 +83,7 @@ importers:
         version: 4.1.13
       '@types/node':
         specifier: ^22.13.8
-        version: 22.18.6
+        version: 22.18.7
       '@types/react':
         specifier: ^19.0.0
         version: 19.1.15
@@ -92,7 +92,7 @@ importers:
         version: 19.1.9(@types/react@19.1.15)
       '@vitejs/plugin-react-swc':
         specifier: ^4.0.0
-        version: 4.1.0(vite@7.1.7(@types/node@22.18.6)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0))
+        version: 4.1.0(vite@7.1.7(@types/node@22.18.7)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0))
       eslint:
         specifier: ^9.20.1
         version: 9.36.0(jiti@2.6.0)
@@ -104,7 +104,7 @@ importers:
         version: 0.4.22(eslint@9.36.0(jiti@2.6.0))
       knip:
         specifier: ^5.45.0
-        version: 5.64.1(@types/node@22.18.6)(typescript@5.9.2)
+        version: 5.64.1(@types/node@22.18.7)(typescript@5.9.2)
       postcss:
         specifier: ^8.4.41
         version: 8.5.6
@@ -125,13 +125,13 @@ importers:
         version: 8.44.1(eslint@9.36.0(jiti@2.6.0))(typescript@5.9.2)
       unplugin-fonts:
         specifier: ^1.1.1
-        version: 1.4.0(vite@7.1.7(@types/node@22.18.6)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0))
+        version: 1.4.0(vite@7.1.7(@types/node@22.18.7)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0))
       vite:
         specifier: ^7.0.0
-        version: 7.1.7(@types/node@22.18.6)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0)
+        version: 7.1.7(@types/node@22.18.7)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0)
       vite-plugin-pwa:
         specifier: ^1.0.0
-        version: 1.0.3(vite@7.1.7(@types/node@22.18.6)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0))(workbox-build@7.3.0)(workbox-window@7.3.0)
+        version: 1.0.3(vite@7.1.7(@types/node@22.18.7)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0))(workbox-build@7.3.0)(workbox-window@7.3.0)
       workbox-window:
         specifier: ^7.3.0
         version: 7.3.0
@@ -1647,8 +1647,8 @@ packages:
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
-  '@types/node@22.18.6':
-    resolution: {integrity: sha512-r8uszLPpeIWbNKtvWRt/DbVi5zbqZyj1PTmhRMqBMvDnaz1QpmSKujUtJLrqGZeoM8v72MfYggDceY4K1itzWQ==}
+  '@types/node@22.18.7':
+    resolution: {integrity: sha512-3E97nlWEVp2V6J7aMkR8eOnw/w0pArPwf/5/W0865f+xzBoGL/ZuHkTAKAGN7cOWNwd+sG+hZOqj+fjzeHS75g==}
 
   '@types/react-dom@19.1.9':
     resolution: {integrity: sha512-qXRuZaOsAdXKFyOhRBg6Lqqc0yay13vN7KrIg4L7N4aaHN68ma9OK3NE1BoDFgFOTfM7zg+3/8+2n8rLUH3OKQ==}
@@ -1768,6 +1768,10 @@ packages:
     resolution: {integrity: sha512-hsU18Ae8CDTR6Kgu9DYf0EbCr/a5iGL0rytQDobUcdpYOKokk8LEjVphnXkDkgpi0wYVsqrXuP0bZxJaTqdgoA==}
     engines: {node: '>= 0.4'}
 
+  async-generator-function@1.0.0:
+    resolution: {integrity: sha512-+NAXNqgCrB95ya4Sr66i1CL2hqLVckAk7xwRYWdcm39/ELQ6YNn1aw5r0bdQtqNZgQpEWzc5yc/igXc7aL5SLA==}
+    engines: {node: '>= 0.4'}
+
   async@3.2.6:
     resolution: {integrity: sha512-htCUDlxyyCLMgaM3xXg0C0LW2xqfuQ6p05pCEIsXuyQ+a1koYKTuBMzRNwmybfLgvJDMd0r1LTn4+E0Ti6C2AA==}
 
@@ -1797,8 +1801,8 @@ packages:
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
 
-  baseline-browser-mapping@2.8.8:
-    resolution: {integrity: sha512-be0PUaPsQX/gPWWgFsdD+GFzaoig5PXaUC1xLkQiYdDnANU8sMnHoQd8JhbJQuvTWrWLyeFN9Imb5Qtfvr4RrQ==}
+  baseline-browser-mapping@2.8.9:
+    resolution: {integrity: sha512-hY/u2lxLrbecMEWSB0IpGzGyDyeoMFQhCvZd2jGFSE5I17Fh01sYUBPCJtkWERw7zrac9+cIghxm/ytJa2X8iA==}
     hasBin: true
 
   brace-expansion@1.1.12:
@@ -2145,12 +2149,16 @@ packages:
   functions-have-names@1.2.3:
     resolution: {integrity: sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==}
 
+  generator-function@2.0.0:
+    resolution: {integrity: sha512-xPypGGincdfyl/AiSGa7GjXLkvld9V7GjZlowup9SHIJnQnHLFiLODCd/DqKOp0PBagbHJ68r1KJI9Mut7m4sA==}
+    engines: {node: '>= 0.4'}
+
   gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
 
-  get-intrinsic@1.3.0:
-    resolution: {integrity: sha512-9fSjSaos/fRIVIp+xSJlE6lfwhES7LNtKaCBIamHsjr2na1BiABJPo0mOjjz8GJDURarmCPGqaiVg5mfjb98CQ==}
+  get-intrinsic@1.3.1:
+    resolution: {integrity: sha512-fk1ZVEeOX9hVZ6QzoBNEC55+Ucqg4sTVwrVuigZhuRPESVFpMyXnd3sbXvPOwp7Y9riVyANiqhEuRF0G1aVSeQ==}
     engines: {node: '>= 0.4'}
 
   get-nonce@1.0.1:
@@ -4811,7 +4819,7 @@ snapshots:
 
   '@types/json-schema@7.0.15': {}
 
-  '@types/node@22.18.6':
+  '@types/node@22.18.7':
     dependencies:
       undici-types: 6.21.0
 
@@ -4920,11 +4928,11 @@ snapshots:
       '@typescript-eslint/types': 8.44.1
       eslint-visitor-keys: 4.2.1
 
-  '@vitejs/plugin-react-swc@4.1.0(vite@7.1.7(@types/node@22.18.6)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0))':
+  '@vitejs/plugin-react-swc@4.1.0(vite@7.1.7(@types/node@22.18.7)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0))':
     dependencies:
       '@rolldown/pluginutils': 1.0.0-beta.35
       '@swc/core': 1.13.5
-      vite: 7.1.7(@types/node@22.18.6)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0)
+      vite: 7.1.7(@types/node@22.18.7)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0)
     transitivePeerDependencies:
       - '@swc/helpers'
 
@@ -4970,10 +4978,12 @@ snapshots:
       define-properties: 1.2.1
       es-abstract: 1.24.0
       es-errors: 1.3.0
-      get-intrinsic: 1.3.0
+      get-intrinsic: 1.3.1
       is-array-buffer: 3.0.5
 
   async-function@1.0.0: {}
+
+  async-generator-function@1.0.0: {}
 
   async@3.2.6: {}
 
@@ -5009,7 +5019,7 @@ snapshots:
 
   balanced-match@1.0.2: {}
 
-  baseline-browser-mapping@2.8.8: {}
+  baseline-browser-mapping@2.8.9: {}
 
   brace-expansion@1.1.12:
     dependencies:
@@ -5026,7 +5036,7 @@ snapshots:
 
   browserslist@4.26.2:
     dependencies:
-      baseline-browser-mapping: 2.8.8
+      baseline-browser-mapping: 2.8.9
       caniuse-lite: 1.0.30001745
       electron-to-chromium: 1.5.227
       node-releases: 2.0.21
@@ -5043,13 +5053,13 @@ snapshots:
     dependencies:
       call-bind-apply-helpers: 1.0.2
       es-define-property: 1.0.1
-      get-intrinsic: 1.3.0
+      get-intrinsic: 1.3.1
       set-function-length: 1.2.2
 
   call-bound@1.0.4:
     dependencies:
       call-bind-apply-helpers: 1.0.2
-      get-intrinsic: 1.3.0
+      get-intrinsic: 1.3.1
 
   callsites@3.1.0: {}
 
@@ -5181,7 +5191,7 @@ snapshots:
       es-set-tostringtag: 2.1.0
       es-to-primitive: 1.3.0
       function.prototype.name: 1.1.8
-      get-intrinsic: 1.3.0
+      get-intrinsic: 1.3.1
       get-proto: 1.0.1
       get-symbol-description: 1.1.0
       globalthis: 1.0.4
@@ -5233,7 +5243,7 @@ snapshots:
   es-set-tostringtag@2.1.0:
     dependencies:
       es-errors: 1.3.0
-      get-intrinsic: 1.3.0
+      get-intrinsic: 1.3.1
       has-tostringtag: 1.0.2
       hasown: 2.0.2
 
@@ -5442,15 +5452,20 @@ snapshots:
 
   functions-have-names@1.2.3: {}
 
+  generator-function@2.0.0: {}
+
   gensync@1.0.0-beta.2: {}
 
-  get-intrinsic@1.3.0:
+  get-intrinsic@1.3.1:
     dependencies:
+      async-function: 1.0.0
+      async-generator-function: 1.0.0
       call-bind-apply-helpers: 1.0.2
       es-define-property: 1.0.1
       es-errors: 1.3.0
       es-object-atoms: 1.1.1
       function-bind: 1.1.2
+      generator-function: 2.0.0
       get-proto: 1.0.1
       gopd: 1.2.0
       has-symbols: 1.1.0
@@ -5470,7 +5485,7 @@ snapshots:
     dependencies:
       call-bound: 1.0.4
       es-errors: 1.3.0
-      get-intrinsic: 1.3.0
+      get-intrinsic: 1.3.1
 
   glob-parent@5.1.2:
     dependencies:
@@ -5556,7 +5571,7 @@ snapshots:
     dependencies:
       call-bind: 1.0.8
       call-bound: 1.0.4
-      get-intrinsic: 1.3.0
+      get-intrinsic: 1.3.1
 
   is-async-function@2.1.1:
     dependencies:
@@ -5584,7 +5599,7 @@ snapshots:
   is-data-view@1.0.2:
     dependencies:
       call-bound: 1.0.4
-      get-intrinsic: 1.3.0
+      get-intrinsic: 1.3.1
       is-typed-array: 1.1.15
 
   is-date-object@1.1.0:
@@ -5665,7 +5680,7 @@ snapshots:
   is-weakset@2.0.4:
     dependencies:
       call-bound: 1.0.4
-      get-intrinsic: 1.3.0
+      get-intrinsic: 1.3.1
 
   isarray@2.0.5: {}
 
@@ -5713,10 +5728,10 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  knip@5.64.1(@types/node@22.18.6)(typescript@5.9.2):
+  knip@5.64.1(@types/node@22.18.7)(typescript@5.9.2):
     dependencies:
       '@nodelib/fs.walk': 1.2.8
-      '@types/node': 22.18.6
+      '@types/node': 22.18.7
       fast-glob: 3.3.3
       formatly: 0.3.0
       jiti: 2.6.0
@@ -5877,7 +5892,7 @@ snapshots:
 
   own-keys@1.0.1:
     dependencies:
-      get-intrinsic: 1.3.0
+      get-intrinsic: 1.3.1
       object-keys: 1.1.1
       safe-push-apply: 1.0.0
 
@@ -6006,7 +6021,7 @@ snapshots:
       es-abstract: 1.24.0
       es-errors: 1.3.0
       es-object-atoms: 1.1.1
-      get-intrinsic: 1.3.0
+      get-intrinsic: 1.3.1
       get-proto: 1.0.1
       which-builtin-type: 1.2.1
 
@@ -6092,7 +6107,7 @@ snapshots:
     dependencies:
       call-bind: 1.0.8
       call-bound: 1.0.4
-      get-intrinsic: 1.3.0
+      get-intrinsic: 1.3.1
       has-symbols: 1.1.0
       isarray: 2.0.5
 
@@ -6130,7 +6145,7 @@ snapshots:
       define-data-property: 1.1.4
       es-errors: 1.3.0
       function-bind: 1.1.2
-      get-intrinsic: 1.3.0
+      get-intrinsic: 1.3.1
       gopd: 1.2.0
       has-property-descriptors: 1.0.2
 
@@ -6162,14 +6177,14 @@ snapshots:
     dependencies:
       call-bound: 1.0.4
       es-errors: 1.3.0
-      get-intrinsic: 1.3.0
+      get-intrinsic: 1.3.1
       object-inspect: 1.13.4
 
   side-channel-weakmap@1.0.2:
     dependencies:
       call-bound: 1.0.4
       es-errors: 1.3.0
-      get-intrinsic: 1.3.0
+      get-intrinsic: 1.3.1
       object-inspect: 1.13.4
       side-channel-map: 1.0.1
 
@@ -6218,7 +6233,7 @@ snapshots:
       es-abstract: 1.24.0
       es-errors: 1.3.0
       es-object-atoms: 1.1.1
-      get-intrinsic: 1.3.0
+      get-intrinsic: 1.3.1
       gopd: 1.2.0
       has-symbols: 1.1.0
       internal-slot: 1.1.0
@@ -6406,11 +6421,11 @@ snapshots:
 
   universalify@2.0.1: {}
 
-  unplugin-fonts@1.4.0(vite@7.1.7(@types/node@22.18.6)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0)):
+  unplugin-fonts@1.4.0(vite@7.1.7(@types/node@22.18.7)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0)):
     dependencies:
       fast-glob: 3.3.3
       unplugin: 2.3.5
-      vite: 7.1.7(@types/node@22.18.6)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0)
+      vite: 7.1.7(@types/node@22.18.7)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0)
 
   unplugin@2.3.5:
     dependencies:
@@ -6449,18 +6464,18 @@ snapshots:
     dependencies:
       react: 19.1.1
 
-  vite-plugin-pwa@1.0.3(vite@7.1.7(@types/node@22.18.6)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0))(workbox-build@7.3.0)(workbox-window@7.3.0):
+  vite-plugin-pwa@1.0.3(vite@7.1.7(@types/node@22.18.7)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0))(workbox-build@7.3.0)(workbox-window@7.3.0):
     dependencies:
       debug: 4.4.1
       pretty-bytes: 6.1.1
       tinyglobby: 0.2.14
-      vite: 7.1.7(@types/node@22.18.6)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0)
+      vite: 7.1.7(@types/node@22.18.7)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0)
       workbox-build: 7.3.0
       workbox-window: 7.3.0
     transitivePeerDependencies:
       - supports-color
 
-  vite@7.1.7(@types/node@22.18.6)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0):
+  vite@7.1.7(@types/node@22.18.7)(jiti@2.6.0)(lightningcss@1.30.1)(terser@5.44.0):
     dependencies:
       esbuild: 0.25.10
       fdir: 6.5.0(picomatch@4.0.3)
@@ -6469,7 +6484,7 @@ snapshots:
       rollup: 4.52.0
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 22.18.6
+      '@types/node': 22.18.7
       fsevents: 2.3.3
       jiti: 2.6.0
       lightningcss: 1.30.1
