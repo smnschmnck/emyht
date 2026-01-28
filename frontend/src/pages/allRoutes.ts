@@ -5,9 +5,9 @@ import { noEmailRoute } from './noEmail/route';
 import { verifyEmailRoute } from './verifyEmail/route';
 
 export const routes = [
-  ...indexRoutes,
   mainLayoutRoute,
   noEmailRoute,
   verifyEmailRoute,
   ...authRoutes,
+  ...indexRoutes,
 ];
