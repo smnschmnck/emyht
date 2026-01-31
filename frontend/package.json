@@ -24,7 +24,7 @@
     "class-variance-authority": "^0.7.0",
     "date-fns": "^4.1.0",
     "dotenv": "^17.0.0",
-    "globals": "^16.0.0",
+    "globals": "^17.0.0",
     "nanoid": "^5.1.0",
     "pretty-bytes": "^7.0.0",
     "pusher-js": "8.4.0",
