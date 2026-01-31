@@ -22,6 +22,7 @@ export const useDataChangeDetector = ({
       onNoChange?.();
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPrevData(data);
   }, [data, prevData, onChange, onNoChange]);
 };
