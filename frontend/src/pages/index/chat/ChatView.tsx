@@ -57,6 +57,7 @@ export const ChatView: FC = () => {
   const { data: chatInfo } = useChatInfo({ chatId });
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setShowFilePicker(false);
   }, [chatId]);
 
