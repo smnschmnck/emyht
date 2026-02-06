@@ -9,7 +9,7 @@ require (
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.15.0
-	github.com/labstack/echo/v5 v5.0.2
+	github.com/labstack/echo/v5 v5.0.3
 	github.com/pusher/pusher-http-go/v5 v5.1.1
 	github.com/redis/go-redis/v9 v9.17.3
 )
