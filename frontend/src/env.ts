@@ -10,7 +10,6 @@ export const env = createEnv({
     VITE_PUSHER_CLUSTER: z.string().min(1),
     VITE_AUTH0_DOMAIN: z.string().min(1),
     VITE_AUTH0_CLIENT_ID: z.string().min(1),
-    VITE_AUTH0_AUDIENCE: z.string().url(),
   },
   runtimeEnv: import.meta.env,
 
