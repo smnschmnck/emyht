@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useSentContactRequests } from '@/hooks/api/contacts';
-import { fetchWithDefaults } from '@/utils/fetch';
+import { useAuthFetch } from '@/hooks/useAuthFetch';
 import { useMutation } from '@tanstack/react-query';
 import { FC, FormEvent, useState } from 'react';
 import { toast } from 'sonner';
@@ -11,12 +11,13 @@ import { Card } from '@/components/ui/Card';
 export const ContactRequests: FC = () => {
   const [recepientEmail, setRecepientEmail] = useState('');
   const { refetch: refetchSentContactRequests } = useSentContactRequests();
+  const authFetch = useAuthFetch();
 
   const { mutate: sendRequest } = useMutation({
     mutationFn: async (event: FormEvent) => {
       event.preventDefault();
 
-      const res = await fetchWithDefaults('/contactRequest', {
+      const res = await authFetch('/contactRequest', {
         method: 'post',
         body: JSON.stringify({
           contactEmail: recepientEmail,

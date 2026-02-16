@@ -1,4 +1,4 @@
-import { fetchWithDefaults } from '@/utils/fetch';
+import { useAuthFetch } from '@/hooks/useAuthFetch';
 import { useQuery } from '@tanstack/react-query';
 
 type LastChatMessage = {
@@ -22,10 +22,12 @@ export type Chat = {
 };
 
 export const useChats = () => {
+  const authFetch = useAuthFetch();
+
   return useQuery({
     queryKey: ['allChats'],
     queryFn: async () => {
-      const res = await fetchWithDefaults('/chats');
+      const res = await authFetch('/chats');
 
       if (!res.ok) {
         return [];

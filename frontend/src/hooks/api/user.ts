@@ -1,20 +1,10 @@
-import { getUserData, UserData } from '@/api/user';
-import { HttpError } from '@/errors/httpError/httpError';
-import { fetchWithDefaults } from '@/utils/fetch';
-import { UseQueryOptions, useMutation, useQuery } from '@tanstack/react-query';
+import { useAuthFetch } from '@/hooks/useAuthFetch';
+import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-export const useUserData = (
-  options?: Omit<UseQueryOptions<UserData, HttpError>, 'queryKey' | 'queryFn'>
-) => {
-  return useQuery<UserData, HttpError>({
-    queryKey: ['user'],
-    queryFn: getUserData,
-    ...options,
-  });
-};
-
 export const useBlockUser = ({ onSuccess }: { onSuccess: () => void }) => {
+  const authFetch = useAuthFetch();
+
   return useMutation({
     mutationFn: async (userId?: string) => {
       if (!userId) {
@@ -23,7 +13,7 @@ export const useBlockUser = ({ onSuccess }: { onSuccess: () => void }) => {
       const body = {
         userID: userId,
       };
-      const res = await fetchWithDefaults('/blockUser', {
+      const res = await authFetch('/blockUser', {
         method: 'post',
         body: JSON.stringify(body),
       });

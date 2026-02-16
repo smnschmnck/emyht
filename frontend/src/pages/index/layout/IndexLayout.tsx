@@ -1,19 +1,23 @@
+import { FullPageLoader } from '@/components/FullPageLoader';
 import { useChats } from '@/hooks/api/chats';
 import { useContactRequests } from '@/hooks/api/contacts';
-import { useUserData } from '@/hooks/api/user';
+import { useChatMessages } from '@/hooks/api/messages';
 import { usePusher } from '@/hooks/pusher/usePusher';
+import { useAuth0 } from '@auth0/auth0-react';
 import { Outlet } from '@tanstack/react-router';
 import { FC, useEffect } from 'react';
 import { twMerge } from 'tailwind-merge';
+import { useChatInfo } from '../chat/hooks/useChatInfo';
 import { Sidebar } from './components/Sidebar';
 import { useChatId, useIsSidebarHidden } from './hooks';
-import { indexLayoutRoute } from './route';
-import { useChatMessages } from '@/hooks/api/messages';
-import { useChatInfo } from '../chat/hooks/useChatInfo';
 
 export const IndexLayout: FC = () => {
-  const loaderUserData = indexLayoutRoute.useLoaderData();
-  const { data: userData } = useUserData({ initialData: loaderUserData });
+  const {
+    isAuthenticated,
+    isLoading: isAuthLoading,
+    loginWithRedirect,
+    user,
+  } = useAuth0();
   const isSidebarHidden = useIsSidebarHidden();
   const { data: chats, refetch: refetchChats } = useChats();
   const chatId = useChatId();
@@ -23,8 +27,14 @@ export const IndexLayout: FC = () => {
   const { subscribeToUserFeed, subscribeToAllChats } = usePusher();
 
   useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      loginWithRedirect();
+    }
+  }, [isAuthLoading, isAuthenticated, loginWithRedirect]);
+
+  useEffect(() => {
     subscribeToUserFeed({
-      uuid: userData?.uuid,
+      uuid: user?.sub,
       refetchChats,
       refetchContactRequests,
     });
@@ -43,7 +53,7 @@ export const IndexLayout: FC = () => {
     });
   }, [
     chats,
-    userData,
+    user,
     chatId,
     subscribeToUserFeed,
     refetchChats,
@@ -52,6 +62,10 @@ export const IndexLayout: FC = () => {
     refetchMessages,
     info?.isChatBlocked,
   ]);
+
+  if (isAuthLoading) {
+    return <FullPageLoader />;
+  }
 
   return (
     <div className="flex h-full">
