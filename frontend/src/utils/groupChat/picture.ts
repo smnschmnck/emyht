@@ -1,37 +1,48 @@
-import { fetchWithDefaults } from '../fetch';
+import { useAuthFetch } from '@/hooks/useAuthFetch';
+import { useCallback } from 'react';
 
-const fetchGroupChatPicturePutUrl = async (picture: File) => {
-  const res = await fetchWithDefaults('/groupChatPicturePutURL', {
-    method: 'post',
-    body: JSON.stringify({
-      contentLength: picture.size,
-    }),
-  });
+export const useUploadGroupChatPicture = () => {
+  const authFetch = useAuthFetch();
 
-  if (!res.ok) {
-    throw new Error(await res.text());
-  }
+  const fetchGroupChatPicturePutUrl = useCallback(
+    async (picture: File) => {
+      const res = await authFetch('/groupChatPicturePutURL', {
+        method: 'post',
+        body: JSON.stringify({
+          contentLength: picture.size,
+        }),
+      });
 
-  return (await res.json()) as {
-    fileID: string;
-    presignedPutURL: string;
-  };
-};
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
 
-export const uploadGroupChatPicture = async (selectedPicture: File | null) => {
-  if (!selectedPicture) {
-    throw new Error('No picture selected');
-  }
-  const { presignedPutURL, fileID } =
-    await fetchGroupChatPicturePutUrl(selectedPicture);
+      return (await res.json()) as {
+        fileID: string;
+        presignedPutURL: string;
+      };
+    },
+    [authFetch]
+  );
 
-  const { ok: uploadSucess } = await fetch(presignedPutURL, {
-    method: 'PUT',
-    body: selectedPicture,
-  });
-  if (!uploadSucess) {
-    throw new Error('Upload failed');
-  }
+  return useCallback(
+    async (selectedPicture: File | null) => {
+      if (!selectedPicture) {
+        throw new Error('No picture selected');
+      }
+      const { presignedPutURL, fileID } =
+        await fetchGroupChatPicturePutUrl(selectedPicture);
 
-  return { fileID };
+      const { ok: uploadSucess } = await fetch(presignedPutURL, {
+        method: 'PUT',
+        body: selectedPicture,
+      });
+      if (!uploadSucess) {
+        throw new Error('Upload failed');
+      }
+
+      return { fileID };
+    },
+    [fetchGroupChatPicturePutUrl]
+  );
 };

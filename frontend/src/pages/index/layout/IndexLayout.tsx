@@ -1,19 +1,27 @@
+import { FullPageLoader } from '@/components/FullPageLoader';
 import { useChats } from '@/hooks/api/chats';
 import { useContactRequests } from '@/hooks/api/contacts';
+import { useChatMessages } from '@/hooks/api/messages';
 import { useUserData } from '@/hooks/api/user';
 import { usePusher } from '@/hooks/pusher/usePusher';
-import { Outlet } from '@tanstack/react-router';
+import { useAuth0 } from '@auth0/auth0-react';
+import { Outlet, useNavigate } from '@tanstack/react-router';
 import { FC, useEffect } from 'react';
 import { twMerge } from 'tailwind-merge';
+import { useChatInfo } from '../chat/hooks/useChatInfo';
 import { Sidebar } from './components/Sidebar';
 import { useChatId, useIsSidebarHidden } from './hooks';
-import { indexLayoutRoute } from './route';
-import { useChatMessages } from '@/hooks/api/messages';
-import { useChatInfo } from '../chat/hooks/useChatInfo';
 
 export const IndexLayout: FC = () => {
-  const loaderUserData = indexLayoutRoute.useLoaderData();
-  const { data: userData } = useUserData({ initialData: loaderUserData });
+  const {
+    isAuthenticated,
+    isLoading: isAuthLoading,
+    loginWithRedirect,
+  } = useAuth0();
+  const navigate = useNavigate();
+  const { data: userData, isLoading: isUserLoading } = useUserData({
+    enabled: isAuthenticated,
+  });
   const isSidebarHidden = useIsSidebarHidden();
   const { data: chats, refetch: refetchChats } = useChats();
   const chatId = useChatId();
@@ -21,6 +29,18 @@ export const IndexLayout: FC = () => {
   const { refetch: refetchMessages } = useChatMessages(chatId);
   const { refetch: refetchContactRequests } = useContactRequests();
   const { subscribeToUserFeed, subscribeToAllChats } = usePusher();
+
+  useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      loginWithRedirect();
+    }
+  }, [isAuthLoading, isAuthenticated, loginWithRedirect]);
+
+  useEffect(() => {
+    if (userData && !userData.emailActive) {
+      navigate({ to: '/no-email', replace: true });
+    }
+  }, [userData, navigate]);
 
   useEffect(() => {
     subscribeToUserFeed({
@@ -52,6 +72,10 @@ export const IndexLayout: FC = () => {
     refetchMessages,
     info?.isChatBlocked,
   ]);
+
+  if (isAuthLoading || isUserLoading) {
+    return <FullPageLoader />;
+  }
 
   return (
     <div className="flex h-full">

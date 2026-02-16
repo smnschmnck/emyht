@@ -5,7 +5,7 @@ import { useChats, useCurrentChat } from '@/hooks/api/chats';
 import { useContacts } from '@/hooks/api/contacts';
 import { useChatMessages } from '@/hooks/api/messages';
 import { useBlockUser } from '@/hooks/api/user';
-import { fetchWithDefaults } from '@/utils/fetch';
+import { useAuthFetch } from '@/hooks/useAuthFetch';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -14,10 +14,12 @@ import { useChatsUserCanBeAddedTo } from '../hooks/useMembers';
 import { chatSettingsRoute } from '../route';
 
 const useChatParticipant = ({ chatId }: { chatId: string }) => {
+  const authFetch = useAuthFetch();
+
   return useQuery({
     queryKey: ['chatParticipant', { chatId }],
     queryFn: async () => {
-      const res = await fetchWithDefaults(`/oneOnOneChatParticipant/${chatId}`);
+      const res = await authFetch(`/oneOnOneChatParticipant/${chatId}`);
 
       if (!res.ok) {
         throw new Error(await res.text());
@@ -50,6 +52,7 @@ const UserPropertiesSettings = () => {
       toast.success('User blocked successfully');
     },
   });
+  const authFetch = useAuthFetch();
 
   const { mutate: unblockUser, isPending: isUnblocking } = useMutation({
     mutationFn: async (userId?: string) => {
@@ -59,7 +62,7 @@ const UserPropertiesSettings = () => {
       const body = {
         userID: userId,
       };
-      const res = await fetchWithDefaults('/unblockUser', {
+      const res = await authFetch('/unblockUser', {
         method: 'post',
         body: JSON.stringify(body),
       });
@@ -127,6 +130,7 @@ const AddToGroup = () => {
     refetch: refetchChatsUserCanBeAddedTo,
   } = useChatsUserCanBeAddedTo({ uuid: chatParticipant?.participantUUID });
   const currentChat = useCurrentChat(chatId);
+  const authFetch = useAuthFetch();
 
   const { mutate: addToChats, isPending: isAdding } = useMutation({
     mutationFn: async () => {
@@ -138,7 +142,7 @@ const AddToGroup = () => {
         chatIDs: selectedChats,
         participantUUID: chatParticipant.participantUUID,
       };
-      const res = await fetchWithDefaults('/addSingleUserToGroupChats', {
+      const res = await authFetch('/addSingleUserToGroupChats', {
         method: 'post',
         body: JSON.stringify(body),
       });

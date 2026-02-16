@@ -1,12 +1,14 @@
 import { Contact } from '@/hooks/api/contacts';
-import { fetchWithDefaults } from '@/utils/fetch';
+import { useAuthFetch } from '@/hooks/useAuthFetch';
 import { useQuery } from '@tanstack/react-query';
 
 export const useMembersNotInGroup = ({ chatId }: { chatId: string }) => {
+  const authFetch = useAuthFetch();
+
   return useQuery({
     queryKey: ['membersNotInChat', { chatId }],
     queryFn: async () => {
-      const res = await fetchWithDefaults(`/contactsNotInChat/${chatId}`);
+      const res = await authFetch(`/contactsNotInChat/${chatId}`);
 
       if (!res.ok) {
         throw new Error(await res.text());
@@ -18,10 +20,12 @@ export const useMembersNotInGroup = ({ chatId }: { chatId: string }) => {
 };
 
 export const useGroupMembers = ({ chatId }: { chatId: string }) => {
+  const authFetch = useAuthFetch();
+
   return useQuery({
     queryKey: ['groupMembers', { chatId }],
     queryFn: async () => {
-      const res = await fetchWithDefaults(`/groupMembers/${chatId}`);
+      const res = await authFetch(`/groupMembers/${chatId}`);
 
       if (!res.ok) {
         throw new Error(await res.text());
@@ -33,13 +37,15 @@ export const useGroupMembers = ({ chatId }: { chatId: string }) => {
 };
 
 export const useChatsUserCanBeAddedTo = ({ uuid }: { uuid?: string }) => {
+  const authFetch = useAuthFetch();
+
   return useQuery({
     queryKey: ['chatsUserCanBeAddedTo', { uuid }],
     queryFn: async () => {
       if (!uuid) {
         throw new Error('No UUID');
       }
-      const res = await fetchWithDefaults(
+      const res = await authFetch(
         `/getGroupchatsNewUserIsNotPartOf/${uuid}`
       );
 

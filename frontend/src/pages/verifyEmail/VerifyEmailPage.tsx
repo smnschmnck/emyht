@@ -1,32 +1,31 @@
 import { Link } from '@/components/ui/Link';
 import { SimpleErrorMessage } from '@/components/ui/SimpleErrorMessage';
 import { Spinner } from '@/components/ui/Spinner';
-import { fetchWithDefaults } from '@/utils/fetch';
+import { useAuthFetch } from '@/hooks/useAuthFetch';
 import { useQuery } from '@tanstack/react-query';
 import { FC } from 'react';
 import { verifyEmailRoute } from './route';
 
 export const VerifyEmailPage: FC = () => {
   const { token } = verifyEmailRoute.useSearch();
-
-  const verifyEmail = async () => {
-    const res = await fetchWithDefaults('/verifyEmail', {
-      method: 'post',
-      body: JSON.stringify({
-        emailToken: token,
-      }),
-    });
-
-    if (!res.ok) {
-      throw new Error(await res.text());
-    }
-
-    return res.text();
-  };
+  const authFetch = useAuthFetch();
 
   const verifyEmailQuery = useQuery({
     queryKey: ['verifyEmail'],
-    queryFn: verifyEmail,
+    queryFn: async () => {
+      const res = await authFetch('/verifyEmail', {
+        method: 'post',
+        body: JSON.stringify({
+          emailToken: token,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+
+      return res.text();
+    },
     refetchOnWindowFocus: false,
   });
 

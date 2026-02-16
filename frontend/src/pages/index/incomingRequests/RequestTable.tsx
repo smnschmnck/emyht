@@ -4,7 +4,7 @@ import { Spinner } from '@/components/ui/Spinner';
 import { HttpError } from '@/errors/httpError/httpError';
 import { useContactRequests, useContacts } from '@/hooks/api/contacts';
 import { useBlockUser } from '@/hooks/api/user';
-import { fetchWithDefaults } from '@/utils/fetch';
+import { useAuthFetch } from '@/hooks/useAuthFetch';
 import {
   CheckIcon,
   NoSymbolIcon,
@@ -23,13 +23,14 @@ export const RequestTable: FC = () => {
     isLoading,
     refetch: refetchContactRequests,
   } = useContactRequests();
+  const authFetch = useAuthFetch();
 
   const { mutate: handleRequest } = useMutation({
     mutationFn: async (opts: {
       senderID: string;
       action: ContactRequestActions;
     }) => {
-      const res = await fetchWithDefaults('/handleContactRequest', {
+      const res = await authFetch('/handleContactRequest', {
         method: 'post',
         body: JSON.stringify(opts),
       });

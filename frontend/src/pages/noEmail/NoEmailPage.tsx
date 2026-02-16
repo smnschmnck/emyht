@@ -1,10 +1,36 @@
+import { FullPageLoader } from '@/components/FullPageLoader';
 import { Link } from '@/components/ui/Link';
-import { useRouteContext } from '@tanstack/react-router';
-import { FC } from 'react';
-import { noEmailRoute } from './route';
+import { useUserData } from '@/hooks/api/user';
+import { useAuth0 } from '@auth0/auth0-react';
+import { useNavigate } from '@tanstack/react-router';
+import { FC, useEffect } from 'react';
 
 export const NoEmailPage: FC = () => {
-  const userData = useRouteContext({ from: noEmailRoute.id });
+  const {
+    isAuthenticated,
+    isLoading: isAuthLoading,
+    loginWithRedirect,
+  } = useAuth0();
+  const navigate = useNavigate();
+  const { data: userData, isLoading: isUserLoading } = useUserData({
+    enabled: isAuthenticated,
+  });
+
+  useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      loginWithRedirect();
+    }
+  }, [isAuthLoading, isAuthenticated, loginWithRedirect]);
+
+  useEffect(() => {
+    if (userData?.emailActive) {
+      navigate({ to: '/', replace: true });
+    }
+  }, [userData, navigate]);
+
+  if (isAuthLoading || isUserLoading || !userData) {
+    return <FullPageLoader />;
+  }
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-10 text-center text-sm">
