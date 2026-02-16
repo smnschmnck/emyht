@@ -2,10 +2,9 @@ import { FullPageLoader } from '@/components/FullPageLoader';
 import { useChats } from '@/hooks/api/chats';
 import { useContactRequests } from '@/hooks/api/contacts';
 import { useChatMessages } from '@/hooks/api/messages';
-import { useUserData } from '@/hooks/api/user';
 import { usePusher } from '@/hooks/pusher/usePusher';
 import { useAuth0 } from '@auth0/auth0-react';
-import { Outlet, useNavigate } from '@tanstack/react-router';
+import { Outlet } from '@tanstack/react-router';
 import { FC, useEffect } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { useChatInfo } from '../chat/hooks/useChatInfo';
@@ -17,11 +16,8 @@ export const IndexLayout: FC = () => {
     isAuthenticated,
     isLoading: isAuthLoading,
     loginWithRedirect,
+    user,
   } = useAuth0();
-  const navigate = useNavigate();
-  const { data: userData, isLoading: isUserLoading } = useUserData({
-    enabled: isAuthenticated,
-  });
   const isSidebarHidden = useIsSidebarHidden();
   const { data: chats, refetch: refetchChats } = useChats();
   const chatId = useChatId();
@@ -37,14 +33,8 @@ export const IndexLayout: FC = () => {
   }, [isAuthLoading, isAuthenticated, loginWithRedirect]);
 
   useEffect(() => {
-    if (userData && !userData.emailActive) {
-      navigate({ to: '/no-email', replace: true });
-    }
-  }, [userData, navigate]);
-
-  useEffect(() => {
     subscribeToUserFeed({
-      uuid: userData?.uuid,
+      uuid: user?.sub,
       refetchChats,
       refetchContactRequests,
     });
@@ -63,7 +53,7 @@ export const IndexLayout: FC = () => {
     });
   }, [
     chats,
-    userData,
+    user,
     chatId,
     subscribeToUserFeed,
     refetchChats,
@@ -73,7 +63,7 @@ export const IndexLayout: FC = () => {
     info?.isChatBlocked,
   ]);
 
-  if (isAuthLoading || isUserLoading) {
+  if (isAuthLoading) {
     return <FullPageLoader />;
   }
 
