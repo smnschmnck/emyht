@@ -11,7 +11,7 @@ require (
 	github.com/labstack/echo/v4 v4.15.0
 	github.com/labstack/echo/v5 v5.0.4
 	github.com/pusher/pusher-http-go/v5 v5.1.1
-	github.com/redis/go-redis/v9 v9.17.3
+	github.com/redis/go-redis/v9 v9.18.0
 )
 
 require (
@@ -45,6 +45,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/net v0.49.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
