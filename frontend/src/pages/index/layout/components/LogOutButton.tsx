@@ -1,24 +1,17 @@
 import { IconButton } from '@/components/ui/IconButton';
-import { fetchWithDefaults } from '@/utils/fetch';
+import { useAuth0 } from '@auth0/auth0-react';
 import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
-import { useNavigate, useRouter } from '@tanstack/react-router';
 import { FC } from 'react';
 
 export const LogOutButton: FC = () => {
-  const navigate = useNavigate();
-  const router = useRouter();
-
-  const logOut = async () => {
-    const res = await fetchWithDefaults('/logout');
-
-    if (res.ok) {
-      await router.invalidate();
-      navigate({ to: '/sign-in' });
-    }
-  };
+  const { logout } = useAuth0();
 
   return (
-    <IconButton onClick={logOut} ariaLabel="Sign out" className="text-white">
+    <IconButton
+      onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+      ariaLabel="Sign out"
+      className="text-white"
+    >
       <ArrowRightOnRectangleIcon />
     </IconButton>
   );

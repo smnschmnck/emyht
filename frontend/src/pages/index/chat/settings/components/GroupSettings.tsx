@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/Card';
 import { FormInput } from '@/components/ui/FormInput';
 import { EntityList } from '@/components/EntityList';
 import { useChats, useCurrentChat } from '@/hooks/api/chats';
-import { fetchWithDefaults } from '@/utils/fetch';
+import { useAuthFetch } from '@/hooks/useAuthFetch';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
@@ -13,7 +13,7 @@ import { useGroupMembers, useMembersNotInGroup } from '../hooks/useMembers';
 import { chatSettingsRoute } from '../route';
 import { contactsToEntities } from '@/utils/contactsToEntities';
 import { FilePickerButton } from '@/components/ui/FilePickerButton';
-import { uploadGroupChatPicture } from '@/utils/groupChat/picture';
+import { useUploadGroupChatPicture } from '@/utils/groupChat/picture';
 
 const GroupPicturePicker = () => {
   const { chatId } = chatSettingsRoute.useParams();
@@ -23,11 +23,13 @@ const GroupPicturePicker = () => {
   const picturePreview = selectedPicture
     ? URL.createObjectURL(selectedPicture)
     : curChat?.chatPictureUrl;
+  const authFetch = useAuthFetch();
+  const uploadGroupChatPicture = useUploadGroupChatPicture();
 
   const { mutate: updatePicture, isPending: isUpdatingPicture } = useMutation({
     mutationFn: async () => {
       const { fileID } = await uploadGroupChatPicture(selectedPicture);
-      const res = await fetchWithDefaults(`/changeGroupPicture/${chatId}`, {
+      const res = await authFetch(`/changeGroupPicture/${chatId}`, {
         method: 'post',
         body: JSON.stringify({ fileID }),
       });
@@ -79,10 +81,11 @@ const GroupPropertiesSettings = () => {
   const { refetch: refetchChats } = useChats();
   const [newName, setNewName] = useState('');
   const navigate = useNavigate();
+  const authFetch = useAuthFetch();
 
   const { mutate: leaveGroup, isPending: isLeaving } = useMutation({
     mutationFn: async () => {
-      const res = await fetchWithDefaults('/leaveGroupChat', {
+      const res = await authFetch('/leaveGroupChat', {
         method: 'post',
         body: JSON.stringify({ chatId }),
       });
@@ -103,7 +106,7 @@ const GroupPropertiesSettings = () => {
 
   const { mutate: renameGroup, isPending: isRenaming } = useMutation({
     mutationFn: async () => {
-      const res = await fetchWithDefaults(`/changeGroupName/${chatId}`, {
+      const res = await authFetch(`/changeGroupName/${chatId}`, {
         method: 'post',
         body: JSON.stringify({ newName }),
       });
@@ -165,13 +168,14 @@ const GroupMemberRemove = () => {
   } = useGroupMembers({
     chatId,
   });
+  const authFetch = useAuthFetch();
 
   const { mutate: removeUsers, isPending: isRemoving } = useMutation({
     mutationFn: async () => {
       const body = {
         uuidsToRemove: selectedUsers,
       };
-      const res = await fetchWithDefaults(`/removeGroupMembers/${chatId}`, {
+      const res = await authFetch(`/removeGroupMembers/${chatId}`, {
         method: 'put',
         body: JSON.stringify(body),
       });
@@ -231,6 +235,7 @@ const GroupMemberAdd = () => {
     refetch: refetchUsersNotInChat,
   } = useMembersNotInGroup({ chatId });
   const { refetch: refetchGroupMembers } = useGroupMembers({ chatId });
+  const authFetch = useAuthFetch();
 
   const { mutate: addUsers, isPending: isAdding } = useMutation({
     mutationFn: async () => {
@@ -238,7 +243,7 @@ const GroupMemberAdd = () => {
         chatID: chatId,
         participantUUIDs: selectedUsers,
       };
-      const res = await fetchWithDefaults('/addUsersToGroupchat', {
+      const res = await authFetch('/addUsersToGroupchat', {
         method: 'post',
         body: JSON.stringify(body),
       });

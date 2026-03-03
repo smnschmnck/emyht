@@ -6,6 +6,10 @@ export const usePusher = () => {
   const { pusher } = useContext(PusherContext);
 
   const subscribe = (type: 'USER_FEED' | 'CHAT', id: string) => {
+    if (!pusher) {
+      throw new Error('Pusher not initialized');
+    }
+
     const prefixes = {
       USER_FEED: 'private-user_feed',
       CHAT: 'private-chat',
