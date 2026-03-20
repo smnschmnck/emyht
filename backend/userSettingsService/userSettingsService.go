@@ -10,12 +10,12 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 var validate = validator.New()
 
-func GetChangeProfilePicturePutURL(c echo.Context) error {
+func GetChangeProfilePicturePutURL(c *echo.Context) error {
 	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
@@ -60,7 +60,7 @@ func GetChangeProfilePicturePutURL(c echo.Context) error {
 	return c.JSON(http.StatusOK, res{PresignedPutUrl: presignedPutUrl, ImageID: imageID})
 }
 
-func ConfirmChangedProfilePic(c echo.Context) error {
+func ConfirmChangedProfilePic(c *echo.Context) error {
 	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")

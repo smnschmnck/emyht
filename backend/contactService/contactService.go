@@ -15,12 +15,12 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 var validate = validator.New()
 
-func SendContactRequest(c echo.Context) error {
+func SendContactRequest(c *echo.Context) error {
 	token, err := authService.GetSessionToken(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
@@ -180,7 +180,7 @@ func AreUsersInContacts(usersUUIDs []string, uuid pgtype.UUID) (bool, error) {
 	return true, nil
 }
 
-func GetContacts(c echo.Context) error {
+func GetContacts(c *echo.Context) error {
 	token, err := authService.GetSessionToken(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
@@ -218,7 +218,7 @@ func GetPendingContactRequestsByUUID(uuid pgtype.UUID) ([]queries.GetPendingFrie
 	return contactRequests, nil
 }
 
-func GetPendingContactRequests(c echo.Context) error {
+func GetPendingContactRequests(c *echo.Context) error {
 	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
@@ -237,7 +237,7 @@ func GetPendingContactRequests(c echo.Context) error {
 	return c.JSON(http.StatusOK, contactRequests)
 }
 
-func HandleContactRequest(c echo.Context) error {
+func HandleContactRequest(c *echo.Context) error {
 	token, err := authService.GetSessionToken(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
@@ -294,7 +294,7 @@ func HandleContactRequest(c echo.Context) error {
 	return c.String(http.StatusOK, "SUCCESS")
 }
 
-func BlockUser(c echo.Context) error {
+func BlockUser(c *echo.Context) error {
 	token, err := authService.GetSessionToken(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
@@ -333,7 +333,7 @@ func BlockUser(c echo.Context) error {
 	return c.String(http.StatusOK, "SUCCESS")
 }
 
-func UnblockUser(c echo.Context) error {
+func UnblockUser(c *echo.Context) error {
 	token, err := authService.GetSessionToken(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
@@ -372,7 +372,7 @@ func UnblockUser(c echo.Context) error {
 	return c.String(http.StatusOK, "SUCCESS")
 }
 
-func GetSentContactRequests(c echo.Context) error {
+func GetSentContactRequests(c *echo.Context) error {
 	token, err := authService.GetSessionToken(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")

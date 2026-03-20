@@ -13,8 +13,8 @@ import (
 	"strconv"
 
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 )
 
 var PORT string
@@ -71,7 +71,9 @@ func handleRequest() {
 	//user settings
 	e.POST("/changeProfilePicturePutURL", userSettingsService.GetChangeProfilePicturePutURL)
 	e.POST("/confirmChangedProfilePic", userSettingsService.ConfirmChangedProfilePic)
-	e.Logger.Fatal(e.Start(PORT))
+	if err := e.Start(PORT); err != nil {
+		e.Logger.Error("failed to start server", "error", err)
+	}
 }
 
 func setPort(defaultPort int) {
