@@ -911,7 +911,7 @@ func ChangeGroupName(c *echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	if !userInChat {
-		c.String(http.StatusUnauthorized, "YOU ARE NOT A PARTICIPANT OF THIS CHAT")
+		return c.String(http.StatusUnauthorized, "YOU ARE NOT A PARTICIPANT OF THIS CHAT")
 	}
 
 	conn := db.GetDB()
@@ -956,7 +956,7 @@ func ChangeGroupPicture(c *echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	if !userInChat {
-		c.String(http.StatusUnauthorized, "YOU ARE NOT A PARTICIPANT OF THIS CHAT")
+		return c.String(http.StatusUnauthorized, "YOU ARE NOT A PARTICIPANT OF THIS CHAT")
 	}
 
 	imageKey := reqUUID.String() + "/gcPictures/" + req.FileId + ".png"
@@ -1000,7 +1000,7 @@ func GetOneOnOneChatParticipant(c *echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	if !userInChat {
-		c.String(http.StatusUnauthorized, "YOU ARE NOT A PARTICIPANT OF THIS CHAT")
+		return c.String(http.StatusUnauthorized, "YOU ARE NOT A PARTICIPANT OF THIS CHAT")
 	}
 
 	conn := db.GetDB()

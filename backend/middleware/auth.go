@@ -4,6 +4,7 @@ import (
 	"chat/db"
 	"chat/queries"
 	"context"
+	"errors"
 	"log"
 	"math/rand"
 	"net/http"
@@ -23,11 +24,14 @@ type contextKey string
 
 const userUUIDKey contextKey = "userUUID"
 
+var errNotAuthorized = errors.New("not authorized")
+
 // Auth0CustomClaims holds the namespaced custom claims added via an Auth0 post-login Action.
 // The namespace (https://emyht.com/) is required by Auth0 for custom access token claims.
 type Auth0CustomClaims struct {
-	Email    string `json:"https://emyht.com/email"`
-	Username string `json:"https://emyht.com/username"`
+	Email         string `json:"https://emyht.com/email"`
+	Username      string `json:"https://emyht.com/username"`
+	EmailVerified *bool  `json:"https://emyht.com/email_verified"`
 }
 
 func (c *Auth0CustomClaims) Validate(_ context.Context) error {
@@ -114,15 +118,23 @@ func Auth() echo.MiddlewareFunc {
 			}
 
 			sub := claims.RegisteredClaims.Subject
+			if !isEndUserSubject(sub) {
+				return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+			}
 
 			var email, username string
+			var emailVerified *bool
 			if custom, ok := claims.CustomClaims.(*Auth0CustomClaims); ok {
 				email = custom.Email
 				username = custom.Username
+				emailVerified = custom.EmailVerified
 			}
 
-			userUUID, err := resolveUser(sub, email, username)
+			userUUID, err := resolveUser(sub, email, username, emailVerified)
 			if err != nil {
+				if errors.Is(err, errNotAuthorized) {
+					return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+				}
 				log.Printf("Failed to resolve user for sub %s: %v", sub, err)
 				return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 			}
@@ -135,14 +147,30 @@ func Auth() echo.MiddlewareFunc {
 	}
 }
 
+func isEndUserSubject(sub string) bool {
+	if sub == "" {
+		return false
+	}
+
+	if strings.HasSuffix(sub, "@clients") {
+		return false
+	}
+
+	return strings.Contains(sub, "|")
+}
+
 // resolveUser finds or creates a user by their Auth0 sub claim.
 // If email is available from custom JWT claims, it is synced via upsert.
 // If not (no Auth0 Action configured yet), it falls back to lookup-only,
 // creating with a placeholder email on first encounter.
-func resolveUser(sub string, email string, username string) (pgtype.UUID, error) {
+func resolveUser(sub string, email string, username string, emailVerified *bool) (pgtype.UUID, error) {
 	conn := db.GetDB()
 
 	if email != "" {
+		if emailVerified != nil && !*emailVerified {
+			return pgtype.UUID{}, errNotAuthorized
+		}
+
 		// We have the email from the token — upsert to create or sync email.
 		// The ON CONFLICT only updates email, never overwrites username/picture.
 		insertUsername := username
@@ -162,28 +190,11 @@ func resolveUser(sub string, email string, username string) (pgtype.UUID, error)
 		return user.ID, nil
 	}
 
-	// No email in token — try to find existing user first
+	// No email in token — allow only pre-existing users.
 	user, err := conn.GetUserBySub(context.Background(), sub)
 	if err == nil {
 		return user.ID, nil
 	}
 
-	// First-time user, no custom claims configured yet — create with placeholder
-	fallbackUsername := "user"
-	parts := strings.SplitN(sub, "|", 2)
-	if len(parts) == 2 && len(parts[1]) >= 6 {
-		fallbackUsername = "user_" + parts[1][:6]
-	}
-
-	newUser, err := conn.UpsertUser(context.Background(), queries.UpsertUserParams{
-		Auth0Sub:   sub,
-		Email:      sub + "@pending",
-		Username:   fallbackUsername,
-		PictureUrl: "default_" + strconv.Itoa(rand.Intn(10)),
-	})
-	if err != nil {
-		return pgtype.UUID{}, err
-	}
-
-	return newUser.ID, nil
+	return pgtype.UUID{}, errNotAuthorized
 }
