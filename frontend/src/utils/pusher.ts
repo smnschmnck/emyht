@@ -1,23 +1,34 @@
 import { env } from '@/env';
 import { useAuth0 } from '@auth0/auth0-react';
 import Pusher from 'pusher-js';
-import { createContext, useEffect, useMemo } from 'react';
+import { createContext, useEffect, useRef, useState } from 'react';
 
 export const PusherContext = createContext<{ pusher: Pusher | null }>({
   pusher: null,
 });
 
 export const usePusherInstance = () => {
-  const { getAccessTokenSilently } = useAuth0();
+  const { getAccessTokenSilently, isAuthenticated, isLoading } = useAuth0();
+  const [pusher, setPusher] = useState<Pusher | null>(null);
+  const getTokenRef = useRef(getAccessTokenSilently);
 
-  const pusher = useMemo(() => {
-    return new Pusher(env.VITE_PUSHER_KEY, {
+  useEffect(() => {
+    getTokenRef.current = getAccessTokenSilently;
+  }, [getAccessTokenSilently]);
+
+  useEffect(() => {
+    // Don't create Pusher until auth is settled and user is authenticated
+    if (isLoading || !isAuthenticated) {
+      return;
+    }
+
+    const instance = new Pusher(env.VITE_PUSHER_KEY, {
       cluster: env.VITE_PUSHER_CLUSTER,
       authEndpoint: `${env.VITE_BACKEND_HOST}/pusher/auth`,
       authorizer: ({ name }) => ({
         authorize: async (socketId, callback) => {
           try {
-            const token = await getAccessTokenSilently();
+            const token = await getTokenRef.current();
             const formData = new URLSearchParams();
             formData.append('socket_id', socketId);
             formData.append('channel_name', name);
@@ -35,14 +46,15 @@ export const usePusherInstance = () => {
               throw new Error(await res.text());
             }
 
-            const json = (await res.json()) as { auth?: string };
-            const { auth } = json;
-
-            if (!auth) {
+            const json = (await res.json()) as {
+              auth?: string;
+              channel_data?: string;
+            };
+            if (!json.auth) {
               throw new Error('Could not authorize');
             }
 
-            callback(null, { auth });
+            callback(null, { ...json, auth: json.auth });
           } catch (e) {
             if (e instanceof Error) {
               callback(e, null);
@@ -53,13 +65,21 @@ export const usePusherInstance = () => {
         },
       }),
     });
-  }, [getAccessTokenSilently]);
 
-  useEffect(() => {
+    instance.connection.bind('connected', () => {
+      console.debug('[Pusher] connected');
+    });
+    instance.connection.bind('error', (err: unknown) => {
+      console.error('[Pusher] connection error', err);
+    });
+
+    setPusher(instance);
+
     return () => {
-      pusher.disconnect();
+      instance.disconnect();
+      setPusher(null);
     };
-  }, [pusher]);
+  }, [isAuthenticated, isLoading]);
 
   return pusher;
 };

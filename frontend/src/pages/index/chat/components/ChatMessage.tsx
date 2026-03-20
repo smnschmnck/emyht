@@ -1,6 +1,6 @@
 import { IconButton } from '@/components/ui/IconButton';
 import { ChatMessage as ChatMessageType } from '@/hooks/api/messages';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useCurrentUser } from '@/hooks/api/user';
 import { formatTimestamp } from '@/utils/dateUtils';
 import {
   ArrowsPointingOutIcon,
@@ -119,16 +119,16 @@ const MediaContent = ({ message }: { message: ChatMessageType }) => {
 };
 
 export const ChatMessage: FC<{ message: ChatMessageType }> = ({ message }) => {
-  const { user } = useAuth0();
+  const { data: currentUser } = useCurrentUser();
   const [hideBlockedContent, setHideBlockedContent] = useState(true);
 
   const isBlockedContentHidden = hideBlockedContent && message.blocked;
 
-  if (!user) {
+  if (!currentUser) {
     return <></>;
   }
 
-  if (user.sub === message.senderId) {
+  if (currentUser.uuid === message.senderId) {
     return (
       <li className="flex w-full flex-col items-end gap-1">
         {message.messageType !== 'plaintext' && (

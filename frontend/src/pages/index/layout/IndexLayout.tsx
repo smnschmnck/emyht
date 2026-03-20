@@ -2,6 +2,7 @@ import { FullPageLoader } from '@/components/FullPageLoader';
 import { useChats } from '@/hooks/api/chats';
 import { useContactRequests } from '@/hooks/api/contacts';
 import { useChatMessages } from '@/hooks/api/messages';
+import { useCurrentUser } from '@/hooks/api/user';
 import { usePusher } from '@/hooks/pusher/usePusher';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Outlet, useNavigate } from '@tanstack/react-router';
@@ -27,7 +28,6 @@ export const IndexLayout: FC = () => {
     isAuthenticated,
     isLoading: isAuthLoading,
     loginWithRedirect,
-    user,
   } = useAuth0();
   const authError = useAuthError();
   const navigate = useNavigate();
@@ -38,6 +38,7 @@ export const IndexLayout: FC = () => {
   const { refetch: refetchMessages } = useChatMessages(chatId);
   const { refetch: refetchContactRequests } = useContactRequests();
   const { subscribeToUserFeed, subscribeToAllChats } = usePusher();
+  const { data: currentUser } = useCurrentUser();
 
   useEffect(() => {
     if (authError) {
@@ -51,7 +52,7 @@ export const IndexLayout: FC = () => {
 
   useEffect(() => {
     subscribeToUserFeed({
-      uuid: user?.sub,
+      uuid: currentUser?.uuid,
       refetchChats,
       refetchContactRequests,
     });
@@ -70,7 +71,7 @@ export const IndexLayout: FC = () => {
     });
   }, [
     chats,
-    user,
+    currentUser,
     chatId,
     subscribeToUserFeed,
     refetchChats,

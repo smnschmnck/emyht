@@ -7,11 +7,8 @@ export const useChatInfo = ({ chatId }: { chatId?: string }) => {
 
   return useQuery({
     queryKey: ['chatInfo', chatId],
+    enabled: Boolean(chatId),
     queryFn: async () => {
-      if (!chatId) {
-        return undefined;
-      }
-
       const res = await authFetch(`/chatInfo/${chatId}`);
 
       if (!res.ok) {
