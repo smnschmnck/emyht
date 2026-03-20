@@ -31,10 +31,10 @@ importers:
         version: 5.90.27
       '@tanstack/react-query':
         specifier: ^5.51.23
-        version: 5.91.2(react@19.2.4)
+        version: 5.91.3(react@19.2.4)
       '@tanstack/react-query-persist-client':
         specifier: ^5.59.19
-        version: 5.90.27(@tanstack/react-query@5.91.2(react@19.2.4))(react@19.2.4)
+        version: 5.90.27(@tanstack/react-query@5.91.3(react@19.2.4))(react@19.2.4)
       '@tanstack/react-router':
         specifier: 1.167.5
         version: 1.167.5(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1794,8 +1794,8 @@ packages:
       '@tanstack/react-query': ^5.91.2
       react: ^18 || ^19
 
-  '@tanstack/react-query@5.91.2':
-    resolution: {integrity: sha512-GClLPzbM57iFXv+FlvOUL56XVe00PxuTaVEyj1zAObhRiKF008J5vedmaq7O6ehs+VmPHe8+PUQhMuEyv8d9wQ==}
+  '@tanstack/react-query@5.91.3':
+    resolution: {integrity: sha512-D8jsCexxS5crZxAeiH6VlLHOUzmHOxeW5c11y8rZu0c34u/cy18hUKQXA/gn1Ila3ZIFzP+Pzv76YnliC0EtZQ==}
     peerDependencies:
       react: ^18 || ^19
 
@@ -1987,8 +1987,8 @@ packages:
     resolution: {integrity: sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==}
     engines: {node: 18 || 20 || >=22}
 
-  baseline-browser-mapping@2.10.8:
-    resolution: {integrity: sha512-PCLz/LXGBsNTErbtB6i5u4eLpHeMfi93aUv5duMmj6caNu6IphS4q6UevDnL36sZQv9lrP11dbPKGMaXPwMKfQ==}
+  baseline-browser-mapping@2.10.9:
+    resolution: {integrity: sha512-OZd0e2mU11ClX8+IdXe3r0dbqMEznRiT4TfbhYIbcRPZkqJ7Qwer8ij3GZAmLsRKa+II9V1v5czCkvmHH3XZBg==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -5048,13 +5048,13 @@ snapshots:
       '@tanstack/query-core': 5.91.2
       '@tanstack/query-persist-client-core': 5.92.4
 
-  '@tanstack/react-query-persist-client@5.90.27(@tanstack/react-query@5.91.2(react@19.2.4))(react@19.2.4)':
+  '@tanstack/react-query-persist-client@5.90.27(@tanstack/react-query@5.91.3(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@tanstack/query-persist-client-core': 5.92.4
-      '@tanstack/react-query': 5.91.2(react@19.2.4)
+      '@tanstack/react-query': 5.91.3(react@19.2.4)
       react: 19.2.4
 
-  '@tanstack/react-query@5.91.2(react@19.2.4)':
+  '@tanstack/react-query@5.91.3(react@19.2.4)':
     dependencies:
       '@tanstack/query-core': 5.91.2
       react: 19.2.4
@@ -5296,7 +5296,7 @@ snapshots:
 
   balanced-match@4.0.4: {}
 
-  baseline-browser-mapping@2.10.8: {}
+  baseline-browser-mapping@2.10.9: {}
 
   baseline-browser-mapping@2.8.20: {}
 
@@ -5327,7 +5327,7 @@ snapshots:
 
   browserslist@4.28.1:
     dependencies:
-      baseline-browser-mapping: 2.10.8
+      baseline-browser-mapping: 2.10.9
       caniuse-lite: 1.0.30001780
       electron-to-chromium: 1.5.321
       node-releases: 2.0.36
