@@ -1,4 +1,4 @@
-import { fetchWithDefaults } from '@/utils/fetch';
+import { useAuthFetch } from '@/hooks/useAuthFetch';
 import { useQuery } from '@tanstack/react-query';
 
 export type ChatMessage = {
@@ -14,6 +14,8 @@ export type ChatMessage = {
 };
 
 export const useChatMessages = (chatId?: string) => {
+  const authFetch = useAuthFetch();
+
   return useQuery({
     queryKey: ['chatMessages', chatId],
     queryFn: async () => {
@@ -21,7 +23,7 @@ export const useChatMessages = (chatId?: string) => {
         return [];
       }
 
-      const res = await fetchWithDefaults(`/chatMessages/${chatId}`);
+      const res = await authFetch(`/chatMessages/${chatId}`);
 
       if (!res.ok) {
         throw new Error(await res.text());

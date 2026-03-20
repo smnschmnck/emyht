@@ -183,14 +183,6 @@ func (ns NullMessageType) Value() (driver.Value, error) {
 	return string(ns.MessageType), nil
 }
 
-type ChangeEmail struct {
-	ID                int32            `json:"id"`
-	UserID            pgtype.UUID      `json:"userId"`
-	NewEmail          string           `json:"newEmail"`
-	ConfirmationToken string           `json:"confirmationToken"`
-	CreatedAt         pgtype.Timestamp `json:"createdAt"`
-}
-
 type Chat struct {
 	ID            pgtype.UUID      `json:"id"`
 	Name          string           `json:"name"`
@@ -219,16 +211,13 @@ type Friend struct {
 }
 
 type User struct {
-	ID          pgtype.UUID      `json:"id"`
-	Email       string           `json:"email"`
-	Username    string           `json:"username"`
-	Password    string           `json:"password"`
-	Salt        string           `json:"salt"`
-	IsAdmin     bool             `json:"isAdmin"`
-	EmailActive bool             `json:"emailActive"`
-	EmailToken  *string          `json:"emailToken"`
-	PictureUrl  string           `json:"pictureUrl"`
-	CreatedAt   pgtype.Timestamp `json:"createdAt"`
+	ID         pgtype.UUID      `json:"id"`
+	Auth0Sub   string           `json:"auth0Sub"`
+	Email      string           `json:"email"`
+	Username   string           `json:"username"`
+	IsAdmin    bool             `json:"isAdmin"`
+	PictureUrl string           `json:"pictureUrl"`
+	CreatedAt  pgtype.Timestamp `json:"createdAt"`
 }
 
 type UserBlock struct {

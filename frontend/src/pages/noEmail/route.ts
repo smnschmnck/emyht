@@ -1,26 +1,15 @@
-import { getUserData } from '@/api/user';
-import { createRoute, redirect } from '@tanstack/react-router';
-import { mainLayoutRoute } from '../mainLayout/route';
+import { rootRoute } from '@/router/config';
+import { createRoute } from '@tanstack/react-router';
+import { z } from 'zod';
 import { NoEmailPage } from './NoEmailPage';
-import { FullPageLoader } from '@/components/FullPageLoader';
+
+const noEmailSearchSchema = z.object({
+  email: z.string().optional(),
+});
 
 export const noEmailRoute = createRoute({
-  getParentRoute: () => mainLayoutRoute,
+  getParentRoute: () => rootRoute,
   path: '/no-email',
+  validateSearch: noEmailSearchSchema,
   component: NoEmailPage,
-  beforeLoad: async () => {
-    let userData;
-    try {
-      userData = await getUserData();
-    } catch {
-      throw redirect({ to: '/sign-in' });
-    }
-
-    if (userData.emailActive) {
-      throw redirect({ to: '/' });
-    }
-
-    return userData;
-  },
-  pendingComponent: FullPageLoader,
 });

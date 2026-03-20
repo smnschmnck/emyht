@@ -28,26 +28,6 @@ func (q *Queries) AcceptFriendRequest(ctx context.Context, arg AcceptFriendReque
 	return err
 }
 
-const activateEmail = `-- name: ActivateEmail :one
-UPDATE users
-SET email_active = true,
-    email_token = $1
-WHERE email_token = $2
-RETURNING email_active
-`
-
-type ActivateEmailParams struct {
-	EmailToken   *string `json:"emailToken"`
-	EmailToken_2 *string `json:"emailToken2"`
-}
-
-func (q *Queries) ActivateEmail(ctx context.Context, arg ActivateEmailParams) (bool, error) {
-	row := q.db.QueryRow(ctx, activateEmail, arg.EmailToken, arg.EmailToken_2)
-	var email_active bool
-	err := row.Scan(&email_active)
-	return email_active, err
-}
-
 const blockUser = `-- name: BlockUser :exec
 INSERT INTO user_blocks (blocker_id, blocked_id)
 VALUES ($1, $2) ON CONFLICT (blocker_id, blocked_id) DO NOTHING
@@ -247,78 +227,6 @@ func (q *Queries) CreateOneOnOneChat(ctx context.Context) (pgtype.UUID, error) {
 	return id, err
 }
 
-const createUser = `-- name: CreateUser :one
-INSERT INTO users (
-        email,
-        username,
-        password,
-        salt,
-        is_admin,
-        email_active,
-        email_token,
-        picture_url
-    )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING id,
-    email,
-    username,
-    password,
-    salt,
-    is_admin,
-    email_active,
-    email_token,
-    picture_url
-`
-
-type CreateUserParams struct {
-	Email       string  `json:"email"`
-	Username    string  `json:"username"`
-	Password    string  `json:"password"`
-	Salt        string  `json:"salt"`
-	IsAdmin     bool    `json:"isAdmin"`
-	EmailActive bool    `json:"emailActive"`
-	EmailToken  *string `json:"emailToken"`
-	PictureUrl  string  `json:"pictureUrl"`
-}
-
-type CreateUserRow struct {
-	ID          pgtype.UUID `json:"id"`
-	Email       string      `json:"email"`
-	Username    string      `json:"username"`
-	Password    string      `json:"password"`
-	Salt        string      `json:"salt"`
-	IsAdmin     bool        `json:"isAdmin"`
-	EmailActive bool        `json:"emailActive"`
-	EmailToken  *string     `json:"emailToken"`
-	PictureUrl  string      `json:"pictureUrl"`
-}
-
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
-	row := q.db.QueryRow(ctx, createUser,
-		arg.Email,
-		arg.Username,
-		arg.Password,
-		arg.Salt,
-		arg.IsAdmin,
-		arg.EmailActive,
-		arg.EmailToken,
-		arg.PictureUrl,
-	)
-	var i CreateUserRow
-	err := row.Scan(
-		&i.ID,
-		&i.Email,
-		&i.Username,
-		&i.Password,
-		&i.Salt,
-		&i.IsAdmin,
-		&i.EmailActive,
-		&i.EmailToken,
-		&i.PictureUrl,
-	)
-	return i, err
-}
-
 const declineFriendRequest = `-- name: DeclineFriendRequest :exec
 DELETE FROM friends
 WHERE sender_id = $1
@@ -332,16 +240,6 @@ type DeclineFriendRequestParams struct {
 
 func (q *Queries) DeclineFriendRequest(ctx context.Context, arg DeclineFriendRequestParams) error {
 	_, err := q.db.Exec(ctx, declineFriendRequest, arg.SenderID, arg.ReceiverID)
-	return err
-}
-
-const deleteChangeEmail = `-- name: DeleteChangeEmail :exec
-DELETE FROM change_email
-WHERE confirmation_token = $1
-`
-
-func (q *Queries) DeleteChangeEmail(ctx context.Context, confirmationToken string) error {
-	_, err := q.db.Exec(ctx, deleteChangeEmail, confirmationToken)
 	return err
 }
 
@@ -654,19 +552,6 @@ func (q *Queries) GetChatsForUser(ctx context.Context, userID pgtype.UUID) ([]Ge
 	return items, nil
 }
 
-const getEmailActiveByToken = `-- name: GetEmailActiveByToken :one
-SELECT email_active
-FROM users
-WHERE email_token = $1
-`
-
-func (q *Queries) GetEmailActiveByToken(ctx context.Context, emailToken *string) (bool, error) {
-	row := q.db.QueryRow(ctx, getEmailActiveByToken, emailToken)
-	var email_active bool
-	err := row.Scan(&email_active)
-	return email_active, err
-}
-
 const getGroupChatUserCount = `-- name: GetGroupChatUserCount :one
 SELECT count(user_id)
 FROM user_chat
@@ -869,7 +754,7 @@ SELECT sender_id,
     u.email AS sender_email
 FROM friends
     JOIN users u ON sender_id = u.id
-    LEFT JOIN user_blocks ub ON sender_id = ub.blocked_id -- Assuming blocked_id is the ID of the person who was blocked
+    LEFT JOIN user_blocks ub ON sender_id = ub.blocked_id
 WHERE receiver_id = $1
     AND status = 'pending'
     AND ub.blocked_id IS NULL
@@ -943,24 +828,20 @@ func (q *Queries) GetSentContactRequests(ctx context.Context, senderID pgtype.UU
 
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id,
+    auth0_sub,
     email,
     username,
-    password,
-    salt,
-    is_admin,
-    email_active
+    is_admin
 FROM users
 WHERE email = $1
 `
 
 type GetUserByEmailRow struct {
-	ID          pgtype.UUID `json:"id"`
-	Email       string      `json:"email"`
-	Username    string      `json:"username"`
-	Password    string      `json:"password"`
-	Salt        string      `json:"salt"`
-	IsAdmin     bool        `json:"isAdmin"`
-	EmailActive bool        `json:"emailActive"`
+	ID       pgtype.UUID `json:"id"`
+	Auth0Sub string      `json:"auth0Sub"`
+	Email    string      `json:"email"`
+	Username string      `json:"username"`
+	IsAdmin  bool        `json:"isAdmin"`
 }
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
@@ -968,38 +849,66 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 	var i GetUserByEmailRow
 	err := row.Scan(
 		&i.ID,
+		&i.Auth0Sub,
 		&i.Email,
 		&i.Username,
-		&i.Password,
-		&i.Salt,
 		&i.IsAdmin,
-		&i.EmailActive,
+	)
+	return i, err
+}
+
+const getUserBySub = `-- name: GetUserBySub :one
+SELECT id,
+    auth0_sub,
+    email,
+    username,
+    is_admin,
+    picture_url
+FROM users
+WHERE auth0_sub = $1
+`
+
+type GetUserBySubRow struct {
+	ID         pgtype.UUID `json:"id"`
+	Auth0Sub   string      `json:"auth0Sub"`
+	Email      string      `json:"email"`
+	Username   string      `json:"username"`
+	IsAdmin    bool        `json:"isAdmin"`
+	PictureUrl string      `json:"pictureUrl"`
+}
+
+func (q *Queries) GetUserBySub(ctx context.Context, auth0Sub string) (GetUserBySubRow, error) {
+	row := q.db.QueryRow(ctx, getUserBySub, auth0Sub)
+	var i GetUserBySubRow
+	err := row.Scan(
+		&i.ID,
+		&i.Auth0Sub,
+		&i.Email,
+		&i.Username,
+		&i.IsAdmin,
+		&i.PictureUrl,
 	)
 	return i, err
 }
 
 const getUserByUUID = `-- name: GetUserByUUID :one
 SELECT id,
+    auth0_sub,
     email,
     username,
-    password,
-    salt,
     is_admin,
-    email_active,
     picture_url
 FROM users
 WHERE id = $1
 `
 
 type GetUserByUUIDRow struct {
-	ID          pgtype.UUID `json:"id"`
-	Email       string      `json:"email"`
-	Username    string      `json:"username"`
-	Password    string      `json:"password"`
-	Salt        string      `json:"salt"`
-	IsAdmin     bool        `json:"isAdmin"`
-	EmailActive bool        `json:"emailActive"`
-	PictureUrl  string      `json:"pictureUrl"`
+	ID         pgtype.UUID `json:"id"`
+	Auth0Sub   string      `json:"auth0Sub"`
+	Email      string      `json:"email"`
+	Username   string      `json:"username"`
+	IsAdmin    bool        `json:"isAdmin"`
+	PictureUrl string      `json:"pictureUrl"`
 }
 
 func (q *Queries) GetUserByUUID(ctx context.Context, id pgtype.UUID) (GetUserByUUIDRow, error) {
@@ -1007,12 +916,10 @@ func (q *Queries) GetUserByUUID(ctx context.Context, id pgtype.UUID) (GetUserByU
 	var i GetUserByUUIDRow
 	err := row.Scan(
 		&i.ID,
+		&i.Auth0Sub,
 		&i.Email,
 		&i.Username,
-		&i.Password,
-		&i.Salt,
 		&i.IsAdmin,
-		&i.EmailActive,
 		&i.PictureUrl,
 	)
 	return i, err
@@ -1157,6 +1064,27 @@ func (q *Queries) IsGroupChat(ctx context.Context, id pgtype.UUID) (bool, error)
 	return column_1, err
 }
 
+const isUserInChat = `-- name: IsUserInChat :one
+SELECT EXISTS (
+        SELECT 1
+        FROM user_chat
+        WHERE user_id = $1
+            AND chat_id = $2
+    )
+`
+
+type IsUserInChatParams struct {
+	UserID pgtype.UUID `json:"userId"`
+	ChatID pgtype.UUID `json:"chatId"`
+}
+
+func (q *Queries) IsUserInChat(ctx context.Context, arg IsUserInChatParams) (bool, error) {
+	row := q.db.QueryRow(ctx, isUserInChat, arg.UserID, arg.ChatID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const leaveGroupChat = `-- name: LeaveGroupChat :exec
 DELETE FROM user_chat
 WHERE chat_id = $1
@@ -1204,54 +1132,6 @@ type UnblockUserParams struct {
 func (q *Queries) UnblockUser(ctx context.Context, arg UnblockUserParams) error {
 	_, err := q.db.Exec(ctx, unblockUser, arg.BlockerID, arg.BlockedID)
 	return err
-}
-
-const updateEmailFromChangeEmail = `-- name: UpdateEmailFromChangeEmail :one
-UPDATE users u
-SET email_active = true,
-    email_token = $1,
-    email = (
-        SELECT c.new_email
-        FROM change_email c
-        WHERE c.confirmation_token = $2
-    )
-WHERE u.user_id = (
-        SELECT c.user_id
-        FROM change_email c
-        WHERE c.confirmation_token = $2
-    )
-RETURNING u.email
-`
-
-type UpdateEmailFromChangeEmailParams struct {
-	EmailToken        *string `json:"emailToken"`
-	ConfirmationToken string  `json:"confirmationToken"`
-}
-
-func (q *Queries) UpdateEmailFromChangeEmail(ctx context.Context, arg UpdateEmailFromChangeEmailParams) (string, error) {
-	row := q.db.QueryRow(ctx, updateEmailFromChangeEmail, arg.EmailToken, arg.ConfirmationToken)
-	var email string
-	err := row.Scan(&email)
-	return email, err
-}
-
-const updateEmailToken = `-- name: UpdateEmailToken :one
-UPDATE users
-SET email_token = $1
-WHERE email = $2
-RETURNING email_token
-`
-
-type UpdateEmailTokenParams struct {
-	EmailToken *string `json:"emailToken"`
-	Email      string  `json:"email"`
-}
-
-func (q *Queries) UpdateEmailToken(ctx context.Context, arg UpdateEmailTokenParams) (*string, error) {
-	row := q.db.QueryRow(ctx, updateEmailToken, arg.EmailToken, arg.Email)
-	var email_token *string
-	err := row.Scan(&email_token)
-	return email_token, err
 }
 
 const updateLastMessageID = `-- name: UpdateLastMessageID :one
@@ -1308,31 +1188,56 @@ func (q *Queries) UpdateUsername(ctx context.Context, arg UpdateUsernameParams) 
 	return username, err
 }
 
-const upsertChangeEmail = `-- name: UpsertChangeEmail :one
-INSERT INTO change_email (user_id, new_email, confirmation_token)
-VALUES ($1, $2, $3) ON CONFLICT (user_id) DO
-UPDATE
-SET new_email = $2,
-    confirmation_token = $3
-RETURNING confirmation_token,
-    new_email
+const upsertUser = `-- name: UpsertUser :one
+INSERT INTO users (
+        auth0_sub,
+        email,
+        username,
+        picture_url
+    )
+VALUES ($1, $2, $3, $4)
+ON CONFLICT (auth0_sub) DO UPDATE
+SET email = EXCLUDED.email
+RETURNING id,
+    auth0_sub,
+    email,
+    username,
+    is_admin,
+    picture_url
 `
 
-type UpsertChangeEmailParams struct {
-	UserID            pgtype.UUID `json:"userId"`
-	NewEmail          string      `json:"newEmail"`
-	ConfirmationToken string      `json:"confirmationToken"`
+type UpsertUserParams struct {
+	Auth0Sub   string `json:"auth0Sub"`
+	Email      string `json:"email"`
+	Username   string `json:"username"`
+	PictureUrl string `json:"pictureUrl"`
 }
 
-type UpsertChangeEmailRow struct {
-	ConfirmationToken string `json:"confirmationToken"`
-	NewEmail          string `json:"newEmail"`
+type UpsertUserRow struct {
+	ID         pgtype.UUID `json:"id"`
+	Auth0Sub   string      `json:"auth0Sub"`
+	Email      string      `json:"email"`
+	Username   string      `json:"username"`
+	IsAdmin    bool        `json:"isAdmin"`
+	PictureUrl string      `json:"pictureUrl"`
 }
 
-func (q *Queries) UpsertChangeEmail(ctx context.Context, arg UpsertChangeEmailParams) (UpsertChangeEmailRow, error) {
-	row := q.db.QueryRow(ctx, upsertChangeEmail, arg.UserID, arg.NewEmail, arg.ConfirmationToken)
-	var i UpsertChangeEmailRow
-	err := row.Scan(&i.ConfirmationToken, &i.NewEmail)
+func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) (UpsertUserRow, error) {
+	row := q.db.QueryRow(ctx, upsertUser,
+		arg.Auth0Sub,
+		arg.Email,
+		arg.Username,
+		arg.PictureUrl,
+	)
+	var i UpsertUserRow
+	err := row.Scan(
+		&i.ID,
+		&i.Auth0Sub,
+		&i.Email,
+		&i.Username,
+		&i.IsAdmin,
+		&i.PictureUrl,
+	)
 	return i, err
 }
 

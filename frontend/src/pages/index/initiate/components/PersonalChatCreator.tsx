@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/Button';
 import { HttpError } from '@/errors/httpError/httpError';
 import { useChats } from '@/hooks/api/chats';
-import { fetchWithDefaults } from '@/utils/fetch';
+import { useAuthFetch } from '@/hooks/useAuthFetch';
 import { useMutation } from '@tanstack/react-query';
 import { FC } from 'react';
 import { toast } from 'sonner';
@@ -14,9 +14,10 @@ export const PersonalChatCreator: FC<PersonalChatCreatorProps> = ({
   selectedUsers,
 }) => {
   const { refetch: refetchChats } = useChats();
+  const authFetch = useAuthFetch();
   const { mutate: createChat, isPending: isCreatingChat } = useMutation({
     mutationFn: async () => {
-      const res = await fetchWithDefaults('/startOneOnOneChat', {
+      const res = await authFetch('/startOneOnOneChat', {
         method: 'post',
         body: JSON.stringify({
           participantUUID: selectedUsers[0],

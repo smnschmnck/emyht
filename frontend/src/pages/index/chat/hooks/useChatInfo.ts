@@ -1,16 +1,15 @@
 import { HttpError } from '@/errors/httpError/httpError';
-import { fetchWithDefaults } from '@/utils/fetch';
+import { useAuthFetch } from '@/hooks/useAuthFetch';
 import { useQuery } from '@tanstack/react-query';
 
 export const useChatInfo = ({ chatId }: { chatId?: string }) => {
+  const authFetch = useAuthFetch();
+
   return useQuery({
     queryKey: ['chatInfo', chatId],
+    enabled: Boolean(chatId),
     queryFn: async () => {
-      if (!chatId) {
-        return undefined;
-      }
-
-      const res = await fetchWithDefaults(`/chatInfo/${chatId}`);
+      const res = await authFetch(`/chatInfo/${chatId}`);
 
       if (!res.ok) {
         throw new HttpError({

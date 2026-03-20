@@ -3,82 +3,91 @@ import { Spinner } from '@/components/ui/Spinner';
 import { HttpError } from '@/errors/httpError/httpError';
 import { useChats } from '@/hooks/api/chats';
 import { useChatMessages } from '@/hooks/api/messages';
-import { fetchWithDefaults } from '@/utils/fetch';
+import { useAuthFetch } from '@/hooks/useAuthFetch';
 import { getFileType } from '@/utils/fileType';
 import { PaperAirplaneIcon, PaperClipIcon } from '@heroicons/react/24/solid';
 import { useMutation } from '@tanstack/react-query';
-import { FC, FormEvent, useState } from 'react';
+import { FC, FormEvent, useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
-const getFilePutUrl = async (file: File) => {
-  const contentLength = file.size;
+const usePostMessage = () => {
+  const authFetch = useAuthFetch();
 
-  const res = await fetchWithDefaults('/messageMediaPutURL', {
-    method: 'post',
-    body: JSON.stringify({ contentLength, fileName: file.name }),
-  });
+  const getFilePutUrl = useCallback(
+    async (file: File) => {
+      const res = await authFetch('/messageMediaPutURL', {
+        method: 'post',
+        body: JSON.stringify({ contentLength: file.size, fileName: file.name }),
+      });
 
-  if (!res.ok) {
-    console.error(await res.text());
-  }
+      if (!res.ok) {
+        console.error(await res.text());
+      }
 
-  const json = await res.json();
+      return (await res.json()) as { fileID: string; presignedPutURL: string };
+    },
+    [authFetch]
+  );
 
-  return json as { fileID: string; presignedPutURL: string };
-};
+  const postMessage = useCallback(
+    async ({
+      fileId,
+      chatId,
+      textContent,
+      messageType,
+    }: {
+      fileId?: string;
+      chatId: string;
+      textContent?: string;
+      messageType: 'plaintext' | 'image' | 'video' | 'audio' | 'data';
+    }) => {
+      const message = {
+        chatID: chatId,
+        textContent,
+        messageType,
+        fileID: fileId,
+      };
 
-const sendMediaMessage = async ({
-  file,
-  chatId,
-  textContent,
-}: {
-  file: File;
-  chatId: string;
-  textContent?: string;
-}) => {
-  const { presignedPutURL, fileID } = await getFilePutUrl(file);
-  const { ok: uploadSucess } = await fetch(presignedPutURL, {
-    method: 'PUT',
-    body: file,
-  });
-  if (!uploadSucess) {
-    throw new Error('Upload failed');
-  }
+      return authFetch('/message', {
+        method: 'post',
+        body: JSON.stringify(message),
+      });
+    },
+    [authFetch]
+  );
 
-  const fileType = getFileType(file);
+  const sendMediaMessage = useCallback(
+    async ({
+      file,
+      chatId,
+      textContent,
+    }: {
+      file: File;
+      chatId: string;
+      textContent?: string;
+    }) => {
+      const { presignedPutURL, fileID } = await getFilePutUrl(file);
+      const { ok: uploadSucess } = await fetch(presignedPutURL, {
+        method: 'PUT',
+        body: file,
+      });
+      if (!uploadSucess) {
+        throw new Error('Upload failed');
+      }
 
-  return await postMessage({
-    fileId: fileID,
-    chatId,
-    messageType: fileType,
-    textContent,
-  });
-};
+      const fileType = getFileType(file);
 
-const postMessage = async ({
-  fileId,
-  chatId,
-  textContent,
-  messageType,
-}: {
-  fileId?: string;
-  chatId: string;
-  textContent?: string;
-  messageType: 'plaintext' | 'image' | 'video' | 'audio' | 'data';
-}) => {
-  const message = {
-    chatID: chatId,
-    textContent,
-    messageType,
-    fileID: fileId,
-  };
+      return postMessage({
+        fileId: fileID,
+        chatId,
+        messageType: fileType,
+        textContent,
+      });
+    },
+    [getFilePutUrl, postMessage]
+  );
 
-  const res = await fetchWithDefaults('/message', {
-    method: 'post',
-    body: JSON.stringify(message),
-  });
-
-  return res;
+  return { postMessage, sendMediaMessage };
 };
 
 export const MessageInput: FC<{
@@ -91,6 +100,7 @@ export const MessageInput: FC<{
   const [textContent, setTextContent] = useState('');
   const { refetch: refetchChats } = useChats();
   const { refetch: refetchChatMessages } = useChatMessages(chatId);
+  const { postMessage, sendMediaMessage } = usePostMessage();
 
   const { mutate: sendMessage, isPending: isSending } = useMutation({
     mutationFn: async (event: FormEvent) => {

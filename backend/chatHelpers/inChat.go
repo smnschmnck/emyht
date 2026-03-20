@@ -2,6 +2,7 @@ package chatHelpers
 
 import (
 	"chat/db"
+	"chat/queries"
 	"context"
 	"errors"
 	"log"
@@ -136,14 +137,12 @@ func GetChatsByUUID(uuid pgtype.UUID) ([]Chat, error) {
 }
 
 func IsUserInChat(uuid pgtype.UUID, chatID pgtype.UUID) (bool, error) {
-	chats, err := GetChatsByUUID(uuid)
+	conn := db.GetDB()
+	inChat, err := conn.IsUserInChat(context.Background(), queries.IsUserInChatParams{UserID: uuid, ChatID: chatID})
 	if err != nil {
+		log.Println(err)
 		return false, err
 	}
-	for _, chat := range chats {
-		if chat.ID == chatID.String() {
-			return true, nil
-		}
-	}
-	return false, nil
+
+	return inChat, nil
 }

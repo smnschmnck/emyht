@@ -1,7 +1,7 @@
 package userSettingsService
 
 import (
-	"chat/authService"
+	"chat/middleware"
 	"chat/s3Helpers"
 	"chat/userService"
 	"net/http"
@@ -16,12 +16,7 @@ import (
 var validate = validator.New()
 
 func GetChangeProfilePicturePutURL(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -61,12 +56,7 @@ func GetChangeProfilePicturePutURL(c *echo.Context) error {
 }
 
 func ConfirmChangedProfilePic(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}

@@ -4,19 +4,11 @@ import { FilePickerButton } from '@/components/ui/FilePickerButton';
 import { Input } from '@/components/ui/Input';
 import { HttpError } from '@/errors/httpError/httpError';
 import { useChats } from '@/hooks/api/chats';
-import { fetchWithDefaults } from '@/utils/fetch';
-import { uploadGroupChatPicture } from '@/utils/groupChat/picture';
+import { useAuthFetch } from '@/hooks/useAuthFetch';
+import { useUploadGroupChatPicture } from '@/utils/groupChat/picture';
 import { useMutation } from '@tanstack/react-query';
 import { FC, FormEvent, useState } from 'react';
 import { toast } from 'sonner';
-
-const uploadPicture = async (selectedPicture: File | null) => {
-  try {
-    return await uploadGroupChatPicture(selectedPicture);
-  } catch {
-    return { fileID: undefined };
-  }
-};
 
 type GroupChatCreatorProps = {
   selectedUsers: string[];
@@ -31,6 +23,17 @@ export const GroupChatCreator: FC<GroupChatCreatorProps> = ({
     ? URL.createObjectURL(selectedPicture)
     : undefined;
   const { refetch: refetchChats } = useChats();
+  const authFetch = useAuthFetch();
+  const uploadGroupChatPicture = useUploadGroupChatPicture();
+
+  const uploadPicture = async (selectedPicture: File | null) => {
+    try {
+      return await uploadGroupChatPicture(selectedPicture);
+    } catch {
+      return { fileID: undefined };
+    }
+  };
+
   const { mutate: createChat, isPending: isCreatingChat } = useMutation({
     mutationFn: async (event: FormEvent) => {
       event.preventDefault();
@@ -40,7 +43,7 @@ export const GroupChatCreator: FC<GroupChatCreatorProps> = ({
       }
 
       const { fileID } = await uploadPicture(selectedPicture);
-      const res = await fetchWithDefaults('/startGroupChat', {
+      const res = await authFetch('/startGroupChat', {
         method: 'post',
         body: JSON.stringify({
           participantUUIDs: selectedUsers,
