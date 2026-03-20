@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/pusher/pusher-http-go/v5"
 )
 
@@ -23,7 +23,7 @@ var PusherClient = pusher.Client{
 	Secure:  true,
 }
 
-func PusherAuth(c echo.Context) error {
+func PusherAuth(c *echo.Context) error {
 	sessionID, responseErr := authService.GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")

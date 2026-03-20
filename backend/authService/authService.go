@@ -17,7 +17,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -32,7 +32,7 @@ type Session struct {
 	UserID    string `json:"userID"`
 }
 
-func getBearer(c echo.Context) (string, error) {
+func getBearer(c *echo.Context) (string, error) {
 	bearerArr := strings.Split(c.Request().Header.Get("authorization"), "Bearer ")
 
 	if len(bearerArr) <= 1 {
@@ -43,7 +43,7 @@ func getBearer(c echo.Context) (string, error) {
 	return sessionID, nil
 }
 
-func getSessionCookieToken(c echo.Context) (string, error) {
+func getSessionCookieToken(c *echo.Context) (string, error) {
 	cookie, err := c.Cookie("SESSION")
 
 	if err != nil {
@@ -53,7 +53,7 @@ func getSessionCookieToken(c echo.Context) (string, error) {
 	return cookie.Value, nil
 }
 
-func GetSessionToken(c echo.Context) (string, error) {
+func GetSessionToken(c *echo.Context) (string, error) {
 	cookieToken, err := getSessionCookieToken(c)
 	if err != nil {
 		return getBearer(c)
@@ -71,7 +71,7 @@ type UserRes struct {
 	ProfilePictureUrl string `json:"profilePictureUrl"`
 }
 
-func GetUserBySession(c echo.Context) error {
+func GetUserBySession(c *echo.Context) error {
 	sessionID, responseErr := GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
@@ -121,7 +121,7 @@ func startSession(uuid string) (Session, error) {
 	return tmpSession, nil
 }
 
-func Register(c echo.Context) error {
+func Register(c *echo.Context) error {
 	type ReqUser struct {
 		Email      string `json:"email" validate:"required"`
 		Username   string `json:"username" validate:"required"`
@@ -177,7 +177,7 @@ func Register(c echo.Context) error {
 	return c.JSON(http.StatusOK, session)
 }
 
-func ResendVerificationEmail(c echo.Context) error {
+func ResendVerificationEmail(c *echo.Context) error {
 	sessionID, responseErr := GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
@@ -201,7 +201,7 @@ func ResendVerificationEmail(c echo.Context) error {
 	return c.String(http.StatusOK, "SUCCESS")
 }
 
-func VerifyEmail(c echo.Context) error {
+func VerifyEmail(c *echo.Context) error {
 	type EmailToken struct {
 		Token string `json:"emailToken" validate:"required"`
 	}
@@ -241,7 +241,7 @@ func createSessionCookie(value string, expirationDate time.Time) *http.Cookie {
 	return cookie
 }
 
-func Authenticate(c echo.Context) error {
+func Authenticate(c *echo.Context) error {
 	type Credentials struct {
 		Email      string `json:"email" validate:"required"`
 		Password   string `json:"password" validate:"required"`
@@ -281,7 +281,7 @@ func Authenticate(c echo.Context) error {
 	return c.JSON(http.StatusOK, session)
 }
 
-func ChangeEmail(c echo.Context) error {
+func ChangeEmail(c *echo.Context) error {
 	type ChangeReq struct {
 		NewEmail string `json:"newEmail" validate:"required"`
 	}
@@ -332,7 +332,7 @@ func ChangeEmail(c echo.Context) error {
 	return c.String(http.StatusOK, "SUCCESS")
 }
 
-func ConfirmChangedEmail(c echo.Context) error {
+func ConfirmChangedEmail(c *echo.Context) error {
 	type ConfirmToken struct {
 		Token string `json:"confirmToken" validate:"required"`
 	}
@@ -358,7 +358,7 @@ func ConfirmChangedEmail(c echo.Context) error {
 	return c.String(http.StatusOK, "SUCCESS")
 }
 
-func ChangeUsername(c echo.Context) error {
+func ChangeUsername(c *echo.Context) error {
 	sessionID, responseErr := GetSessionToken(c)
 	if responseErr != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
@@ -391,7 +391,7 @@ func ChangeUsername(c echo.Context) error {
 	return c.String(http.StatusOK, "SUCCESS")
 }
 
-func Logout(c echo.Context) error {
+func Logout(c *echo.Context) error {
 	sessionID, err := GetSessionToken(c)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
