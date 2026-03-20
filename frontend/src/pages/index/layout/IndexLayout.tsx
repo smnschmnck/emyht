@@ -4,12 +4,23 @@ import { useContactRequests } from '@/hooks/api/contacts';
 import { useChatMessages } from '@/hooks/api/messages';
 import { usePusher } from '@/hooks/pusher/usePusher';
 import { useAuth0 } from '@auth0/auth0-react';
-import { Outlet } from '@tanstack/react-router';
-import { FC, useEffect } from 'react';
+import { Outlet, useNavigate } from '@tanstack/react-router';
+import { FC, useEffect, useMemo } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { useChatInfo } from '../chat/hooks/useChatInfo';
 import { Sidebar } from './components/Sidebar';
 import { useChatId, useIsSidebarHidden } from './hooks';
+
+const useAuthError = () => {
+  return useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    if (error === 'access_denied') {
+      return true;
+    }
+    return false;
+  }, []);
+};
 
 export const IndexLayout: FC = () => {
   const {
@@ -18,6 +29,8 @@ export const IndexLayout: FC = () => {
     loginWithRedirect,
     user,
   } = useAuth0();
+  const authError = useAuthError();
+  const navigate = useNavigate();
   const isSidebarHidden = useIsSidebarHidden();
   const { data: chats, refetch: refetchChats } = useChats();
   const chatId = useChatId();
@@ -27,10 +40,14 @@ export const IndexLayout: FC = () => {
   const { subscribeToUserFeed, subscribeToAllChats } = usePusher();
 
   useEffect(() => {
+    if (authError) {
+      navigate({ to: '/no-email' });
+      return;
+    }
     if (!isAuthLoading && !isAuthenticated) {
       loginWithRedirect();
     }
-  }, [isAuthLoading, isAuthenticated, loginWithRedirect]);
+  }, [isAuthLoading, isAuthenticated, loginWithRedirect, authError, navigate]);
 
   useEffect(() => {
     subscribeToUserFeed({
@@ -63,7 +80,7 @@ export const IndexLayout: FC = () => {
     info?.isChatBlocked,
   ]);
 
-  if (isAuthLoading) {
+  if (isAuthLoading || authError) {
     return <FullPageLoader />;
   }
 

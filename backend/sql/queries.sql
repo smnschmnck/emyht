@@ -1,48 +1,58 @@
--- name: GetEmailActiveByToken :one
-SELECT email_active
+-- name: GetUserBySub :one
+SELECT id,
+    auth0_sub,
+    email,
+    username,
+    is_admin,
+    picture_url
 FROM users
-WHERE email_token = $1;
--- name: ActivateEmail :one
-UPDATE users
-SET email_active = true,
-    email_token = $1
-WHERE email_token = $2
-RETURNING email_active;
+WHERE auth0_sub = $1;
+-- name: GetUserByUUID :one
+SELECT id,
+    auth0_sub,
+    email,
+    username,
+    is_admin,
+    picture_url
+FROM users
+WHERE id = $1;
+-- name: GetUserByEmail :one
+SELECT id,
+    auth0_sub,
+    email,
+    username,
+    is_admin
+FROM users
+WHERE email = $1;
+-- name: UpsertUser :one
+INSERT INTO users (
+        auth0_sub,
+        email,
+        username,
+        picture_url
+    )
+VALUES ($1, $2, $3, $4)
+ON CONFLICT (auth0_sub) DO UPDATE
+SET email = EXCLUDED.email
+RETURNING id,
+    auth0_sub,
+    email,
+    username,
+    is_admin,
+    picture_url;
 -- name: EmailExists :one
 SELECT count(1) > 0
 FROM users
 WHERE email = $1;
--- name: UpsertChangeEmail :one
-INSERT INTO change_email (user_id, new_email, confirmation_token)
-VALUES ($1, $2, $3) ON CONFLICT (user_id) DO
-UPDATE
-SET new_email = $2,
-    confirmation_token = $3
-RETURNING confirmation_token,
-    new_email;
--- name: UpdateEmailFromChangeEmail :one
-UPDATE users u
-SET email_active = true,
-    email_token = $1,
-    email = (
-        SELECT c.new_email
-        FROM change_email c
-        WHERE c.confirmation_token = $2
-    )
-WHERE u.user_id = (
-        SELECT c.user_id
-        FROM change_email c
-        WHERE c.confirmation_token = $2
-    )
-RETURNING u.email;
--- name: DeleteChangeEmail :exec
-DELETE FROM change_email
-WHERE confirmation_token = $1;
 -- name: UpdateUsername :one
 UPDATE users
 SET username = $1
 WHERE id = $2
 RETURNING username;
+-- name: UpdatePictureURL :exec
+UPDATE users
+SET picture_url = $1
+WHERE id = $2;
 -- name: GetChatsForUser :many
 SELECT DISTINCT c.id,
     c.chat_type,
@@ -157,7 +167,7 @@ SELECT sender_id,
     u.email AS sender_email
 FROM friends
     JOIN users u ON sender_id = u.id
-    LEFT JOIN user_blocks ub ON sender_id = ub.blocked_id -- Assuming blocked_id is the ID of the person who was blocked
+    LEFT JOIN user_blocks ub ON sender_id = ub.blocked_id
 WHERE receiver_id = $1
     AND status = 'pending'
     AND ub.blocked_id IS NULL;
@@ -315,57 +325,6 @@ SELECT user_id
 FROM user_chat
 WHERE chat_id = $1
     AND user_id != $2;
--- name: GetUserByUUID :one
-SELECT id,
-    email,
-    username,
-    password,
-    salt,
-    is_admin,
-    email_active,
-    picture_url
-FROM users
-WHERE id = $1;
--- name: GetUserByEmail :one
-SELECT id,
-    email,
-    username,
-    password,
-    salt,
-    is_admin,
-    email_active
-FROM users
-WHERE email = $1;
--- name: CreateUser :one
-INSERT INTO users (
-        email,
-        username,
-        password,
-        salt,
-        is_admin,
-        email_active,
-        email_token,
-        picture_url
-    )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING id,
-    email,
-    username,
-    password,
-    salt,
-    is_admin,
-    email_active,
-    email_token,
-    picture_url;
--- name: UpdateEmailToken :one
-UPDATE users
-SET email_token = $1
-WHERE email = $2
-RETURNING email_token;
--- name: UpdatePictureURL :exec
-UPDATE users
-SET picture_url = $1
-WHERE id = $2;
 -- name: DeleteFromGroupChat :exec
 DELETE FROM user_chat
 WHERE chat_id = $1

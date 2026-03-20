@@ -5,6 +5,7 @@ import (
 	"chat/chatService"
 	"chat/contactService"
 	"chat/db"
+	authmw "chat/middleware"
 	"chat/pusher"
 	"chat/redisdb"
 	"chat/userSettingsService"
@@ -19,29 +20,25 @@ import (
 
 var PORT string
 
-// TODO Check if email is active for most requests!
 func handleRequest() {
 	e := echo.New()
 	e.Use(middleware.Gzip())
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
-	// Pusher
-	e.POST("/pusher/auth", pusher.PusherAuth)
 	//CORS
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     utils.GetAllowedCorsOrigins(),
 		AllowCredentials: true,
 	}))
-	//auth
-	e.GET("/user", authService.GetUserBySession)
-	e.POST("/register", authService.Register)
-	e.POST("/verifyEmail", authService.VerifyEmail)
-	e.GET("/resendVerificationEmail", authService.ResendVerificationEmail)
-	e.POST("/changeEmail", authService.ChangeEmail)
-	e.POST("/confirmChangedEmail", authService.ConfirmChangedEmail)
+
+	// All routes below require a valid Auth0 JWT
+	e.Use(authmw.Auth())
+
+	// Pusher
+	e.POST("/pusher/auth", pusher.PusherAuth)
+	// User
+	e.GET("/user", authService.GetUser)
 	e.POST("/changeUsername", authService.ChangeUsername)
-	e.POST("/login", authService.Authenticate)
-	e.GET("/logout", authService.Logout)
-	//chats
+	// Chats
 	e.POST("/startOneOnOneChat", chatService.StartOneOnOneChat)
 	e.POST("/startGroupChat", chatService.StartGroupChat)
 	e.POST("/addSingleUserToGroupChats", chatService.AddSingleUserToGroupChats)
@@ -60,7 +57,7 @@ func handleRequest() {
 	e.GET("/oneOnOneChatParticipant/:chatID", chatService.GetOneOnOneChatParticipant)
 	e.GET("/getGroupchatsNewUserIsNotPartOf/:uuid", chatService.GetGroupchatsNewUserIsNotPartOf)
 	e.GET("/contactsNotInChat/:chatID", chatService.GetContactsNotInChat)
-	//user relationships
+	// Contacts
 	e.POST("/contactRequest", contactService.SendContactRequest)
 	e.POST("/handleContactRequest", contactService.HandleContactRequest)
 	e.GET("/pendingContactRequests", contactService.GetPendingContactRequests)
@@ -68,9 +65,10 @@ func handleRequest() {
 	e.POST("/blockUser", contactService.BlockUser)
 	e.POST("/unblockUser", contactService.UnblockUser)
 	e.GET("/sentContactRequests", contactService.GetSentContactRequests)
-	//user settings
+	// User settings
 	e.POST("/changeProfilePicturePutURL", userSettingsService.GetChangeProfilePicturePutURL)
 	e.POST("/confirmChangedProfilePic", userSettingsService.ConfirmChangedProfilePic)
+
 	if err := e.Start(PORT); err != nil {
 		e.Logger.Error("failed to start server", "error", err)
 	}
@@ -87,7 +85,6 @@ func setPort(defaultPort int) {
 
 func initGlobals() {
 	redisdb.InitializePresignedUrlsRedis()
-	redisdb.InitializeSessionsRedis()
 	setPort(3001)
 }
 

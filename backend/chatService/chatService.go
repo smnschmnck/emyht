@@ -1,14 +1,13 @@
 package chatService
 
 import (
-	"chat/authService"
 	"chat/chatHelpers"
 	"chat/contactService"
 	"chat/db"
+	"chat/middleware"
 	"chat/pusher"
 	"chat/queries"
 	"chat/s3Helpers"
-	"chat/userService"
 	"context"
 	"errors"
 	"fmt"
@@ -30,12 +29,7 @@ import (
 var validate = validator.New()
 
 func StartOneOnOneChat(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -105,12 +99,7 @@ func StartOneOnOneChat(c *echo.Context) error {
 }
 
 func StartGroupChat(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -271,12 +260,7 @@ func addUsersToGroupChat(participantUUIDs []string, uuid pgtype.UUID, chatId pgt
 }
 
 func AddUsersToGroupChat(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -311,12 +295,7 @@ func AddUsersToGroupChat(c *echo.Context) error {
 }
 
 func GetChatParticipantsExceptUser(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -356,12 +335,7 @@ func GetChatParticipantsExceptUser(c *echo.Context) error {
 }
 
 func GetChats(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -379,12 +353,7 @@ func GetChats(c *echo.Context) error {
 }
 
 func SendMessage(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -531,12 +500,7 @@ func getMessagesByChatID(chatID pgtype.UUID, uuid pgtype.UUID) ([]queries.GetCha
 }
 
 func GetMessages(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -597,14 +561,11 @@ func GetChatInfo(c *echo.Context) error {
 		Blocked bool   `json:"isChatBlocked"`
 	}
 
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
+
 	reqChatId := c.Param("chatID")
 	if len(reqChatId) <= 0 {
 		return c.String(http.StatusBadRequest, "MISSING CHAT ID")
@@ -663,12 +624,7 @@ func GetChatInfo(c *echo.Context) error {
 }
 
 func GetMediaPutURL(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -710,12 +666,7 @@ func GetMediaPutURL(c *echo.Context) error {
 }
 
 func GetGroupPicturePutURL(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -755,12 +706,7 @@ func GetGroupPicturePutURL(c *echo.Context) error {
 }
 
 func LeaveGroupChat(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -832,12 +778,7 @@ func getGroupchatsNewUserIsNotPartOf(uuid pgtype.UUID, newUserUUID pgtype.UUID) 
 }
 
 func GetGroupchatsNewUserIsNotPartOf(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -865,12 +806,7 @@ func GetGroupchatsNewUserIsNotPartOf(c *echo.Context) error {
 }
 
 func AddSingleUserToGroupChats(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -945,12 +881,7 @@ func AddSingleUserToGroupChats(c *echo.Context) error {
 }
 
 func ChangeGroupName(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -995,12 +926,7 @@ func ChangeGroupName(c *echo.Context) error {
 }
 
 func ChangeGroupPicture(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -1057,12 +983,7 @@ func ChangeGroupPicture(c *echo.Context) error {
 }
 
 func GetOneOnOneChatParticipant(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -1097,12 +1018,7 @@ func GetOneOnOneChatParticipant(c *echo.Context) error {
 }
 
 func GetContactsNotInChat(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -1165,12 +1081,7 @@ func stringsToUUIDs(uuidStrings []string) ([]pgtype.UUID, error) {
 }
 
 func RemoveUsersFromGroupChat(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}

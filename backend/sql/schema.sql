@@ -8,30 +8,17 @@ CREATE TYPE friendship_status AS ENUM ('pending', 'accepted');
 -- Tables
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    auth0_sub VARCHAR(128) NOT NULL UNIQUE,
     email VARCHAR(64) NOT NULL UNIQUE,
     username VARCHAR(32) NOT NULL,
-    password VARCHAR(256) NOT NULL,
-    salt VARCHAR(128) NOT NULL,
-    is_admin BOOLEAN NOT NULL,
-    email_active BOOLEAN NOT NULL,
-    email_token VARCHAR(64) UNIQUE,
+    is_admin BOOLEAN NOT NULL DEFAULT false,
     picture_url VARCHAR(128) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_email_token ON users(email_token);
+CREATE INDEX idx_users_auth0_sub ON users(auth0_sub);
 CREATE INDEX idx_users_username ON users(username);
 CREATE INDEX idx_users_id ON users(id);
-CREATE TABLE change_email (
-    id SERIAL PRIMARY KEY,
-    user_id UUID NOT NULL REFERENCES users(id),
-    new_email VARCHAR(64) NOT NULL UNIQUE,
-    confirmation_token VARCHAR(64) NOT NULL UNIQUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX idx_change_email_user_id ON change_email(user_id);
-CREATE INDEX idx_change_email_confirmation_token ON change_email(confirmation_token);
-CREATE INDEX idx_change_email_token_user ON change_email(confirmation_token, user_id);
 CREATE TABLE chats (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(32) NOT NULL,

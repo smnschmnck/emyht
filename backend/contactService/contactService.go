@@ -1,8 +1,8 @@
 package contactService
 
 import (
-	"chat/authService"
 	"chat/db"
+	"chat/middleware"
 	"chat/pusher"
 	"chat/queries"
 	"chat/s3Helpers"
@@ -21,10 +21,11 @@ import (
 var validate = validator.New()
 
 func SendContactRequest(c *echo.Context) error {
-	token, err := authService.GetSessionToken(c)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
+
 	type contactRequest struct {
 		ContactEmail string `json:"contactEmail" validate:"required"`
 	}
@@ -38,9 +39,9 @@ func SendContactRequest(c *echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
-	user, respErr := userService.GetUserBySessionID(token)
-	if respErr.StatusCode >= 300 {
-		return c.String(respErr.StatusCode, respErr.Msg)
+	user, err := userService.GetUserByUUID(reqUUID)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	trimmedEmail := strings.TrimSpace(contactReq.ContactEmail)
@@ -51,7 +52,7 @@ func SendContactRequest(c *echo.Context) error {
 
 	conn := db.GetDB()
 
-	duplicateExists, err := conn.CheckDuplicateFriendRequest(context.TODO(), queries.CheckDuplicateFriendRequestParams{ReceiverID: user.ID, Email: lowerCaseEmail})
+	duplicateExists, err := conn.CheckDuplicateFriendRequest(context.TODO(), queries.CheckDuplicateFriendRequestParams{ReceiverID: reqUUID, Email: lowerCaseEmail})
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
@@ -59,7 +60,7 @@ func SendContactRequest(c *echo.Context) error {
 		return c.String(http.StatusConflict, lowerCaseEmail+" ALREADY SENT A FRIEND REQUEST TO YOU")
 	}
 
-	_, err = conn.CreateFriendRequest(context.Background(), queries.CreateFriendRequestParams{SenderID: user.ID, Email: lowerCaseEmail})
+	_, err = conn.CreateFriendRequest(context.Background(), queries.CreateFriendRequestParams{SenderID: reqUUID, Email: lowerCaseEmail})
 	if err != nil {
 		if strings.Contains(err.Error(), "violates not-null constraint") {
 			return c.String(http.StatusNotFound, "USER DOES NOT EXIST")
@@ -181,11 +182,7 @@ func AreUsersInContacts(usersUUIDs []string, uuid pgtype.UUID) (bool, error) {
 }
 
 func GetContacts(c *echo.Context) error {
-	token, err := authService.GetSessionToken(c)
-	if err != nil {
-		return c.String(http.StatusUnauthorized, "NO AUTH")
-	}
-	uuid, err := userService.GetUUIDBySessionID(token)
+	uuid, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
@@ -219,11 +216,7 @@ func GetPendingContactRequestsByUUID(uuid pgtype.UUID) ([]queries.GetPendingFrie
 }
 
 func GetPendingContactRequests(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-	uuid, err := userService.GetUUIDBySessionID(sessionID)
+	uuid, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
@@ -238,14 +231,11 @@ func GetPendingContactRequests(c *echo.Context) error {
 }
 
 func HandleContactRequest(c *echo.Context) error {
-	token, err := authService.GetSessionToken(c)
+	uuid, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
-	uuid, err := userService.GetUUIDBySessionID(token)
-	if err != nil {
-		return c.String(http.StatusUnauthorized, "NO AUTH")
-	}
+
 	type contactRequestResolution struct {
 		SenderID string `json:"senderID" validate:"required"`
 		Action   string `json:"action" validate:"required"`
@@ -295,11 +285,7 @@ func HandleContactRequest(c *echo.Context) error {
 }
 
 func BlockUser(c *echo.Context) error {
-	token, err := authService.GetSessionToken(c)
-	if err != nil {
-		return c.String(http.StatusUnauthorized, "NO AUTH")
-	}
-	uuid, err := userService.GetUUIDBySessionID(token)
+	uuid, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
@@ -334,11 +320,7 @@ func BlockUser(c *echo.Context) error {
 }
 
 func UnblockUser(c *echo.Context) error {
-	token, err := authService.GetSessionToken(c)
-	if err != nil {
-		return c.String(http.StatusUnauthorized, "NO AUTH")
-	}
-	uuid, err := userService.GetUUIDBySessionID(token)
+	uuid, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}
@@ -373,11 +355,7 @@ func UnblockUser(c *echo.Context) error {
 }
 
 func GetSentContactRequests(c *echo.Context) error {
-	token, err := authService.GetSessionToken(c)
-	if err != nil {
-		return c.String(http.StatusUnauthorized, "NO AUTH")
-	}
-	uuid, err := userService.GetUUIDBySessionID(token)
+	uuid, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NO AUTH")
 	}

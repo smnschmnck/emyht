@@ -1,9 +1,8 @@
 package pusher
 
 import (
-	"chat/authService"
 	"chat/chatHelpers"
-	"chat/userService"
+	"chat/middleware"
 	"chat/utils"
 	"io"
 	"net/http"
@@ -24,12 +23,7 @@ var PusherClient = pusher.Client{
 }
 
 func PusherAuth(c *echo.Context) error {
-	sessionID, responseErr := authService.GetSessionToken(c)
-	if responseErr != nil {
-		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
-	}
-
-	reqUUID, err := userService.GetUUIDBySessionID(sessionID)
+	reqUUID, err := middleware.GetUserUUID(c)
 	if err != nil {
 		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 	}
