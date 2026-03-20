@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-export type CurrentUser = {
+type CurrentUser = {
   uuid: string;
   email: string;
   username: string;
