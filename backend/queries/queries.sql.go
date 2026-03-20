@@ -1064,6 +1064,27 @@ func (q *Queries) IsGroupChat(ctx context.Context, id pgtype.UUID) (bool, error)
 	return column_1, err
 }
 
+const isUserInChat = `-- name: IsUserInChat :one
+SELECT EXISTS (
+        SELECT 1
+        FROM user_chat
+        WHERE user_id = $1
+            AND chat_id = $2
+    )
+`
+
+type IsUserInChatParams struct {
+	UserID pgtype.UUID `json:"userId"`
+	ChatID pgtype.UUID `json:"chatId"`
+}
+
+func (q *Queries) IsUserInChat(ctx context.Context, arg IsUserInChatParams) (bool, error) {
+	row := q.db.QueryRow(ctx, isUserInChat, arg.UserID, arg.ChatID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const leaveGroupChat = `-- name: LeaveGroupChat :exec
 DELETE FROM user_chat
 WHERE chat_id = $1

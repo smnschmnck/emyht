@@ -291,6 +291,13 @@ SELECT users.id,
 FROM user_chat
     JOIN users ON users.id = user_chat.user_id
 WHERE chat_id = $1;
+-- name: IsUserInChat :one
+SELECT EXISTS (
+        SELECT 1
+        FROM user_chat
+        WHERE user_id = $1
+            AND chat_id = $2
+    );
 -- name: IsGroupChat :one
 SELECT chat_type = 'group'
 FROM chats

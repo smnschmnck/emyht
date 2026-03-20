@@ -2,6 +2,7 @@ package chatHelpers
 
 import (
 	"chat/db"
+	"chat/queries"
 	"context"
 	"errors"
 	"log"
@@ -136,15 +137,8 @@ func GetChatsByUUID(uuid pgtype.UUID) ([]Chat, error) {
 }
 
 func IsUserInChat(uuid pgtype.UUID, chatID pgtype.UUID) (bool, error) {
-	row := db.GetRawConn().QueryRow(
-		context.Background(),
-		"SELECT EXISTS (SELECT 1 FROM user_chat WHERE user_id = $1 AND chat_id = $2)",
-		uuid,
-		chatID,
-	)
-
-	var inChat bool
-	err := row.Scan(&inChat)
+	conn := db.GetDB()
+	inChat, err := conn.IsUserInChat(context.Background(), queries.IsUserInChatParams{UserID: uuid, ChatID: chatID})
 	if err != nil {
 		log.Println(err)
 		return false, err
