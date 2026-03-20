@@ -8,18 +8,20 @@ import (
 	"chat/userService"
 	"context"
 	"net/http"
+	"regexp"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v5"
 )
 
 var validate = validator.New()
+var usernamePattern = regexp.MustCompile(`^[a-zA-Z0-9._-]{1,32}$`)
 
 type UserRes struct {
 	UUID              string `json:"uuid"`
 	Email             string `json:"email"`
 	Username          string `json:"username"`
-	IsAdmin           bool   `json:"isAdmin"`
 	ProfilePictureUrl string `json:"profilePictureUrl"`
 }
 
@@ -40,7 +42,6 @@ func GetUser(c *echo.Context) error {
 		UUID:              user.ID.String(),
 		Email:             user.Email,
 		Username:          user.Username,
-		IsAdmin:           user.IsAdmin,
 		ProfilePictureUrl: formattedProfilePic,
 	}
 	return c.JSON(http.StatusOK, res)
@@ -64,12 +65,21 @@ func ChangeUsername(c *echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
+	if !isValidUsername(changeReq.NewUsername) {
+		return c.String(http.StatusBadRequest, "INVALID USERNAME")
+	}
+	newUsername := strings.TrimSpace(changeReq.NewUsername)
 
 	conn := db.GetDB()
-	_, err = conn.UpdateUsername(context.Background(), queries.UpdateUsernameParams{Username: changeReq.NewUsername, ID: reqUUID})
+	_, err = conn.UpdateUsername(context.Background(), queries.UpdateUsernameParams{Username: newUsername, ID: reqUUID})
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "COULD NOT CHANGE USERNAME")
 	}
 
 	return c.String(http.StatusOK, "SUCCESS")
+}
+
+func isValidUsername(username string) bool {
+	trimmed := strings.TrimSpace(username)
+	return usernamePattern.MatchString(trimmed)
 }

@@ -7,7 +7,6 @@ type CurrentUser = {
   uuid: string;
   email: string;
   username: string;
-  isAdmin: boolean;
   profilePictureUrl: string;
 };
 

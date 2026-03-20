@@ -4,18 +4,22 @@ import (
 	"chat/db"
 	"chat/queries"
 	"context"
+	"encoding/json"
 	"errors"
 	"log"
 	"math/rand"
 	"net/http"
+	"net/mail"
 	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 
 	jwtmiddleware "github.com/auth0/go-jwt-middleware/v3"
 	"github.com/auth0/go-jwt-middleware/v3/jwks"
 	"github.com/auth0/go-jwt-middleware/v3/validator"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v5"
 )
@@ -23,8 +27,12 @@ import (
 type contextKey string
 
 const userUUIDKey contextKey = "userUUID"
+const maxUsernameLength = 32
+const maxEmailLength = 64
 
 var errNotAuthorized = errors.New("not authorized")
+var endUserSubjectPattern = regexp.MustCompile(`^[A-Za-z0-9_-]+\|[A-Za-z0-9_-]+$`)
+var invalidUsernameChars = regexp.MustCompile(`[^a-zA-Z0-9._-]`)
 
 // Auth0CustomClaims holds the namespaced custom claims added via an Auth0 post-login Action.
 // The namespace (https://emyht.com/) is required by Auth0 for custom access token claims.
@@ -35,6 +43,18 @@ type Auth0CustomClaims struct {
 }
 
 func (c *Auth0CustomClaims) Validate(_ context.Context) error {
+	if !isValidEmail(c.Email) {
+		return errors.New("missing or invalid email claim")
+	}
+
+	if c.EmailVerified != nil && !*c.EmailVerified {
+		return errors.New("email is not verified")
+	}
+
+	if c.Username != "" && !isValidUsername(c.Username) {
+		return errors.New("invalid username claim")
+	}
+
 	return nil
 }
 
@@ -87,7 +107,10 @@ func Auth() echo.MiddlewareFunc {
 			log.Printf("[AUTH] JWT validation failed: %v", err)
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte(`{"error":"invalid_token","error_description":"` + err.Error() + `"}`))
+			_ = json.NewEncoder(w).Encode(map[string]string{
+				"error":             "invalid_token",
+				"error_description": "Token validation failed",
+			})
 		}),
 	)
 	if err != nil {
@@ -148,43 +171,43 @@ func Auth() echo.MiddlewareFunc {
 }
 
 func isEndUserSubject(sub string) bool {
-	if sub == "" {
-		return false
-	}
-
 	if strings.HasSuffix(sub, "@clients") {
 		return false
 	}
 
-	return strings.Contains(sub, "|")
+	return endUserSubjectPattern.MatchString(sub)
 }
 
 // resolveUser finds or creates a user by their Auth0 sub claim.
-// If email is available from custom JWT claims, it is synced via upsert.
-// If not (no Auth0 Action configured yet), it falls back to lookup-only,
-// creating with a placeholder email on first encounter.
+// Email and verified status are required in the custom JWT claims.
+// If email claims are missing, only pre-existing users can be resolved.
 func resolveUser(sub string, email string, username string, emailVerified *bool) (pgtype.UUID, error) {
 	conn := db.GetDB()
+	normalizedEmail := strings.ToLower(strings.TrimSpace(email))
 
-	if email != "" {
+	if normalizedEmail != "" {
 		if emailVerified != nil && !*emailVerified {
+			return pgtype.UUID{}, errNotAuthorized
+		}
+		if !isValidEmail(normalizedEmail) {
 			return pgtype.UUID{}, errNotAuthorized
 		}
 
 		// We have the email from the token — upsert to create or sync email.
 		// The ON CONFLICT only updates email, never overwrites username/picture.
-		insertUsername := username
-		if insertUsername == "" {
-			insertUsername = strings.SplitN(email, "@", 2)[0]
-		}
+		insertUsername := normalizeUsername(username, normalizedEmail)
 
 		user, err := conn.UpsertUser(context.Background(), queries.UpsertUserParams{
 			Auth0Sub:   sub,
-			Email:      email,
+			Email:      normalizedEmail,
 			Username:   insertUsername,
 			PictureUrl: "default_" + strconv.Itoa(rand.Intn(10)),
 		})
 		if err != nil {
+			var pgErr *pgconn.PgError
+			if errors.As(err, &pgErr) && pgErr.Code == "23505" && pgErr.ConstraintName == "users_email_key" {
+				return pgtype.UUID{}, errNotAuthorized
+			}
 			return pgtype.UUID{}, err
 		}
 		return user.ID, nil
@@ -197,4 +220,42 @@ func resolveUser(sub string, email string, username string, emailVerified *bool)
 	}
 
 	return pgtype.UUID{}, errNotAuthorized
+}
+
+func isValidEmail(email string) bool {
+	email = strings.TrimSpace(strings.ToLower(email))
+	if email == "" || len(email) > maxEmailLength {
+		return false
+	}
+	parsed, err := mail.ParseAddress(email)
+	if err != nil {
+		return false
+	}
+	return strings.EqualFold(parsed.Address, email)
+}
+
+func isValidUsername(username string) bool {
+	trimmed := strings.TrimSpace(username)
+	if trimmed == "" || len(trimmed) > maxUsernameLength {
+		return false
+	}
+	return !invalidUsernameChars.MatchString(trimmed)
+}
+
+func normalizeUsername(claimUsername string, email string) string {
+	candidate := strings.TrimSpace(claimUsername)
+	if candidate == "" {
+		candidate = strings.SplitN(email, "@", 2)[0]
+	}
+
+	candidate = strings.TrimSpace(candidate)
+	candidate = invalidUsernameChars.ReplaceAllString(candidate, "")
+	if len(candidate) > maxUsernameLength {
+		candidate = candidate[:maxUsernameLength]
+	}
+	if candidate == "" {
+		candidate = "user" + strconv.Itoa(rand.Intn(1000000))
+	}
+
+	return candidate
 }

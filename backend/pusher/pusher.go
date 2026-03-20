@@ -39,8 +39,18 @@ func PusherAuth(c *echo.Context) error {
 	}
 
 	privateChannelName := values.Get("channel_name")
+	if privateChannelName == "" {
+		return c.String(http.StatusBadRequest, "Missing channel name")
+	}
+	if !strings.HasPrefix(privateChannelName, "private-") {
+		return c.String(http.StatusBadRequest, "Invalid channel name")
+	}
+
 	fullChannelName := strings.Replace(privateChannelName, "private-", "", 1)
 	splitChannelName := strings.Split(fullChannelName, ".")
+	if len(splitChannelName) != 2 || splitChannelName[0] == "" || splitChannelName[1] == "" {
+		return c.String(http.StatusBadRequest, "Invalid channel format")
+	}
 	channelType := splitChannelName[0]
 	channelName := splitChannelName[1]
 

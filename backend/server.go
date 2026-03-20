@@ -26,8 +26,7 @@ func handleRequest() {
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
 	//CORS
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     utils.GetAllowedCorsOrigins(),
-		AllowCredentials: true,
+		AllowOrigins: utils.GetAllowedCorsOrigins(),
 	}))
 
 	// All routes below require a valid Auth0 JWT

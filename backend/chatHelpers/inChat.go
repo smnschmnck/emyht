@@ -136,14 +136,19 @@ func GetChatsByUUID(uuid pgtype.UUID) ([]Chat, error) {
 }
 
 func IsUserInChat(uuid pgtype.UUID, chatID pgtype.UUID) (bool, error) {
-	chats, err := GetChatsByUUID(uuid)
+	row := db.GetRawConn().QueryRow(
+		context.Background(),
+		"SELECT EXISTS (SELECT 1 FROM user_chat WHERE user_id = $1 AND chat_id = $2)",
+		uuid,
+		chatID,
+	)
+
+	var inChat bool
+	err := row.Scan(&inChat)
 	if err != nil {
+		log.Println(err)
 		return false, err
 	}
-	for _, chat := range chats {
-		if chat.ID == chatID.String() {
-			return true, nil
-		}
-	}
-	return false, nil
+
+	return inChat, nil
 }

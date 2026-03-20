@@ -48,11 +48,11 @@ func StartOneOnOneChat(c *echo.Context) error {
 	}
 
 	isInContacts, err := contactService.AreUsersInContacts([]string{req.ParticipantUUID}, reqUUID)
-	if !isInContacts {
-		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
-	}
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "SOMETHING WENT WRONG")
+	}
+	if !isInContacts {
+		return c.String(http.StatusUnauthorized, "USER NOT IN CONTACTS")
 	}
 
 	var participantUuid pgtype.UUID
@@ -409,6 +409,9 @@ func SendMessage(c *echo.Context) error {
 	if req.MessageType == "plaintext" && len(req.TextContent) < 1 {
 		return c.String(http.StatusBadRequest, "MESSAGE TOO SHORT")
 	}
+	if !isValidMessageType(req.MessageType) {
+		return c.String(http.StatusBadRequest, "INVALID MESSAGE TYPE")
+	}
 
 	inChat, err := chatHelpers.IsUserInChat(reqUUID, chatId)
 	if err != nil {
@@ -694,7 +697,7 @@ func GetGroupPicturePutURL(c *echo.Context) error {
 
 	presignedPutUrl, err := s3Helpers.PresignPutObject(fileName, time.Hour, req.ContentLength)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "INTERNAL ERROR")
+		return c.String(http.StatusInternalServerError, "INTERNAL ERROR")
 	}
 
 	type res struct {
@@ -1030,6 +1033,14 @@ func GetContactsNotInChat(c *echo.Context) error {
 		return c.String(http.StatusBadRequest, "BAD REQUEST")
 	}
 
+	inChat, err := chatHelpers.IsUserInChat(reqUUID, chatId)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	if !inChat {
+		return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
+	}
+
 	chatMembers, err := getChatMembers(chatId)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
@@ -1063,6 +1074,15 @@ func GetContactsNotInChat(c *echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, usersNotInChat)
+}
+
+func isValidMessageType(messageType string) bool {
+	switch queries.MessageType(messageType) {
+	case queries.MessageTypePlaintext, queries.MessageTypeImage, queries.MessageTypeVideo, queries.MessageTypeAudio, queries.MessageTypeData:
+		return true
+	default:
+		return false
+	}
 }
 
 func stringsToUUIDs(uuidStrings []string) ([]pgtype.UUID, error) {
