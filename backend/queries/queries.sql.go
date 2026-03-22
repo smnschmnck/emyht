@@ -1197,7 +1197,12 @@ INSERT INTO users (
     )
 VALUES ($1, $2, $3, $4)
 ON CONFLICT (auth0_sub) DO UPDATE
-SET email = EXCLUDED.email
+SET email = EXCLUDED.email,
+    picture_url = CASE
+        WHEN users.picture_url ~ '^default_[0-9]$'
+            AND EXCLUDED.picture_url !~ '^default_[0-9]$' THEN EXCLUDED.picture_url
+        ELSE users.picture_url
+    END
 RETURNING id,
     auth0_sub,
     email,

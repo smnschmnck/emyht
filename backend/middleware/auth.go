@@ -4,6 +4,7 @@ import (
 	"chat/db"
 	"chat/queries"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"log"
@@ -29,6 +30,7 @@ type contextKey string
 const userUUIDKey contextKey = "userUUID"
 const maxUsernameLength = 32
 const maxEmailLength = 64
+const maxPictureURLLength = 128
 
 var errNotAuthorized = errors.New("not authorized")
 var endUserSubjectPattern = regexp.MustCompile(`^[A-Za-z0-9_-]+\|[A-Za-z0-9_-]+$`)
@@ -40,6 +42,7 @@ type Auth0CustomClaims struct {
 	Email         string `json:"https://emyht.com/email"`
 	Username      string `json:"https://emyht.com/username"`
 	EmailVerified *bool  `json:"https://emyht.com/email_verified"`
+	Picture       string `json:"https://emyht.com/picture"`
 }
 
 func (c *Auth0CustomClaims) Validate(_ context.Context) error {
@@ -145,15 +148,23 @@ func Auth() echo.MiddlewareFunc {
 				return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
 			}
 
-			var email, username string
+			var email, username, pictureURL string
 			var emailVerified *bool
 			if custom, ok := claims.CustomClaims.(*Auth0CustomClaims); ok {
 				email = custom.Email
 				username = custom.Username
 				emailVerified = custom.EmailVerified
+				pictureURL = custom.Picture
 			}
 
-			userUUID, err := resolveUser(sub, email, username, emailVerified)
+			if pictureURL == "" {
+				pictureURL = getStringClaimFromBearerToken(c.Request().Header.Get("Authorization"), "picture")
+			}
+			if pictureURL == "" {
+				pictureURL = getStringClaimFromBearerToken(c.Request().Header.Get("Authorization"), "https://emyht.com/picture")
+			}
+
+			userUUID, err := resolveUser(sub, email, username, pictureURL, emailVerified)
 			if err != nil {
 				if errors.Is(err, errNotAuthorized) {
 					return c.String(http.StatusUnauthorized, "NOT AUTHORIZED")
@@ -181,7 +192,7 @@ func isEndUserSubject(sub string) bool {
 // resolveUser finds or creates a user by their Auth0 sub claim.
 // Email and verified status are required in the custom JWT claims.
 // If email claims are missing, only pre-existing users can be resolved.
-func resolveUser(sub string, email string, username string, emailVerified *bool) (pgtype.UUID, error) {
+func resolveUser(sub string, email string, username string, pictureURL string, emailVerified *bool) (pgtype.UUID, error) {
 	conn := db.GetDB()
 	normalizedEmail := strings.ToLower(strings.TrimSpace(email))
 
@@ -194,14 +205,15 @@ func resolveUser(sub string, email string, username string, emailVerified *bool)
 		}
 
 		// We have the email from the token — upsert to create or sync email.
-		// The ON CONFLICT only updates email, never overwrites username/picture.
+		// Existing usernames are preserved, and default avatars can be upgraded to social avatars.
 		insertUsername := normalizeUsername(username, normalizedEmail)
+		insertPictureURL := normalizePictureURL(pictureURL)
 
 		user, err := conn.UpsertUser(context.Background(), queries.UpsertUserParams{
 			Auth0Sub:   sub,
 			Email:      normalizedEmail,
 			Username:   insertUsername,
-			PictureUrl: "default_" + strconv.Itoa(rand.Intn(10)),
+			PictureUrl: insertPictureURL,
 		})
 		if err != nil {
 			var pgErr *pgconn.PgError
@@ -258,4 +270,57 @@ func normalizeUsername(claimUsername string, email string) string {
 	}
 
 	return candidate
+}
+
+func normalizePictureURL(claimPictureURL string) string {
+	pictureURL := strings.TrimSpace(claimPictureURL)
+	if pictureURL == "" {
+		return randomDefaultProfilePicture()
+	}
+	if len(pictureURL) > maxPictureURLLength {
+		return randomDefaultProfilePicture()
+	}
+
+	parsed, err := url.Parse(pictureURL)
+	if err != nil || !parsed.IsAbs() {
+		return randomDefaultProfilePicture()
+	}
+	if parsed.Scheme != "https" && parsed.Scheme != "http" {
+		return randomDefaultProfilePicture()
+	}
+
+	return pictureURL
+}
+
+func randomDefaultProfilePicture() string {
+	return "default_" + strconv.Itoa(rand.Intn(10))
+}
+
+func getStringClaimFromBearerToken(authHeader string, claimKey string) string {
+	token := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+	if token == "" || token == authHeader {
+		return ""
+	}
+
+	parts := strings.Split(token, ".")
+	if len(parts) != 3 {
+		return ""
+	}
+
+	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
+	if err != nil {
+		return ""
+	}
+
+	var claims map[string]any
+	if err := json.Unmarshal(payload, &claims); err != nil {
+		return ""
+	}
+
+	value, ok := claims[claimKey].(string)
+	if !ok {
+		return ""
+	}
+
+	return strings.TrimSpace(value)
 }
